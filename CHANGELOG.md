@@ -1,5 +1,9 @@
 # Changelog
 
+- Publica o pacote coordenado do handoff em aa28d38e, após CI completa e promoção
+  protegida. Aplica somente as duas migrations autorizadas; mantém a leitura por
+  intervalo desligada e registra evidências, recuperação e bloqueios oficiais.
+
 - Reduz o payload analítico inicial de Agendamentos com resumo compacto e detalhe
   paginado no servidor, preservando os cálculos e a exportação integral autorizada.
 - Pagina a lista Leads com filtros, contagens e cursor estável; preserva a leitura

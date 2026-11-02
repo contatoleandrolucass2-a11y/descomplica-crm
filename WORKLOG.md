@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-11-02 — Publicação coordenada do handoff
+
+- PR467 integrado em aa28d38e; quatro jobs do main/41479050792 aprovados.
+  Vitest 4850 aprovados/112 condicionais; 100 migrations e 2391 asserções pgTAP
+  conferidas na origem/restauração, com privilégios e fingerprints preservados.
+- Duas migrations aplicadas após autorização específica, com backup privado,
+  hashes e ACL relidos; somente os dois novos registros de histórico alinhados
+  às versões aprovadas, preservando os 82 anteriores. Range permanece desligado.
+- Imagem aprovada comprovada por checksum, cadeia OCI e dois perfis, sem rebuild.
+  Coordenador publicou aa28d38e às 17:03:30.921Z, deployment
+  fd394210-9300-46be-aab9-b71ba59906d2; health e imagem ativa conferidos.
+- Smoke confirmou guards anônimos, RPC negada ao anon e conexão operacional
+  Leads sem ler clientes. Fluxos positivos autenticados usam evidências da CI.
+- Metas das quatro etapas, ranking e publicação de parcerias conservam seus
+  bloqueios oficiais. Repasse retirado pelo usuário; Meta Ads sem arquivos alterados.
+- Encerramento somente Markdown, sem outra promoção de runtime. Evidências,
+  medições, limites e recuperação no registro canônico do handoff.
+
 ## 2026-11-02 — Seleção SQL por evidência
 
 - CI 41461202422 aprovou os quatro jobs no merge de teste 4a08b9b1 do PR 467

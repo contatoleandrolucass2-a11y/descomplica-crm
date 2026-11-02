@@ -1,5 +1,15 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-02: handoff integrado e publicado
+
+PR467/main aa28d38e publicado em 17:03:30.921Z, CI41479050792 aprovada nos quatro
+jobs, health/guards/imagem conferidos. Duas migrations expressamente autorizadas
+aplicadas com backup, hashes e privilégios preservados; range permanece desligado.
+Metas/ranking/parcerias mantêm bloqueios oficiais. Repasse retirado pelo usuário;
+Meta Ads sem arquivos alterados. Medições, validações, limites e recuperação em
+[registro canônico](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-HANDOFF.md).
+Encerramento documental não provoca outra promoção de runtime.
+
 - Agendamentos: abertura do ajuste direto das torres, títulos e layout compacto.
   Fontes e limites no histórico AGENDAMENTOS de 30/10/2026.
 

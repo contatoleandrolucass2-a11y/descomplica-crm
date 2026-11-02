@@ -5,6 +5,84 @@ Registro canônico desta execução. Fonte: handoff solicitado pelo usuário em
 Meta Ads está integralmente fora do escopo; contratos compartilhados existentes
 continuam obrigatórios. Não há autorização para inventar políticas comerciais.
 
+## Estado integrado
+
+PR [467](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/467)
+integrado em `aa28d38e99ec5bf835e5fbde3da3520874c002ec`. Candidato de origem
+`46fc3735a499d389531e50528ed80fbdf2d53d56`. Os quatro jobs da CI
+[41469001307](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/41469001307)
+passaram; duração total 60m14s. A CI push/main
+[41479050792](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/41479050792)
+aprovou os quatro jobs no SHA exato; duração 45m23s. Lint, tipos, build e 4850
+testes Vitest passaram; 112 condicionais permaneceram não executados. Restore
+validou 100 migrations e 2391 asserções pgTAP na origem e no banco restaurado,
+com owners, privilégios e fingerprints preservados. Não se atribui CI de PR a main.
+
+Publicação confirmada em 02/11/2026, 17:03:30.921Z / 14:03:30.921 -03:
+`aa28d38e99ec5bf835e5fbde3da3520874c002ec`, deployment
+`fd394210-9300-46be-aab9-b71ba59906d2`, sem pendência. Exclusivamente pelo
+`pnpm release:production`, com consulta ao vivo, travas e CAS. Checkout isolado
+`/srv/descomplica-crm-releases/handoff-aa28d38e`, Node24.19.0/pnpm11.20.0;
+checkout administrativo preservado. Nenhum build ou suíte ampla executados na VPS.
+
+Artefato da CI41479050792: SHA256 comprimido
+`b8c0275afa4a9be537bf632255eee874da3905fd6bdcdf5411f231b4f8d5f8df`.
+Config digest da CI `sha256:f9ab54c8cc131ff3e91c056c1f5a57376ad82c30bbbe55fb19c64352f4e96bfa`;
+manifest digest local e imagem ativa
+`sha256:aa7a104ee4f76bbb75db8d80219e98a49027df42cc6e3ffc0d1019c27049a004`.
+Diferença de armazenamento comprovada sobre o mesmo arquivo: index/manifest/config,
+30 blobs, 14 camadas, hashes, tamanhos, linux/amd64 e RootFS legado/OCI iguais.
+`image:prove` validou dois perfis sobre a mesma imagem, sem rebuild nem retag.
+Prova sanitizada em `/srv/descomplica-crm-release-artifacts/handoff-aa28d38e/image-identity-proof.json`.
+
+Smoke pós-publicação: health público 200/ok no SHA exato; Agendamentos, Leads,
+quatro etapas e Investidor negam anônimo com 307 para login. O primeiro verificador
+usou caminho inexistente do simulador e recebeu 404; corrigido somente o caminho
+para o catálogo `/app/simulacao/tabela-investidor`, confirmado 307. Não houve
+correção de runtime nem baseline para esse erro do verificador. Nova RPC retorna
+401/42501 a anônimo. Processo ativo mantém range=false; conexão operacional de
+Leads no projeto aprovado passou em SELECT 1, sem ler registros de clientes.
+Fluxos positivos autenticados foram validados com fixtures na CI; dados privados
+de produção não foram exportados.
+
+O usuário autorizou expressamente as duas migrations em 02/11/2026, mantendo a
+flag de intervalo desligada. Aplicadas somente `20261102120809` e `20261102131119`
+no CRM `hnncxuerlcsaahdxoswb`, PostgreSQL17.6, após a CI main completa. Ambas foram
+relidas e seus corpos SHA256 conferidos com os arquivos aprovados. Projeção:
+security invoker, owner postgres, ACL somente postgres. Range: security invoker,
+stable, search_path vazio e execução somente postgres/authenticated; anon e
+service_role não recebem execução. Os 82 registros anteriores permaneceram
+intactos; histórico final 84. API MCP gerou inicialmente versões 20261102165943 e
+20261102170024; somente esses registros novos foram alinhados por CAS aos IDs
+aprovados, exigindo nome, hash exato do SQL armazenado, corpo ativo e ausência do
+ID de destino. Nenhuma outra migration foi aplicada ou reparada.
+
+SHA256 dos arquivos: range
+`110e88dfc3bedcf1f16c0c74ada39d98ea5d6591ade32a3fd20f803a1dbca57f`;
+projeção `28e82dc966c4aca64a172c786eb4dbdde8842b4177e762083725df0ee9f07508`.
+Corpos ativos: range `6feee2fd9f8b1c8d017531db5b722c52a56d3261765f72b15bb31cb42bbdb139`;
+projeção `6ea9776079d45e906e40dc62acf7b1719f1b26d94bd0542fbfb46b70d6467d72`.
+Conferência final SQL em 17:01:06.785911Z validou histórico e privilégios. Nenhum
+registro comercial, policy, tabela ou índice de negócio foi alterado.
+
+Backup anterior salvo privadamente na VPS em
+`/etc/descomplica-crm/migration-backups/handoff-aa28d38e-20261102-preapply.json`,
+SHA256 `018b68be09598b2981e21259b11427cee3491e3b32e79a704d50e039a5ff293b`.
+Recuperação SQL: reverter projeção por nova migration com
+somente a definição histórica; desativar o range antes de eventual remoção da RPC
+aditiva. Nenhuma tabela de negócio é alterada por essas duas migrations. A flag
+`CRM_APPOINTMENTS_GOALS_RANGE_ENABLED` permanece false, com caminho legado ativo.
+
+Imagem anterior `sha256:455ec44d89d6c2094bb126a4c251cf07a4d5f66b4d0c8fcf9c78316608be1d42`
+foi conservada e conferida antes da troca. Não houve recuperação pendente. Após
+release concluída, reversão de aplicação exige PR, CI e nova promoção protegida;
+`recover` fica restrito à tentativa pendente exata, conforme o runbook.
+
+Fechamento documental em branch própria, somente Markdown, depois da publicação
+funcional. Não promover o SHA documental como aplicação nem reiniciar runtime
+para registrar a própria entrega. Resultado do PR documental e sync constam da
+entrega coordenada; não iniciar ciclo recursivo para registrar seu próprio commit.
+
 ## Identidade e preparação
 
 - Git comum confirmado: `Documents/ChatGPT/DESCOMPLICA-CRM/.git`.
@@ -28,8 +106,8 @@ continuam obrigatórios. Não há autorização para inventar políticas comerci
 | -------- | --------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------------------------------- |
 | A        | Implementador CI; integração pelo coordenador | scripts/ci, escopo visual QA, workflows, release policy, E2E | Contrato executor/agregador e negações; CI ampla final | Implementado; cadência E2E preservada até prova de capacidade                    |
 | B        | Coordenador                                   | Instrumentação agregada e medição sintética local            | Privacidade, falhas, identidade e fases                | Implementado em etapas; RUM sem destino/consentimento aprovado                   |
-| C1/C2    | Dados                                         | stages/data, novas migrations e testes                       | Snapshot, histórico H=0/H=11, pgTAP                    | C1 medido e selecionado; C2 validado; rollout remoto pendente                    |
-| C3/H     | Coordenador                                   | Dashboard Agendamentos e página de etapas                    | Volume, gráficos, teclado e estados                    | Resumo compacto e detalhe servidor implementados; CI ampla pendente              |
+| C1/C2    | Dados                                         | stages/data, novas migrations e testes                       | Snapshot, histórico H=0/H=11, pgTAP                    | C1 aplicado; C2 aplicado/validado, flag desligada conforme autorização           |
+| C3/H     | Coordenador                                   | Dashboard Agendamentos e página de etapas                    | Volume, gráficos, teclado e estados                    | Implementado, validado na CI main e publicado                                    |
 | D        | Implementador Leads                           | lead-plus cliente/servidor e testes                          | Escopos, SQL e fixtures                                | Cursor, filtros e analytics validados; contrato operacional conferido em leitura |
 | E        | Implementador simuladores                     | Recursos e títulos por variante                              | Compilação e fórmulas existentes                       | Manual diferido e título corrigido; fórmulas/CSS preservados                     |
 | F        | Coordenador                                   | Repasse                                                      | Pedido posterior do usuário                            | Retirado pelo usuário; nenhum diff funcional ou instrumentação                   |
@@ -111,7 +189,7 @@ Manifesto integrado: 100 migrations; restore: 46 arquivos/2391 assertions.
 sem probe adicional. Só habilitar depois da aplicação autorizada e pgTAP aprovados.
 RPC ausente permite fallback; permissão negada e intervalo parcial falham fechado.
 Reverter a flag retorna ao caminho legado; remover apenas a função aditiva, após
-desativar a flag, é o rollback de banco. Nenhuma migration remota foi aplicada.
+desativar a flag, é o rollback de banco. As duas migrations foram aplicadas após autorização, mantendo a flag desligada.
 
 A ausência de Docker/psql no desktop e de branch Supabase remota isolada não
 foi tratada como impedimento definitivo: a CI existente oferece PostgreSQL
@@ -273,12 +351,45 @@ essas duas entradas nem alegar uma redução de CSS, TTFB, INP ou p75.
   sobrepõem entre lotes e não devem ser somadas.
 - QA independente revisou CI/release/RPC/logs, detectou manifesto e retorno de
   escopo, ambos corrigidos. Prova browser de edição com versão atual aprovada.
-- SQL/restore/matriz autenticada/build completos ficam para CI Linux do candidato
-  coordenado. Nenhum teste POSIX será adulterado por diferenças do Windows.
+- SQL/restore/matriz autenticada/build completos passaram na CI Linux do main
+  coordenado. Não se adulteraram testes POSIX por diferenças do Windows.
 
 ## Identidade de entrega e documentação
 
 ### Checkpoint SQL medido
+
+CI final do main AA28 / 41479050792, PostgreSQL17.6: medianas aquecidas pareadas
+baseline→candidato, ms: 5000 fatos/ranking 102,335→85,594; 5000/mascarado
+104,884→95,253; 20000/ranking 435,622→406,103; 20000/mascarado
+431,289→422,560. JSON integral equivalente em todos os recortes; candidato menor
+nos quatro. Primeiras execuções 97,080→84,789; 107,702→90,302; 510,724→463,953;
+441,569→467,412: não há ganho universal em chamada inicial.
+
+Leads/main: 80 recortes, 5000 registros, 5→1 consultas, 2936263→31317 bytes e
+5000→50 linhas iniciais. Primeira execução 98,740→26,502 ms; repetições
+92,847/93,733→22,443/22,808 ms. São fixtures isoladas; não latência operacional.
+Histórico de CI #463: PR58m54s/main51m14s. Atual: PR60m14s/main45m23s; pacotes e
+runners diferentes impedem atribuir a diferença a uma otimização específica.
+Rodadas de correção anteriores não entram nesses tempos do par final aprovado.
+
+Rodada final do PR em `46fc3735` / CI41469001307 confirmou a seleção instalada,
+JSON integral equivalente e mediana menor nos quatro recortes. Medianas pareadas
+baseline→candidato, ms: 5000 fatos/ranking 172,060→153,888; 5000/mascarado
+184,658→168,963; 20000/ranking 729,932→666,845; 20000/mascarado
+769,598→700,277. Primeiras execuções: 175,093→150,204; 169,164→156,028;
+754,658→711,673; 764,325→733,286. Comparar dentro da mesma rodada; tempos absolutos
+variaram entre runners. Não são medidas de produção nem percentis de usuários.
+
+Leads da rodada final: mesmos 80 recortes e bytes/consultas abaixo. Primeira
+execução 188,697→42,006 ms; duas repetições 174,513/205,867→38,634/38,274 ms.
+Node mede SQL e processamento no harness isolado; não mede o endpoint operacional.
+
+Instrumentação da matriz no artefato da CI41461202422: oito perfis, 392/392
+combinações, zero retries e zero espera por retry. Soma dos tempos por perfil:
+452824 ms, sendo 392000 ms de cadência fixa e 59942 ms de requisições. Controles
+originais de carga permanecem; ausência de falha serial não prova capacidade para
+bursts ou pausa menor. Não houve economia medida nessa cadência. Os 20 testes E2E
+da rodada concluíram em 9,1 min; esse tempo inclui outras jornadas.
 
 Run [41461202422](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/41461202422)
 aprovou os quatro jobs. Head `ddde6bb980f2610f3cc31fe2e85835681a5d844b`, merge
@@ -320,8 +431,7 @@ de texto e fontes. A versão SQL nova entra apenas em
 nonDeployableRepositoryVersions do allowlist histórico de homologação; os dois
 candidatos e hashes Auth/MFA permanecem intactos. Nenhum gate foi ignorado.
 
-Preparado no working tree; commits/PR/CI/publicação ainda serão preenchidos após
-os gates. CI da base foi conferida via API pública: run 41380947066, push/main
+Preparação encerrada; commits/PR/CI/publicação estão registrados no estado integrado acima. CI da base foi conferida via API pública: run 41380947066, push/main
 `d4bb4d91`, success. Isso não valida o código novo.
 
 Checkpoint local de Leads/simuladores: `994c104d869a312d94836005aef4b69115e757c1`.
@@ -335,11 +445,11 @@ O manifesto/restore foi reconciliado, incluindo a segunda asserção de contagem
 whitespace conferidos; provas de perfil executadas novamente para os hashes
 finais dos componentes.
 
-SSH observacional confirmou acesso ao host e ledger: produção `0dab1578`,
+Conferência SSH anterior à promoção: produção `0dab1578`,
 deployment `694c8f77-0aa7-4e64-92c4-1a7aeed3117d`, publicação real
 2026-11-02T02:50:35.132Z, sem pendência. Não é a consulta final de DEPLOY-001.
-Nenhuma troca de runtime foi feita. O checkout administrativo do host tem outro
-SHA e será preservado; promoção exige checkout/artefato próprios do candidato.
+Naquele momento não havia troca de runtime. O checkout administrativo tinha outro
+SHA e foi preservado; a promoção usou checkout/artefato próprios do candidato.
 
 A nota inicial ultrapassou o limite de 256000 bytes do índice. Uma seção histórica
 foi movida integralmente para o arquivo existente de Agendamentos, com referência,
