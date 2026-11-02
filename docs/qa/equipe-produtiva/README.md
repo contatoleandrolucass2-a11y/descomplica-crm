@@ -22,6 +22,10 @@ dados permitida.
 
 Executar `node scripts/qa/productive-team-preview.mjs` com Node 24.19.x e as
 dependências fixadas no lockfile. O preview usa somente fixtures sintéticas e
+o DashboardShell real, com transporte de navegação sintético. O teste de zoom
+aguarda a largura publicada pelo ResizeObserver do shell antes de exigir
+ausência de overflow; não aceita a largura antiga nem amplia a tolerância.
+O preview
 grava evidências em `test-results/productive-team-preview/evidence.json`, com
 capturas nos três temas em 390 e 1440 px. Verifica quatro cards, filtros,
 calendário por teclado, limpar, zoom de layout de 200%, overflow, axe e a

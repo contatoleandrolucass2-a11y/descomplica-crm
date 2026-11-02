@@ -5694,6 +5694,7 @@ async function checkProductiveTeam(page, origin) {
     keyboard: false,
     zoom: false,
     passed: false,
+    stage: "initializing",
   };
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
@@ -5702,84 +5703,164 @@ async function checkProductiveTeam(page, origin) {
   });
   const destinationRoot = path.join(artifactRoot, "productive-team");
   await mkdir(destinationRoot, { recursive: true });
-  for (const width of [390, 1440]) {
-    await page.setViewportSize({ width, height: 900 });
-    for (const theme of themes) {
-      await gotoWithServerRetry(page, `${origin}${route}`, { waitUntil: "domcontentloaded" });
-      await setTheme(page, theme);
-      await expect(
-        page.getByRole("heading", { name: "Equipe Produtiva", exact: true }),
-      ).toBeVisible();
-      const cards = page.getByRole("region", { name: "Corretores produtivos por etapa" });
-      await expect(cards.getByRole("heading")).toHaveCount(4);
-      for (const activity of ["Agendamentos", "Visitas", "Pastas", "Vendas"])
-        await expect(
-          cards.getByRole("heading", { name: `Equipe produtiva “${activity}”`, exact: true }),
-        ).toBeVisible();
-      for (const id of ["regionalManager", "manager", "owner", "company"])
-        await expect(page.locator(`#appointment-filter-${id}`)).toBeVisible();
-      await expect(page.getByRole("group", { name: "Canal de vendas" })).toBeVisible();
-      const filters = page.getByRole("region", { name: "Filtros de Equipe Produtiva" });
-      await expect(filters.locator('button[aria-haspopup="dialog"]')).toHaveCount(1);
-      const unavailableCards = await cards
-        .locator("article")
-        .evaluateAll((elements) =>
-          elements
-            .map((element) => element.innerText)
-            .filter((text) => /indispon[ií]ve|aguardando|n[aã]o conciliado|amb[ií]gua/i.test(text)),
-        );
-      if (unavailableCards.some((text) => /\b0%|0 de 0/.test(text)))
-        throw new Error("Equipe Produtiva rendered an unavailable source as zero.");
-      const geometry = await page.evaluate(() => ({
+  const readGeometry = () =>
+    page.evaluate(() => {
+      const shell = document.querySelector("[data-dashboard-shell]");
+      const surface = document.querySelector("[data-dashboard-surface]");
+      return {
         width: innerWidth,
         scrollWidth: document.documentElement.scrollWidth,
-      }));
-      if (geometry.scrollWidth > geometry.width + 1)
-        throw new Error(`Equipe Produtiva overflows at ${theme}/${width}`);
-      const accessibility = await inspectAccessibility(
-        page,
-        route,
-        `productive-team-${width}`,
-        theme,
-      );
-      if (!accessibility.passed)
-        throw new Error(`Equipe Produtiva accessibility failed at ${theme}/${width}`);
-      const buffer = await captureComparableScreenshot(page);
-      const persistedBuffer = await capturePersistedScreenshot(page, buffer);
-      const screenshot = await saveLosslessWebp(
-        persistedBuffer,
-        path.join(destinationRoot, `${theme}-${width}.webp`),
-      );
-      evidence.screens.push({
-        width,
-        theme,
-        geometry,
-        accessibility,
-        unavailableCards: unavailableCards.length,
-        screenshot,
-      });
+        shellWidth: shell?.clientWidth ?? null,
+        railWidth: shell
+          ? Number.parseFloat(getComputedStyle(shell).getPropertyValue("--dashboard-sidebar-rail"))
+          : null,
+        layoutWidth: surface
+          ? Number.parseFloat(
+              getComputedStyle(surface).getPropertyValue("--dashboard-layout-width"),
+            )
+          : null,
+      };
+    });
+  try {
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const theme of themes) {
+        evidence.stage = `navigate:${theme}:${width}`;
+        await gotoWithServerRetry(page, `${origin}${route}`, { waitUntil: "domcontentloaded" });
+        evidence.stage = `theme:${theme}:${width}`;
+        await setTheme(page, theme);
+        evidence.stage = `content:${theme}:${width}`;
+        await expect(
+          page.getByRole("heading", { name: "Equipe Produtiva", exact: true }),
+        ).toBeVisible();
+        const cards = page.getByRole("region", { name: "Corretores produtivos por etapa" });
+        await expect(cards.getByRole("heading")).toHaveCount(4);
+        for (const activity of ["Agendamentos", "Visitas", "Pastas", "Vendas"])
+          await expect(
+            cards.getByRole("heading", { name: `Equipe produtiva “${activity}”`, exact: true }),
+          ).toBeVisible();
+        for (const id of ["regionalManager", "manager", "owner", "company"])
+          await expect(page.locator(`#appointment-filter-${id}`)).toBeVisible();
+        await expect(page.getByRole("group", { name: "Canal de vendas" })).toBeVisible();
+        const filters = page.getByRole("region", { name: "Filtros de Equipe Produtiva" });
+        await expect(filters.locator('button[aria-haspopup="dialog"]')).toHaveCount(1);
+        const unavailableCards = await cards
+          .locator("article")
+          .evaluateAll((elements) =>
+            elements
+              .map((element) => element.innerText)
+              .filter((text) =>
+                /indispon[ií]ve|aguardando|n[aã]o conciliado|amb[ií]gua/i.test(text),
+              ),
+          );
+        if (unavailableCards.some((text) => /\b0%|0 de 0/.test(text)))
+          throw new Error("Equipe Produtiva rendered an unavailable source as zero.");
+        evidence.stage = `geometry:${theme}:${width}`;
+        const geometry = await page.evaluate(() => ({
+          width: innerWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+        }));
+        if (geometry.scrollWidth > geometry.width + 1)
+          throw new Error(`Equipe Produtiva overflows at ${theme}/${width}`);
+        evidence.stage = `accessibility:${theme}:${width}`;
+        const accessibility = await inspectAccessibility(
+          page,
+          route,
+          `productive-team-${width}`,
+          theme,
+        );
+        evidence.latestAccessibility = accessibility;
+        if (!accessibility.passed)
+          throw new Error(`Equipe Produtiva accessibility failed at ${theme}/${width}`);
+        evidence.stage = `screenshot:${theme}:${width}`;
+        const buffer = await captureComparableScreenshot(page);
+        const persistedBuffer = await capturePersistedScreenshot(page, buffer);
+        const screenshot = await saveLosslessWebp(
+          persistedBuffer,
+          path.join(destinationRoot, `${theme}-${width}.webp`),
+        );
+        evidence.screens.push({
+          width,
+          theme,
+          geometry,
+          accessibility,
+          unavailableCards: unavailableCards.length,
+          screenshot,
+        });
+      }
     }
+    const period = page
+      .getByRole("region", { name: "Filtros de Equipe Produtiva" })
+      .locator('button[aria-haspopup="dialog"]');
+    evidence.stage = "keyboard:open";
+    await period.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("button", { name: "Fechar calendário", exact: true }),
+    ).toBeFocused();
+    evidence.stage = "keyboard:close";
+    await page.keyboard.press("Escape");
+    await expect(period).toBeFocused();
+    evidence.keyboard = true;
+    evidence.stage = "zoom:before";
+    evidence.zoomBefore = await readGeometry();
+    await page.evaluate(() => {
+      document.documentElement.style.zoom = "2";
+    });
+    evidence.stage = "zoom:layout";
+    // CSS zoom changes the shell's measured width. Wait for its ResizeObserver
+    // to commit that width before checking overflow; do not accept stale layout.
+    await expect
+      .poll(
+        async () => {
+          evidence.zoomAfter = await readGeometry();
+          const geometry = evidence.zoomAfter;
+          const shellSettled =
+            geometry.shellWidth !== null &&
+            geometry.layoutWidth !== null &&
+            geometry.railWidth !== null &&
+            Math.abs(
+              geometry.layoutWidth - Math.max(1, geometry.shellWidth - geometry.railWidth),
+            ) <= 1;
+          return shellSettled && geometry.scrollWidth <= geometry.width + 1;
+        },
+        {
+          timeout: 10_000,
+          message: "Equipe Produtiva zoom layout must settle without horizontal overflow",
+        },
+      )
+      .toBe(true);
+    evidence.zoom = true;
+    await page.evaluate(() => {
+      document.documentElement.style.zoom = "";
+    });
+    if (!evidence.zoom || errors.length)
+      throw new Error("Equipe Produtiva zoom or browser errors failed.");
+    evidence.stage = "complete";
+    evidence.passed = true;
+    return evidence;
+  } catch {
+    evidence.failure = { stage: evidence.stage, kind: "sanitized" };
+    evidence.browserErrorCount = errors.length;
+    try {
+      evidence.failureGeometry = await readGeometry();
+      const buffer = await capturePersistedScreenshot(page);
+      evidence.failureScreenshot = await saveLosslessWebp(
+        buffer,
+        path.join(destinationRoot, "failure.webp"),
+      );
+    } catch {
+      evidence.failureCaptureUnavailable = true;
+    }
+    throw new Error(
+      `Equipe Produtiva failed at ${evidence.stage}; inspect productive-team-results.json.`,
+    );
+  } finally {
+    await writeFile(
+      path.join(artifactRoot, "productive-team-results.json"),
+      JSON.stringify(evidence, null, 2),
+    );
   }
-  const period = page
-    .getByRole("region", { name: "Filtros de Equipe Produtiva" })
-    .locator('button[aria-haspopup="dialog"]');
-  await period.focus();
-  await page.keyboard.press("Enter");
-  await expect(page.getByRole("button", { name: "Fechar calendário", exact: true })).toBeFocused();
-  await page.keyboard.press("Escape");
-  await expect(period).toBeFocused();
-  evidence.keyboard = true;
-  await page.evaluate(() => {
-    document.documentElement.style.zoom = "2";
-  });
-  evidence.zoom = await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1);
-  await page.evaluate(() => {
-    document.documentElement.style.zoom = "";
-  });
-  if (!evidence.zoom || errors.length)
-    throw new Error("Equipe Produtiva zoom or browser errors failed.");
-  evidence.passed = true;
-  return evidence;
 }
 
 async function checkZoom(

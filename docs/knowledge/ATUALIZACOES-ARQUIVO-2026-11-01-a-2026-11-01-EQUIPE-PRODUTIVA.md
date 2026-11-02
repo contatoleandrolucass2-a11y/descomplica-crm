@@ -93,3 +93,28 @@
   os quatro casos de troca de gerente, atividade sem filtro, atual e mista.
   Lint dos três arquivos aprovado. Fonte: comentário da revisão do PR465 e
   `tests/productive-team-analysis.test.ts`. Nova CI ainda necessária.
+
+## Banco e captura autenticada do candidato 31d95b1a
+
+- CI41378013677 aprovou `validate` e `promotable-image`. Banco e restauração
+  falharam em três dependências dos novos acessos: grants_matrix precisava
+  incluir a RPC auditada; duas contagens Admin passaram de 82 para 83; a fixture
+  precisava limpar o JWT durante preparação postgres antes de injetar negações
+  contra Master. O guard de imutabilidade funcionou e permanece integral.
+  Planos de testes mantidos; execução final exige nova CI.
+- Captura41378013692: E2E real com 50 rotas protegidas aprovou 20 testes e
+  ignorou um previsto. RLS/API também aprovou. Artefato13112731441 contém seis
+  capturas reais da nova rota, nos três temas em 390/1440, com ausência de fonte
+  mostrada como indisponível. Revisão visual do desktop preservou título,
+  filtros, quatro cards e navegação. Isso não prova dados preenchidos no Next;
+  preenchimento continua coberto por fixtures unitárias e preview sintético.
+- O gate visual parou após as seis capturas no zoom: medição imediata encontrou
+  scrollWidth2880 para viewport1440, antes de o ResizeObserver atualizar o
+  conteúdo de 1396 para 676 px. Após o recálculo, scrollWidth1440. Reprodução
+  com DashboardShell real confirmou a corrida do teste; nenhum limite de
+  overflow foi relaxado nem CSS do produto alterado.
+- QA agora aguarda a igualdade entre largura do conteúdo e shell menos rail,
+  além de ausência de overflow. Diagnóstico parcial guarda somente etapa,
+  geometria, acessibilidade e contagem de erros, sem mensagens privadas.
+  Preview com sidebar real passou seis telas e nove interações, axe e console
+  sem erros; lint, sintaxe e formatação aprovados. Nova CI ainda pendente.

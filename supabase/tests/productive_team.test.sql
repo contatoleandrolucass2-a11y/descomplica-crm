@@ -96,19 +96,27 @@ set local role authenticated;
 select ok(not (public.read_crm_productive_team('all')->'availableStages' ? 'folders'),
   'missing metric source stays unavailable');
 reset role;
+-- Fixture writes run as postgres without a JWT. RESET ROLE alone leaves
+-- auth.uid() populated and correctly triggers the immutable-Master boundary.
+select set_config('request.jwt.claim.sub','',true);
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason)
 values ('ed110000-0000-4000-8000-000000000001','crm.dashboard.all.view','deny','Synthetic view denial');
+select set_config('request.jwt.claim.sub','ed110000-0000-4000-8000-000000000001',true);
 set local role authenticated;
 select is(public.read_crm_productive_team('all'),null::jsonb,'explicit view denial wins');
 reset role;
+select set_config('request.jwt.claim.sub','',true);
 delete from public.user_permission_overrides where user_id='ed110000-0000-4000-8000-000000000001';
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason)
 values ('ed110000-0000-4000-8000-000000000001','crm.productive_team.view','deny','Synthetic page denial');
+select set_config('request.jwt.claim.sub','ed110000-0000-4000-8000-000000000001',true);
 set local role authenticated;
 select is(public.read_crm_productive_team('all'),null::jsonb,'explicit page denial wins');
 reset role;
+select set_config('request.jwt.claim.sub','',true);
 delete from public.user_permission_overrides where user_id='ed110000-0000-4000-8000-000000000001';
 update public.app_pages set is_active=false where key='crm.productive_team';
+select set_config('request.jwt.claim.sub','ed110000-0000-4000-8000-000000000001',true);
 set local role authenticated;
 select is(public.read_crm_productive_team('all'),null::jsonb,'inactive page cannot be read via RPC');
 reset role;

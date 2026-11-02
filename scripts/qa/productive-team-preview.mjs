@@ -73,7 +73,9 @@ const built = await build({
   envFile: false,
   logLevel: "error",
   define: { "process.env.NODE_ENV": JSON.stringify("production"), "process.env": "{}" },
-  resolve: { alias: { "@": root } },
+  resolve: {
+    alias: { "@": root, "next/navigation": "\0next/navigation", "next/link": "\0next/link" },
+  },
   oxc: { jsx: { runtime: "automatic" } },
   css: {
     modules: {
@@ -87,10 +89,15 @@ const built = await build({
       enforce: "pre",
       resolveId(id) {
         if (id.endsWith("productive-team-memory.tsx")) return entry;
+        if (id === "next/navigation" || id === "next/link") return `\0${id}`;
       },
       load(id) {
+        if (id === "\0next/navigation")
+          return "export const usePathname = () => '/app/equipe-produtiva';";
+        if (id === "\0next/link")
+          return "import {createElement} from 'react';export default function Link({prefetch,...props}) {return createElement('a',props);}";
         if (id === entry)
-          return `import {createRoot} from 'react-dom/client';import {ProductiveTeamDashboard} from '@/app/(protected)/app/equipe-produtiva/_components/ProductiveTeamDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const roster=${JSON.stringify(roster)};const query=new URLSearchParams(location.search);createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><ProductiveTeamDashboard analysis={query.has('empty')?null:fixture} brokerRoster={roster} availableStages={query.has('missing')?['appointments','visits','sales']:['appointments','visits','folders','sales']} generatedAt="2026-10-31T15:00:00Z" calendarDate="2026-10-31"/></main>);`;
+          return `import {createRoot} from 'react-dom/client';import {ProductiveTeamDashboard} from '@/app/(protected)/app/equipe-produtiva/_components/ProductiveTeamDashboard';import {DashboardShell} from '@/app/(protected)/_components/DashboardShell';import {PAGE_REGISTRY} from '@/lib/navigation/registry';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const roster=${JSON.stringify(roster)};const pages=PAGE_REGISTRY.map(page=>({...page,key:page.pageKey}));const query=new URLSearchParams(location.search);createRoot(document.getElementById('root')).render(<DashboardShell pages={pages}><main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><ProductiveTeamDashboard analysis={query.has('empty')?null:fixture} brokerRoster={roster} availableStages={query.has('missing')?['appointments','visits','sales']:['appointments','visits','folders','sales']} generatedAt="2026-10-31T15:00:00Z" calendarDate="2026-10-31"/></main></DashboardShell>);`;
       },
     },
   ],
@@ -227,10 +234,36 @@ try {
     "clear",
   );
   await page.evaluate(() => (document.documentElement.style.zoom = "2"));
-  assert.ok(
-    await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
-    "No overflow at 200% layout zoom",
-  );
+  await expect
+    .poll(
+      async () => {
+        evidence.zoomGeometry = await page.evaluate(() => {
+          const shell = document.querySelector("[data-dashboard-shell]");
+          const surface = document.querySelector("[data-dashboard-surface]");
+          return {
+            width: innerWidth,
+            scrollWidth: document.documentElement.scrollWidth,
+            shellWidth: shell.clientWidth,
+            railWidth: Number.parseFloat(
+              getComputedStyle(shell).getPropertyValue("--dashboard-sidebar-rail"),
+            ),
+            layoutWidth: Number.parseFloat(
+              getComputedStyle(surface).getPropertyValue("--dashboard-layout-width"),
+            ),
+          };
+        });
+        const geometry = evidence.zoomGeometry;
+        return (
+          Math.abs(geometry.layoutWidth - Math.max(1, geometry.shellWidth - geometry.railWidth)) <=
+            1 && geometry.scrollWidth <= geometry.width + 1
+        );
+      },
+      {
+        timeout: 10_000,
+        message: "Shell ResizeObserver must settle at 200% without horizontal overflow",
+      },
+    )
+    .toBe(true);
   evidence.interactions.push("zoom-200");
   await page.goto(`${origin}?missing`);
   await expect(cards()).toContainText("Relatório indisponível para esta etapa.");

@@ -24,6 +24,12 @@
   Quatro regressões reproduziram 100% indevido antes e 0% correto após o ajuste;
   68 testes de cálculo e regressão de Agendamentos passaram. A análise anterior
   somente expõe o cadastro já filtrado; seus indicadores permanecem intactos.
+- CI `31d95b1a` aprovou validação da aplicação e imagem. Restauração/banco
+  revelaram três expectativas/fixtures diretamente afetadas, corrigidas sem
+  alterar guards: allowlist da RPC, contagem Admin e preparação sem JWT do
+  teste de negação de Master. A captura real aprovou acesso/E2E e seis telas
+  da página; falhou na medição imediata do zoom antes de ResizeObserver.
+  Regressão agora inclui sidebar real e espera pela geometria observável.
 
 ## 2026-11-01 — Margem do comparativo em cards estreitos
 
