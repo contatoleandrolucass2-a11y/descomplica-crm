@@ -1,5 +1,30 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-02 — CAIXA integrado; promoção bloqueada por avanço documental
+
+- PR #470 integrado em `a93d65b2856ed85a950301adea801b568d0b5ed6`:
+  sidebar retrátil, cores de Agendamentos e diálogo mensal de parcelas.
+  CI do PR `41516831785` e push/main `41523108306`: quatro jobs aprovados.
+  Local: 64 testes, tipos, lint focado e formatação aprovados; 11 referências
+  CAIXA revisadas, demais imagens e limiares preservados.
+- Artefato `13178542590`, digest ZIP
+  `acea7c69d2fc353cdebfb08a866634d9985f3a256c5f3956de63cb81de0ebfdb`,
+  revisão/checksums/14 camadas linux-amd64 e dois perfis provados na VPS.
+  Config CI `1d5cb621244084443c743b066e2c3a38a8bc856393a3a295b05c58022a82a7ec`;
+  manifesto local `8008307298a11e4311bcea3954337d817484793ef73ddc507f4c1269222a6f96`.
+- Antes da promoção, PR #472 avançou main documental para `8697ade2`.
+  Sua CI `41527166188` aprovou validate, mas ignorou os outros três jobs.
+  O guard exige candidato igual à main remota e quatro jobs aprovados de push.
+  Portanto o SHA CAIXA não é mais promovível e o documental não tem imagem.
+  Não executar bypass, rebuild, commit artificial ou alteração do pipeline.
+- Produção permanece em `2556898d911f3c5d5a806b70c0ec0c800a820bd2`, deployment
+  `28c48a83-4c9e-4923-91c8-3028aabc5555`, publicado em
+  `2026-11-02T20:39:49.477Z`, sem pendência. Backup privado conferido; nenhuma
+  troca de runtime, migration ou dado remoto foi executada nesta demanda.
+- Reavaliar promoção quando houver novo main de aplicação com quatro gates
+  aprovados ou correção explicitamente autorizada do protocolo concorrente.
+  O registro documental não exige reinício da aplicação nem ciclo recursivo.
+
 ## 2026-11-02 — CAIXA: sidebar retrátil e parcelas
 
 - Escopo: somente `/app/simulacao/caixa`, sidebar responsiva baseada em

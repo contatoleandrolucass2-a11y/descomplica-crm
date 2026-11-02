@@ -1,5 +1,8 @@
 # Changelog
 
+- Registra sidebar e parcelas CAIXA integradas e validadas no PR #470;
+  promoção aguarda resolução do avanço documental da main perante o guard.
+
 - Publica as melhorias de leitura de Agendamentos em2556898d e aplica a
   expansão autorizada dos layouts salvos, preservando os cards anteriores.
   Persistência de dimensão/ordem comprovada entre Chrome, integrado e

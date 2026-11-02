@@ -1,5 +1,10 @@
 # Worklog
 
+- CAIXA/PR #470 integrado em a93d65b2, CI main41523108306 verde nos quatro jobs.
+  Artefato provado e backup conferido. Publicação bloqueada porque main avançou
+  documentalmente em8697ade2, cujos jobs pesados foram ignorados; o guard exige
+  SHA remoto exato e quatro jobs aprovados. Produção2556898d preservada.
+
 ## 2026-11-02 — Agendamentos: publicação e persistência
 
 - PR469/main2556898d publicado pelo coordenador, após CI41511483505 verde
