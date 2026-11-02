@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-11-01 — Margem do comparativo em cards estreitos
+
+- Duas declarações CSS reservam a mesma margem direita ao plot e ao eixo.
+  Rótulo31 permanece inteiro sem mudar dimensões, dados ou persistência.
+- QA isolada de componentes/CSS reais:27/27 cenários, três temas, cards269/299/
+  500/1205 e viewports390/844/1440. Antes cortava até3,695px; depois0px,
+  com desalinhamento máximo0,014757px, sem erros JS ou tráfego externo.
+  Inclui seis casos de largura fixa móvel real. CI, Next e smoke publicados
+  seguem pendentes para esta margem; fonte do comparativo e contratos inalterados.
+
 ## 2026-11-01 — Comparativo de linhas durante arraste
 
 - O smoke publicado encontrou recálculo pesado ao montar o gráfico de linhas
@@ -12,8 +22,11 @@
   formatter, com saída integral idêntica. Não representa latência real do site.
 - Getter: 13 verificações aprovadas; arraste desktop antigo construía 1→2→3
   comparativos e candidato mantém 1→1→1; celular mantém 7→7→7. Dois SSR,
-  tipos e build Next16.4.1/Node24 passaram. CI e novo smoke seguem pendentes;
-  sem migration ou dados reescritos.
+  tipos e build Next16.4.1/Node24 passaram. PR462 e CI main332a37c3 aprovados;
+  publicado em01/11 às21:38BRT, sem migration ou dados reescritos.
+- Smoke real: canto e arraste de card/gráfico line no Chrome e no celular simulado,
+  atualização cruzada, rotação nos dois sentidos, navegação e nova aba passaram.
+  Margem do rótulo31 em largura299px corrigida no CSS, aguardando publicação.
 
 ## 2026-11-01 — Calendário, vendas e comparativos de Agendamentos
 
