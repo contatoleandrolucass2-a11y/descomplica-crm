@@ -28,9 +28,9 @@ continuam obrigatórios. Não há autorização para inventar políticas comerci
 | -------- | --------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------------------------------- |
 | A        | Implementador CI; integração pelo coordenador | scripts/ci, escopo visual QA, workflows, release policy, E2E | Contrato executor/agregador e negações; CI ampla final | Implementado; cadência E2E preservada até prova de capacidade                    |
 | B        | Coordenador                                   | Instrumentação agregada e medição sintética local            | Privacidade, falhas, identidade e fases                | Implementado em etapas; RUM sem destino/consentimento aprovado                   |
-| C1/C2    | Dados                                         | stages/data, novas migrations e testes                       | Snapshot, histórico H=0/H=11, pgTAP                    | C1/C2 preparados; validação SQL isolada e rollout pendentes                      |
+| C1/C2    | Dados                                         | stages/data, novas migrations e testes                       | Snapshot, histórico H=0/H=11, pgTAP                    | C1 medido e selecionado; C2 validado; rollout remoto pendente                    |
 | C3/H     | Coordenador                                   | Dashboard Agendamentos e página de etapas                    | Volume, gráficos, teclado e estados                    | Resumo compacto e detalhe servidor implementados; CI ampla pendente              |
-| D        | Implementador Leads                           | lead-plus cliente/servidor e testes                          | Escopos, SQL e fixtures                                | Cursor, filtros, contadores e analytics preparados; conexão operacional ausente  |
+| D        | Implementador Leads                           | lead-plus cliente/servidor e testes                          | Escopos, SQL e fixtures                                | Cursor, filtros e analytics validados; contrato operacional conferido em leitura |
 | E        | Implementador simuladores                     | Recursos e títulos por variante                              | Compilação e fórmulas existentes                       | Manual diferido e título corrigido; fórmulas/CSS preservados                     |
 | F        | Coordenador                                   | Repasse                                                      | Pedido posterior do usuário                            | Retirado pelo usuário; nenhum diff funcional ou instrumentação                   |
 | G        | Dados e coordenador UI                        | Fonte de metas, snapshot/exportador, etapa                   | Vigência, ausência/zero, escopos                       | Fonte inválida e zero corrigidos; integração comercial sem autoridade suficiente |
@@ -116,13 +116,13 @@ desativar a flag, é o rollback de banco. Nenhuma migration remota foi aplicada.
 A ausência de Docker/psql no desktop e de branch Supabase remota isolada não
 foi tratada como impedimento definitivo: a CI existente oferece PostgreSQL
 isolado. Não se criou conta/ambiente pago nem fez EXPLAIN ANALYZE em produção.
-C1 prepara migration `20261102131119_appointments_projection_sets.sql`, alterando
-somente a seleção dos índices usados por dimensão para um conjunto, mantendo
-ordenações, somas, fallback e mascaramento. Dezoito assertions comparam a saída
-com a função histórica. O harness compara também a alternativa mínima de remover
-seis sorts intermediários: a escolha final depende da medição, sem pressupor
-como o otimizador executa o EXISTS. Rollback exige nova migration restaurando
-somente a definição histórica, mantendo owner/grants, sem reaplicar o arquivo antigo.
+C1 comparou projeção por conjuntos e retirada dos sorts intermediários, mantendo
+ordenação final, somas, fallback e mascaramento. O benchmark da CI rejeitou ganho
+consistente da alternativa por conjuntos; a menor mudança, retirada de sorts,
+foi mais rápida nos quatro recortes e foi selecionada para o candidato final.
+Dezoito assertions comparam o JSON inteiro com a função histórica. Rollback exige
+nova migration restaurando somente a definição histórica, mantendo owner/grants,
+sem reaplicar o arquivo antigo.
 
 C3 não necessita inventar outra regra de resumo: o codec compacto preserva datas
 exatas e campos analíticos em dicionários/tuplas, mantendo a engine canônica local.
@@ -159,11 +159,14 @@ necessário, mantendo eventos anteriores e opções completas. Respostas antigas
 não sobrepõem novo ator; erros de autorização apagam linhas anteriores.
 
 O projeto operacional `xwtasgjnkctyxokxjykk` não aparece no conector; o CRM
-`hnncxuerlcsaahdxoswb` não o substitui. O caminho alternativo legítimo pelo backend
-publicado também foi conferido sem segredos: `LEAD_DB_URL` e `LEAD_DB_PROJECT_REF`
-estão ambos ausentes no processo da aplicação. O probe abortou antes de conectar;
-nenhuma consulta/dado operacional foi exportado. Falta configurar esses dois
-valores pelo armazenamento protegido e validar schema/rollout no projeto correto.
+`hnncxuerlcsaahdxoswb` não o substitui. Correção da evidência inicial: o primeiro
+probe não comprovava o ambiente efetivo do Next. A leitura de `/proc` do processo
+Next filho confirmou URL operacional e projeto aprovado, sem imprimir valores.
+Pelo backend existente, em 02/11/2026, as três consultas novas (página, dashboard
+e resumo analítico) passaram em PostgreSQL 17.11, transação `READ ONLY`, timeout
+de 5 s e `EXPLAIN (FORMAT JSON)` sem ANALYZE. Zero registros de clientes foram
+exportados; nada foi alterado no banco. Isso valida o contrato real do schema,
+não mede latência nem substitui testes de escopo com fixtures.
 
 Código e contratos independentes foram preparados e testados em fixtures. O
 harness PostgreSQL isolado cria somente um c2s_app sintético inexistente, em
@@ -274,6 +277,36 @@ essas duas entradas nem alegar uma redução de CSS, TTFB, INP ou p75.
   coordenado. Nenhum teste POSIX será adulterado por diferenças do Windows.
 
 ## Identidade de entrega e documentação
+
+### Checkpoint SQL medido
+
+Run [41461202422](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/41461202422)
+aprovou os quatro jobs. Head `ddde6bb980f2610f3cc31fe2e85835681a5d844b`, merge
+de teste `4a08b9b1272e5af2aa2fa727df538705839bdb2e`; não é aprovação de main.
+Release-gates durou 40m59s. Origem e restauração independentes validaram 100
+migrations, 46 arquivos/2391 asserções pgTAP, owners, privilégios e fingerprints.
+Não é restauração representativa da base remota nem autorização de cutover.
+
+PostgreSQL 17.6, fixtures v4 sintéticas, três repetições aquecidas com ordem
+alternada; clock do servidor exclui rede/serialização, sem flush de cache:
+
+| Fatos / rótulos / operações | Ranking   | Baseline ms | Sem sorts ms | Conjuntos ms |
+| --------------------------- | --------- | ----------- | ------------ | ------------ |
+| 5000 / 30 / 1000            | permitido | 90,556      | 83,369       | 91,205       |
+| 5000 / 30 / 1000            | mascarado | 100,452     | 93,488       | 99,797       |
+| 20000 / 300 / 4000          | permitido | 405,556     | 381,930      | 412,888      |
+| 20000 / 300 / 4000          | mascarado | 432,924     | 399,878      | 424,900      |
+
+Todos os JSONs foram equivalentes. As primeiras execuções constam do artefato,
+separadas das medianas; não houve ganho em toda primeira execução. Selecionada
+a menor mudança comprovada: remover sorts intermediários. A CI precisa validar
+o novo SHA instalado; a aprovação anterior não é transplantada.
+
+Leads: 80 recortes por escopo/filtro/categoria, cursor em microssegundos, limite
+de novos registros e exportação integral passaram. Fixture de 5000 leads:
+legado 5 consultas, 2936263 bytes, 5000 linhas; página 1 consulta, 31317 bytes,
+50 linhas. Primeira execução 90,709→23,931 ms; repetições 83,358/91,628→
+20,700/20,625 ms. São medições SQL+Node isoladas, sem provar latência operacional.
 
 PR 467 aberto para o pacote coordenado. Run inicial 41447032115 parou somente
 em Formatting do script appointments-profile-performance, antes de lint/tipos/

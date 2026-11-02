@@ -4,8 +4,9 @@
   paginado no servidor, preservando os cálculos e a exportação integral autorizada.
 - Pagina a lista Leads com filtros, contagens e cursor estável; preserva a leitura
   completa do Kanban, histórico analítico, revogação e troca de usuário.
-- Prepara projeção SQL por conjuntos e evidências condicionais de PostgreSQL,
-  sem aplicar migrations remotas nem atribuir ganho antes da medição.
+- Reduz ordenações intermediárias da projeção SQL após comparação isolada;
+  preserva ordenação final, somas e máscaras. A alternativa por conjuntos não
+  mostrou ganho consistente e foi descartada. Migrations remotas não aplicadas.
 
 - Normaliza formatação do script de evidência e finais de linha da migration e
   do teste SQL do handoff, preservando comportamento e contratos.

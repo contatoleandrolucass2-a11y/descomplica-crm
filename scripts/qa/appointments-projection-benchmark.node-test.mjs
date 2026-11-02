@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   baselineFile,
+  candidateFile,
   localConnection,
   projectionDefinition,
   syntheticPayload,
@@ -22,14 +23,23 @@ test("benchmark refuses remote, forwarded/nonstandard port and ambiguous databas
   assert.equal(localConnection("postgres://postgres:fixture@[::1]:54322/postgres").host, "::1");
 });
 
-test("temporary alternatives retain final ordering, masking and fallback while changing only intermediate sorts", async () => {
-  const source = await readFile(baselineFile, "utf8");
-  const original = projectionDefinition(source);
-  const alternative = temporaryDefinition(original, "appointments_no_sort", true);
+test("candidate removes only intermediate sorts; set-based alternative retains historical ordering", async () => {
+  const original = projectionDefinition(await readFile(baselineFile, "utf8"));
+  const candidate = projectionDefinition(await readFile(candidateFile, "utf8"));
+  assert.equal(
+    candidate,
+    original
+      .replace("jsonb_agg(f order by f)", "jsonb_agg(f)")
+      .replace("'-1'::jsonb)) order by f)", "'-1'::jsonb)))"),
+  );
+  assert.ok(candidate.includes("order by g.key,g.store"));
+  assert.ok(candidate.includes("order by row->>'createdAt'"));
+  assert.ok(candidate.includes("private.project_crm_appointments_analysis_v3_base"));
+  assert.ok(!candidate.includes("order by f"));
+  const alternative = temporaryDefinition(original, "appointments_set_based_alternative", true);
+  assert.ok(alternative.includes("select distinct (f->>v_position)::int as original"));
+  assert.ok(alternative.includes("jsonb_agg(f order by f)"));
   assert.ok(alternative.includes("order by g.key,g.store"));
-  assert.ok(alternative.includes("order by row->>'createdAt'"));
-  assert.ok(alternative.includes("private.project_crm_appointments_analysis_v3_base"));
-  assert.ok(!alternative.includes("order by f"));
   assert.throws(() => temporaryDefinition(original, "private_arbitrary_function"));
 });
 

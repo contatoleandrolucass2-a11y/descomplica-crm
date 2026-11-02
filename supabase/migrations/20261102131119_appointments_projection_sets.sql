@@ -1,8 +1,8 @@
 begin;
 
--- Match dictionary positions against one set of used fact indices per dimension.
--- Keep all intermediate/final ordering, numeric aggregation, version fallback,
--- account masking and the permission-checked public RPC unchanged.
+-- Remove six intermediate fact sorts; final grouped output remains ordered.
+-- Keep dictionary membership, numeric aggregation, version fallback, account
+-- masking and the permission-checked public RPC unchanged.
 create or replace function private.project_crm_appointments_analysis(
   p_payload jsonb, p_can_rank boolean
 )
@@ -18,7 +18,7 @@ begin
   if p_payload->'version' is distinct from '4'::jsonb then
     return private.project_crm_appointments_analysis_v3_base(p_payload, p_can_rank);
   end if;
-  select coalesce(jsonb_agg(f order by f), '[]'::jsonb) into v_facts
+  select coalesce(jsonb_agg(f), '[]'::jsonb) into v_facts
   from jsonb_array_elements(p_payload->'facts') f
   where (f->>0)::int in (0,1,2,3,4);
   for v_key, v_position in select * from (values
@@ -32,15 +32,13 @@ begin
         row_number() over (order by labels.ordinality) - 1 as new_index
       from jsonb_array_elements(p_payload#>array['dimensions',v_key])
         with ordinality labels(label,ordinality)
-      join (
-        select distinct (f->>v_position)::int as original
-        from jsonb_array_elements(v_facts) f
-      ) used on used.original = labels.ordinality - 1
       where (p_can_rank or v_key not in ('developments','stores'))
+        and exists (select 1 from jsonb_array_elements(v_facts) f
+          where (f->>v_position)::int = labels.ordinality - 1)
     ) relevant;
     v_payload := jsonb_set(v_payload, array['dimensions',v_key], v_dictionary);
     select coalesce(jsonb_agg(jsonb_set(f, array[v_position::text],
-      coalesce(v_mapping->(f->>v_position), '-1'::jsonb)) order by f), '[]'::jsonb)
+      coalesce(v_mapping->(f->>v_position), '-1'::jsonb))), '[]'::jsonb)
       into v_facts from jsonb_array_elements(v_facts) f;
   end loop;
   select coalesce(jsonb_agg(g.key || jsonb_build_array(g.count,g.amount,g.approved,g.store)

@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-11-02 — Seleção SQL por evidência
+
+- CI 41461202422 aprovou os quatro jobs no merge de teste 4a08b9b1 do PR 467
+  (head ddde6bb9): 100 migrations e 2391 asserções pgTAP em origem/restauração.
+- Benchmark PostgreSQL 17.6 demonstrou mediana menor nos quatro recortes somente
+  para retirada dos sorts intermediários; a projeção por conjuntos não melhorou
+  consistentemente. Candidato reduzido à menor alteração comprovada, preservando
+  saída JSON integral. Novo SHA exige novamente os gates obrigatórios.
+- Leads: 80 recortes SQL passaram; fixture de 5000 registros passou de cinco
+  consultas/2936263 bytes para uma/31317 bytes, com cinquenta linhas iniciais.
+- A checagem operacional foi corrigida: o ambiente efetivo do Next contém a
+  conexão aprovada. Três consultas passaram no schema real PostgreSQL 17.11 por
+  EXPLAIN sem ANALYZE em READ ONLY, sem exportar registros ou alterar dados.
+
 ## 2026-11-02 — Resumos compactos, paginação e prova SQL do handoff
 
 - Agendamentos mantém a engine local sobre resumo sem perda e entrega cinquenta

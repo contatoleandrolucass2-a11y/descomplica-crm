@@ -56,18 +56,23 @@ export function projectionDefinition(source) {
   return matches[0][0];
 }
 
-export function temporaryDefinition(definition, name, noSort = false) {
-  assert.ok(["appointments_baseline", "appointments_no_sort"].includes(name));
+export function temporaryDefinition(definition, name, setBased = false) {
+  assert.ok(["appointments_baseline", "appointments_set_based_alternative"].includes(name));
   let result = definition.replace(
     "create or replace function private.project_crm_appointments_analysis(",
     `create function pg_temp.${name}(`,
   );
-  if (noSort) {
-    assert.equal(result.split("jsonb_agg(f order by f)").length, 2);
-    assert.equal(result.split("'-1'::jsonb)) order by f)").length, 2);
-    result = result
-      .replace("jsonb_agg(f order by f)", "jsonb_agg(f)")
-      .replace("'-1'::jsonb)) order by f)", "'-1'::jsonb)))");
+  if (setBased) {
+    const membership = `      where (p_can_rank or v_key not in ('developments','stores'))
+        and exists (select 1 from jsonb_array_elements(v_facts) f
+          where (f->>v_position)::int = labels.ordinality - 1)`;
+    const joined = `      join (
+        select distinct (f->>v_position)::int as original
+        from jsonb_array_elements(v_facts) f
+      ) used on used.original = labels.ordinality - 1
+      where (p_can_rank or v_key not in ('developments','stores'))`;
+    assert.equal(result.split(membership).length, 2);
+    result = result.replace(membership, joined);
   }
   return result;
 }
@@ -129,8 +134,8 @@ begin
   v_start := clock_timestamp();
   case p_variant
     when 'baseline' then v_result := pg_temp.appointments_baseline(p_payload,p_can_rank);
-    when 'no_sort' then v_result := pg_temp.appointments_no_sort(p_payload,p_can_rank);
-    when 'set_based' then v_result := private.project_crm_appointments_analysis(p_payload,p_can_rank);
+    when 'candidate' then v_result := private.project_crm_appointments_analysis(p_payload,p_can_rank);
+    when 'set_based_alternative' then v_result := pg_temp.appointments_set_based_alternative(p_payload,p_can_rank);
     else raise exception 'unknown benchmark variant';
   end case;
   v_duration := extract(epoch from (clock_timestamp()-v_start))*1000;
@@ -174,7 +179,7 @@ export async function benchmark(client) {
     report.postgres = installed.rows[0].version;
     report.hashes.installedBody = hash(installed.rows[0].prosrc);
     await client.query(temporaryDefinition(baseline, "appointments_baseline"));
-    await client.query(temporaryDefinition(baseline, "appointments_no_sort", true));
+    await client.query(temporaryDefinition(baseline, "appointments_set_based_alternative", true));
     await client.query(measurementFunction);
     for (const [rows, labels] of [
       [5000, 30],
@@ -190,14 +195,14 @@ export async function benchmark(client) {
           canRank,
           payloadHash: hash(serialized),
           firstCallMs: {},
-          warmMs: { baseline: [], no_sort: [], set_based: [] },
+          warmMs: { baseline: [], candidate: [], set_based_alternative: [] },
         };
         let expected;
         for (let repetition = 0; repetition < 4; repetition++) {
           const order =
             repetition % 2
-              ? ["set_based", "no_sort", "baseline"]
-              : ["baseline", "no_sort", "set_based"];
+              ? ["set_based_alternative", "candidate", "baseline"]
+              : ["baseline", "candidate", "set_based_alternative"];
           for (const variant of order) {
             const result = await client.query(
               "select pg_temp.measure_appointments_projection($1,$2::jsonb,$3) as measurement",
@@ -218,11 +223,11 @@ export async function benchmark(client) {
     }
     report.equivalent = true;
     report.observations = {
-      noSortLowerWarmMedianInEveryScenario: report.scenarios.every(
-        (s) => s.warmMedianMs.no_sort < s.warmMedianMs.baseline,
+      candidateLowerWarmMedianInEveryScenario: report.scenarios.every(
+        (s) => s.warmMedianMs.candidate < s.warmMedianMs.baseline,
       ),
-      setBasedLowerWarmMedianInEveryScenario: report.scenarios.every(
-        (s) => s.warmMedianMs.set_based < s.warmMedianMs.baseline,
+      setBasedAlternativeLowerWarmMedianInEveryScenario: report.scenarios.every(
+        (s) => s.warmMedianMs.set_based_alternative < s.warmMedianMs.baseline,
       ),
       automaticPromotion: false,
     };
