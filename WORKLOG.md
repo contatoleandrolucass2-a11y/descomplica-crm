@@ -7,8 +7,10 @@
 - QA isolada de componentes/CSS reais:27/27 cenários, três temas, cards269/299/
   500/1205 e viewports390/844/1440. Antes cortava até3,695px; depois0px,
   com desalinhamento máximo0,014757px, sem erros JS ou tráfego externo.
-  Inclui seis casos de largura fixa móvel real. CI, Next e smoke publicados
-  seguem pendentes para esta margem; fonte do comparativo e contratos inalterados.
+  Inclui seis casos de largura fixa móvel real. PR463/CI main0dab1578 aprovados;
+  publicado em01/11 às23:50BRT. Smoke do CSS Next compilado confirmou corte0px
+  e alinhamento0,006253px. Cópia removida; reload nos dois navegadores manteve
+  os28originais com as mesmas larguras, alturas e posições. Prints locais salvos.
 
 ## 2026-11-01 — Comparativo de linhas durante arraste
 
@@ -26,7 +28,7 @@
   publicado em01/11 às21:38BRT, sem migration ou dados reescritos.
 - Smoke real: canto e arraste de card/gráfico line no Chrome e no celular simulado,
   atualização cruzada, rotação nos dois sentidos, navegação e nova aba passaram.
-  Margem do rótulo31 em largura299px corrigida no CSS, aguardando publicação.
+  Margem do rótulo31 em largura299px publicada e conferida no site.
 
 ## 2026-11-01 — Calendário, vendas e comparativos de Agendamentos
 
