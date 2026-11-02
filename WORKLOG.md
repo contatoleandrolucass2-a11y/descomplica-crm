@@ -10661,3 +10661,10 @@ Candidato isolado a partir de 44707e359c99eabfafa2f37489062d9d87540522. As nove 
 Foram preparados a rota assinada /webhooks/meta e o worker supervisionado na mesma imagem, com configuração separada da credencial de métricas Meta Ads. A substituição não altera inscrições do C2S. Os gates do candidato e a validação visual autenticada ainda estão em andamento; esta nota não comprova publicação ou entrega real da Meta.
 
 Validação local do candidato Lead+: build Next e tipos aprovados, lint sem erros, formatação aprovada, catálogo de 49 páginas e inventário de 91 rotas conferidos, Gitleaks sem achados. A suíte completa executada passou com 4577 testes Vitest e 727 testes Node, preservados os skips já previstos para ambiente/CI. Testes adicionais focados verificam guards granulares, aposentadoria das ações legadas e supervisão de worker. A montagem standalone local importou o runtime do worker sem abrir conexão ao banco. Falta CI do SHA final, prova da imagem e validação visual autenticada; não foi promovida imagem à VPS.
+
+### Revisão do candidato de leitura (PR469)
+
+- Fonte indisponível mantida como indisponível também nos novos rankings e vencidos;
+  65 testes pertinentes aprovados após correção.
+- Migration20261102175113 autorizada pelo usuário após CI verde. Preflight MCP
+  do projeto confirmado:2perfis, máximo29cards, nenhum acima47. Sem aplicação ainda.

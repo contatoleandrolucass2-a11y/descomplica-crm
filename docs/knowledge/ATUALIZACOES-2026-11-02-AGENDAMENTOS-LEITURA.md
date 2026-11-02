@@ -48,3 +48,19 @@ Revisão independente somente leitura não demonstrou vulnerabilidade; constatou
 que pgTAP cobre helper/ACL/limites, sem provar concorrência de produção.
 Aplicação remota ainda não autorizada. Exige backup e cliente/rollback compatível
 com métricas novas. Não reverter removendo cards como efeito incidental.
+
+## Autorização e revisão final do candidato
+
+PR469 aberto. Usuário autorizou explicitamente aplicar em produção a migration
+20261102175113 após CI verde, incluindo backup e expansão dos layouts existentes.
+A aprovação não se estende a outras migrations. Preflight observacional MCP
+confirmou projeto descomplica-crm-production/hnncxuerlcsaahdxoswb, PostgreSQL17.6,
+2perfis de Agendamentos, máximo29cards e nenhum acima47; nenhum dado alterado.
+
+Revisão final corrigiu a apresentação de fonte indisponível nos novos rankings e
+na tabela de vencidos, preservando distinção de ausência e vazio.65testes de
+análise/renderização/rankings passaram após a correção. CI anterior do mesmo PR
+foi substituída pelo candidato atualizado; resultados do SHA anterior não serão
+usados para aprovar publicação do novo. A geometria atual de29cards foi guardada
+localmente sem conteúdo de clientes para comparação posterior; a cópia já presente
+não pertence a este teste e não será excluída.
