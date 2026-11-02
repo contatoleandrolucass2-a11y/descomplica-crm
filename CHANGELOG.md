@@ -1,5 +1,13 @@
 # Changelog
 
+- Unifica a validação visual por impacto, sem aprovar verificações não executadas;
+  preserva gates de aplicação e separa o fechamento documental no main.
+- Agendamentos recebe perfil autorizado desde a primeira renderização e relê
+  a versão ao retornar ao canal. Leituras históricas são paralelas e a leitura
+  consolidada tem rollout explícito, desligado até aplicação autorizada.
+- Metas zero permanecem distintas de ausência. Fontes comerciais parciais ou
+  inválidas não habilitam metas; logs opcionais não incluem dados do CRM.
+
 - Reduz o grafo JavaScript inicial de Leads e Investidor com módulos sob demanda,
   preservando sessão, conteúdo e cálculos. Consultas de Leads recebem escopo
   autorizado e dashboard agregado, sem mudar o banco operacional.

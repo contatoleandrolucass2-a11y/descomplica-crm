@@ -44,9 +44,14 @@ describe("release-candidate migration train", () => {
 
     expect(workflow).toContain("fetch-depth: 0");
     expect(workflow).toContain("id: documentation_source_scope");
-    expect(workflow).toContain("git diff --name-only -z HEAD^ HEAD");
-    expect(workflow).toContain("lib/archive-investor/*");
-    expect(workflow).toContain("scripts/verify-documentation-sources.mjs");
+    expect(workflow).toContain("node scripts/ci/documentation-source-scope.mjs");
+    const sourceScope = await readFile(
+      path.join(repositoryRoot, "scripts/ci/documentation-source-scope.mjs"),
+      "utf8",
+    );
+    expect(sourceScope).toContain('git(["merge-base", base, head])');
+    expect(sourceScope).toContain('"--no-renames"');
+    expect(sourceScope).toContain("lib\\/archive-investor\\/");
     expect(workflow).toContain("if: steps.documentation_source_scope.outputs.required == 'true'");
     expect(
       workflow.match(
@@ -58,18 +63,18 @@ describe("release-candidate migration train", () => {
     );
   });
 
-  it("keeps a unique, ordered 98-version manifest", async () => {
+  it("keeps a unique, ordered 99-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(98);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(98);
+    expect(migrations).toHaveLength(99);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(99);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-44)).toEqual([
+    expect(migrations.slice(-45)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -114,9 +119,10 @@ describe("release-candidate migration train", () => {
       "20261031055824_appointments_profile_conflict_http.sql",
       "20261031184038_appointments_bar_max_height_pixels.sql",
       "20261101115602_appointments_allow_card_copies.sql",
+      "20261102120809_appointments_goal_range.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261101115602_appointments_allow_card_copies.sql");
+    expect(migrations.at(-1)).toBe("20261102120809_appointments_goal_range.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -148,8 +154,8 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.files).toBe(44);
-    expect(plan.tests).toBe(2360);
+    expect(plan.files).toBe(45);
+    expect(plan.tests).toBe(2373);
   });
 
   it("keeps PL/pgSQL CASE layout limits parenthesized as expressions", async () => {
@@ -505,7 +511,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 2360;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 2373;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

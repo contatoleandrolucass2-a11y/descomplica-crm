@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-11-02 — Integração do handoff e gates de entrega
+
+- Plano visual comum entre classificador, executor e agregador, com resultados
+  explícitos; referências intencionais, CI documental não publicável e caches.
+  Cadência e cobertura da matriz de autorização preservadas.
+- Agendamentos paraleliza leituras, valida snapshot após metas e prepara RPC
+  mensal aditiva com treze assertions. Flag desligada por padrão. Canvas recebe
+  perfil autorizado no HTML inicial, releitura por canal e controle de versão.
+- Logs opcionais contêm apenas tempos agregados. Etapas distinguem zero de
+  ausência e recebem títulos específicos; fonte parcial não habilita metas.
+- Revisão independente e testes focados descritos no
+  [registro canônico](docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-HANDOFF.md).
+  CI ampla do candidato coordenado ainda será executada. Meta Ads permanece
+  excluído; Repasse retirado pelo usuário e sem diff.
+
 ## 2026-11-02 — Checkpoint de Leads e simuladores do handoff
 
 - Leads divide famílias e aplica escopo/agregados SQL. Dashboard não precisa ler

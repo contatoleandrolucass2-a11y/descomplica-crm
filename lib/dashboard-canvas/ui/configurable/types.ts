@@ -68,6 +68,14 @@ export type ConfigurableDashboardRenderer = (
 ) => ReactNode;
 
 export interface ConfigurableDashboardCanvasProps {
+  /** Authorized server read for this exact page/scope, never a permission cache. */
+  initialProfileState?:
+    | {
+        pageKey: string;
+        scopeKey: string | null;
+        profiles: import("./configurable-dashboard-canvas").RemoteDashboardProfile[];
+      }
+    | undefined;
   initialCards: readonly DashboardCard[];
   catalog: ConfigurableDashboardCatalog;
   compatibility?: ConfigurableDashboardCompatibility | undefined;

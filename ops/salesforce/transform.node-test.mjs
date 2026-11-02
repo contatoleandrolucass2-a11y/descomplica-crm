@@ -118,9 +118,17 @@ test("uses approved folders only in ranking and hashes stable Salesforce contact
 
 test("is deterministic for the same request and accepts goals only from input", () => {
   const input = fixture();
-  input.goals = {
-    all: { opportunities: { month: 10, week: 3, today: 1 } },
-  };
+  input.goals = Object.fromEntries(
+    ["all", "with_canal_imob", "without_canal_imob"].map((view) => [
+      view,
+      Object.fromEntries(
+        ["opportunities", "appointments", "visits", "folders", "sales"].map((stage) => [
+          stage,
+          { month: 10, week: 3, today: 1 },
+        ]),
+      ),
+    ]),
+  );
   const first = buildSalesforceSnapshot(input);
   const second = buildSalesforceSnapshot(input);
   assert.deepEqual(first, second);

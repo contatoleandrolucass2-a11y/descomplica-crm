@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { forbidden, notFound } from "next/navigation";
 
 import { getAuthorizedDashboardViews } from "@/lib/authorization/dashboard-views";
@@ -23,6 +24,10 @@ import { CRM_STAGES, getCrmStage, type CrmStage } from "@/lib/crm/stages/catalog
 import { buildStageComparisons, type StageComparison } from "@/lib/crm/stages/presentation";
 import { loadAppointmentsReadModel } from "@/lib/crm/stages/data";
 import { saoPauloDate } from "@/lib/crm/stages/appointments";
+import { measureCrmPhase } from "@/lib/crm/performance";
+import { listDashboardProfiles } from "@/lib/dashboard-canvas/persistence/server";
+import { normalizeDashboardCards } from "@/lib/dashboard-canvas/state/migrations";
+import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 import { AppointmentsDashboard } from "../_components/AppointmentsDashboard";
 
@@ -214,7 +219,7 @@ function comparisonColumns(
         if (!dashboard.goalsAvailable) {
           return <UnavailableValue reason="A fonte oficial de metas não está disponível." />;
         }
-        return row.goal !== null && row.goal > 0 ? (
+        return row.goal !== null && row.goal >= 0 ? (
           numberFormatter.format(row.goal)
         ) : (
           <UnavailableValue reason="Não existe meta definida para esta janela." />
@@ -274,7 +279,7 @@ function StageComposition({
     dashboard && metric
       ? availableCommercialValue(dashboard.goalsAvailable, metric[periodConfig.goalField])
       : null;
-  const goal = sourceGoal !== null && sourceGoal > 0 ? sourceGoal : null;
+  const goal = sourceGoal !== null && sourceGoal >= 0 ? sourceGoal : null;
   const progress = current === null || goal === null ? null : calculateProgress(current, goal);
   const gap = current === null || goal === null ? null : Math.max(goal - current, 0);
   const stageIndex = CRM_STAGES.findIndex((item) => item.slug === stage.slug);
@@ -322,10 +327,10 @@ function StageComposition({
             {GOALS_UNAVAILABLE_LABEL}. Realizados continuam visíveis; gauge, meta e gap ficam
             indisponíveis até existir uma fonte oficial segura.
           </p>
-        ) : sourceGoal !== null && sourceGoal <= 0 ? (
+        ) : sourceGoal === 0 ? (
           <p className="sr-only" role="status">
-            Meta não definida para o período. O snapshot trouxe meta igual a zero; esse valor não é
-            tratado como alvo válido nem como progresso zero.
+            Meta cadastrada igual a zero. O valor e o gap permanecem visíveis; o progresso
+            percentual é indisponível porque o denominador é zero.
           </p>
         ) : null}
 
@@ -353,7 +358,7 @@ function StageComposition({
                     <dt>Gap matemático</dt>
                     <dd>
                       {gap === null ? (
-                        <UnavailableValue reason="O gap exige realizado e meta oficial maior que zero." />
+                        <UnavailableValue reason="O gap exige realizado e meta oficial cadastrada." />
                       ) : (
                         numberFormatter.format(gap)
                       )}
@@ -473,6 +478,15 @@ export function generateStaticParams() {
   return CRM_STAGES.map((stage) => ({ stage: stage.slug }));
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ stage: string }>;
+}): Promise<Metadata> {
+  const stage = getCrmStage((await params).stage);
+  return { title: stage ? `${stage.label} | Descomplica CRM` : "Etapas | Descomplica CRM" };
+}
+
 export default async function StagePage({
   params,
   searchParams,
@@ -483,7 +497,10 @@ export default async function StagePage({
   const [{ stage: slug }, query] = await Promise.all([params, searchParams]);
   const stage = getCrmStage(slug);
   if (!stage) notFound();
-  const authorization = await enforcePageAccess(`/app/etapas/${stage.slug}`);
+  const route = stage.key === "appointments" ? "appointments" : "stages";
+  const authorization = await measureCrmPhase(route, "authorization", () =>
+    enforcePageAccess(`/app/etapas/${stage.slug}`),
+  );
 
   const authorizedViews = getAuthorizedDashboardViews(authorization.permissions);
   if (authorizedViews.length === 0) forbidden();
@@ -491,11 +508,29 @@ export default async function StagePage({
   const view: DashboardViewKey = isDashboardView(query.view) ? query.view : authorizedViews[0]!;
   const period: DashboardPeriodKey = isDashboardPeriod(query.period) ? query.period : "month";
   if (stage.key === "appointments") {
-    const appointments = await loadAppointmentsReadModel(view);
+    const [appointments, profileResult] = await Promise.all([
+      measureCrmPhase("appointments", "loader", () => loadAppointmentsReadModel(view)),
+      // The page guard above and the canonical RPC both authorize this read.
+      // Failure retains the existing client recovery/cache behavior.
+      listDashboardProfiles("crm.stage.appointments", "channel.house").catch(() => null),
+    ]);
+    const initialProfileState =
+      profileResult?.data && !profileResult.error
+        ? {
+            pageKey: "crm.stage.appointments",
+            scopeKey: "channel.house",
+            profiles: profileResult.data.map((profile) => ({
+              ...profile,
+              userId: authorization.userId,
+              cards: normalizeDashboardCards(profile.cards, APPOINTMENTS_CARD_LAYOUT_POLICY),
+            })),
+          }
+        : undefined;
     return (
       <main className={styles.canvasMain}>
         <AnalyticsCanvas kind="stage">
           <AppointmentsDashboard
+            initialProfileState={initialProfileState}
             calendarDate={saoPauloDate(new Date().toISOString())}
             analysis={appointments.analysis}
             brokerRoster={appointments.brokerRoster}
@@ -520,7 +555,9 @@ export default async function StagePage({
       item.key === stage.key ||
       pages.some((page) => page.path === `/app/etapas/${item.slug}`),
   ).map((item) => item.key);
-  const result = await loadStageReadModel([view], readableStages);
+  const result = await measureCrmPhase("stages", "loader", () =>
+    loadStageReadModel([view], readableStages),
+  );
 
   return (
     <StageComposition

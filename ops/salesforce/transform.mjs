@@ -195,14 +195,31 @@ function emptyGoal() {
   return { month: 0, week: 0, today: 0 };
 }
 
+function validateGoals(goals) {
+  if (goals == null) return false;
+  // The snapshot has a single availability flag. A partial source must not
+  // advertise missing cells as configured zero targets for another view/stage.
+  if (typeof goals !== "object" || Array.isArray(goals)) throw new Error("invalid goals source");
+  for (const view of VIEW_KEYS) {
+    for (const stage of STAGE_KEYS) {
+      const goal = goals[view]?.[stage];
+      if (
+        !goal ||
+        ["month", "week", "today"].some(
+          (period) =>
+            typeof goal[period] !== "number" || !Number.isFinite(goal[period]) || goal[period] < 0,
+        )
+      )
+        throw new Error("incomplete or invalid goals source");
+    }
+  }
+  return true;
+}
+
 function goalFor(goals, viewKey, stageKey) {
-  const goal = goals?.[viewKey]?.[stageKey];
-  if (!goal) return emptyGoal();
-  return {
-    month: Math.max(0, Number(goal.month) || 0),
-    week: Math.max(0, Number(goal.week) || 0),
-    today: Math.max(0, Number(goal.today) || 0),
-  };
+  if (goals == null) return emptyGoal();
+  const goal = goals[viewKey][stageKey];
+  return { month: goal.month, week: goal.week, today: goal.today };
 }
 
 function makeMetric(viewKey, stageKey, records, referenceDate, goals) {
@@ -368,6 +385,7 @@ export function buildSalesforceSnapshot({
   if (!/^\d{4}-\d{2}-\d{2}T/.test(generatedAt)) throw new Error("invalid generated timestamp");
   if (!/^[0-9a-f-]{36}$/i.test(requestId)) throw new Error("invalid request id");
 
+  const goalsAvailable = validateGoals(goals);
   const { reports, duplicates } = normalizeReports(rawReports);
   const imobAccounts = new Set(
     reports.imobAccounts.map((account) => fold(account.name)).filter(Boolean),
@@ -413,7 +431,7 @@ export function buildSalesforceSnapshot({
       generatedAt,
       timezone: "America/Sao_Paulo",
       source: "Salesforce Analytics Reports API v61 via n8n",
-      goalsAvailable: Boolean(goals),
+      goalsAvailable,
       views,
       metrics,
       topDevelopments: top,
@@ -511,7 +529,7 @@ export function buildSalesforceSnapshot({
         (name) => !activeBrokerNames.has(name),
       ).length,
     },
-    goals: goals ? "provided" : "defaulted_to_zero",
+    goals: goalsAvailable ? "provided" : "unavailable_numeric_placeholders",
     roulette: "source_unavailable_defaulted_to_zero",
   };
 

@@ -14,7 +14,9 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # New integration commits must not cancel the exact main candidate while its
+  # release gates run. PR supersession remains local to that PR's concurrency group.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   validate:
@@ -24,6 +26,7 @@ jobs:
       documentation_only: ${{ steps.change_scope.outputs.documentation_only }}
       visual_mode: ${{ steps.visual_scope.outputs.visual_mode }}
       visual_routes: ${{ steps.visual_scope.outputs.visual_routes }}
+      visual_plan: ${{ steps.visual_scope.outputs.visual_plan }}
 
     steps:
       - name: Checkout
@@ -31,42 +34,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Detect documentation source verification scope
-        id: documentation_source_scope
-        shell: bash
-        run: |
-          set -euo pipefail
-          verification_required=false
-          while IFS= read -r -d '' changed_file; do
-            case "$changed_file" in
-              lib/archive-investor/* | \
-                scripts/verify-documentation-sources.mjs | \
-                tests/documentation-sources.test.ts | \
-                tests/associative-documentation-parity.test.ts | \
-                docs/runbooks/documentation-fees-sp.md | \
-                package.json | \
-                pnpm-lock.yaml)
-                verification_required=true
-                break
-                ;;
-            esac
-          done < <(git diff --name-only -z HEAD^ HEAD)
-          echo "required=$verification_required" >> "$GITHUB_OUTPUT"
-          if [[ "$verification_required" == "false" ]]; then
-            echo "Documentation fee sources are unchanged; live source verification is not required."
-          fi
-
       - name: Node.js 24
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
 
-      - name: Classify complete pull request scope
+      - name: Detect documentation source verification scope
+        id: documentation_source_scope
+        run: node scripts/ci/documentation-source-scope.mjs
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+
+      - name: Classify complete candidate scope
         id: change_scope
         run: node scripts/ci/documentation-scope.mjs
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
 
       - name: Classify authenticated visual impact
         id: visual_scope
@@ -81,6 +68,16 @@ jobs:
           npm install --global corepack@0.35.0
           corepack enable
           corepack prepare pnpm@11.20.0 --activate
+
+      - name: Locate pnpm store
+        id: pnpm_store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache verified dependency store
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ${{ steps.pnpm_store.outputs.path }}
+          key: ${{ runner.os }}-node24-pnpm11-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml') }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -147,8 +144,24 @@ jobs:
           corepack enable
           corepack prepare pnpm@11.20.0 --activate
 
+      - name: Locate pnpm store
+        id: pnpm_store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache verified dependency store
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ${{ steps.pnpm_store.outputs.path }}
+          key: ${{ runner.os }}-node24-pnpm11-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml') }}
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Cache pinned Chromium binaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-node24-chromium-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml') }}
 
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
@@ -228,6 +241,7 @@ jobs:
         run: pnpm qa:visual:authenticated
         env:
           QA_ALLOW_MISSING_PRIVATE_INVENTORY: "true"
+          QA_VISUAL_PLAN: ${{ needs.validate.outputs.visual_plan }}
 
       - name: Focused responsive, theme, zoom and keyboard matrix
         if: needs.validate.outputs.visual_mode == 'focused'
@@ -235,6 +249,7 @@ jobs:
         env:
           QA_ALLOW_MISSING_PRIVATE_INVENTORY: "true"
           QA_VISUAL_ROUTES: ${{ needs.validate.outputs.visual_routes }}
+          QA_VISUAL_PLAN: ${{ needs.validate.outputs.visual_plan }}
 
       - name: Record dedicated visual coverage
         if: needs.validate.outputs.visual_mode == 'none'
@@ -247,6 +262,7 @@ jobs:
           name: authenticated-visual-candidate-${{ github.sha }}
           path: |
             test-results/authenticated-visual
+            test-results/authorization-matrix
             test-results/associative-page-guide
             test-results/dashboard-report
             output/playwright/connected-systems
@@ -277,6 +293,16 @@ jobs:
           npm install --global corepack@0.35.0
           corepack enable
           corepack prepare pnpm@11.20.0 --activate
+
+      - name: Locate pnpm store
+        id: pnpm_store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache verified dependency store
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ${{ steps.pnpm_store.outputs.path }}
+          key: ${{ runner.os }}-node24-pnpm11-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml') }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

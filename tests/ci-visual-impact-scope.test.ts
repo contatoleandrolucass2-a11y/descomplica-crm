@@ -19,6 +19,7 @@ function fixture() {
   git("init", "--initial-branch=main");
   git("config", "user.name", "CI fixture");
   git("config", "user.email", "ci@example.invalid");
+  git("config", "core.autocrlf", "false");
   git("config", "core.hooksPath", path.join(cwd, "no-hooks"));
   const put = (file: string, value = "fixture\n") => {
     mkdirSync(path.dirname(path.join(cwd, file)), { recursive: true });
@@ -31,7 +32,7 @@ function fixture() {
   };
   put("README.md");
   const base = commit();
-  return { cwd, put, commit, base };
+  return { cwd, git, put, commit, base };
 }
 
 describe("authenticated visual impact scope", () => {
@@ -58,6 +59,19 @@ describe("authenticated visual impact scope", () => {
       routes: ["/app/ranking", "/app/canal-de-parcerias"],
       reason: "mapped-routes",
     });
+  });
+
+  it("keeps exclusive appointments styles and components on their own route", () => {
+    expect(
+      classifyVisualPaths([
+        "app/(protected)/app/etapas/_components/AppointmentsDashboard.module.css",
+        "app/(protected)/app/etapas/_components/AppointmentsComparison.tsx",
+        "lib/crm/stages/appointments.ts",
+      ]),
+    ).toMatchObject({ mode: "focused", routes: ["/app/etapas/agendamentos"] });
+    expect(classifyVisualPaths(["app/(protected)/app/etapas/[stage]/page.tsx"]).routes).toEqual(
+      authenticatedVisualRoutes.filter((route: string) => route.startsWith("/app/etapas/")),
+    );
   });
 
   it.each([
@@ -93,6 +107,24 @@ describe("authenticated visual impact scope", () => {
       routes: [],
     });
   });
+
+  it("includes removals and both sides of renames in the complete impact", () => {
+    const f = fixture();
+    const file = "app/(protected)/app/etapas/_components/AppointmentsDashboard.module.css";
+    f.put(file);
+    const previous = f.commit();
+    f.git("rm", file);
+    const deleted = f.commit();
+    expect(
+      classifyVisualImpact({ event: "push", base: previous, head: deleted, cwd: f.cwd }),
+    ).toMatchObject({ mode: "focused", routes: ["/app/etapas/agendamentos"] });
+    f.put(file);
+    const restored = f.commit();
+    f.git("mv", file, "unknown-component.css");
+    expect(
+      classifyVisualImpact({ event: "pull_request", base: restored, head: f.commit(), cwd: f.cwd }),
+    ).toMatchObject({ mode: "full", reason: "unmapped:unknown-component.css" });
+  }, 15_000);
 
   it("forces a complete matrix for scheduled, manual or invalid revisions", () => {
     expect(classifyVisualImpact({ event: "schedule" })).toMatchObject({ mode: "full" });

@@ -2230,6 +2230,8 @@ function runVisualHarness({ origin, apiUrl, publishableKey, account, readerAccou
       "OFFICIAL_SIMULATOR_RUNTIME_MODE",
       "OFFICIAL_SIMULATOR_ENABLED_KEYS",
       "QA_LOCAL_DIAGNOSTICS",
+      "QA_VISUAL_ROUTES",
+      "QA_VISUAL_PLAN",
     ]),
     QA_AUTH_ORIGIN: origin,
     QA_AUTH_EMAIL: account.email,

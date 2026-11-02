@@ -354,9 +354,15 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain(
       '["/api/inventory", "/api/inventory/snapshot"].includes(requestUrl.pathname)',
     );
-    expect(script).toContain(
-      'simulatorValidation = await checkSimulatorValidation(page, origin, httpCredentials);\n          currentStage = "tabelao-validation";\n          tabelaoValidation = await checkTabelaoValidation(page, origin);\n          await stopSyntheticInventory();\n          currentStage = "direct-table-validation"',
-    );
+    expect(script).toContain('"simulatorValidation",');
+    expect(script).toContain('"tabelaoValidation",');
+    expect(/await runFunctional\(\s*"directTableValidation",/.test(script)).toBe(true);
+    expect(
+      script.indexOf(
+        "await stopSyntheticInventory();",
+        script.indexOf('currentStage = "tabelao-validation"'),
+      ),
+    ).toBeLessThan(script.indexOf('currentStage = "direct-table-validation"'));
     expect(script).toContain(
       'functionalValidation: remoteHomologation\n    ? "protected homologation snapshot without persisted commercial fields"',
     );

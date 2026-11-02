@@ -47,16 +47,18 @@ outro chat leu a instrução: agentes devem consultar a versão vigente.
 ### CI documental autorizada em 29/10/2026
 
 O pedido explícito de corrigir desperdícios neste processo autorizou uma faixa
-rápida somente para pull requests cujo diff inteiro altere apenas WORKLOG.md,
+rápida para candidatos cujo diff inteiro altere apenas WORKLOG.md,
 CHANGELOG.md ou Markdown diretamente em docs/knowledge. Formatação e testes de
 conhecimento, inventário e classificação continuam obrigatórios. Os jobs pesados
 ficam explicitamente ignorados nesses PRs, sem fabricar resultados de execução.
 
 AGENTS, skills, runbooks, scripts, workflows, dependências, código, arquivos
 desconhecidos, symlinks e falhas de classificação exigem CI completa. Todos os
-pushes em main permanecem completos, inclusive os documentais. Assim, o guard
-de produção continua exigindo os quatro jobs aprovados no SHA exato; a faixa
-rápida de PR não é prova de candidato publicável. Esta entrega altera o próprio
+pushes de aplicação em main permanecem completos. O handoff explícito de
+02/11/2026 estende a faixa documental conservadora ao diff completo do push
+em main, sem gerar imagem nem aprovar candidato de aplicação. O guard
+de produção continua exigindo os quatro jobs aprovados no SHA exato e rejeita
+o candidato documental; jobs ignorados não são aprovação. Esta entrega altera o próprio
 pipeline e por isso também exige CI completa.
 
 A matriz visual por impacto usa um classificador versionado e fail-closed. Rotas

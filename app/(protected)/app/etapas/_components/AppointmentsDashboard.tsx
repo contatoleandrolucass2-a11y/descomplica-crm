@@ -13,6 +13,7 @@ import {
 import { ArrowLeftRight, CalendarDays, X } from "lucide-react";
 
 import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configurable";
+import type { ConfigurableDashboardCanvasProps } from "@/lib/dashboard-canvas/ui/configurable/types";
 import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
 import { AppointmentsColumns as Columns } from "./AppointmentsColumns";
 import { AppointmentsComparison, DailyChartTypeControl } from "./AppointmentsComparison";
@@ -1195,6 +1196,7 @@ function lazyAppointmentComparison(
 
 export function AppointmentsDashboard({
   analysis,
+  initialProfileState,
   brokerRoster = null,
   generatedAt,
   calendarDate,
@@ -1207,6 +1209,7 @@ export function AppointmentsDashboard({
   canEditDashboard = false,
 }: {
   analysis: DashboardAnalysisSlice | null;
+  initialProfileState?: ConfigurableDashboardCanvasProps["initialProfileState"];
   brokerRoster?: AppointmentBrokerRosterEntry[] | null | undefined;
   generatedAt?: string | undefined;
   calendarDate?: string | undefined;
@@ -1224,6 +1227,9 @@ export function AppointmentsDashboard({
   const [monthChoice, setSelectedMonth] = useState("");
   const [yearChoice, setSelectedYear] = useState("");
   const [filters, setFilters] = useState<AppointmentFilters>({ channel: 1 });
+  // The server snapshot belongs to the initial visit only. Returning to House
+  // must read the latest version, including edits saved before switching scope.
+  const [initialProfileConsumed, setInitialProfileConsumed] = useState(false);
   const [periodLabel, setPeriodLabel] = useState<string>();
   const [selectedRow, setSelectedRow] = useState("");
   const [rowBaseFilters, setRowBaseFilters] = useState<AppointmentFilters | null>(null);
@@ -1409,6 +1415,7 @@ export function AppointmentsDashboard({
     key: K,
     value: AppointmentFilters[K],
   ) => {
+    if (key === "channel") setInitialProfileConsumed(true);
     setSelectedRow("");
     setRowBaseFilters(null);
     setFilters((current) => {
@@ -1422,6 +1429,7 @@ export function AppointmentsDashboard({
     key: K,
     value: AppointmentFilters[K] | undefined,
   ) => {
+    if (key === "channel" && value !== filters.channel) setInitialProfileConsumed(true);
     setSelectedRow("");
     setRowBaseFilters(null);
     setFilters((current) => {
@@ -2064,6 +2072,7 @@ export function AppointmentsDashboard({
       <ConfigurableDashboardCanvas
         key={canvasScopeKey}
         initialCards={APPOINTMENTS_CANVAS_DEFAULT_CARDS}
+        initialProfileState={initialProfileConsumed ? undefined : initialProfileState}
         catalog={APPOINTMENTS_CANVAS_CATALOG}
         compatibility={APPOINTMENTS_CANVAS_COMPATIBILITY}
         contentByMetricAndType={contentByMetricAndType}
