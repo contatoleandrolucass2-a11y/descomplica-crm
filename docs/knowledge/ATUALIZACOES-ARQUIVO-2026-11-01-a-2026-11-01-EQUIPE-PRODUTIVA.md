@@ -77,3 +77,19 @@
   desktop/celular, axe, teclado e zoom. Os 22 canvases históricos e suas baselines
   permanecem preservados. Verificação sintática e lint aprovados; execução remota
   isolada da nova CI ainda pendente.
+
+## Conciliação com o elenco filtrado
+
+- Revisão automática do PR465 identificou um P2 real: Ana atualmente no gerente A
+  com venda histórica do gerente B podia elevar a equipe B para 100%, embora
+  sua única corretora atual Bia não tivesse vendido. O mesmo cruzamento existia
+  nos outros numeradores. A revisão independente inicial não detectou o caso.
+- Reproduzido com quatro regressões vermelhas; corrigido na nova página com
+  interseção de broker_key entre atividade e o mesmo cadastro filtrado usado
+  pelo denominador. Homônimos permanecem indisponíveis por ambiguidade.
+  `analyzeAppointments` somente expõe `filteredBrokerRoster` no retorno; não
+  altera indicadores nem comportamento da página antiga.
+- Node24/Vitest: 68 testes aprovados nos cálculos novos e Agendamentos, incluindo
+  os quatro casos de troca de gerente, atividade sem filtro, atual e mista.
+  Lint dos três arquivos aprovado. Fonte: comentário da revisão do PR465 e
+  `tests/productive-team-analysis.test.ts`. Nova CI ainda necessária.

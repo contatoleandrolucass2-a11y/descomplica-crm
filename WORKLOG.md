@@ -20,6 +20,10 @@
   restauração. Entradas exatas atualizadas; 130 testes focados passaram.
   O contrato visual dedicado foi integrado à matriz autenticada, preservando
   os canvases e baselines anteriores. Nova CI e banco ainda pendentes.
+- Revisão do PR465 identificou atividade histórica fora do elenco filtrado.
+  Quatro regressões reproduziram 100% indevido antes e 0% correto após o ajuste;
+  68 testes de cálculo e regressão de Agendamentos passaram. A análise anterior
+  somente expõe o cadastro já filtrado; seus indicadores permanecem intactos.
 
 ## 2026-11-01 — Margem do comparativo em cards estreitos
 

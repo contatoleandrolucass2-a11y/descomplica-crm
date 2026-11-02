@@ -2,6 +2,8 @@
 
 - Adiciona Equipe Produtiva ao Dashboard: quatro indicadores de corretores únicos,
   filtros comerciais, período e acesso pela sidebar das páginas do funil.
+  Os quatro numeradores respeitam o mesmo cadastro filtrado do denominador,
+  inclusive quando o corretor mudou de gerente após uma atividade histórica.
 
 - Preserva o último rótulo do comparativo de Agendamentos em cards estreitos,
   mantendo os dias alinhados às três séries e a autonomia de tamanho.

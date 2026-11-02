@@ -63,6 +63,54 @@ const slice = (overrides: Partial<DashboardAnalysisSlice> = {}): DashboardAnalys
 });
 
 describe("productive team analysis", () => {
+  it.each(["appointments", "visits", "folders", "sales"] as const)(
+    "intersects %s activity with the current filtered roster after a manager change",
+    (stage) => {
+      const stages = ["appointments", "visits", "folders", "sales"] as const;
+      const stageIndex = stages.indexOf(stage);
+      const historical = slice({
+        appointments: [{ ...appointment(), salesManager: "Gerente B" }],
+        facts: [fact(stageIndex + 1, 0, "2026-11-02", 1, 1)],
+      });
+      const otherManager = analyzeProductiveTeam(historical, {
+        brokerRoster: roster,
+        filters: { manager: "Gerente B" },
+      }).cards[stageIndex];
+      expect(otherManager).toMatchObject({
+        productiveBrokers: 0,
+        brokerCount: 1,
+        percent: 0,
+        unavailableReason: null,
+      });
+      expect(
+        analyzeProductiveTeam(historical, { brokerRoster: roster }).cards[stageIndex],
+      ).toMatchObject({ productiveBrokers: 1, brokerCount: 2, percent: 50 });
+
+      const current = slice({ appointments: [appointment()], facts: [fact(stageIndex + 1)] });
+      expect(
+        analyzeProductiveTeam(current, { brokerRoster: roster, filters: { manager: "Gerente A" } })
+          .cards[stageIndex],
+      ).toMatchObject({ productiveBrokers: 1, brokerCount: 1, percent: 100 });
+
+      const mixed = slice({
+        appointments: [
+          ...historical.appointments!,
+          { ...appointment("Bia"), salesManager: "Gerente B" },
+        ],
+        facts: [...historical.facts, fact(stageIndex + 1, 1, "2026-11-02", 1, 1)],
+      });
+      expect(
+        analyzeProductiveTeam(mixed, { brokerRoster: roster, filters: { manager: "Gerente B" } })
+          .cards[stageIndex],
+      ).toMatchObject({
+        productiveBrokers: 1,
+        brokerCount: 1,
+        percent: 100,
+        unavailableReason: null,
+      });
+    },
+  );
+
   it("counts unique registered brokers instead of operations and preserves the appointment rule", () => {
     const input = slice();
     const result = analyzeProductiveTeam(input, { brokerRoster: roster });
@@ -106,6 +154,12 @@ describe("productive team analysis", () => {
       true,
     );
     const missing = analyzeProductiveTeam(slice());
+    expect(missing.cards[0]).toMatchObject({
+      productiveBrokers: 1,
+      brokerCount: 2,
+      percent: 50,
+      unavailableReason: null,
+    });
     expect(missing.cards[1]).toMatchObject({
       productiveBrokers: null,
       percent: null,

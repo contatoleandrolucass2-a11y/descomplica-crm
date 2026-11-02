@@ -67,6 +67,9 @@ export function analyzeProductiveTeam(
 ) {
   const appointments = analyzeAppointments(slice, { filters, month, brokerRoster });
   const brokerCount = appointments.brokerCount;
+  const filteredBrokerKeys = new Set(
+    (appointments.filteredBrokerRoster ?? []).map((broker) => broker.key),
+  );
   const rosterKeys = new Map<string, Set<string>>();
   for (const broker of brokerRoster ?? []) {
     const pair = identity(broker.owner);
@@ -156,10 +159,29 @@ export function analyzeProductiveTeam(
 
     let productiveBrokers: number;
     if (stage === "appointments") {
-      // Preserve the exact registeredBroker and detail-date rule of the card
-      // already shown on Agendamentos.
       if (appointments.productiveBrokers === null) return unavailable("unsupported-version");
-      productiveBrokers = appointments.productiveBrokers;
+      if (brokerRoster === null) {
+        // The snapshot's own registeredBroker flag and numeric denominator
+        // remain usable when no dimensional roster filtering is requested.
+        productiveBrokers = appointments.productiveBrokers;
+      } else {
+        // Activity retains its historical manager. Count only identities also
+        // present in the current roster that supplies this filtered denominator.
+        const productive = new Set<string>();
+        for (const appointment of appointments.details ?? []) {
+          if (
+            !("registeredBroker" in appointment) ||
+            !appointment.registeredBroker ||
+            !inPeriod(saoPauloDate(appointment.createdAt))
+          )
+            continue;
+          const keys = rosterKeys.get(identity(appointment.owner));
+          if (keys && keys.size > 1) return unavailable("ambiguous-broker");
+          const key = keys?.size === 1 ? [...keys][0]! : null;
+          if (key !== null && filteredBrokerKeys.has(key)) productive.add(key);
+        }
+        productiveBrokers = productive.size;
+      }
     } else {
       if (brokerRoster === null) return unavailable("missing-roster");
       if (filters.regionalManager && !appointments.regionalFactsAvailable)
@@ -179,7 +201,8 @@ export function analyzeProductiveTeam(
           continue;
         const keys = rosterKeys.get(identity(owner));
         if (keys && keys.size > 1) return unavailable("ambiguous-broker");
-        if (keys?.size === 1) productive.add([...keys][0]!);
+        const key = keys?.size === 1 ? [...keys][0]! : null;
+        if (key !== null && filteredBrokerKeys.has(key)) productive.add(key);
       }
       productiveBrokers = productive.size;
     }
