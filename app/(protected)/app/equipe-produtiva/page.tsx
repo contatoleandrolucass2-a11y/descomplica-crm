@@ -23,7 +23,12 @@ export default async function ProductiveTeamPage({
   return (
     <main className={analytics.canvasMain}>
       <AnalyticsCanvas kind="stage">
-        <ProductiveTeamDashboard {...data} calendarDate={saoPauloDate(new Date().toISOString())} />
+        <ProductiveTeamDashboard
+          key={view}
+          {...data}
+          initialChannel={view === "with_canal_imob" ? 0 : 1}
+          calendarDate={saoPauloDate(new Date().toISOString())}
+        />
       </AnalyticsCanvas>
     </main>
   );

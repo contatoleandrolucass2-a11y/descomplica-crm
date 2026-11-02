@@ -7,6 +7,7 @@
   A cobertura inclui acesso no banco e os cinco níveis equivalentes de zoom
   da matriz vigente, com a sidebar real.
   O contrato de navegação compartilhado inclui o novo destino do Dashboard.
+  A seleção Imob autorizada permanece correta mesmo sem coleta disponível.
 
 - Preserva o último rótulo do comparativo de Agendamentos em cards estreitos,
   mantendo os dias alinhados às três séries e a autonomia de tamanho.

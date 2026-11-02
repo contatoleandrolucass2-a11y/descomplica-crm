@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-11-02 — Evidências e bloqueio de Equipe Produtiva
+
+- Captura protegida 41385963470 aprovada: 242 cenários de tela/axe, navegação
+  compartilhada e contrato dedicado da página com seis telas e cinco zooms.
+  No candidato `cf284fac`, aplicação, banco, restauração e imagem passaram;
+  a comparação visual obrigatória ainda estava em execução na consulta final.
+- As referências Admin contêm diferenças anteriores à demanda (margens,
+  bordas e header), além das contagens afetadas pelo catálogo. Não há aprovação
+  para absorver essas divergências. Nenhum baseline foi substituído; integração
+  e publicação ficam bloqueadas até a resolução em demanda própria.
+- O estado sem coleta agora preserva o canal Imob autorizado e reinicia o
+  componente ao trocar a visão. Trinta testes focados passaram após esse ajuste;
+  o novo SHA precisa de sua própria CI. Nenhuma migration remota foi aplicada.
+
 ## 2026-11-01 — Equipe Produtiva
 
 - Nova página `/app/equipe-produtiva`, com permissão própria e item autorizado na

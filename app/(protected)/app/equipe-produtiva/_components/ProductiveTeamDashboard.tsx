@@ -44,14 +44,16 @@ export function ProductiveTeamDashboard({
   generatedAt,
   availableStages,
   calendarDate,
+  initialChannel,
 }: {
   analysis: DashboardAnalysisSlice | null;
   brokerRoster: AppointmentBrokerRosterEntry[] | null;
   generatedAt?: string | undefined;
   availableStages: readonly ProductiveTeamStage[];
   calendarDate: string;
+  initialChannel?: 0 | 1;
 }) {
-  const defaultChannel = analysis?.viewKey === "with_canal_imob" ? 0 : 1;
+  const defaultChannel = initialChannel ?? (analysis?.viewKey === "with_canal_imob" ? 0 : 1);
   const [filters, setFilters] = useState<AppointmentFilters>({ channel: defaultChannel });
   const initialMonth = (analysis?.referenceDate ?? calendarDate).slice(0, 7);
   const [month, setMonth] = useState(initialMonth);

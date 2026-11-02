@@ -99,4 +99,19 @@ describe("Equipe Produtiva presentation", () => {
     expect(markup).not.toContain("0%");
     expect(markup).not.toContain("0 de 0");
   });
+
+  it("keeps the authorized Imob channel selected while collection is absent", () => {
+    const markup = renderToStaticMarkup(
+      <ProductiveTeamDashboard
+        analysis={null}
+        brokerRoster={null}
+        availableStages={[]}
+        initialChannel={0}
+        calendarDate="2026-10-31"
+      />,
+    );
+    expect(markup).toMatch(/aria-pressed="true"[^>]*>Imob<\/button>/);
+    expect(markup).toMatch(/aria-pressed="false"[^>]*>House<\/button>/);
+    expect(markup).not.toContain("0%");
+  });
 });

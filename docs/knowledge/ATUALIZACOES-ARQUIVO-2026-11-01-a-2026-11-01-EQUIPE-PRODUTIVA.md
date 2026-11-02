@@ -172,3 +172,43 @@
   formatação e diff aprovados. Nenhum baseline nem funcionalidade de simulador
   foi alterado para liberar o gate. Capturas locais ignoradas em
   `test-results/equipe-produtiva-ci-34fc`. Nova CI ainda obrigatória.
+
+## Conferência final e bloqueio visual — 02/11/2026
+
+- PR465, candidato `cf284fac4bd586e42641ec46b8fedae6ead23493`: captura protegida
+  https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/41385963470
+  concluída com sucesso. Cobertura: 154 telas responsivas, 88 temas, 242 axe,
+  40 cenários de navegação e contrato dedicado Equipe Produtiva aprovado
+  (seis telas, teclado, cinco zooms equivalentes). Captura inclui estado sem
+  coleta; contagens preenchidas também têm provas unitárias e preview sintético.
+- Artefato13116736699, ZIP SHA256
+  `e447c21aef8a9c23c0b52bb4e4b9edb8f73bcf5f2f4020cc281c120bd7358df7`;
+  captura `18a5174686f8af51cdde28d2c137732bb7fcd5e1`, árvore limpa.
+  Cópia local ignorada: `test-results/equipe-produtiva-approved-cf`.
+- A comparação com referências aponta 88 imagens em oito rotas: cinco rotas
+  Dashboard afetadas e `/admin`, `/admin/paginas`, `/admin/usuarios`.
+  Revisão independente dos três pares Admin1440 constatou mudanças adicionais
+  de margens, bordas e header, inclusive em `/admin`, sem contador novo.
+  Contagens49→50 e nova permissão são dependências reais; essas outras mudanças
+  não estão justificadas por elas. Componentes Admin, ManagementCanvas,
+  ProtectedShell, globals e presentation não mudaram de `0dab1578` a `cf284fac`.
+  Não aprovar rebaseline Admin nem investigar/corrigir outra página neste chat.
+  Nenhum baseline alterado. Reavaliação exige demanda própria e evidência da
+  causa dessas divergências; gates continuam obrigatórios e bloqueiam publicação.
+- CI41385963459 aprovou validate, isolated-restore e promotable-image;
+  release-gates ainda comparava a matriz na consulta de encerramento. Aprovação
+  da captura funcional não equivale à aprovação dessa comparação visual.
+- Correção final limitada à página nova: canal inicial vem da visão autorizada
+  mesmo quando a análise está ausente; chave de visão reinicia o estado.
+  Trinta testes de apresentação, análise e contrato passaram localmente depois
+  do ajuste. Evidências de CI anteriores não aprovam automaticamente esse SHA.
+- Consulta observacional em 2026-11-02T04:38:28Z: fetch origin/main
+  `d4bb4d91b8a553ae2edf0eaeb876d21e2b59b361`; health público HTTP200, status ok,
+  versão `0dab1578063eece6b9b5c86fa184c722388578fb`.
+  Fonte: https://crm.descomplicapro.com.br/api/health. Demanda não integrada nem
+  publicada. Duas migrations remotas seguem sem aplicação e exigem autorização
+  específica conforme automatic-publication.md, além dos gates aprovados.
+- A API pública GitHub esgotou sua cota durante a espera. As conferências finais
+  de jobs/artefatos usaram o conector GitHub autenticado já disponível; nenhuma
+  conta ou permissão foi alterada. Empresa/Imob seguem sem denominador oficial
+  conciliável no cadastro atual; a página comunica indisponibilidade.
