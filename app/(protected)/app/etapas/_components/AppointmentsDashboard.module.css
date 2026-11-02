@@ -1244,7 +1244,7 @@
   display: grid;
   gap: 0.15rem;
 }
-.recencyManager small {
+.recencyOwner small {
   color: var(--analytics-muted);
   font-size: 0.62rem;
   font-variant-numeric: tabular-nums;
@@ -1695,12 +1695,27 @@
 .configurableCanvas :is(.canvasChart .cardBody, .recencyPanel .recencyList, .tableViewport) {
   overflow: auto;
   overscroll-behavior: contain;
-  scrollbar-width: none;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--analytics-cyan-strong) var(--analytics-surface-muted);
 }
 
 .configurableCanvas
   :is(.canvasChart .cardBody, .recencyPanel .recencyList, .tableViewport)::-webkit-scrollbar {
-  display: none;
+  width: 8px;
+  height: 8px;
+}
+
+.configurableCanvas
+  :is(.canvasChart .cardBody, .recencyPanel .recencyList, .tableViewport)::-webkit-scrollbar-thumb {
+  border: 2px solid var(--analytics-surface-muted);
+  border-radius: 8px;
+  background: var(--analytics-cyan-strong);
+}
+
+.configurableCanvas
+  :is(.canvasChart .cardBody, .recencyPanel .recencyList, .tableViewport)::-webkit-scrollbar-track {
+  background: var(--analytics-surface-muted);
 }
 
 .configurableCanvas .tableViewport th {
@@ -2179,13 +2194,29 @@
 }
 
 .recencyList {
+  display: flex;
+  flex-direction: column;
   align-content: start;
+  gap: 0.65rem;
 }
 
 .recencyList li {
   align-items: start;
-  min-height: 0;
+  flex: 0 0 auto;
+  min-height: 4.25rem;
   padding: 0.65rem 0.35rem;
+  line-height: 1.4;
+}
+
+.recencyOwner {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
+}
+
+.recencyOwner small {
+  font-size: calc(0.7rem * var(--dashboard-font-scale, 1));
+  line-height: 1.4;
 }
 
 .recencyLabels > :last-child,

@@ -1,5 +1,7 @@
 # Aprendizados e atualizacoes
 
+- Abertura das melhorias de leitura: [registro](ATUALIZACOES-2026-11-02-AGENDAMENTOS-LEITURA.md).
+
 ## 2026-11-02: handoff integrado e publicado
 
 PR467/main aa28d38e publicado em 17:03:30.921Z, CI41479050792 aprovada nos quatro

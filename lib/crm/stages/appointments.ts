@@ -796,5 +796,27 @@ export function analyzeAppointments(
     owners: ranking(owners),
     stores: ranking(stores),
     developments: slice.version === 2 ? ranking(developments) : null,
+    developmentRankings: (() => {
+      // Operational rows deliberately omit these dimensions. Use the authorized
+      // aggregate facts, never an inferred join between client identities.
+      if (filters.accountRanking || (filters.regionalManager && !regionalFactsAvailable))
+        return null;
+      const pdvs = new Map<string, number>();
+      const projects = new Map<string, number>();
+      for (const fact of sharedFacts) {
+        if (fact[0] !== 1 || !matchesReportingPeriod(fact[1])) continue;
+        add(pdvs, slice.dimensions.stores?.[fact[10] ?? -1] ?? "PDV não informado", fact[7]);
+        add(
+          projects,
+          slice.dimensions.developments[fact[6]] ?? "Empreendimento não informado",
+          fact[7],
+        );
+      }
+      return {
+        pdvs: slice.version >= 2 ? ranking(pdvs) : null,
+        projects: slice.version >= 2 ? ranking(projects) : null,
+        total: [...projects.values()].reduce((sum, value) => sum + value, 0),
+      };
+    })(),
   };
 }

@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-11-02 — Leitura e rankings de Agendamentos
+
+- Base main b93d3904, runtime aa28d38e; escopo exclusivo de Agendamentos.
+- Barras de rolagem internas restauradas; recência não comprime linhas e mostra
+  a data sob o responsável. Comparativo usa todos os dias válidos do filtro,
+  três séries e tooltip numérico. Feriados nacionais fixos têm círculo vermelho,
+  nome e explicação; pontos facultativos e feriados locais não são inferidos.
+- Rankings PDV/empreendimento usam dimensões distintas dos fatos autorizados,
+  em ordem decrescente, preservando indisponibilidade em filtros não mapeáveis.
+- Vencidos usam Data de comparecimento anterior ao dia civil de São Paulo e
+  Visita realizada Não; datas ausentes não são inferidas. Filtro antes de paginar
+  e exportar, sob os mesmos guards e snapshot; resumo não recebe detalhes privados.
+- Migration 20261102175113 preparada: três métricas e três cards ausentes nos
+  perfis salvos, sem apagar conteúdo ou alterar dimensões originais. Mantém
+  ordem relativa, incrementa versão e valida todos os documentos antes do UPDATE.
+  Não altera RLS, permissões ou RPCs. Rollback deve manter leitores compatíveis.
+- Node24.19/pnpm11.20: tipos e lint focado aprovados; testes pertinentes de
+  Agendamentos aprovados. QA Chromium sintético em três temas e 1440/390:
+  rolagem até último item, recência sem sobreposição, rankings com35 itens,
+  vencidos73 em páginas50/23 e CSV73; tooltip e dias alinhados, sem overflow.
+- SQL local indisponível (ECONNREFUSED127.0.0.1:54322):22 asserções pgTAP
+  preparadas aguardam CI. Inventário atualizado para101 migrations/2413asserções.
+  Nenhuma migration remota aplicada nesta etapa; aprovação específica pendente.
+  Evidências e fontes no registro AGENDAMENTOS-LEITURA de02/11/2026.
+
 ## 2026-11-02 — Publicação coordenada do handoff
 
 - PR467 integrado em aa28d38e; quatro jobs do main/41479050792 aprovados.

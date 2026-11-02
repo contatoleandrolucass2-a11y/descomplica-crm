@@ -228,12 +228,14 @@ function Ranking({
   unavailable = "Dados indisponíveis nesta atualização.",
   selected,
   onSelect,
+  fullLabel = false,
 }: {
   buckets: AppointmentBucket[] | null;
   total: number;
   unavailable?: string;
   selected?: string | undefined;
   onSelect?: (bucket: AppointmentBucket) => void;
+  fullLabel?: boolean;
 }) {
   if (buckets === null) return <Empty>{unavailable}</Empty>;
   if (!buckets.length) return <Empty />;
@@ -257,7 +259,7 @@ function Ranking({
               <div className={styles.rankingHeading}>
                 <span>
                   <span className={styles.rank}>{index + 1}.</span>{" "}
-                  <span title={item.label}>{shortName(item.label)}</span>
+                  <span title={item.label}>{fullLabel ? item.label : shortName(item.label)}</span>
                 </span>
                 <strong>{number.format(item.total)}</strong>
                 <strong
@@ -1030,10 +1032,12 @@ function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] })
           <ol className={styles.recencyList} tabIndex={0} aria-label={title}>
             {items.map((item) => (
               <li key={item.owner}>
-                <strong title={item.owner}>{shortName(item.owner)}</strong>
+                <div className={styles.recencyOwner}>
+                  <strong title={item.owner}>{shortName(item.owner)}</strong>
+                  <small>Último: {displayDate(item.lastAppointmentDate)}</small>
+                </div>
                 <span className={styles.recencyManager} title={item.manager}>
                   <span>{item.manager ? shortName(item.manager) : "Gerente não informado"}</span>
-                  <small>Último: {displayDate(item.lastAppointmentDate)}</small>
                 </span>
                 <b>
                   {item.daysSinceLastAppointment === 0
@@ -1096,6 +1100,7 @@ const emptyDetailSubscribe = () => () => undefined;
 const emptyDetailVersion = () => 0;
 
 function AppointmentTable({
+  title = "Detalhamento dos agendamentos",
   rows,
   timezone,
   selectedKey,
@@ -1104,6 +1109,7 @@ function AppointmentTable({
   detailQuery,
   detailController,
 }: {
+  title?: string;
   rows: NonNullable<ReturnType<typeof analyzeAppointments>["details"]>;
   timezone: string;
   selectedKey?: string;
@@ -1205,7 +1211,7 @@ function AppointmentTable({
       );
       const link = document.createElement("a");
       link.href = url;
-      link.download = `agendamentos-${detailQuery.month}.csv`;
+      link.download = `agendamentos-${detailQuery.subset === "overdue" ? "vencidos-" : ""}${detailQuery.month}.csv`;
       link.click();
       URL.revokeObjectURL(url);
       setExportMessage(`${number.format(result.total)} registros exportados integralmente.`);
@@ -1230,7 +1236,7 @@ function AppointmentTable({
       aria-busy={pending}
     >
       <header className={styles.cardHeader}>
-        <h2 id={headingId}>Detalhamento dos agendamentos</h2>
+        <h2 id={headingId}>{title}</h2>
         <span>
           {total === null
             ? "Detalhamento aguardando leitura"
@@ -2206,6 +2212,65 @@ export function AppointmentsDashboard({
             onSelect={(bucket) => selectMonth(`${selectedYear}-${bucket.key}`)}
           />
         </Chart>
+      ),
+    },
+    "ranking.pdv": {
+      "horizontal-bars": (
+        <Chart title="Ranking por PDV: Nome do Empreendimento">
+          <Ranking
+            buckets={canViewDevelopmentRankings ? (result.developmentRankings?.pdvs ?? null) : null}
+            total={result.developmentRankings?.total ?? 0}
+            fullLabel
+            unavailable="Ranking por PDV indisponível neste recorte ou perfil de acesso."
+          />
+        </Chart>
+      ),
+    },
+    "ranking.development": {
+      "horizontal-bars": (
+        <Chart title="Ranking por Nome do empreendimento">
+          <Ranking
+            buckets={
+              canViewDevelopmentRankings ? (result.developmentRankings?.projects ?? null) : null
+            }
+            total={result.developmentRankings?.total ?? 0}
+            fullLabel
+            unavailable="Ranking por empreendimento indisponível neste recorte ou perfil de acesso."
+          />
+        </Chart>
+      ),
+    },
+    "appointments.overdue": {
+      table: (
+        <AppointmentTable
+          title="Agendamentos vencidos sem visita realizada"
+          rows={
+            compactSummary
+              ? []
+              : (result.details ?? []).filter(
+                  (row) =>
+                    !row.visitPerformed &&
+                    row.attendedAt !== null &&
+                    saoPauloDate(row.attendedAt) < currentCalendarDate,
+                )
+          }
+          detailSource={detailSource}
+          detailQuery={detailQuery ? { ...detailQuery, subset: "overdue" } : undefined}
+          detailController={detailController}
+          timezone={timezone}
+          selectedKey={selectedRow}
+          onSelect={(rowFilters, key) => {
+            if (selectedRow === key) {
+              setSelectedRow("");
+              setFilters(rowBaseFilters ?? { channel: 1 });
+              setRowBaseFilters(null);
+            } else {
+              setRowBaseFilters(rowBaseFilters ?? filters);
+              setSelectedRow(key);
+              setFilters({ ...(rowBaseFilters ?? filters), ...rowFilters });
+            }
+          }}
+        />
       ),
     },
     "appointments.details": {
