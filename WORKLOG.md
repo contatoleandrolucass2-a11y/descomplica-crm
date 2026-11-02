@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-11-02 — Checkpoint de Leads e simuladores do handoff
+
+- Leads divide famílias e aplica escopo/agregados SQL. Dashboard não precisa ler
+  contatos completos; analytics preserva primeiro contato histórico. Sem mudar
+  pool, sessão, Shadow DOM ou o projeto operacional.
+- Simuladores carregam o manual integral ao abrir, com deep link e foco, sem
+  alterações de fórmula ou CSS compartilhado. Investidor tem título específico.
+- Scripts reproduzíveis de bundles e manual em tests; 153 testes focados e sete
+  casos browser aprovados. Comparação compilada não mede transferência Next.
+- Paginação/analytics SQL completos aguardam acesso ao banco operacional correto.
+  Meta Ads excluído. Este checkpoint será entregue em candidato coordenado com
+  as demais frentes, sem publicação independente.
+
 ## 2026-11-01 — Margem do comparativo em cards estreitos
 
 - Duas declarações CSS reservam a mesma margem direita ao plot e ao eixo.

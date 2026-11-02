@@ -1,5 +1,9 @@
 # Changelog
 
+- Reduz o grafo JavaScript inicial de Leads e Investidor com módulos sob demanda,
+  preservando sessão, conteúdo e cálculos. Consultas de Leads recebem escopo
+  autorizado e dashboard agregado, sem mudar o banco operacional.
+
 - Preserva o último rótulo do comparativo de Agendamentos em cards estreitos,
   mantendo os dias alinhados às três séries e a autonomia de tamanho.
   Validado com atualização cruzada entre navegadores e celular emulado.

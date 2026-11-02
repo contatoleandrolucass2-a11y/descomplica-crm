@@ -1,19 +1,36 @@
-import CrmUserLinks from "./CrmUserLinks";
-import { ConnectedBucket, BucketSettings } from "./Bucket";
-import ImportLeads from "./ImportLeads";
-import Exportations from "./Exportations";
-import Management from "./Management";
-import Permissions from "./Permissions";
-import AdminPanel from "./AdminPanel";
-import { ConnectedConfiguration } from "./ConnectedConfiguration";
+import { lazy } from "react";
 import {
   ConnectedLeads,
   ConnectedIntegrations,
   ConnectedAudit,
   PersistentRecords,
 } from "./ConnectedCRM";
-import { WorkspaceHome, Hierarchy, Training } from "./OperationalScreens";
 import { Panel } from "./ui";
+
+const CrmUserLinks = lazy(() => import("./CrmUserLinks"));
+const ConnectedBucket = lazy(() =>
+  import("./Bucket").then((module) => ({ default: module.ConnectedBucket })),
+);
+const BucketSettings = lazy(() =>
+  import("./Bucket").then((module) => ({ default: module.BucketSettings })),
+);
+const ImportLeads = lazy(() => import("./ImportLeads"));
+const Exportations = lazy(() => import("./Exportations"));
+const Management = lazy(() => import("./Management"));
+const Permissions = lazy(() => import("./Permissions"));
+const AdminPanel = lazy(() => import("./AdminPanel"));
+const ConnectedConfiguration = lazy(() =>
+  import("./ConnectedConfiguration").then((module) => ({ default: module.ConnectedConfiguration })),
+);
+const WorkspaceHome = lazy(() =>
+  import("./OperationalScreens").then((module) => ({ default: module.WorkspaceHome })),
+);
+const Hierarchy = lazy(() =>
+  import("./OperationalScreens").then((module) => ({ default: module.Hierarchy })),
+);
+const Training = lazy(() =>
+  import("./OperationalScreens").then((module) => ({ default: module.Training })),
+);
 
 export default function SystemScreens({
   screen,

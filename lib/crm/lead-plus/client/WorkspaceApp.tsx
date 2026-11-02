@@ -1,17 +1,18 @@
 import UserViewSelector from "./UserViewSelector";
 import { workspaceDocument } from "./workspace-document";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { MotionConfig } from "motion/react";
-import SystemScreens from "./SystemScreens";
-import OperationDashboard from "./OperationDashboard";
 import MetaDashboard from "./MetaDashboard";
 import BackendStatus from "./BackendStatus";
-import ConnectedReports from "./ConnectedReports";
 import LeadNotifications from "./LeadNotifications";
 import { submenus, canAccessRoute } from "./navigation";
 import { Sidebar } from "./components/ui/sidebar";
 import SidebarDemo from "./components/sidebar-demo";
 import { HostSessionRequired, useAuth } from "./Auth";
+
+const SystemScreens = lazy(() => import("./SystemScreens"));
+const OperationDashboard = lazy(() => import("./OperationDashboard"));
+const ConnectedReports = lazy(() => import("./ConnectedReports"));
 
 function currentRoute() {
   try {
@@ -104,20 +105,22 @@ export default function App({ initialScreen = "Leads" }: { initialScreen?: strin
                 tabIndex={-1}
                 className="workspace-content system-main"
               >
-                {!canAccessRoute(active, auth.can, auth.user?.host_pages) ? (
-                  <div className="system-screen" role="alert">
-                    <h1>Acesso restrito</h1>
-                    <p>Seu nível não possui permissão para esta tela.</p>
-                  </div>
-                ) : active === "LEAD+" || active === "Dashboards" ? (
-                  <OperationDashboard />
-                ) : active === "Dashboard Meta" ? (
-                  <MetaDashboard />
-                ) : active === "Relatórios" || submenus.Relatórios!.includes(active) ? (
-                  <ConnectedReports key={active} screen={active} />
-                ) : (
-                  <SystemScreens key={active} screen={active} navigate={navigate} />
-                )}
+                <Suspense fallback={<p role="status">Abrindo {active}…</p>}>
+                  {!canAccessRoute(active, auth.can, auth.user?.host_pages) ? (
+                    <div className="system-screen" role="alert">
+                      <h1>Acesso restrito</h1>
+                      <p>Seu nível não possui permissão para esta tela.</p>
+                    </div>
+                  ) : active === "LEAD+" || active === "Dashboards" ? (
+                    <OperationDashboard />
+                  ) : active === "Dashboard Meta" ? (
+                    <MetaDashboard />
+                  ) : active === "Relatórios" || submenus.Relatórios!.includes(active) ? (
+                    <ConnectedReports key={active} screen={active} />
+                  ) : (
+                    <SystemScreens key={active} screen={active} navigate={navigate} />
+                  )}
+                </Suspense>
               </main>
               <footer className="workspace-footer">
                 <span>DESCOMPLICA LEAD</span>
