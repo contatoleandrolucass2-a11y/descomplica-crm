@@ -367,6 +367,11 @@ const protectedSurfaces = [
     heading: "Dashboard | Resumo Geral",
     allowed: activeOperationalRoles,
   },
+  {
+    path: "/app/equipe-produtiva",
+    heading: "Equipe Produtiva",
+    allowed: adminRoles,
+  },
   { path: "/app/leads", heading: "DESCOMPLICA LEAD", allowed: adminRoles },
   { path: "/app/leads/lista", heading: "DESCOMPLICA LEAD", allowed: adminRoles },
   { path: "/app/leads/atividades", heading: "DESCOMPLICA LEAD", allowed: adminRoles },
@@ -601,6 +606,7 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
+    "/app/equipe-produtiva",
     ...leadRoutes,
     ...metaAdsRoutes,
     ...settingsRoutes,
@@ -614,6 +620,7 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
+    "/app/equipe-produtiva",
     ...leadRoutes,
     ...metaAdsRoutes,
     ...settingsRoutes,
@@ -666,6 +673,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
+    "/app/equipe-produtiva",
     "/app/leads",
     metaAdsRoutes[0],
     "/app/simulacao",
@@ -679,6 +687,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
+    "/app/equipe-produtiva",
     "/app/leads",
     metaAdsRoutes[0],
     "/app/simulacao",
@@ -964,12 +973,12 @@ test.afterAll(() => {
 });
 
 test("the hosted profile matrix uses the exact approved commercial page sets", () => {
-  expect(protectedSurfaces).toHaveLength(49);
-  expect(new Set(protectedSurfaces.map((surface) => surface.path)).size).toBe(49);
+  expect(protectedSurfaces).toHaveLength(50);
+  expect(new Set(protectedSurfaces.map((surface) => surface.path)).size).toBe(50);
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 27 : activeOperationalRoles.has(role) ? 19 : 0,
+      adminRoles.has(role) ? 28 : activeOperationalRoles.has(role) ? 19 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
@@ -979,6 +988,10 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
     );
 
     const directRoutes = expectedDirectRoutesByRole[role];
+    expect(directRoutes.includes("/app/equipe-produtiva"), role).toBe(adminRoles.has(role));
+    expect(expectedHeaderRoutesByRole[role].includes("/app/equipe-produtiva"), role).toBe(
+      adminRoles.has(role),
+    );
     expect(directRoutes.includes("/app/gestao/previsao"), role).toBe(
       activeOperationalRoles.has(role),
     );

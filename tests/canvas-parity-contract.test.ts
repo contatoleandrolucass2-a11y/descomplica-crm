@@ -30,7 +30,9 @@ describe("approved canvas parity contract", () => {
         !path.startsWith("/app/meta-ads") &&
         !path.startsWith("/app/leads") &&
         !path.startsWith("/app/links-uteis") &&
-        !["/app/repasse", "/app/configuracoes/conectar-sistemas"].includes(path),
+        !["/app/repasse", "/app/equipe-produtiva", "/app/configuracoes/conectar-sistemas"].includes(
+          path,
+        ),
     );
     const metaAdsAudit = readFileSync(
       new URL("../../audits/meta-ads-dashboard-local-2026-10-20.md", root),
@@ -39,7 +41,14 @@ describe("approved canvas parity contract", () => {
     const repasseReadme = readFileSync(new URL("../repasse/README.md", root), "utf8");
     const systemsReadme = readFileSync(new URL("../connected-systems/README.md", root), "utf8");
 
-    expect(releasedPaths).toHaveLength(49);
+    const productiveTeamReadme = readFileSync(
+      new URL("../equipe-produtiva/README.md", root),
+      "utf8",
+    );
+    expect(productiveTeamReadme).toContain("`/app/equipe-produtiva`");
+    expect(productiveTeamReadme).toContain("Claro, Médio e Escuro");
+    expect(productiveTeamReadme).toContain("scripts/qa/productive-team-preview.mjs");
+    expect(releasedPaths).toHaveLength(50);
     expect(canvasPaths).toHaveLength(26);
     // The new content pages have their own reference; historical canvases stay unchanged.
     expect(usefulLinksPages).toHaveLength(7);

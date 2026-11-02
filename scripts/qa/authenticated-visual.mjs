@@ -5683,6 +5683,105 @@ async function checkFixtureSourceMarker(page, origin, expectedMarker) {
   return checks;
 }
 
+// This new page has a dedicated authenticated contract, like Repasse. Its
+// screenshots are evidence, not an invented replacement for an approved canvas.
+async function checkProductiveTeam(page, origin) {
+  const route = "/app/equipe-produtiva";
+  const evidence = {
+    route,
+    contract: "docs/qa/equipe-produtiva/README.md",
+    screens: [],
+    keyboard: false,
+    zoom: false,
+    passed: false,
+  };
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  const destinationRoot = path.join(artifactRoot, "productive-team");
+  await mkdir(destinationRoot, { recursive: true });
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const theme of themes) {
+      await gotoWithServerRetry(page, `${origin}${route}`, { waitUntil: "domcontentloaded" });
+      await setTheme(page, theme);
+      await expect(
+        page.getByRole("heading", { name: "Equipe Produtiva", exact: true }),
+      ).toBeVisible();
+      const cards = page.getByRole("region", { name: "Corretores produtivos por etapa" });
+      await expect(cards.getByRole("heading")).toHaveCount(4);
+      for (const activity of ["Agendamentos", "Visitas", "Pastas", "Vendas"])
+        await expect(
+          cards.getByRole("heading", { name: `Equipe produtiva “${activity}”`, exact: true }),
+        ).toBeVisible();
+      for (const id of ["regionalManager", "manager", "owner", "company"])
+        await expect(page.locator(`#appointment-filter-${id}`)).toBeVisible();
+      await expect(page.getByRole("group", { name: "Canal de vendas" })).toBeVisible();
+      const filters = page.getByRole("region", { name: "Filtros de Equipe Produtiva" });
+      await expect(filters.locator('button[aria-haspopup="dialog"]')).toHaveCount(1);
+      const unavailableCards = await cards
+        .locator("article")
+        .evaluateAll((elements) =>
+          elements
+            .map((element) => element.innerText)
+            .filter((text) => /indispon[ií]ve|aguardando|n[aã]o conciliado|amb[ií]gua/i.test(text)),
+        );
+      if (unavailableCards.some((text) => /\b0%|0 de 0/.test(text)))
+        throw new Error("Equipe Produtiva rendered an unavailable source as zero.");
+      const geometry = await page.evaluate(() => ({
+        width: innerWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+      }));
+      if (geometry.scrollWidth > geometry.width + 1)
+        throw new Error(`Equipe Produtiva overflows at ${theme}/${width}`);
+      const accessibility = await inspectAccessibility(
+        page,
+        route,
+        `productive-team-${width}`,
+        theme,
+      );
+      if (!accessibility.passed)
+        throw new Error(`Equipe Produtiva accessibility failed at ${theme}/${width}`);
+      const buffer = await captureComparableScreenshot(page);
+      const persistedBuffer = await capturePersistedScreenshot(page, buffer);
+      const screenshot = await saveLosslessWebp(
+        persistedBuffer,
+        path.join(destinationRoot, `${theme}-${width}.webp`),
+      );
+      evidence.screens.push({
+        width,
+        theme,
+        geometry,
+        accessibility,
+        unavailableCards: unavailableCards.length,
+        screenshot,
+      });
+    }
+  }
+  const period = page
+    .getByRole("region", { name: "Filtros de Equipe Produtiva" })
+    .locator('button[aria-haspopup="dialog"]');
+  await period.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("button", { name: "Fechar calendário", exact: true })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(period).toBeFocused();
+  evidence.keyboard = true;
+  await page.evaluate(() => {
+    document.documentElement.style.zoom = "2";
+  });
+  evidence.zoom = await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1);
+  await page.evaluate(() => {
+    document.documentElement.style.zoom = "";
+  });
+  if (!evidence.zoom || errors.length)
+    throw new Error("Equipe Produtiva zoom or browser errors failed.");
+  evidence.passed = true;
+  return evidence;
+}
+
 async function checkZoom(
   origin,
   email,
@@ -5780,6 +5879,7 @@ function functionalChecksPassed({
   simulatorValidation,
   tabelaoValidation,
   directTableValidation,
+  productiveTeamValidation,
   archiveNavigation,
   fixtureSourceMarker,
   zoom,
@@ -5811,6 +5911,7 @@ function functionalChecksPassed({
     Object.values(tabelaoValidation).every(Boolean) &&
     directTableValidation &&
     Object.values(directTableValidation).every(Boolean) &&
+    productiveTeamValidation?.passed === true &&
     archiveNavigationPassed(archiveNavigation) &&
     fixtureSourceMarker &&
     Object.values(fixtureSourceMarker).every(Boolean) &&
@@ -6025,6 +6126,7 @@ async function run() {
   let simulatorValidation = null;
   let tabelaoValidation = null;
   let directTableValidation = null;
+  let productiveTeamValidation = null;
   let archiveNavigation = null;
   let fixtureSourceMarker = null;
   let homologationCheckpoints = [];
@@ -6101,6 +6203,17 @@ async function run() {
         }
 
         if (viewport.key === "desktop-1440x900") {
+          currentStage = "productive-team";
+          const productiveTeamPage = configureQaPage(await context.newPage());
+          try {
+            productiveTeamValidation = await checkProductiveTeam(productiveTeamPage, origin);
+            await writeFile(
+              path.join(artifactRoot, "productive-team-results.json"),
+              JSON.stringify(productiveTeamValidation, null, 2),
+            );
+          } finally {
+            await productiveTeamPage.close({ runBeforeUnload: false });
+          }
           currentStage = "repasse";
           const repassePage = configureQaPage(await context.newPage());
           try {
@@ -6461,6 +6574,7 @@ async function run() {
       simulatorValidation,
       tabelaoValidation,
       directTableValidation,
+      productiveTeamValidation,
       archiveNavigation,
       fixtureSourceMarker,
       zoom,
@@ -6507,6 +6621,7 @@ async function run() {
       simulatorValidation,
       tabelaoValidation,
       directTableValidation,
+      productiveTeamValidation,
       archiveNavigation,
       homologationCheckpoints,
       zoom,

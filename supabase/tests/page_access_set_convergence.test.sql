@@ -4,8 +4,8 @@ select plan(12);
 
 select is(
   (select count(*) from public.app_pages),
-  49::bigint,
-  'the page catalog contains exactly the forty-nine approved entries'
+  50::bigint,
+  'the page catalog contains exactly the fifty approved entries'
 );
 
 select is(
@@ -39,6 +39,7 @@ select is(
     'crm.meta_ads.campaigns|/app/meta-ads/campanhas|crm.meta_ads.campaigns.view|true',
     'crm.meta_ads.reports|/app/meta-ads/relatorios|crm.meta_ads.reports.view|true',
     'crm.partnerships|/app/canal-de-parcerias|crm.partnerships.view|true',
+    'crm.productive_team|/app/equipe-produtiva|crm.productive_team.view|true',
     'crm.ranking|/app/ranking|crm.ranking.view|true',
     'crm.repasse|/app/repasse|crm.repasse.view|true',
     'crm.settings|/app/configuracoes|crm.settings.view|true',
@@ -124,6 +125,7 @@ select is(
     'crm.meta_ads.campaigns',
     'crm.meta_ads.reports',
     'crm.partnerships',
+    'crm.productive_team',
     'crm.ranking',
     'crm.repasse',
     'crm.settings',
@@ -153,7 +155,7 @@ select is(
     'crm.useful_links.regras_comerciais',
     'crm.useful_links.relacionamento'
   ]::text[],
-  'Master resolves the exact forty-nine-page catalog set'
+  'Master resolves the exact fifty-page catalog set'
 );
 
 select is(
@@ -194,6 +196,7 @@ select is(
     'crm.meta_ads.campaigns',
     'crm.meta_ads.reports',
     'crm.partnerships',
+    'crm.productive_team',
     'crm.ranking',
     'crm.repasse',
     'crm.settings',
@@ -223,7 +226,7 @@ select is(
     'crm.useful_links.regras_comerciais',
     'crm.useful_links.relacionamento'
   ]::text[],
-  'Admin retains the exact forty-nine-page inherited set including Lead, Meta Ads, useful links, partnerships and simulators'
+  'Admin retains the exact fifty-page inherited set including Equipe Produtiva, Lead, Meta Ads, useful links, partnerships and simulators'
 );
 
 select is(

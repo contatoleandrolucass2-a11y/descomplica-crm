@@ -58,18 +58,18 @@ describe("release-candidate migration train", () => {
     );
   });
 
-  it("keeps a unique, ordered 98-version manifest", async () => {
+  it("keeps a unique, ordered 100-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(98);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(98);
+    expect(migrations).toHaveLength(100);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(100);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-44)).toEqual([
+    expect(migrations.slice(-46)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -114,9 +114,11 @@ describe("release-candidate migration train", () => {
       "20261031055824_appointments_profile_conflict_http.sql",
       "20261031184038_appointments_bar_max_height_pixels.sql",
       "20261101115602_appointments_allow_card_copies.sql",
+      "20261102020840_productive_team_read.sql",
+      "20261102020921_sync_page_catalog.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261101115602_appointments_allow_card_copies.sql");
+    expect(migrations.at(-1)).toBe("20261102020921_sync_page_catalog.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -148,8 +150,8 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.files).toBe(44);
-    expect(plan.tests).toBe(2360);
+    expect(plan.files).toBe(45);
+    expect(plan.tests).toBe(2383);
   });
 
   it("keeps PL/pgSQL CASE layout limits parenthesized as expressions", async () => {
@@ -310,8 +312,8 @@ describe("release-candidate activation defaults", () => {
       { timeout: 1000 },
     );
     const surfacePaths = matrix.protectedSurfaces.map((surface: { path: string }) => surface.path);
-    expect(surfacePaths).toHaveLength(49);
-    expect(new Set(surfacePaths).size).toBe(49);
+    expect(surfacePaths).toHaveLength(50);
+    expect(new Set(surfacePaths).size).toBe(50);
     expect([...surfacePaths].sort()).toEqual(
       PROTECTED_PAGE_GATES.filter((gate) => gate.releaseEnabled)
         .map((gate) => gate.path)
@@ -335,6 +337,7 @@ describe("release-candidate activation defaults", () => {
         matrix.expectedHeaderRoutesByRole[role],
       ]) {
         expect(routes.includes("/app/gestao/previsao"), role).toBe(operational);
+        expect(routes.includes("/app/equipe-produtiva"), role).toBe(administrative);
       }
       expect(matrix.expectedAccountSettingsRoutesForRole(role)).not.toContain(
         "/app/gestao/previsao",
@@ -367,7 +370,7 @@ describe("release-candidate activation defaults", () => {
       ).toBe(administrative);
       expect(roots.some((root: { name: string }) => root.name === "Configurações")).toBe(false);
       if (administrative) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(27);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(28);
         expect(matrix.expectedHeaderRoutesByRole[role]).toContain("/app/configuracoes/metas");
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",
@@ -505,7 +508,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 2360;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 2383;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

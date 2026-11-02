@@ -55,4 +55,25 @@
   Teste atualizado somente para o novo item e para o alcance pedido do menu.
   Revalidação de navegação e apresentação: 25 testes aprovados após ajustes.
 - Revisão independente de SQL, loader e integração não encontrou achados
-  acionáveis. Build Next local e CI do novo candidato ainda pendentes.
+  acionáveis. Build Next local aprovado, com dois avisos preexistentes de tracing
+  Lead+ fora do diff; nenhuma correção incidental realizada.
+
+## Dependências comprovadas pela primeira CI
+
+- PR465, candidato `bef128a4`: CI41376879945 falhou em 15 asserções de inventários
+  diretamente afetados pela nova página/permissão/migrations; 4.766 testes
+  passaram e 112 foram ignorados. Gate bloqueado, sem merge nem publicação.
+  Captura41376879955 parou no catálogo REST divergente pelo mesmo novo acesso.
+- Ajustes preservam asserções estritas: 50 páginas, nova permissão somente nos
+  conjuntos de Admin/Master, 100 migrations e 2.383 asserções pgTAP em 45 arquivos.
+  As duas versões novas foram acrescentadas somente à lista não implantável
+  pelo fluxo histórico Auth/MFA, sem mudar hashes, candidatos ou resultados
+  antigos. Não há mudança de política de acesso de outra página.
+- Revalidação focada das seis suítes que falharam: 130 testes aprovados em
+  Node24.19.0. Os testes SQL do catálogo preservam planos e conjuntos dos demais
+  papéis; execução real ainda depende da CI.
+- Nova página recebeu contrato dedicado em `docs/qa/equipe-produtiva/README.md`,
+  integrado como gate na matriz autenticada: CSS Next, sessão sintética, temas,
+  desktop/celular, axe, teclado e zoom. Os 22 canvases históricos e suas baselines
+  permanecem preservados. Verificação sintática e lint aprovados; execução remota
+  isolada da nova CI ainda pendente.

@@ -14,6 +14,12 @@
   locais preparam catálogo e leitura; nenhuma ativação remota executada.
 - Evidências e limites em
   `docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md`.
+- Build Next, lint e tipos aprovados. A primeira CI revelou inventários estáticos
+  diretamente afetados pela página: catálogos de páginas/permissões, matrizes de
+  acesso, duas versões não implantáveis pelo fluxo histórico Auth/MFA e plano de
+  restauração. Entradas exatas atualizadas; 130 testes focados passaram.
+  O contrato visual dedicado foi integrado à matriz autenticada, preservando
+  os canvases e baselines anteriores. Nova CI e banco ainda pendentes.
 
 ## 2026-11-01 — Margem do comparativo em cards estreitos
 
