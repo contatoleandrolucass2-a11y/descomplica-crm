@@ -223,6 +223,27 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(page.locator(".caixa-city-picker.open")).toBeVisible();
       await page.getByRole("option", { name: "São Paulo SP", exact: true }).click();
     }
+    it("resizes the retractable sidebar and opens monthly installments with keyboard dismissal", async () => {
+      await open();
+      const workspace = page.locator(".caixa-workspace");
+      await browserExpect(workspace).toHaveAttribute("data-sidebar-collapsed", "true");
+      await page.getByRole("button", { name: "Expandir menu de simulação" }).click();
+      await browserExpect(workspace).toHaveAttribute("data-sidebar-collapsed", "false");
+      await browserExpect(
+        page.getByRole("navigation", { name: "Simuladores disponíveis" }).getByRole("link"),
+      ).toHaveCount(6);
+      await fillMain();
+      await browserExpect(workspace).toHaveAttribute("data-sidebar-collapsed", "true");
+      await page.getByRole("button", { name: "Exibir parcelas", exact: true }).click();
+      const dialog = page.getByRole("dialog");
+      await browserExpect(dialog).toBeVisible();
+      await browserExpect(dialog.locator("tbody tr")).toHaveCount(420);
+      await page.keyboard.press("Escape");
+      await browserExpect(dialog).not.toBeVisible();
+      await browserExpect(
+        page.getByRole("button", { name: "Exibir parcelas", exact: true }),
+      ).toBeFocused();
+    });
     async function auditCurrentTab(name: string) {
       const directory = resolve("private-data/caixa-qa");
       await mkdir(directory, { recursive: true });
