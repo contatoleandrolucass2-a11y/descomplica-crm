@@ -1,5 +1,7 @@
 # Aprendizados e atualizacoes
 
+- Agendamentos 03/11: [metas, média inteira e vencidos](ATUALIZACOES-ARQUIVO-2026-11-03-a-2026-11-03-AGENDAMENTOS-METAS.md).
+
 - 03/11/2026, 08:38 São Paulo: abertura dos detalhes nominais de Equipe
   Produtiva. Main 093453c6/CI 41592078541 aprovada; health 200/ok em f3c4f126.
   Escopo e fontes no registro da página abaixo.

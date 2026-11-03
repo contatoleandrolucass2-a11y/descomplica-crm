@@ -203,13 +203,11 @@ try {
     top: el.scrollTop,
   }));
   assert(evidence.scroll.top > 0);
-  const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Exportar CSV completo", exact: true }).press("Enter");
-  const download = await downloadPromise;
-  const downloaded = [];
-  for await (const chunk of await download.createReadStream()) downloaded.push(chunk);
-  assert(Buffer.concat(downloaded).toString().includes("Conta sintética 00271"));
-  assert.deepEqual(evidence.exports, [136]);
+  await expect(
+    page.getByRole("button", { name: "Exportar CSV completo", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByText(/Exibindo todos os/)).toHaveCount(0);
+  assert.deepEqual(evidence.exports, []);
   const owner = page.getByRole("combobox", { name: "Responsável da conta", exact: true });
   await owner.selectOption("Corretor A");
   await expect.poll(() => evidence.requests.at(-1)?.owner).toBe("Corretor A");

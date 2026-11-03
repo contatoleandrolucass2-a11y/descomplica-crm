@@ -90,13 +90,15 @@ export function fullAppointmentDetails(
   });
   if (reading.coverage === "unavailable" || reading.details === null) return null;
   // Filter the complete authorized snapshot before pagination and CSV export.
-  // Do not infer a comparecimento from Horário, creation date or missing data.
+  // scheduledAt is Salesforce ActivityDateTime: the planned appointment date/time.
+  // attendedAt is the actual visit date and is normally null for an unvisited row.
+  // Missing planned dates never fall back to creation or actual attendance dates.
   return query.subset === "overdue"
     ? reading.details.filter(
         (row) =>
           !row.visitPerformed &&
-          row.attendedAt !== null &&
-          saoPauloDate(row.attendedAt) < query.calendarDate,
+          row.scheduledAt !== null &&
+          saoPauloDate(row.scheduledAt) < query.calendarDate,
       )
     : reading.details;
 }

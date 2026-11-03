@@ -86,11 +86,13 @@ describe("authorized appointment detail server functions", () => {
     ).toBe(true);
   });
   it("returns all overdue rows after filtering the entire snapshot, with civil-date boundaries", async () => {
-    const model = appointmentModel(127);
-    model.analysis.appointments = model.analysis.appointments.map((row, index) => ({
+    const model: import("@/lib/crm/stages/data").AppointmentsReadModel = appointmentModel(127);
+    const analysis = model.analysis!;
+    analysis.appointments = analysis.appointments!.map((row, index) => ({
       ...row,
       visitPerformed: index === 123,
-      attendedAt:
+      attendedAt: null,
+      scheduledAt:
         index === 124
           ? null
           : index === 125
@@ -115,7 +117,12 @@ describe("authorized appointment detail server functions", () => {
     if (all.status !== "ready") throw new Error("Expected complete overdue read");
     expect(all.rows).toHaveLength(123);
     expect(
-      all.rows!.every((row) => !row.visitPerformed && row.attendedAt === "2026-10-31T02:59:59Z"),
+      all.rows!.every(
+        (row) =>
+          !row.visitPerformed &&
+          row.attendedAt === null &&
+          row.scheduledAt === "2026-10-31T02:59:59Z",
+      ),
     ).toBe(true);
   });
   it("rejects malformed complete modes and any combined cursor before reading a model", async () => {

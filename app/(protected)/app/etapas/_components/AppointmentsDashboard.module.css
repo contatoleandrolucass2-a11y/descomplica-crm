@@ -2283,3 +2283,20 @@
     backdrop-filter: none;
   }
 }
+
+/* Keep the result count out of the floating card actions' hover lane. */
+.configurableCanvas .detailTableHeader {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.configurableCanvas .detailTableHeader h2 {
+  padding-top: 1.5rem;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .configurableCanvas .detailTableHeader h2 {
+    padding-top: 2.75rem;
+  }
+}
