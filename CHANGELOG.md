@@ -1,5 +1,9 @@
 # Changelog
 
+- Compacta exclusivamente o Simulador CAIXA com lateral de altura completa
+  que abre no hover, canvas proporcional, campos sem fundo, título ao lado
+  do menu e parcelas centralizadas com impressão da tabela completa.
+
 - Confirma publicação e validação em produção do menu retrátil e das parcelas
   do Simulador CAIXA, em6a0b1df5, após correção da compatibilidade do deploy.
 

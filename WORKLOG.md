@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-11-03 — CAIXA: lateral e formulário compactos
+
+- Sidebar exclusiva da CAIXA rente à esquerda, do cabeçalho ao fim da tela,
+  com hover/foco como Dashboard. Canvas proporcional conserva as linhas ao
+  expandir; celular mantém rail e abre por toque. Título ao lado da lateral.
+- Removidas molduras externas e fundos dos campos/seções; tipografia usa a
+  fonte do sistema e tokens dos simuladores. Controles compactos e alinhados.
+- Parcelas centralizadas nas quatro larguras; botão Imprimir prepara somente
+  a tabela completa, sem limitar aos meses visíveis. Motor financeiro intacto.
+- Validação focada:57 testes de cálculo/parcelas aprovados, tipos/lint locais;
+  nove jornadas browser cobrem temas,320–1440px,Axe,hover/foco,toque e impressão.
+  CI obrigatória e versão publicada serão conferidas no encerramento.
+
 ## 2026-11-02 — CAIXA publicada e validada
 
 - PR470 (sidebar e parcelas) e PR475 (compatibilidade do deploy) integrados;
