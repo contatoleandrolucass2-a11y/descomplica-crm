@@ -50,6 +50,16 @@
   preservando sessão, conteúdo e cálculos. Consultas de Leads recebem escopo
   autorizado e dashboard agregado, sem mudar o banco operacional.
 
+- Adiciona Equipe Produtiva ao Dashboard: quatro indicadores de corretores únicos,
+  incluindo referências revisadas da nova permissão em Usuários móvel e tablet,
+  filtros comerciais, período e acesso pela sidebar das páginas do funil.
+  Os quatro numeradores respeitam o mesmo cadastro filtrado do denominador,
+  inclusive quando o corretor mudou de gerente após uma atividade histórica.
+  A cobertura inclui acesso no banco e os cinco níveis equivalentes de zoom
+  da matriz vigente, com a sidebar real.
+  O contrato de navegação compartilhado inclui o novo destino do Dashboard.
+  A seleção Imob autorizada permanece correta mesmo sem coleta disponível.
+
 - Preserva o último rótulo do comparativo de Agendamentos em cards estreitos,
   mantendo os dias alinhados às três séries e a autonomia de tamanho.
   Validado com atualização cruzada entre navegadores e celular emulado.
@@ -4028,3 +4038,15 @@ Validação e publicação serão registradas com evidências ao concluir os gat
 - Isola dados operacionais, vínculos e permissões no backend; remove a prévia de demonstração da integração.
 - Prepara webhook Facebook e processamento supervisionado sem substituir a credencial de métricas nem a integração do C2S.
 - Estado: candidato em validação, ainda não publicado.
+
+- Estabiliza a prioridade dos estilos de Administração, Páginas e Usuários,
+  preservando margens, bordas e filtros contra a ordem dos chunks CSS.
+
+- Atualiza somente as referências revisadas do novo sidebar do Dashboard;
+  mantém os baselines administrativos para validar a correção da cascata CSS.
+
+- Alinha quatro referências móveis de Usuários à permissão Equipe Produtiva,
+  após confirmar a correção CSS e o escopo dos pixels alterados.
+- Mantém o registro da referência tablet no contrato existente de QA.
+- Confirma o gate visual completo das correções administrativas e de Equipe
+  Produtiva; publicação segue condicionada à integração estrita e ao main exato.

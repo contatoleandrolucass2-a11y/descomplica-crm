@@ -617,9 +617,9 @@ async function captureComparableScreenshot(page) {
   }
 }
 
-async function capturePersistedScreenshot(page, comparableBuffer) {
+async function capturePersistedScreenshot(page, comparableBuffer, viewportOnly = false) {
   if (!remoteHomologation) {
-    const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
+    const fullPage = !viewportOnly && !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
     return (
       comparableBuffer ??
       (await page.screenshot({
@@ -665,7 +665,7 @@ async function capturePersistedScreenshot(page, comparableBuffer) {
   });
 
   try {
-    const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
+    const fullPage = !viewportOnly && !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
     return await page.screenshot({
       fullPage,
       animations: "disabled",
@@ -5695,6 +5695,246 @@ async function checkFixtureSourceMarker(page, origin, expectedMarker) {
   return checks;
 }
 
+// This new page has a dedicated authenticated contract, like Repasse. Its
+// screenshots are evidence, not an invented replacement for an approved canvas.
+async function checkProductiveTeam(page, origin, httpCredentials) {
+  const route = "/app/equipe-produtiva";
+  const evidence = {
+    route,
+    contract: "docs/qa/equipe-produtiva/README.md",
+    screens: [],
+    keyboard: false,
+    zoom: false,
+    zoomMethod: "CSS viewport equivalents with deviceScaleFactor on a 1440×900 physical canvas",
+    zoomChecks: [],
+    passed: false,
+    stage: "initializing",
+  };
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  const destinationRoot = path.join(artifactRoot, "productive-team");
+  await mkdir(destinationRoot, { recursive: true });
+  const readGeometry = (target = page) =>
+    target.evaluate(() => {
+      const shell = document.querySelector("[data-dashboard-shell]");
+      const surface = document.querySelector("[data-dashboard-surface]");
+      return {
+        width: innerWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        shellWidth: shell?.clientWidth ?? null,
+        railWidth: shell
+          ? Number.parseFloat(getComputedStyle(shell).getPropertyValue("--dashboard-sidebar-rail"))
+          : null,
+        layoutWidth: surface
+          ? Number.parseFloat(
+              getComputedStyle(surface).getPropertyValue("--dashboard-layout-width"),
+            )
+          : null,
+      };
+    });
+  try {
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const theme of themes) {
+        evidence.stage = `navigate:${theme}:${width}`;
+        await gotoWithServerRetry(page, `${origin}${route}`, { waitUntil: "domcontentloaded" });
+        evidence.stage = `theme:${theme}:${width}`;
+        await setTheme(page, theme);
+        evidence.stage = `content:${theme}:${width}`;
+        await expect(
+          page.getByRole("heading", { name: "Equipe Produtiva", exact: true }),
+        ).toBeVisible();
+        const cards = page.getByRole("region", { name: "Corretores produtivos por etapa" });
+        await expect(cards.getByRole("heading")).toHaveCount(4);
+        for (const activity of ["Agendamentos", "Visitas", "Pastas", "Vendas"])
+          await expect(
+            cards.getByRole("heading", { name: `Equipe produtiva “${activity}”`, exact: true }),
+          ).toBeVisible();
+        for (const id of ["regionalManager", "manager", "owner", "company"])
+          await expect(page.locator(`#appointment-filter-${id}`)).toBeVisible();
+        await expect(page.getByRole("group", { name: "Canal de vendas" })).toBeVisible();
+        const filters = page.getByRole("region", { name: "Filtros de Equipe Produtiva" });
+        await expect(filters.locator('button[aria-haspopup="dialog"]')).toHaveCount(1);
+        const unavailableCards = await cards
+          .locator("article")
+          .evaluateAll((elements) =>
+            elements
+              .map((element) => element.innerText)
+              .filter((text) =>
+                /indispon[ií]ve|aguardando|n[aã]o conciliado|amb[ií]gua/i.test(text),
+              ),
+          );
+        if (unavailableCards.some((text) => /\b0%|0 de 0/.test(text)))
+          throw new Error("Equipe Produtiva rendered an unavailable source as zero.");
+        evidence.stage = `geometry:${theme}:${width}`;
+        const geometry = await page.evaluate(() => ({
+          width: innerWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+        }));
+        if (geometry.scrollWidth > geometry.width + 1)
+          throw new Error(`Equipe Produtiva overflows at ${theme}/${width}`);
+        evidence.stage = `accessibility:${theme}:${width}`;
+        const accessibility = await inspectAccessibility(
+          page,
+          route,
+          `productive-team-${width}`,
+          theme,
+        );
+        evidence.latestAccessibility = accessibility;
+        if (!accessibility.passed)
+          throw new Error(`Equipe Produtiva accessibility failed at ${theme}/${width}`);
+        evidence.stage = `screenshot:${theme}:${width}`;
+        const buffer = await captureComparableScreenshot(page);
+        const persistedBuffer = await capturePersistedScreenshot(page, buffer);
+        const screenshot = await saveLosslessWebp(
+          persistedBuffer,
+          path.join(destinationRoot, `${theme}-${width}.webp`),
+        );
+        evidence.screens.push({
+          width,
+          theme,
+          geometry,
+          accessibility,
+          unavailableCards: unavailableCards.length,
+          screenshot,
+        });
+      }
+    }
+    const period = page
+      .getByRole("region", { name: "Filtros de Equipe Produtiva" })
+      .locator('button[aria-haspopup="dialog"]');
+    evidence.stage = "keyboard:open";
+    await period.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("button", { name: "Fechar calendário", exact: true }),
+    ).toBeFocused();
+    evidence.stage = "keyboard:close";
+    await page.keyboard.press("Escape");
+    await expect(period).toBeFocused();
+    evidence.keyboard = true;
+    // Reuse the approved checkZoom method: resizing the CSS viewport also
+    // evaluates responsive media queries. CSS style.zoom does not do that.
+    const storageState = await page.context().storageState();
+    const browser = page.context().browser();
+    if (!browser) throw new Error("Equipe Produtiva requires an isolated browser.");
+    for (const level of zoomLevels) {
+      evidence.stage = `zoom:${level.percent}:context`;
+      const zoomContext = await browser.newContext({
+        viewport: { width: level.width, height: level.height },
+        deviceScaleFactor: level.deviceScaleFactor,
+        reducedMotion: "reduce",
+        locale: "pt-BR",
+        timezoneId: "America/Sao_Paulo",
+        serviceWorkers: "block",
+        httpCredentials,
+        storageState,
+      });
+      let zoomPage;
+      try {
+        await hideHomologationBannerForBaseline(zoomContext);
+        zoomPage = configureQaPage(await zoomContext.newPage());
+        zoomPage.on("pageerror", (error) => errors.push(error.message));
+        zoomPage.on("console", (message) => {
+          if (message.type() === "error") errors.push(message.text());
+        });
+        evidence.stage = `zoom:${level.percent}:content`;
+        await gotoWithServerRetry(zoomPage, `${origin}${route}`, { waitUntil: "domcontentloaded" });
+        await expect(
+          zoomPage.getByRole("heading", { name: "Equipe Produtiva", exact: true }),
+        ).toBeVisible();
+        const zoomCards = zoomPage.getByRole("region", { name: "Corretores produtivos por etapa" });
+        await expect(zoomCards.getByRole("heading")).toHaveCount(4);
+        evidence.stage = `zoom:${level.percent}:layout`;
+        await expect
+          .poll(
+            async () => {
+              evidence.zoomAfter = await readGeometry(zoomPage);
+              const geometry = evidence.zoomAfter;
+              return (
+                geometry.shellWidth !== null &&
+                geometry.layoutWidth !== null &&
+                geometry.railWidth !== null &&
+                Math.abs(
+                  geometry.layoutWidth - Math.max(1, geometry.shellWidth - geometry.railWidth),
+                ) <= 1 &&
+                geometry.scrollWidth <= geometry.width + 1
+              );
+            },
+            {
+              timeout: 10_000,
+              message: "Equipe Produtiva equivalent zoom must settle without horizontal overflow",
+            },
+          )
+          .toBe(true);
+        evidence.stage = `zoom:${level.percent}:screenshot`;
+        const buffer = await capturePersistedScreenshot(zoomPage, undefined, true);
+        const screenshot = await saveLosslessWebp(
+          buffer,
+          path.join(destinationRoot, `zoom-${level.percent}.webp`),
+        );
+        await expect(screenshot.width).toBe(1440);
+        await expect(screenshot.height).toBe(900);
+        evidence.zoomChecks.push({
+          percent: level.percent,
+          viewport: { width: level.width, height: level.height },
+          deviceScaleFactor: level.deviceScaleFactor,
+          geometry: evidence.zoomAfter,
+          screenshot,
+        });
+      } catch {
+        if (zoomPage) {
+          try {
+            evidence.failureGeometry = await readGeometry(zoomPage);
+            const buffer = await capturePersistedScreenshot(zoomPage, undefined, true);
+            evidence.failureScreenshot = await saveLosslessWebp(
+              buffer,
+              path.join(destinationRoot, "failure.webp"),
+            );
+          } catch {
+            evidence.failureCaptureUnavailable = true;
+          }
+        }
+        throw new Error("Equipe Produtiva equivalent zoom failed.");
+      } finally {
+        await zoomContext.close();
+      }
+    }
+    evidence.zoom = evidence.zoomChecks.length === zoomLevels.length;
+    if (!evidence.zoom || errors.length)
+      throw new Error("Equipe Produtiva zoom or browser errors failed.");
+    evidence.stage = "complete";
+    evidence.passed = true;
+    return evidence;
+  } catch {
+    evidence.failure = { stage: evidence.stage, kind: "sanitized" };
+    evidence.browserErrorCount = errors.length;
+    try {
+      if (!evidence.failureScreenshot) {
+        evidence.failureGeometry = await readGeometry();
+        const buffer = await capturePersistedScreenshot(page);
+        evidence.failureScreenshot = await saveLosslessWebp(
+          buffer,
+          path.join(destinationRoot, "failure.webp"),
+        );
+      }
+    } catch {
+      evidence.failureCaptureUnavailable = true;
+    }
+    throw new Error(
+      `Equipe Produtiva failed at ${evidence.stage}; inspect productive-team-results.json.`,
+    );
+  } finally {
+    await writeFile(
+      path.join(artifactRoot, "productive-team-results.json"),
+      JSON.stringify(evidence, null, 2),
+    );
+  }
+}
+
 async function checkZoom(
   origin,
   email,
@@ -5789,6 +6029,7 @@ function functionalChecksPassed({
   accessibilityChecks,
   screenshots,
   functionalChecks,
+  productiveTeamValidation,
   zoom,
 }) {
   return (
@@ -5811,6 +6052,7 @@ function functionalChecksPassed({
       .filter(({ approvedCanvasComparison }) => approvedCanvasComparison)
       .every(({ approvedCanvasComparison }) => approvedCanvasComparison.passed) &&
     visualCheckResultsPassed(functionalPlan, functionalChecks) &&
+    (functionalPlan.mode !== "full" || productiveTeamValidation?.passed === true) &&
     zoom.routes.length === visualRoutes.length * zoomLevels.length &&
     zoom.passed
   );
@@ -6025,6 +6267,7 @@ async function run() {
   let simulatorValidation = null;
   let tabelaoValidation = null;
   let directTableValidation = null;
+  let productiveTeamValidation = null;
   let archiveNavigation = null;
   let fixtureSourceMarker = null;
   let homologationCheckpoints = [];
@@ -6101,6 +6344,22 @@ async function run() {
         }
 
         if (viewport.key === "desktop-1440x900") {
+          // The new page has a dedicated contract outside the historical canvas
+          // catalogue. Full runs must preserve it; unrelated focused runs do not
+          // execute this page or turn a skipped contract into an approval.
+          if (functionalPlan.mode === "full") {
+            currentStage = "productive-team";
+            const productiveTeamPage = configureQaPage(await context.newPage());
+            try {
+              productiveTeamValidation = await checkProductiveTeam(
+                productiveTeamPage,
+                origin,
+                httpCredentials,
+              );
+            } finally {
+              await productiveTeamPage.close({ runBeforeUnload: false });
+            }
+          }
           await runFunctional(
             "repasse",
             async () => {
@@ -6547,6 +6806,7 @@ async function run() {
       accessibilityChecks,
       screenshots,
       functionalChecks,
+      productiveTeamValidation,
       zoom,
     });
     const visualComparisonsPassed = screenshots.every(
@@ -6593,6 +6853,7 @@ async function run() {
       simulatorValidation,
       tabelaoValidation,
       directTableValidation,
+      productiveTeamValidation,
       archiveNavigation,
       homologationCheckpoints,
       zoom,

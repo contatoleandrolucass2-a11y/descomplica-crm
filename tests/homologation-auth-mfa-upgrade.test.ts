@@ -128,6 +128,18 @@ describe("homologation Auth/MFA migration gate", () => {
     );
   });
 
+  it("keeps productive-team migrations outside the historical Auth/MFA deployment", async () => {
+    const manifest = await loadManifest();
+    const productiveVersions = ["20261102020840", "20261102020921"];
+    expect(manifest.nonDeployableRepositoryVersions).toEqual(
+      expect.arrayContaining(productiveVersions),
+    );
+    for (const version of productiveVersions) {
+      expect(manifest.baselineVersions).not.toContain(version);
+      expect(manifest.candidates.map((candidate) => candidate.version)).not.toContain(version);
+    }
+  });
+
   it("requires a fresh typed backup and isolated restore proof", () => {
     expect(
       validateBackupProof(backupProof, {

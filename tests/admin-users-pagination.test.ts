@@ -593,7 +593,7 @@ describe("paginação server-side da administração de usuários", () => {
     expect(from).toHaveBeenCalledOnce();
     expect(rpc).toHaveBeenCalledExactlyOnceWith("get_user_directory_contract");
   });
-  it.each([66, 74, 82])(
+  it.each([67, 75, 83])(
     "aceita catálogo com %i chaves e herança Admin integral do banco",
     async (size) => {
       const excluded = new Set([
@@ -618,8 +618,8 @@ describe("paginação server-side da administração de usuários", () => {
       ];
       const keys = Object.keys(PERMISSIONS).filter(
         (key) =>
-          (size === 82 || !usefulLinksPermissionKeys.includes(key)) &&
-          (size !== 66 || !excluded.has(key)),
+          (size === 83 || !usefulLinksPermissionKeys.includes(key)) &&
+          (size !== 67 || !excluded.has(key)),
       );
       const row = profile(1);
       const results = currentSchemaResults([row], 1);
@@ -636,9 +636,9 @@ describe("paginação server-side da administração de usuários", () => {
         page: { roleDefaults: { admin: keys }, users: [{ inheritedPermissions: keys }] },
       });
       expect(keys).toHaveLength(size);
-      expect(keys.includes("crm.management.forecast.view")).toBe(size !== 66);
+      expect(keys.includes("crm.management.forecast.view")).toBe(size !== 67);
       expect(keys.filter((key) => key.startsWith("crm.useful_links."))).toEqual(
-        size === 82 ? usefulLinksPermissionKeys : [],
+        size === 83 ? usefulLinksPermissionKeys : [],
       );
     },
   );

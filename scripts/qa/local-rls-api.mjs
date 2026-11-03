@@ -63,6 +63,7 @@ const rankingPageKeys = pageKeysForPermissions("crm.ranking.view");
 const partnershipPageKeys = pageKeysForPermissions("crm.partnerships.view");
 const forecastPageKeys = pageKeysForPermissions("crm.management.forecast.view");
 const administrativeCommercialPageKeys = pageKeysForPermissions(
+  "crm.productive_team.view",
   "crm.settings.view",
   "crm.settings.manage",
   "crm.repasse.view",

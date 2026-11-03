@@ -37,6 +37,7 @@ const icons = {
   "crm.stage.folders": FolderOpen,
   "crm.stage.sales": CircleDollarSign,
   "crm.repasse": Handshake,
+  "crm.productive_team": Users,
 };
 
 type DashboardSidebarContextValue = {
@@ -60,7 +61,6 @@ export function DashboardShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
-  if (pathname !== "/app/etapas/agendamentos") return children;
   // Only the server-authorized catalog supplies destinations, including profiles
   // with access to a stage but without access to the overview.
   const dashboardPages = pages
@@ -71,7 +71,11 @@ export function DashboardShell({
   if (!activePage) return children;
 
   return (
-    <AppointmentsDashboardShell pages={dashboardPages} activePageKey={activePage.key}>
+    <AppointmentsDashboardShell
+      key={pathname}
+      pages={dashboardPages}
+      activePageKey={activePage.key}
+    >
       {children}
     </AppointmentsDashboardShell>
   );
@@ -86,8 +90,7 @@ function AppointmentsDashboardShell({
   activePageKey: string;
   children: ReactNode;
 }) {
-  // Mount only on the appointments route, so pointer/focus state cannot remain
-  // expanded when navigating away and returning through browser history.
+  // Remount on each Dashboard destination so pointer/focus state resets.
   const [hovered, setHovered] = useState(false);
   const [keyboardFocused, setKeyboardFocused] = useState(false);
   const collapsed = !hovered && !keyboardFocused;

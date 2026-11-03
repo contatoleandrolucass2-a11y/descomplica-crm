@@ -60,6 +60,12 @@ sem ocultá-las nem ampliar a tolerância de regressão visual.
 
 ## Mapeamento das páginas
 
+A rota `/app/equipe-produtiva`, solicitada em 01/11/2026, possui
+[contrato visual e validação próprios](../equipe-produtiva/README.md). Os prints
+do pedido orientam seus filtros e quatro indicadores; não foi criada referência
+externa fictícia nem alterada a baseline de outra página. A rota participa da
+matriz autenticada completa, além do preview sintético específico.
+
 O pedido de 04/10/2026 acrescenta `/app/configuracoes/recurso-mkt` como 23a
 pagina protegida. A guia usa o padrao da Tabela Associativo e o print fornecido
 para fundo, custo, percentuais, destinos e conversoes. O pedido de 11/10/2026

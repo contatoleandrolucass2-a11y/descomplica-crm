@@ -746,6 +746,7 @@ export function analyzeAppointments(
     dailyAverage: selectedCoveredDays > 0 ? total / selectedCoveredDays : null,
     dailyAverageGoal,
     brokerCount: filteredBrokerCount,
+    filteredBrokerRoster: filteredRoster,
     plannedToday: todayGoal,
     todayGoal,
     yesterdayGoal,

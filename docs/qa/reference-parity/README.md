@@ -1,5 +1,71 @@
 # Baseline e QA visual — fundação de paridade
 
+## Permissão de Equipe Produtiva em Usuários tablet — 02/11/2026
+
+A CI `41516437878`, head `25e58c96` e captura `7fcd96ce`, passou todos os
+contratos funcionais, axe, zoom e Team. Somente Usuários 768×1024 excedeu pixels:
+15.601 (1,0291%). Revisão independente confirmou contagens 75→76/49→50 e o novo
+item; comparado ao candidato anterior, os únicos 3.649 pixels diferentes estão
+em avatar/email sintéticos. Geometria e todos os demais pixels são idênticos.
+Promovida somente essa imagem, preservando os outros 241 registros e imagens.
+
+Artefato `13179407589`, ZIP SHA256
+`1a6e331e4406f2f0c56ff0e205971238da5bdae4064552c94f94b43e5bc6987b` conferido.
+O fingerprint `08e116e4d19d4175868e26c47a0ebcd81c97369833370ce3a27deb9cbcd28eea`
+foi reproduzido com diff vazio e os 19 outputs sintéticos do próprio artefato.
+Árvore da captura igual ao head: `1225d6e966e7a6e5c10a0f813a1a9423eac0506b`.
+Dirty e resultado geral falho permanecem registrados em `reviewedUpdates`.
+Esta exceção vale somente para essa captura; limiares continuam 1%/16.
+Nova CI do candidato integrado é obrigatória antes de merge e publicação.
+
+## Permissão de Equipe Produtiva em Usuários móvel — 02/11/2026
+
+A CI `41503395675`, head `791b2a82` e merge de teste
+`91073e44171890f88841cc4d2ab7d0ab2096123f`, aprovou todos os contratos funcionais,
+154 telas responsivas, 88 temas, 242 axe, 110 zooms, 22 canvases e Team seis telas
+mais cinco zooms. A comparação de pixels falhou somente em quatro imagens móveis
+de Usuários, pelo item Equipe Produtiva, contadores e identidade sintética.
+Administração e Páginas passaram contra suas referências originais.
+
+Os quatro pares foram revisados. O mapa de pixels não mostrou mudanças fora de
+identidade, contadores e matriz de permissões; o teste com DOM real em 375/320,
+três temas e dois estados de usuário passou 12 casos nas duas ordens CSS.
+Somente essas quatro imagens foram promovidas pelo helper transacional; os
+outros 238 registros e imagens desta etapa ficaram intactos.
+
+Artefato `13174480600`, ZIP SHA256
+`db5261b81d84a9ce3f10ea48647bc8fc6d3a0ebe1e5718a160d418b48f57d35b` conferido.
+O flag `worktreeDirtyAtCapture: true` foi preservado: o fingerprint
+`68387cf2ed328ce1f94b18a5bd8839775ff5e60a3df276e4f7077c80d0e30d7e` foi
+reproduzido exatamente com diff rastreado vazio e os 19 outputs sintéticos de
+Conectar Sistemas presentes no artefato. A árvore do merge de teste é idêntica à
+do head. Essa prova vale somente para essa captura; qualquer fonte diferente,
+output ausente ou fingerprint divergente exige nova captura. `reviewedUpdates`
+mantém a origem real, o resultado geral falho e o escopo aprovado. Não se altera
+o limiar 1%/16. Nova CI de verificação continua obrigatória antes do merge.
+
+## Sidebar de Equipe Produtiva em 02/11/2026
+
+Captura protegida `41495047808` no SHA exato `1e43cdfbaf9a8bab83decbf0fa185880d701c309`,
+árvore limpa. Artefato `13169150433`, ZIP SHA256
+`b8a04491cce4b19850ab23605c423058981ce7acce34e17c8f7199d11523f442` conferido.
+Passaram 154 telas responsivas, 88 temas, 242 auditorias axe, 110 zooms e o
+contrato dedicado de Equipe Produtiva (seis telas, cinco zooms e teclado).
+
+Somente 55 referências de Visão Geral, Oportunidades, Visitas, Pastas e Vendas
+foram promovidas pelo helper transacional existente, após a revisão do sidebar
+solicitado. O coordenador inspecionou oito representantes em desktop, tablet,
+celular e temas; a revisão independente cobriu as 33 variantes das três últimas
+etapas. Métricas e testes cobrem as 55. Tabelas móveis conservam rolagem própria;
+recortes internos já existentes nos cards estreitos do Dashboard não foram
+redesenhados. Isso não constitui uma aprovação geral desses layouts legados.
+
+As outras 187 imagens e sua proveniência foram preservadas, incluindo todas as
+referências administrativas. Os empates de CSS Admin são corrigidos contra a
+referência existente, sem absorver sua deriva. `reviewedUpdates` registra SHA,
+árvore, hashes e escopo desta promoção. Os limiares continuam 1%/16; CI normal
+em modo de verificação do candidato final permanece obrigatória.
+
 ## Sidebar automatico de Agendamentos em 31/10/2026
 
 CI `41201061134`, captura `d25b38d38b854adfcf4eb592d3876643b1d828ff`,

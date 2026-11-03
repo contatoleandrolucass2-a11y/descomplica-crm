@@ -65,6 +65,21 @@ aplicadas. Implementação, testes e publicação desta nova alteração pendent
 
 ## Reconciliação após CI aprovada
 
+A segunda CI41555902549 também aprovou os quatro jobs do heada00b9bb4.
+Main avançou para6a0b1df5 e a proteção strict do GitHub recusou a integração
+como BEHIND (três checks exigidos na base atual). A nova integração local
+preservou integralmente a entrega concorrente, sem conflitos de código.
+Dependências compartilhadas de Agendamentos mantêm defaults e acrescentam
+somente filteredBrokerRoster; testes focados foram reconferidos na combinação.
+
+As migrations20261102020840/20261102020921 da entrega concorrente não estavam
+no ledger de produção na consulta observacional. Não foram aplicadas por este
+chat. Revisão restrita de compatibilidade constatou: menu usa app_pages
+persistidas/autorizadas, guard exige página ativa e RPC ausente falha como
+indisponível. Portanto app-first não demonstra quebra de Agendamentos; isso
+não conclui nem autoriza ativar Equipe Produtiva. CI completa da combinação
+e do main exato permanecem obrigatórias antes da publicação.
+
 CI41534244751 aprovou os quatro jobs do head10c6132a. Antes do merge, main
 avançou para855f32d6 com uma atualização autorizada do protocolo de publicação.
 O GitHub recusou o merge por conflito somente em CHANGELOG, WORKLOG e índice

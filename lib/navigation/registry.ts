@@ -20,6 +20,18 @@ export interface RegisteredPage {
 // Run pnpm pages:sync after editing. CI rejects unregistered routes or a stale migration.
 export const PAGE_REGISTRY = [
   {
+    pageKey: "crm.productive_team",
+    path: "/app/equipe-produtiva",
+    permission: "crm.productive_team.view",
+    releaseEnabled: true,
+    name: "Equipe Produtiva",
+    description: "Corretores com agendamentos, visitas, pastas e vendas no período.",
+    section: "crm",
+    parentKey: "crm.dashboard",
+    sortOrder: 65,
+    isNavigation: true,
+  },
+  {
     pageKey: "crm.dashboard",
     path: "/app",
     permission: "crm.dashboard.view",
