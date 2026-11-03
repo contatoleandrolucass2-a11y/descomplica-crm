@@ -19,6 +19,7 @@ import {
 } from "../../etapas/_components/AppointmentsDashboard";
 import shared from "../../etapas/_components/AppointmentsDashboard.module.css";
 import styles from "./ProductiveTeamDashboard.module.css";
+import { ProductiveTeamDetails } from "./ProductiveTeamDetails";
 
 const labels = {
   appointments: ["Agendamentos", "agendamentos"],
@@ -185,6 +186,21 @@ export function ProductiveTeamDashboard({
               productive={card?.productiveBrokers ?? null}
               brokers={card?.brokerCount ?? null}
               percent={card?.percent ?? null}
+              details={{
+                title: `Equipe Produtiva — ${labels[stage][0]}`,
+                className: styles.detailsDialog,
+                content: (
+                  <ProductiveTeamDetails
+                    productiveMembers={card?.productiveMembers ?? null}
+                    unproductiveMembers={card?.unproductiveMembers ?? null}
+                    unavailableDetail={
+                      card?.unavailableReason
+                        ? unavailable[card.unavailableReason]
+                        : "Não foi possível carregar a lista de corretores para este indicador."
+                    }
+                  />
+                ),
+              }}
               unavailableDetail={
                 card?.unavailableReason
                   ? unavailable[card.unavailableReason]

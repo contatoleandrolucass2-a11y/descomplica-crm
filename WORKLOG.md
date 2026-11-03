@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-11-03 — Equipe Produtiva: detalhes nominais
+
+- Pop-up dos quatro cards mostra tabelas de Equipe Produtiva e Equipe não
+  Produtiva, com Regional, Gerente de Vendas e Responsável em ordem alfabética.
+- Listas particionam o mesmo cadastro filtrado e as mesmas identidades do card;
+  preservam números, regras, permissões e indisponibilidade. Sem nova coleta,
+  endpoint ou migration. Vínculo regional ausente/ambíguo aparece não informado.
+- Conteúdo nominal renderiza ao abrir o pop-up. Tabelas ficam lado a lado no
+  desktop e empilhadas no celular, com nomes integrais e fechamento fixo durante
+  a rolagem. Extensão opcional do card compartilhado mantém os demais detalhes.
+- Validação local: 20 testes de análise, 13 de apresentação/regressão, tipos e
+  lint aprovados. Chromium aprovou 48 combinações, 72 aberturas e listas de 180
+  nomes no desktop/celular, além do filtro, Escape e retorno do foco. A correção
+  do limite de altura do modal foi validada sem relaxar o contrato.
+
 ## 2026-11-03 — Equipe Produtiva: ajuste visual publicado
 
 - PR #479 integrado em f3c4f126; CI 41585221159 aprovou os quatro gates.
