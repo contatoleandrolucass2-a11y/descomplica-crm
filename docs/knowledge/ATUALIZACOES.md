@@ -2,9 +2,8 @@
 
 - Agendamentos 03/11: [metas, média inteira e vencidos](ATUALIZACOES-ARQUIVO-2026-11-03-a-2026-11-03-AGENDAMENTOS-METAS.md).
 
-- 03/11/2026, 08:38 São Paulo: abertura dos detalhes nominais de Equipe
-  Produtiva. Main 093453c6/CI 41592078541 aprovada; health 200/ok em f3c4f126.
-  Escopo e fontes no registro da página abaixo.
+- 03/11/2026: tabelas de Equipe Produtiva publicadas em 82ee8deb, com CI
+  41654312258 aprovada e health 200/ok. Evidências no registro da página abaixo.
 
 - 03/11/2026: Equipe Produtiva compacta publicada em f3c4f126, CI 41585221159
   com quatro gates aprovados e health 200/ok. Vidro e menu externo confirmados;

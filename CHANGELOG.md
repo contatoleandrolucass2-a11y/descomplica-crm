@@ -1,5 +1,8 @@
 # Changelog
 
+- Publica as tabelas de Equipe Produtiva e Equipe não Produtiva dos quatro
+  indicadores em 82ee8deb, após validação e promoção coordenada.
+
 - Corrige vencidos de Agendamentos pela data prevista, mantém a contagem
   legível no hover e remove o bloco informativo/exportação das tabelas.
   Média anual arredondada para cima; metas semanal e mensal usam referências

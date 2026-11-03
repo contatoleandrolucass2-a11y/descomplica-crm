@@ -590,3 +590,74 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
   Responsável, Escape e retorno do foco, sem ampliar tolerâncias. Evidências:
   test-results/productive-team-layout/current/evidence.json e capturas details-\*.png.
   Cabeçalho/dados locais sintéticos; CI/merge/publicação ainda pendentes.
+
+### Integração e bloqueio de concorrência — 03/11/2026
+
+- PR #481 integrado em 1f155c6b7345b781868f43ada41295f8967a7f92; CI do PR
+  41630586257 e da main 41639086133 aprovaram os quatro gates. Contrato
+  autenticado: 24 aberturas, seis capturas de detalhes com acessibilidade,
+  teclado/zoom e geometria aprovados. Fixtures do runtime sem fontes nominais
+  confirmaram indisponibilidade; partição positiva foi validada localmente.
+- Imagem 1f155c6b homologada, mas o coordenador recusou a promoção antes de
+  qualquer troca: main avançou para 950dfb9a01f7f972b2fa1e8fbf193e35b0315de4
+  pelo PR #482 (Agendamentos). Produção segue f3c4f126, deployment b66918d3,
+  pendingDeploymentId=null e health HTTP 200/status ok. Não houve recuperação
+  nem redefinição automática do estado esperado.
+- Conferência ao vivo em 03/11, após 13:45 UTC: PR #482 tem quatro gates
+  aprovados; CI da nova main 41647058472 em execução. Mudanças compartilhadas
+  preservam CardDetails e a partição de Equipe Produtiva; apenas metas/tabelas
+  de Agendamentos mudaram nessa base. Nenhuma migration acrescentada.
+- Prosseguir somente com CI/imagem da main exata ou reconhecer candidato já
+  ativo; nunca promover 1f155c6b após avanço da main. Evidências: GitHub PRs
+  #481/#482, runs citados, release:production status e health público.
+
+### Janela coordenada de publicação — 03/11/2026
+
+- Coordenação da entrega CAIXA comunicou janela para integrar PR #478,
+  aprovar a CI da main exata e publicar. Aguardar sem novos merges/deploys;
+  preservar código e gates, sem criar locks alternativos ou cancelar entregas.
+- GitHub confirma head 6e5d90cd63d6eba1a59cc6d2024cfe7595aac609 do PR #478:
+  validate, imagem e restore aprovados; release-gates em execução na CI 41647692259. Ancestralidade Git confirma inclusão de 1f155c6b (tabelas de
+  Equipe Produtiva) e da main 950dfb9a. Não foi lido histórico privado de chat.
+- Esta demanda mantém sua verificação pendente até confirmar a versão ativa,
+  sua CI/imagem aprovadas e os detalhes de Equipe Produtiva nessa versão.
+  Nenhuma publicação, merge adicional ou alteração da CAIXA foi feita aqui.
+
+## Detalhes nominais publicados — 03/11/2026
+
+- Implementação do PR #481, merge 1f155c6b7345b781868f43ada41295f8967a7f92,
+  incluída na publicação coordenada 82ee8deb38b5c86f9781504f60c673ee69d9ab44
+  pelo PR #478, sobre a base do PR #482. Ancestralidade Git conferida; nenhum
+  arquivo de Equipe Produtiva, análise nominal ou extensão CardDetails mudou
+  entre 950dfb9a e 82ee8deb. Não houve alteração da CAIXA por este chat.
+- CI do PR #481 (41630586257), da sua main 1f155c6b (41639086133) e da base
+  950dfb9a (41647058472) aprovadas nos quatro gates, incluindo matriz completa
+  e contrato de Equipe Produtiva. Novo runtime 82ee8deb aprovado nos quatro
+  gates em 41654312258; matriz focada em simuladores conforme o diff da CAIXA.
+  Contrato nominal anterior reutilizado para os componentes inalterados,
+  sem transformar cobertura focada em nova aprovação da matriz completa.
+- Aceite local: 20 testes de análise e 13 de apresentação/regressão, lint e
+  tipos aprovados; 48 cenários de layout e 72 aberturas dos quatro pop-ups,
+  dois grupos de 90 em lista de 180, filtro, nomes integrais, rolagem, Escape
+  e foco aprovados. Fonte ausente distinta de equipe vazia. Dados sintéticos.
+- Aceite no runtime Next isolado: 24 aberturas dos quatro indicadores nos
+  três temas/duas larguras, tabelas e cabeçalhos corretos, indisponibilidade,
+  geometria, teclado/zoom aprovados; seis capturas de detalhes com axe aprovado.
+  Sem fontes nominais nesse runtime: partição com nomes confirmada nos testes
+  de dados e navegador com fixtures positivas, sem consultar nomes em produção.
+- Ledger do coordenador e Docker conferidos após a janela: deployment
+  1d4c8ac7-f800-4513-ac2b-48ba4fd192a2, SHA 82ee8deb, imagem ativa
+  sha256:4aaa101b9e02da54ea2435095ce4a82543842d9396be3a1ea51be4b3ab5d3b0b,
+  label de revisão correspondente e pendingDeploymentId=null. Publicado em
+  2026-11-03T15:35:48.568Z (12:35:48.568 America/Sao_Paulo). Imagem anterior
+  f3c4f126/sha256:8f0382311f406b762fed486aa6c0b22f8e0f2592b18307832dc75d30e9494606
+  preservada. Nenhum segundo deploy, retag ou recuperação foi executado aqui.
+- Pós-publicação observacional: health HTTP 200/status ok/version 82ee8deb;
+  /app/equipe-produtiva e /app/etapas/agendamentos retornam HTTP 307 para login
+  sem sessão. CSS da imagem ativa contém tabelas nominais, vidro e shell da
+  página. Fontes: https://crm.descomplicapro.com.br/api/health, Docker,
+  release:production status e runs GitHub citados. Nenhuma migration nova.
+- Dados: nomes já pertenciam ao read model autorizado. Regional ausente,
+  conflitante ou instável no período continua Não informado. Não houve nova
+  coleta, concessão, endpoint ou remoção de masking. Registro final somente
+  documental; sincronizar Obsidian e não reiniciar o runtime para este registro.
