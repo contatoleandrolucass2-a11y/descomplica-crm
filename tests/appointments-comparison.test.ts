@@ -35,6 +35,20 @@ function slice(overrides: Partial<DashboardAnalysisSlice> = {}): DashboardAnalys
 }
 
 describe("appointment month comparison", () => {
+  it("rounds each covered daily annual average upward to an integer and preserves zero", () => {
+    const result = buildAppointmentComparison(
+      slice({
+        coverageStart: "2026-01-01",
+        referenceDate: "2026-02-28",
+        facts: [fact("2026-01-01", 2), fact("2026-02-01", 3), fact("2026-01-03", 1)],
+      }),
+      { month: "2026-02" },
+    );
+    expect(result.series[2].values.slice(0, 3)).toEqual([3, 0, 1]);
+    expect(result.series[0].values[0]).toBe(3);
+    expect(result.series[1].values[0]).toBe(2);
+  });
+
   it("aligns January with the previous December and keeps future days unknown", () => {
     const result = buildAppointmentComparison(
       slice({
@@ -120,7 +134,7 @@ describe("appointment month comparison", () => {
     const november = buildAppointmentComparison(input, { month: "2026-11" });
     expect(november.series[0].values.every((value) => value === null)).toBe(true);
     expect(november.series[1].values[0]).toBe(4);
-    expect(november.series[2].values[0]).toBe(0.4); // Ten covered months, not twelve.
+    expect(november.series[2].values[0]).toBe(1); // Ceiling of 0.4 across ten covered months.
     expect(november.days).toHaveLength(30);
     expect(november.series[2].values).toHaveLength(30);
     const nextYear = buildAppointmentComparison(input, { month: "2027-02" });
@@ -202,7 +216,7 @@ describe("appointment month comparison", () => {
     });
     expect(result.series[0].values[0]).toBe(2);
     expect(result.series[1].values[0]).toBe(1);
-    expect(result.series[2].values[0]).toBe(1.5);
+    expect(result.series[2].values[0]).toBe(2);
     const inactive = buildAppointmentComparison(input, {
       month: "2026-03",
       filters: { owner: "Sem atividade", channel: 1 },

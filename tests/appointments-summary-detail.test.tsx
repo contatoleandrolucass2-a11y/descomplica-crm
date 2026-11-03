@@ -257,6 +257,7 @@ describe("lossless appointment summary and separate operational pages", () => {
     expect(html).toContain("Carregando todos os registros…");
     expect(html).not.toContain("Próxima página");
     expect(html).not.toContain("Página anterior");
-    expect(html).toContain("Exportar CSV completo");
+    expect(html).not.toContain("Exportar CSV completo");
+    expect(html).not.toContain("PDF: visualização atual");
   });
 });

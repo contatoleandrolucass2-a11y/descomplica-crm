@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-11-03 — Agendamentos: metas e vencidos
+
+- PR474 e CI integrada41575950480 confirmados concluídos; código já incorporado
+  à produção f3c4f126 por publicação posterior. Nova etapa parte de main093453c6.
+- Média anual arredondada na origem; linha semanal única usa a maior soma
+  semanal do mês e não cai ao selecionar uma semana/dia menor. Linha mensal
+  usa o cadastro de corretores; meta aparece abaixo do máximo do gráfico.
+- Vencidos passam a usar scheduledAt (previsto) anterior ao dia atual SP,
+  sem visita, com coluna própria de data prevista. attendedAt continua a data
+  real na tabela geral; nenhum dado ausente é inferido pela criação.
+- Removidos texto informativo e botão CSV da interface das tabelas; leitura
+  integral, contrato de exportação no servidor e estados recuperáveis mantidos.
+  Contagem fica abaixo do título, fora da faixa flutuante das ferramentas.
+- Testes focados de cálculo/dados/componentes, tipos e lint aprovados; QA
+  visual integrado e publicação são etapas posteriores, registradas no arquivo
+  AGENDAMENTOS-METAS de03/11. Sem migration ou alteração de permissões.
+
 ## 2026-11-03 — Equipe Produtiva: detalhes nominais
 
 - Pop-up dos quatro cards mostra tabelas de Equipe Produtiva e Equipe não
