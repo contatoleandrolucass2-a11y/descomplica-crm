@@ -45874,7 +45874,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "reviewed_caixa_layout_update",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
@@ -46724,7 +46724,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "reviewed_caixa_layout_update",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
@@ -47574,7 +47574,7 @@
       "theme": "balanced",
       "visualComparison": {
         "passed": true,
-        "reason": "reviewed_caixa_layout_update",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
@@ -48589,7 +48589,7 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "reviewed_caixa_layout_update",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
@@ -49516,7 +49516,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "reviewed_caixa_layout_update",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 921600,
         "changedPixelRatio": 0,
@@ -52060,7 +52060,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "reviewed_caixa_layout_update",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 552630,
         "changedPixelRatio": 0,
@@ -52910,7 +52910,7 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "reviewed_caixa_layout_update",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 552630,
         "changedPixelRatio": 0,
@@ -53760,7 +53760,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "reviewed_caixa_layout_update",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 531375,
         "changedPixelRatio": 0,
@@ -54598,7 +54598,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "reviewed_caixa_layout_update",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 578880,
         "changedPixelRatio": 0,
