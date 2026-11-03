@@ -295,6 +295,41 @@ test("a successful documentation-only main run never authorizes runtime publicat
   assert.throws(() => assertApprovedCandidate(candidate, targetSha), /exactly one/);
 });
 
+test("manual main execution requires the exact SHA and all four executed gates", () => {
+  const candidate = approval();
+  candidate.run.event = "workflow_dispatch";
+  assert.doesNotThrow(() => assertApprovedCandidate(candidate, targetSha));
+  for (const patch of [
+    { head_branch: "feature" },
+    { head_sha: currentSha },
+    { status: "in_progress" },
+  ]) {
+    assert.throws(() =>
+      assertApprovedCandidate({ ...candidate, run: { ...candidate.run, ...patch } }, targetSha),
+    );
+  }
+  assert.throws(() => assertApprovedCandidate({ ...candidate, mainSha: currentSha }, targetSha));
+  for (const name of jobNames) {
+    for (const conclusion of ["skipped", "failure", "cancelled"]) {
+      assert.throws(() =>
+        assertApprovedCandidate(
+          {
+            ...candidate,
+            jobs: candidate.jobs.map((job) => (job.name === name ? { ...job, conclusion } : job)),
+          },
+          targetSha,
+        ),
+      );
+    }
+    assert.throws(() =>
+      assertApprovedCandidate(
+        { ...candidate, jobs: candidate.jobs.filter((job) => job.name !== name) },
+        targetSha,
+      ),
+    );
+  }
+});
+
 test("rejects a changed remote main, pull-request CI, another SHA, and unsuccessful runs", () => {
   assert.throws(() => assertApprovedCandidate({ ...approval(), mainSha: currentSha }, targetSha));
   assert.throws(() => assertApprovedCandidate(approval(), "main"));
@@ -302,7 +337,7 @@ test("rejects a changed remote main, pull-request CI, another SHA, and unsuccess
     id: [undefined, 0, -1, "123", NaN, 1.5, Number.MAX_SAFE_INTEGER + 1],
     status: [undefined, "in_progress", "queued"],
     conclusion: [undefined, null, "failure", "cancelled", "skipped"],
-    event: [undefined, "pull_request", "workflow_dispatch", "workflow_run"],
+    event: [undefined, "pull_request", "workflow_run", "schedule"],
     head_branch: [undefined, "feature"],
     head_sha: [undefined, currentSha],
   })) {
