@@ -33,7 +33,7 @@ export async function readAppointmentDetailsAction(
     const model = await loadAppointmentsReadModel(request.query.view);
     if (appointmentSnapshotIdentity(model) !== request.snapshot)
       return { status: "snapshot_changed" };
-    return appointmentDetailPage(model, request.query, request.cursor);
+    return appointmentDetailPage(model, request.query, request.cursor, request.all);
   } catch (error) {
     return {
       status:

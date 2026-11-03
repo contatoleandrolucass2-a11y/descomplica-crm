@@ -36,6 +36,122 @@ beforeEach(() => {
   });
 });
 describe("authorized appointment detail server functions", () => {
+  it("returns every authorized row in one full read without changing default pagination", async () => {
+    const model = appointmentModel();
+    const input = { query, snapshot: appointmentSnapshotIdentity(model) };
+    const partial = await readAppointmentDetailsAction(input);
+    expect(partial.status === "ready" && partial.rows?.length).toBe(50);
+    const all = await readAppointmentDetailsAction({ ...input, all: true, cursor: null });
+    expect(all).toMatchObject({
+      status: "ready",
+      total: 123,
+      offset: 0,
+      nextCursor: null,
+      previousCursor: null,
+    });
+    if (all.status !== "ready") throw new Error("Expected complete read");
+    expect(all.rows).toHaveLength(123);
+    expect(new Set(all.rows!.map((row) => row.accountName)).size).toBe(123);
+    expect(all.rows!.some((row) => row.accountName === "Conta sintética 00122")).toBe(true);
+    expect(mocks.authorize).toHaveBeenCalledTimes(2);
+    expect(mocks.views).toHaveBeenCalledTimes(2);
+    expect(mocks.load).toHaveBeenCalledTimes(2);
+  });
+  it("applies owner filters and field masking before a complete read", async () => {
+    const model = appointmentModel();
+    model.analysis.appointments = model.analysis.appointments.map((row) => ({
+      ...row,
+      accountName: "",
+      accountRanking: "",
+    }));
+    mocks.load.mockResolvedValue(model);
+    const all = await readAppointmentDetailsAction({
+      query: { ...query, filters: { owner: "Corretor A" } },
+      snapshot: appointmentSnapshotIdentity(model),
+      all: true,
+    });
+    expect(all).toMatchObject({
+      status: "ready",
+      total: 62,
+      offset: 0,
+      nextCursor: null,
+      previousCursor: null,
+    });
+    expect(
+      all.status === "ready" &&
+        all.rows!.every(
+          (row) =>
+            row.owner === "Corretor A" && row.accountName === "" && row.accountRanking === "",
+        ),
+    ).toBe(true);
+  });
+  it("returns all overdue rows after filtering the entire snapshot, with civil-date boundaries", async () => {
+    const model = appointmentModel(127);
+    model.analysis.appointments = model.analysis.appointments.map((row, index) => ({
+      ...row,
+      visitPerformed: index === 123,
+      attendedAt:
+        index === 124
+          ? null
+          : index === 125
+            ? "2026-10-31T03:00:00Z"
+            : index === 126
+              ? "2026-11-01T03:00:00Z"
+              : "2026-10-31T02:59:59Z",
+    }));
+    mocks.load.mockResolvedValue(model);
+    const all = await readAppointmentDetailsAction({
+      query: { ...query, subset: "overdue" },
+      snapshot: appointmentSnapshotIdentity(model),
+      all: true,
+    });
+    expect(all).toMatchObject({
+      status: "ready",
+      total: 123,
+      offset: 0,
+      nextCursor: null,
+      previousCursor: null,
+    });
+    if (all.status !== "ready") throw new Error("Expected complete overdue read");
+    expect(all.rows).toHaveLength(123);
+    expect(
+      all.rows!.every((row) => !row.visitPerformed && row.attendedAt === "2026-10-31T02:59:59Z"),
+    ).toBe(true);
+  });
+  it("rejects malformed complete modes and any combined cursor before reading a model", async () => {
+    const input = { query, snapshot: appointmentSnapshotIdentity(appointmentModel()) };
+    for (const malformed of [
+      { ...input, all: false },
+      { ...input, all: "true" },
+      { ...input, all: true, cursor: "foreign" },
+      { ...input, all: true, cursor: "" },
+      { ...input, query: { ...query, all: true } },
+    ])
+      expect(await readAppointmentDetailsAction(malformed)).toEqual({ status: "invalid_request" });
+    expect(mocks.load).not.toHaveBeenCalled();
+    await expect(
+      readAppointmentDetailsAction({
+        ...input,
+        all: true,
+        query: { ...query, view: "with_canal_imob" },
+      }),
+    ).rejects.toThrow("forbidden");
+    expect(mocks.load).not.toHaveBeenCalled();
+  });
+  it("keeps full reads bound to the authorized snapshot and source availability", async () => {
+    const input = { query, snapshot: appointmentSnapshotIdentity(appointmentModel()), all: true };
+    mocks.load.mockResolvedValueOnce({
+      ...appointmentModel(),
+      generatedAt: "2026-11-01T12:00:00Z",
+    });
+    expect(await readAppointmentDetailsAction(input)).toEqual({ status: "snapshot_changed" });
+    expect(
+      await readAppointmentDetailsAction({ ...input, query: { ...query, month: "2026-11" } }),
+    ).toEqual({ status: "unavailable" });
+    mocks.authorize.mockRejectedValueOnce(new Error("revoked"));
+    await expect(readAppointmentDetailsAction(input)).rejects.toThrow("revoked");
+    expect(mocks.load).toHaveBeenCalledTimes(2);
+  });
   it("returns unavailable instead of an empty CSV for a month outside snapshot coverage", async () => {
     const input = {
       query: { ...query, month: "2026-11", calendarDate: "2026-11-02" },
