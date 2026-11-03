@@ -128,3 +128,7 @@ O registro da outra entrega e suas regras não foram removidos ou reescritos.
 ## Reconciliação documental de main em 03/11 UTC
 
 Main avançou de6a0b1df5 para b19da16a somente por registro da publicação CAIXA. Conflitos limitados a WORKLOG/CHANGELOG preservaram ambos os blocos. Código funcional inalterado; resultados focados reutilizados, mas proteção strict exige nova CI do head atualizado. O índice voltou a exceder256000bytes com a nota concorrente; somente a própria nota histórica de Agendamentos acima foi movida integralmente, com referência, sem reescrever a outra entrega. Produção foi atualizada por outro coordenador para6a0b1df5; a próxima promoção deve usar consulta ao vivo e CAS novos.
+
+## Reconciliação com registro de Equipe Produtiva
+
+Durante CI41568899145, main avançou de b19da16a para38bec742 somente em CHANGELOG, WORKLOG e arquivo de conhecimento de outra entrega. Merge local limpo preservou esses documentos. Código de Agendamentos permanece inalterado; não há novo teste local justificado. A proteção strict exige CI do novo head antes de integrar. Sem migration, mudança de permissão ou ação sobre dados remotos por este chat.
