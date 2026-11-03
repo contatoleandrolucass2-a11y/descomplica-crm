@@ -10971,3 +10971,12 @@ b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigi
   modal central em desktop/mobile, Imprimir habilitado, Escape/foco e Limpar.
 - Evidências de CI e publicação detalhadas em ATUALIZACOES; fórmulas preservadas.
   Registro documental posterior não reinicia a aplicação.
+
+### Obsidian — limite de exportação resolvido em03/11/2026
+
+- Move19 seções CAIXA integralmente para arquivo histórico de34501bytes;
+  reduz ATUALIZACOES de253465 para menos de222000bytes com o registro final.
+- Preserva demais seções, teto de256000bytes e proteções do sincronizador.
+- Sync real:12 documentos; cópias, hashes e geração única conferidos no Obsidian.
+  Dois testes focados de particionamento e limite aprovados. Sem código de página,
+  instalação, alteração de hooks ou reinício do CRM. Evidência em ATUALIZACOES.
