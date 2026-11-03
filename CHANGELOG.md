@@ -1,8 +1,8 @@
 # Changelog
 
-- Compacta exclusivamente o Simulador CAIXA com lateral de altura completa
-  que abre no hover, canvas proporcional, campos sem fundo, título ao lado
-  do menu e parcelas centralizadas com impressão da tabela completa.
+- Detalha os quatro indicadores de Equipe Produtiva em tabelas de corretores
+  produtivos e não produtivos, ordenadas por Regional, Gerente e Responsável,
+  respeitando os filtros e a base usada nos cards.
 
 - Publica os ajustes visuais de Equipe Produtiva em f3c4f126, com CI completa,
   vidro confirmado no CSS de produção e encaixe desktop validado no navegador.
@@ -4066,3 +4066,7 @@ Validação e publicação serão registradas com evidências ao concluir os gat
 - Publica Equipe Produtiva e as correções de Administração, Páginas e Usuários
   em6a0b1df5, após os quatro gates de main. Ativa as duas migrations autorizadas,
   preservando acessos anteriores e confirmando a proteção de acesso anônimo.
+
+- Compacta exclusivamente o Simulador CAIXA com lateral de altura completa
+  que abre no hover, canvas proporcional, campos sem fundo, título ao lado
+  do menu e parcelas centralizadas com impressão da tabela completa.

@@ -20,6 +20,33 @@ dados permitida.
 
 ## Validação reproduzível
 
+### Tabelas nominais dos quatro indicadores — 03/11/2026
+
+Cada pop-up tem duas tabelas, com captions Equipe Produtiva e Equipe não
+Produtiva. Cabeçalhos: Gerente Regional, Gerente de Vendas e Responsável,
+nessa ordem. A ordenação em português segue essas três colunas, com regionais
+desconhecidos ao fim. Cada corretor aparece uma vez na partição do cadastro
+vigente filtrado; o grupo produtivo usa exatamente o conjunto do indicador.
+Sem cadastro reconciliável, o detalhe nominal fica indisponível; não se cria
+lista vazia nem se classifica um corretor por ausência de dados.
+
+O read model atual não contém Regional no cadastro nominal. O detalhe utiliza
+o vínculo autorizado de Agendamentos quando conhecido e estável no período;
+ausência, conflito ou mudança gera Não informado. Nenhuma consulta remota,
+concessão ou alteração de RPC foi acrescentada. Testes de análise cobrem
+partição, filtros, nomes homônimos/duplicados, ordenação, zero e indisponibilidade.
+
+O teste Chromium preserva as 48 combinações de layout e verifica abertura dos
+quatro pop-ups em desktop e celular, fontes presentes/ausentes e três temas.
+O cenário com 180 corretores verifica duas listas de 90, nomes longos completos,
+último registro, rolagem, botão de fechar visível e filtro de Responsável.
+O contrato autenticado abre os quatro indicadores nos seis contextos de
+tema/largura, confere tabelas/cabeçalhos, totais e ausência nominal, acessibilidade
+e fechamento por Escape com retorno do foco. Seus dados continuam sintéticos;
+nenhum nome real deve ser salvo nas capturas.
+
+### Layout compacto e vidro
+
 A revisão de 03/11/2026 remove o breadcrumb e a atualização duplicada, mantém
 o sidebar fora do conteúdo e mede a altura do cabeçalho para posicioná-lo.
 Os cards recebem translucidez e blur de 12px, preservando bordas e interações.

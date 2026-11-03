@@ -1,38 +1,19 @@
 # Worklog
 
-## 2026-11-03 — CAIXA: lateral e formulário compactos
+## 2026-11-03 — Equipe Produtiva: detalhes nominais
 
-- Sidebar exclusiva da CAIXA rente à esquerda, do cabeçalho ao fim da tela,
-  com hover/foco como Dashboard. Canvas proporcional conserva as linhas ao
-  expandir; celular mantém rail e abre por toque. Título ao lado da lateral.
-- Removidas molduras externas e fundos dos campos/seções; tipografia usa a
-  fonte do sistema e tokens dos simuladores. Controles compactos e alinhados.
-- Parcelas centralizadas nas quatro larguras; botão Imprimir prepara somente
-  a tabela completa, sem limitar aos meses visíveis. Motor financeiro intacto.
-- Validação focada:57 testes de cálculo/parcelas aprovados, tipos/lint locais;
-  nove jornadas browser cobrem temas,320–1440px,Axe,hover/foco,toque e impressão.
-  CI obrigatória e versão publicada serão conferidas no encerramento.
-- O título visível é Simulador Caixa; o nome acessível oficial Simulador CAIXA
-  foi preservado para leitores de tela e consumidores existentes. O contrato
-  E2E compartilhado permanece sem alterações no diff final. Referências
-  serão incorporadas somente para a CAIXA após revisão; a CI normal continua
-  obrigatória no candidato final.
-- Captura real86796b44: autorização, funções, acessibilidade e zoom aprovados;
-  a fonte Geist real expôs overflow dos rótulos opcionais em375/390px.
-  Corrigida somente essa indicação redundante nas duas colunas estreitas.
-  Nenhuma referência foi promovida enquanto havia overflow.
-- CI41582668319: todos os checks funcionais, responsivos, temas, Axe,
-  canvas e zoom passaram; diferença visual restrita às11 imagens da CAIXA.
-  Nove imagens revisadas incorporadas;768/1024px excluídas para ajuste de
-  legibilidade em tablet. Proveniência reproduzida por hash dos19 arquivos
-  gerados, sem diff de código; nenhum baseline de outra página alterado.
-- Tablet768 usa distribuição própria sem sobrepor rótulos;1024 conserva
-  a linha com tipografia ajustada. Hover conserva as linhas em cada largura.
-- CI41590386249: todos os checks requeridos passaram, exceto a comparação
-  com as duas referências antigas de tablet. Capturas768/1024 revisadas e
-  incorporadas;11 referências CAIXA completas. Manifesto:15 testes aprovados,
-  um condicional não aplicável. Hash de proveniência reproduzido novamente;
-  nenhuma imagem de outra página alterada. CI final permanece obrigatória.
+- Pop-up dos quatro cards mostra tabelas de Equipe Produtiva e Equipe não
+  Produtiva, com Regional, Gerente de Vendas e Responsável em ordem alfabética.
+- Listas particionam o mesmo cadastro filtrado e as mesmas identidades do card;
+  preservam números, regras, permissões e indisponibilidade. Sem nova coleta,
+  endpoint ou migration. Vínculo regional ausente/ambíguo aparece não informado.
+- Conteúdo nominal renderiza ao abrir o pop-up. Tabelas ficam lado a lado no
+  desktop e empilhadas no celular, com nomes integrais e fechamento fixo durante
+  a rolagem. Extensão opcional do card compartilhado mantém os demais detalhes.
+- Validação local: 20 testes de análise, 13 de apresentação/regressão, tipos e
+  lint aprovados. Chromium aprovou 48 combinações, 72 aberturas e listas de 180
+  nomes no desktop/celular, além do filtro, Escape e retorno do foco. A correção
+  do limite de altura do modal foi validada sem relaxar o contrato.
 
 ## 2026-11-03 — Equipe Produtiva: ajuste visual publicado
 
@@ -10910,3 +10891,37 @@ b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigi
   cópia32, gráficos13/16comrecência,31dias e preservação de ambas as tabelas no
   preset500. Sintaxe, formatação e4checagens isoladas aprovadas; suites manuais
   integrais não repetidas. Não houve alteração de baselines ou outros roteiros.
+
+## 2026-11-03 — CAIXA: lateral e formulário compactos
+
+- Sidebar exclusiva da CAIXA rente à esquerda, do cabeçalho ao fim da tela,
+  com hover/foco como Dashboard. Canvas proporcional conserva as linhas ao
+  expandir; celular mantém rail e abre por toque. Título ao lado da lateral.
+- Removidas molduras externas e fundos dos campos/seções; tipografia usa a
+  fonte do sistema e tokens dos simuladores. Controles compactos e alinhados.
+- Parcelas centralizadas nas quatro larguras; botão Imprimir prepara somente
+  a tabela completa, sem limitar aos meses visíveis. Motor financeiro intacto.
+- Validação focada:57 testes de cálculo/parcelas aprovados, tipos/lint locais;
+  nove jornadas browser cobrem temas,320–1440px,Axe,hover/foco,toque e impressão.
+  CI obrigatória e versão publicada serão conferidas no encerramento.
+- O título visível é Simulador Caixa; o nome acessível oficial Simulador CAIXA
+  foi preservado para leitores de tela e consumidores existentes. O contrato
+  E2E compartilhado permanece sem alterações no diff final. Referências
+  serão incorporadas somente para a CAIXA após revisão; a CI normal continua
+  obrigatória no candidato final.
+- Captura real86796b44: autorização, funções, acessibilidade e zoom aprovados;
+  a fonte Geist real expôs overflow dos rótulos opcionais em375/390px.
+  Corrigida somente essa indicação redundante nas duas colunas estreitas.
+  Nenhuma referência foi promovida enquanto havia overflow.
+- CI41582668319: todos os checks funcionais, responsivos, temas, Axe,
+  canvas e zoom passaram; diferença visual restrita às11 imagens da CAIXA.
+  Nove imagens revisadas incorporadas;768/1024px excluídas para ajuste de
+  legibilidade em tablet. Proveniência reproduzida por hash dos19 arquivos
+  gerados, sem diff de código; nenhum baseline de outra página alterado.
+- Tablet768 usa distribuição própria sem sobrepor rótulos;1024 conserva
+  a linha com tipografia ajustada. Hover conserva as linhas em cada largura.
+- CI41590386249: todos os checks requeridos passaram, exceto a comparação
+  com as duas referências antigas de tablet. Capturas768/1024 revisadas e
+  incorporadas;11 referências CAIXA completas. Manifesto:15 testes aprovados,
+  um condicional não aplicável. Hash de proveniência reproduzido novamente;
+  nenhuma imagem de outra página alterada. CI final permanece obrigatória.

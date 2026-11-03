@@ -28,6 +28,80 @@
   line-height: 1.6;
 }
 
+.cards .detailsDialog {
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  width: min(76rem, calc(100vw - 1.5rem));
+  max-width: calc(100vw - 1.5rem);
+}
+
+.detailsDialog > div > header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--analytics-surface);
+}
+
+.details {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
+
+.detailsUnavailable {
+  margin: 0 0 1rem;
+  color: var(--analytics-muted);
+  line-height: 1.5;
+}
+
+.detailTables {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 1.5rem;
+}
+
+.detailTable {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  color: var(--analytics-ink);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.detailTable caption {
+  border: 1px solid var(--analytics-line);
+  border-bottom: 0;
+  padding: 0.75rem;
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-ink);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.detailTable th,
+.detailTable td {
+  border: 1px solid var(--analytics-line);
+  padding: 0.65rem 0.5rem;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+  text-align: left;
+}
+
+.detailTable th {
+  background: var(--analytics-surface-muted);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .detailTables {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (min-width: 901px) and (max-width: 1200px) {
   .compact > section[aria-label="Filtros de Equipe Produtiva"] {
     grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -288,4 +288,182 @@ describe("productive team analysis", () => {
     });
     expect(result.cards[3]).toMatchObject({ productiveBrokers: 1, percent: 50 });
   });
+
+  it("partitions the same deduplicated roster as every indicator and sorts both tables in pt-BR", () => {
+    const members = [
+      { key: "zelia", owner: "Zélia", manager: "Gerente Ágata" },
+      { key: "alvaro", owner: "Álvaro", manager: "Gerente Ágata" },
+      { key: "bia", owner: "bia", manager: "Gerente B" },
+      { key: "ana", owner: "Ana", manager: "Gerente Aline" },
+      { key: "bruno", owner: "Bruno", manager: "Gerente C" },
+      { key: "carlos", owner: "Carlos", manager: "Gerente X" },
+    ];
+    const input = slice({
+      brokerCount: members.length,
+      dimensions: {
+        ...slice().dimensions,
+        managers: members.map((member) => member.manager),
+        owners: members.map((member) => member.owner),
+      },
+      appointments: members.slice(0, 5).map((member, index) => ({
+        ...appointment(member.owner, "2026-11-01"),
+        salesManager: member.manager,
+        regionalManager: index < 3 ? "Regional Á" : "Regional B",
+      })),
+      facts: [
+        ...members.map((_, index) => fact(2, index, "2026-11-02", 1, index)),
+        fact(2, 0, "2026-11-03", 20),
+      ],
+    });
+    const result = analyzeProductiveTeam(input, {
+      brokerRoster: [...members, members[0]!],
+    });
+    const order = ["alvaro", "zelia", "bia", "ana", "bruno", "carlos"];
+    expect(result.cards[1]?.productiveMembers?.map((member) => member.key)).toEqual(order);
+    expect(result.cards[1]?.unproductiveMembers).toEqual([]);
+    expect(result.cards[2]?.productiveMembers).toEqual([]);
+    expect(result.cards[2]?.unproductiveMembers?.map((member) => member.key)).toEqual(order);
+    expect(result.cards[1]?.productiveMembers?.at(-1)).toEqual({
+      ...members[5],
+      regionalManager: null,
+    });
+    for (const card of result.cards) {
+      expect(card.productiveMembers).toHaveLength(card.productiveBrokers!);
+      expect(card.productiveMembers!.length + card.unproductiveMembers!.length).toBe(
+        card.brokerCount,
+      );
+      const keys = [...card.productiveMembers!, ...card.unproductiveMembers!].map(
+        (member) => member.key,
+      );
+      expect(new Set(keys).size).toBe(card.brokerCount);
+    }
+  });
+
+  it("limits both tables to the current filtered denominator and the card's selected dates", () => {
+    const input = slice({
+      appointments: [
+        appointment("Ana", "2026-11-01"),
+        { ...appointment("Bia", "2026-11-01"), salesManager: "Gerente B" },
+      ],
+      facts: [fact(2, 0, "2026-11-02"), fact(2, 1, "2026-11-03", 1, 1)],
+    });
+    const result = analyzeProductiveTeam(input, {
+      brokerRoster: roster,
+      filters: {
+        channel: 1,
+        regionalManager: "Regional A",
+        manager: "Gerente A",
+        owner: "Ana",
+        createdDates: ["2026-11-03"],
+      },
+    });
+    expect(result.cards[1]).toMatchObject({
+      productiveBrokers: 0,
+      brokerCount: 1,
+      productiveMembers: [],
+      unproductiveMembers: [
+        { key: "ana", owner: "Ana", manager: "Gerente A", regionalManager: "Regional A" },
+      ],
+    });
+    const selected = analyzeProductiveTeam(input, {
+      brokerRoster: roster,
+      filters: { owner: "Ana", createdDate: "2026-11-02" },
+    });
+    expect(selected.cards[1]?.productiveMembers?.map((member) => member.key)).toEqual(["ana"]);
+    expect(selected.cards[1]?.unproductiveMembers).toEqual([]);
+  });
+
+  it("does not invent a regional link when it changes, conflicts, is future-only or is absent", () => {
+    for (const observations of [
+      [],
+      [appointment("Ana", "2026-11-11")],
+      [
+        appointment("Ana", "2026-11-01"),
+        { ...appointment("Ana", "2026-11-06"), regionalManager: "Regional B" },
+      ],
+      [
+        appointment("Ana", "2026-11-01"),
+        { ...appointment("Ana", "2026-11-01"), regionalManager: "Regional B" },
+      ],
+    ]) {
+      const card = analyzeProductiveTeam(slice({ appointments: observations, facts: [fact(4)] }), {
+        brokerRoster: roster,
+      }).cards[3]!;
+      expect(card.productiveBrokers).toBe(1);
+      expect(card.productiveMembers?.[0]).toMatchObject({
+        owner: "Ana",
+        regionalManager: null,
+      });
+      expect(card.unproductiveMembers?.[0]).toMatchObject({
+        owner: "Bia",
+        regionalManager: null,
+      });
+    }
+    const changed = slice({
+      appointments: [
+        appointment("Ana", "2026-11-01"),
+        { ...appointment("Ana", "2026-11-06"), regionalManager: "Regional B" },
+      ],
+      facts: [fact(4)],
+    });
+    const early = analyzeProductiveTeam(changed, {
+      brokerRoster: roster,
+      filters: { periodStart: "2026-11-01", periodEnd: "2026-11-05" },
+    });
+    expect(early.cards[3]?.productiveMembers?.[0]?.regionalManager).toBe("Regional A");
+    const selected = analyzeProductiveTeam(changed, {
+      brokerRoster: roster,
+      filters: { createdDates: ["2026-11-02", "2026-11-03"] },
+    });
+    expect(selected.cards[3]?.productiveMembers?.[0]?.regionalManager).toBe("Regional A");
+  });
+
+  it("shows the current registered manager instead of the historical activity manager", () => {
+    const card = analyzeProductiveTeam(
+      slice({
+        appointments: [{ ...appointment("Ana", "2026-11-01"), salesManager: "Gerente B" }],
+        facts: [fact(4, 0, "2026-11-02", 1, 1)],
+      }),
+      { brokerRoster: roster },
+    ).cards[3]!;
+    expect(card.productiveMembers).toEqual([
+      { key: "ana", owner: "Ana", manager: "Gerente A", regionalManager: null },
+    ]);
+    expect(card.unproductiveMembers).toEqual([
+      { key: "bia", owner: "Bia", manager: "Gerente B", regionalManager: "Regional A" },
+    ]);
+  });
+
+  it("keeps detail unavailable rather than inventing rows without a reconciled roster", () => {
+    const missing = analyzeProductiveTeam(slice()).cards[0]!;
+    expect(missing).toMatchObject({
+      productiveBrokers: 1,
+      percent: 50,
+      productiveMembers: null,
+      unproductiveMembers: null,
+    });
+    for (const brokerCount of [1, 3]) {
+      const card = analyzeProductiveTeam(slice({ brokerCount }), { brokerRoster: roster })
+        .cards[0]!;
+      expect(card.productiveBrokers).toBe(1);
+      expect(card.productiveMembers).toBeNull();
+      expect(card.unproductiveMembers).toBeNull();
+    }
+    for (const options of [
+      { brokerRoster: roster, availableStages: [] },
+      { brokerRoster: roster, filters: { company: "Empresa A" } },
+      { brokerRoster: roster, filters: { regionalManager: "Desconhecido" } },
+    ])
+      for (const card of analyzeProductiveTeam(slice(), options).cards) {
+        expect(card.productiveMembers).toBeNull();
+        expect(card.unproductiveMembers).toBeNull();
+      }
+    const empty = analyzeProductiveTeam(slice({ brokerCount: 0, facts: [], appointments: [] }), {
+      brokerRoster: [],
+    });
+    for (const card of empty.cards) {
+      expect(card.productiveMembers).toEqual([]);
+      expect(card.unproductiveMembers).toEqual([]);
+    }
+  });
 });
