@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-11-02 — CAIXA publicada e validada
+
+- PR470 (sidebar e parcelas) e PR475 (compatibilidade do deploy) integrados;
+  produção confirmada em6a0b1df51ff8e8f9ed0711bd114f4c5ab6d41573.
+- Deploymentf854e369-d792-45e4-9ff8-504e75651453, em2026-11-03T02:41:32.581Z,
+  CI41561175667 com quatro gates aprovados; nenhuma recuperação pendente.
+- Health HTTP200/ok às02:43:46Z. Chrome autenticado: menu expande/recolhe,
+  cálculo automático com dados fictícios, diálogo com420 parcelas e saldo
+  final zero; Escape devolve foco e Limpar remove o cenário.
+- Nenhuma outra página nem migration alterada nesta demanda. Publicação
+  concorrente já ativa foi reconhecida, sem republicar. Obsidian pendente
+  pelo limite de exportação; não altera a evidência direta de publicação.
+
 ## 2026-11-02 — Compatibilidade do deploy com main documental
 
 - Autorização explícita para corrigir o protocolo e publicar CAIXA. Nenhuma

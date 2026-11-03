@@ -3271,3 +3271,24 @@ PR463 publicado/0dab1578; persistência, margem e prints aprovados. Evidências 
 - Health https://crm.descomplicapro.com.br/api/health: HTTP 200, status ok, version 0dab1578063eece6b9b5c86fa184c722388578fb. Código local/integrado e publicado são distintos; diferença histórica documental será preservada.
 - Contexto e busca temática de conhecimento executados. Dependências deste worktree ausentes; Next/Chrome MCP declarados no config, mas ferramentas locais não expostas nesta sessão. Não confundir declaração com conexão funcional. Validação e métricas dependerão de fixtures/ambiente isolado; não usar dados pessoais de produção.
 - Registro canônico desta execução: docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-HANDOFF.md, a preparar com matriz por frente, evidências e bloqueios. Sem autorização implícita para políticas comerciais, contas, DNS ou migrations remotas.
+
+## 2026-11-02 — Encerramento CAIXA: publicação comprovada
+
+- Escopo: somente CAIXA (PR470) e correção autorizada do protocolo (PR475).
+  Fontes: GitHub/main6a0b1df51ff8e8f9ed0711bd114f4c5ab6d41573,
+  CI41561175667 (quatro jobs aprovados), ledger privado lido via SSH e
+  GEThttps://crm.descomplicapro.com.br/api/health em2026-11-03T02:43:46Z:
+  HTTP200, statusok, versão6a0b1df51ff8e8f9ed0711bd114f4c5ab6d41573.
+- Deploymentf854e369-d792-45e4-9ff8-504e75651453,
+  publicado em2026-11-03T02:41:32.581Z; sem operação pendente. Publicação
+  concorrente já ativa reconhecida; nenhuma repetição nem migration por este chat.
+- Chrome real na rota CAIXA: menu expande/recolhe, resultado automático para
+  renda fictícia6000/imóvel300000/nascimento1991-03-15/São Paulo;
+  PRICE420 meses, primeira prestação1800,420 linhas, saldo final0.
+  Escape fecha e retorna foco ao botão; Limpar limpa os dados fictícios.
+- Evidência local: caixa-publicado-parcelas.png no diretório de visualizações
+  desta sessão. Testes focados e matriz visual prévios reutilizados; nenhum
+  teste financeiro integral contra CAIXA foi alegado nesta entrega de interface.
+- Sync do conhecimento impedido por documento acima do limite de exportação.
+  Exceção restrita ao registro no Obsidian; reavaliar quando a infraestrutura
+  permitir exportar. Não corrigir infraestrutura ou outras páginas neste chat.
