@@ -4724,3 +4724,8 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
     background: #fff !important;
   }
 }
+@media (min-width: 361px) and (max-width: 760px) {
+  .goal-page-shell.caixa-page-shell .caixa-primary-grid > .caixa-field > span > small {
+    display: none;
+  }
+}

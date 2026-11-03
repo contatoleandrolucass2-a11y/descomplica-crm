@@ -17,6 +17,10 @@
   autorização e cálculo. Referências visuais serão capturadas pelo workflow
   existente de candidato, revisadas e incorporadas somente para a CAIXA;
   a CI normal continuará obrigatória no candidato final.
+- Captura real86796b44: autorização, funções, acessibilidade e zoom aprovados;
+  a fonte Geist real expôs overflow dos rótulos opcionais em375/390px.
+  Corrigida somente essa indicação redundante nas duas colunas estreitas.
+  Nenhuma referência foi promovida enquanto havia overflow.
 
 ## 2026-11-02 — Agendamentos: recência e lista integral
 

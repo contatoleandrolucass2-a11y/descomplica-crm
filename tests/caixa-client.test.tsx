@@ -703,6 +703,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             `${width}/${theme}: ${JSON.stringify(overflow)}`,
           ).toBe(true);
           const formBounds = await page.locator("form.caixa-form").evaluate((form) => {
+            // The mobile label must fit without relying on the local fallback font.
             const box = form.getBoundingClientRect();
             return Array.from(form.children).map((child) => {
               const bounds = child.getBoundingClientRect();
@@ -712,6 +713,13 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
               };
             });
           });
+          if (width === 390) {
+            for (const optional of await page
+              .locator(".caixa-primary-grid > .caixa-field > span > small")
+              .all()) {
+              await browserExpect(optional).toBeHidden();
+            }
+          }
           expect(
             formBounds.filter((child) => !child.contained),
             `${width}/${theme}`,
