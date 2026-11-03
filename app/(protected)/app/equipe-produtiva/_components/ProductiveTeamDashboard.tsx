@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
 import {
   appointmentYears,
@@ -13,7 +13,6 @@ import {
   type ProductiveTeamStage,
   type ProductiveTeamUnavailableReason,
 } from "@/lib/crm/stages/productive-team";
-import { useDashboardSidebar } from "../../../_components/DashboardShell";
 import {
   DashboardFilters,
   ProductiveTeamCard,
@@ -77,10 +76,6 @@ export function ProductiveTeamDashboard({
         timeZone: "America/Sao_Paulo",
       }).format(new Date(generatedAt))
     : "Coleta não confirmada";
-  const sidebar = useDashboardSidebar();
-  useEffect(() => {
-    sidebar?.setUpdatedAt(updatedAt);
-  }, [sidebar, updatedAt]);
   const emptyOptions = {
     channels: [],
     regionalManagers: [],
@@ -117,7 +112,7 @@ export function ProductiveTeamDashboard({
     });
   }
   return (
-    <div className={shared.dashboard}>
+    <div className={`${shared.dashboard} ${styles.compact}`}>
       <header className={shared.titleRow}>
         <div className={shared.titleGroup}>
           <h1 className={shared.title}>Equipe Produtiva</h1>

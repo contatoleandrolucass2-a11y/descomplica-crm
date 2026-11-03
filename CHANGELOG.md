@@ -4,6 +4,9 @@
   que abre no hover, canvas proporcional, campos sem fundo, título ao lado
   do menu e parcelas centralizadas com impressão da tabela completa.
 
+- Compacta Equipe Produtiva, remove breadcrumb e atualização duplicada, alinha
+  o menu externo ao cabeçalho e acrescenta vidro aos cards com efeitos preservados.
+
 - Padroniza a recência de Agendamentos com os rankings, incluindo barras de
   dias e data abaixo do responsável. Detalhamento geral e vencidos passam a
   exibir a lista completa com rolagem, sem botões de paginação.
