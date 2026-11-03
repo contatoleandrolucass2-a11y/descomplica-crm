@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-11-02 — Compatibilidade do deploy com main documental
+
+- Autorização explícita para corrigir o protocolo e publicar CAIXA. Nenhuma
+  página alterada: workflow CI, política do guard, testes e documentação.
+- Execução manual na main passa por validação, restore, release e imagem;
+  o guard exige main/SHA exatos e todos os jobs concluídos com sucesso.
+- Jobs ignorados, CI de PR, outras branches e SHAs antigos seguem recusados.
+  Backup, lock, CAS, imagem homologada e consulta no minuto permanecem exigidos.
+
 ## 2026-11-02 — Agendamentos: publicação e persistência
 
 - PR469/main2556898d publicado pelo coordenador, após CI41511483505 verde
