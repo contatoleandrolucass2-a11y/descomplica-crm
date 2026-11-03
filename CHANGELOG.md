@@ -4049,3 +4049,6 @@ Validação e publicação serão registradas com evidências ao concluir os gat
 - Mantém o registro da referência tablet no contrato existente de QA.
 - Confirma o gate visual completo das correções administrativas e de Equipe
   Produtiva; publicação segue condicionada à integração estrita e ao main exato.
+- Publica Equipe Produtiva e as correções de Administração, Páginas e Usuários
+  em6a0b1df5, após os quatro gates de main. Ativa as duas migrations autorizadas,
+  preservando acessos anteriores e confirmando a proteção de acesso anônimo.
