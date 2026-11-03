@@ -495,7 +495,7 @@ const protectedSurfaces = [
   },
   {
     path: "/app/simulacao/caixa",
-    heading: "Simulador CAIXA",
+    heading: "Simulador Caixa",
     allowed: activeOperationalRoles,
   },
   {
@@ -2264,7 +2264,7 @@ test("released simulator pages respect explicit inventory access while CAIXA cal
     const caixa = await page.goto("/app/simulacao/caixa");
     expect(caixa?.status()).toBe(200);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Simulador CAIXA", exact: true }),
+      page.getByRole("heading", { level: 1, name: "Simulador Caixa", exact: true }),
     ).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Simuladores disponíveis" })).toBeVisible();
     await expect(

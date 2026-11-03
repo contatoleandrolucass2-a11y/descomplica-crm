@@ -12,6 +12,11 @@
 - Validação focada:57 testes de cálculo/parcelas aprovados, tipos/lint locais;
   nove jornadas browser cobrem temas,320–1440px,Axe,hover/foco,toque e impressão.
   CI obrigatória e versão publicada serão conferidas no encerramento.
+- A primeira CI encontrou expectativas do título antigo no contrato E2E da
+  CAIXA. Atualizadas somente essas duas expectativas, preservando os testes de
+  autorização e cálculo. Referências visuais serão capturadas pelo workflow
+  existente de candidato, revisadas e incorporadas somente para a CAIXA;
+  a CI normal continuará obrigatória no candidato final.
 
 ## 2026-11-02 — CAIXA publicada e validada
 
