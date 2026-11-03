@@ -1,5 +1,8 @@
 # Changelog
 
+- Publica os ajustes visuais de Equipe Produtiva em f3c4f126, com CI completa,
+  vidro confirmado no CSS de produção e encaixe desktop validado no navegador.
+
 - Compacta Equipe Produtiva, remove breadcrumb e atualização duplicada, alinha
   o menu externo ao cabeçalho e acrescenta vidro aos cards com efeitos preservados.
 

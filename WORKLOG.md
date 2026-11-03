@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-11-03 — Equipe Produtiva: ajuste visual publicado
+
+- PR #479 integrado em f3c4f126; CI 41585221159 aprovou os quatro gates.
+  Contrato autenticado confirmou vidro, menu externo, teclado/zoom/axe e
+  encaixe desktop sem rolagem vertical; 48 combinações locais aprovadas.
+- Imagem da CI verificada por checksum, 30 blobs/14 camadas e perfis de
+  homologação/produção. Coordenador publicou às 06:42:26.927Z (03:42 São Paulo),
+  deployment b66918d3-6a95-4012-b96c-41ecabf27a70, sem pendência.
+- Pós-publicação: health 200/ok no SHA exato, CSS com vidro e shell condicional,
+  Equipe Produtiva/Agendamentos redirecionando anônimo ao login. Sem migration.
+  Obsidian sincronizado; encerramento documental não exige novo restart.
+
 ## 2026-11-03 — Equipe Produtiva compacta
 
 - Remove breadcrumb e atualização duplicada; alinha o sidebar externo com a
