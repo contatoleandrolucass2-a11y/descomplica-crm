@@ -3291,4 +3291,3 @@ PR463 publicado/0dab1578; persistência, margem e prints aprovados. Evidências 
 - Sync do conhecimento impedido por documento acima do limite de exportação.
   Exceção restrita ao registro no Obsidian; reavaliar quando a infraestrutura
   permitir exportar. Não corrigir infraestrutura ou outras páginas neste chat.
-
