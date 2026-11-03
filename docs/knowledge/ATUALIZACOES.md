@@ -3290,3 +3290,43 @@ PR463 publicado/0dab1578; persistência, margem e prints aprovados. Evidências 
 - Context/search indisponíveis por limite de exportação do conhecimento;
   referências versionadas consultadas. Sync será tentado, sem ampliar escopo
   para corrigir a infraestrutura de conhecimento.
+
+## 2026-11-03 — CAIXA: sidebar e parcelas publicados e validados
+
+- PR #478 integrado em82ee8deb38b5c86f9781504f60c673ee69d9ab44. CI de
+  main41654312258 com validate, release-gates, isolated-restore e
+  promotable-image aprovados; CI do PR41647692259 também aprovada.
+- DEPLOY-002: diff produção→candidato inclui entregas concorrentes de Equipe
+  Produtiva e Agendamentos, preservadas sem edição por este chat. Evidências
+  anteriores reutilizadas e CI obrigatória executada no candidato integrado.
+  Janela de publicação coordenada com autorização explícita do usuário.
+- Artefato13239149238; ZIP SHA-256
+  fd45461f8d1006338f106535a9d07f0a962303eacb3281b0df2424aee870f492.
+  Config da CI b36be44c5c960fcd44868253054308c8f0094954407fabc1b0314520736b1614
+  e manifesto local4aaa101b9e02da54ea2435095ce4a82543842d9396be3a1ea51be4b3ab5d3b0b
+  conciliados pelo mesmo arquivo, hashes/tamanhos dos blobs e14 camadas,
+  linux/amd64 e rootfs. image:prove confirmou os dois perfis; sem rebuild na VPS.
+- Backup privado conferido em/var/backups/descomplica-crm/caixa-hover-82ee8deb.
+  Coordenador release:production publicou com lock, CAS e consulta ao vivo:
+  deployment1d4c8ac7-f800-4513-ac2b-48ba4fd192a2,03/11/2026
+  15:35:48.568UTC (12:35:48.568America/Sao_Paulo), sem pendência.
+- Health público03/11/2026 15:39:27UTC: HTTP200/ok, versão82ee8deb;
+  acesso anônimo à CAIXA redireciona/login307. Chrome autenticado: sidebar
+  rente à esquerda, top58 no fim do header e altura até o fim da tela;
+  hover44→208→44 sem overflow. Fundo#061f35, fonte Geist e campos transparentes.
+- Cenário fictício: renda6000, imóvel300000, São Paulo/SP, nascimento1991-03-15;
+  cálculo automático PRICE420, primeira prestação1800. Modal central no viewport
+  desktop e390x844,420 linhas, saldo final zero, botão Imprimir habilitado;
+  Escape devolve foco e Limpar remove o cenário. Impressão integral verificada
+  pela suíte isolada, sem imprimir fisicamente em produção. Motor preservado.
+- Evidências locais nesta sessão: caixa-sidebar-hover-publicado.png,
+  caixa-parcelas-centralizadas-publicado.png e caixa-parcelas-mobile-publicado.png.
+  Capturas após redimensionamento foram conferidas novamente após o layout
+  estabilizar; falha transitória de captura CDP não alterou código ou dados.
+- Fonte: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/478
+  e actions/runs/41654312258, health público e inspeção visual da rota solicitada.
+  Registro final somente documental; não exige reinício nem nova publicação da aplicação.
+- Sync final tentou exportar o registro e falhou: documento excede o limite de
+  exportação. Obsidian permanece pendente para esta nota; o sync anterior ao
+  registro havia passado. Exceção somente de conhecimento, sem efeito no deploy;
+  reavaliar após ajuste da infraestrutura em demanda própria.

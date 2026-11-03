@@ -10955,3 +10955,16 @@ b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigi
   incorporadas;11 referências CAIXA completas. Manifesto:15 testes aprovados,
   um condicional não aplicável. Hash de proveniência reproduzido novamente;
   nenhuma imagem de outra página alterada. CI final permanece obrigatória.
+
+### CAIXA — fechamento da publicação em03/11/2026
+
+- PR #478 e main82ee8deb com quatro gates aprovados na CI41654312258.
+- Imagem imutável conciliada entre config Docker e manifesto containerd,
+  dois perfis comprovados, backup conferido e promoção pelo coordenador único.
+- Publicado12:35:48America/Sao_Paulo, deployment1d4c8ac7-f800-4513-ac2b-48ba4fd192a2;
+  health200/ok na versão exata e rota anônima307/login.
+- Chrome real: hover44/208px, layout sem overflow, fundo/fonte de referência,
+  inputs transparentes, simulação automática,420 parcelas, saldo final zero,
+  modal central em desktop/mobile, Imprimir habilitado, Escape/foco e Limpar.
+- Evidências de CI e publicação detalhadas em ATUALIZACOES; fórmulas preservadas.
+  Registro documental posterior não reinicia a aplicação.

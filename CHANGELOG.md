@@ -4078,3 +4078,5 @@ Validação e publicação serão registradas com evidências ao concluir os gat
 - Compacta exclusivamente o Simulador CAIXA com lateral de altura completa
   que abre no hover, canvas proporcional, campos sem fundo, título ao lado
   do menu e parcelas centralizadas com impressão da tabela completa.
+- Publica e valida o novo visual CAIXA em82ee8deb, com os quatro gates de main,
+  artefato imutável, backup e smoke autenticado desktop/mobile concluídos.
