@@ -4191,6 +4191,9 @@
   display: none;
 }
 .caixa-installments-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   width: min(900px, calc(100vw - 24px));
   max-height: 85dvh;
   padding: 20px;
@@ -4204,11 +4207,19 @@
 }
 .caixa-installments-dialog header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
+.caixa-installments-actions {
+  display: flex;
+  flex: 0 0 auto;
+  margin-left: auto;
+  gap: 8px;
+}
 .caixa-installments-dialog button {
+  white-space: nowrap;
   padding: 10px 16px;
   border: 1px solid currentColor;
   border-radius: 8px;
@@ -4302,5 +4313,442 @@
   .goal-page-shell.caixa-page-shell .caixa-content-toolbar {
     padding-left: 52px;
     min-height: 52px;
+  }
+}
+
+/* CAIXA: lateral rente à tela e canvas proporcional como Agendamentos. */
+body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
+  display: none;
+}
+.goal-page-shell.caixa-page-shell {
+  padding: 0;
+  font-family: inherit;
+  background: var(--analytics-page);
+}
+.goal-page-shell.caixa-page-shell .caixa-main {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.goal-page-shell.caixa-page-shell .caixa-workspace,
+.goal-page-shell.caixa-page-shell .caixa-workspace[data-sidebar-collapsed="true"] {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transition: none;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar {
+  position: fixed;
+  z-index: 40;
+  top: var(--protected-header-height, 58px);
+  bottom: 0;
+  left: 0;
+  width: 208px;
+  height: auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 4px 2px;
+  border: 0;
+  border-right: 1px solid var(--caixa-layout-line);
+  border-radius: 0;
+  background: var(--caixa-sidebar-background);
+  box-shadow: none;
+}
+.goal-page-shell.caixa-page-shell
+  .caixa-workspace[data-sidebar-collapsed="true"]
+  .caixa-tool-sidebar {
+  width: 44px;
+  border-right: 1px solid var(--caixa-layout-line);
+  background: var(--caixa-sidebar-background);
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar nav {
+  display: flex;
+  gap: 2px;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar nav > a {
+  min-height: 36px;
+  padding: 5px 4px;
+  gap: 5px;
+  border-radius: 5px;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar-copy > strong {
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar nav > a.active {
+  color: var(--analytics-cyan-strong);
+  background: color-mix(in srgb, currentColor 9%, transparent);
+  box-shadow: inset 2px 0 currentColor;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar nav > a.active strong {
+  font-weight: 700;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar-icon,
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar nav > a.active .caixa-tool-sidebar-icon {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.goal-page-shell.caixa-page-shell .caixa-sidebar-toggle {
+  display: none;
+}
+.goal-page-shell.caixa-page-shell
+  .caixa-workspace[data-sidebar-collapsed="true"]
+  .caixa-tool-sidebar
+  nav
+  > a {
+  justify-content: center;
+}
+.goal-page-shell.caixa-page-shell .caixa-workspace-content {
+  display: block;
+  margin-left: 208px;
+  padding: 0;
+}
+.goal-page-shell.caixa-page-shell
+  .caixa-workspace[data-sidebar-collapsed="true"]
+  .caixa-workspace-content {
+  margin-left: 44px;
+}
+.caixa-content-surface {
+  width: var(--caixa-content-width, 100%);
+  min-width: 0;
+  padding: 8px 12px 24px;
+  zoom: var(--caixa-content-scale, 1);
+  display: grid;
+  gap: 12px;
+}
+.goal-page-shell.caixa-page-shell .caixa-content-toolbar {
+  justify-content: space-between;
+  min-height: 42px;
+  padding: 0;
+  gap: 10px;
+}
+.caixa-content-toolbar h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.4vw, 2.5rem);
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  color: var(--caixa-layout-ink);
+  white-space: nowrap;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form,
+.goal-page-shell.caixa-page-shell .caixa-workspace-content .caixa-form-section,
+.goal-page-shell.caixa-page-shell .caixa-workspace-content .caixa-form-section-content,
+.goal-page-shell.caixa-page-shell .caixa-subsidy-inputs {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.goal-page-shell.caixa-page-shell .caixa-form-section::before,
+.goal-page-shell.caixa-page-shell .caixa-form-section::after {
+  display: none;
+}
+.goal-page-shell.caixa-page-shell .caixa-primary-grid {
+  grid-template-columns: 1fr 1fr 1fr 1fr 0.65fr;
+  gap: 12px;
+}
+.goal-page-shell.caixa-page-shell .caixa-secondary-grid {
+  grid-template-columns: 1fr 1.35fr 0.5fr 0.75fr 1.2fr;
+  gap: 12px;
+}
+.goal-page-shell.caixa-page-shell .caixa-binary-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 2fr);
+  gap: 12px;
+}
+.goal-page-shell.caixa-page-shell .caixa-primary-grid > .caixa-field {
+  grid-template-rows: 18px 40px minmax(16px, auto);
+}
+.goal-page-shell.caixa-page-shell
+  :is(
+    .caixa-field input,
+    .caixa-field select,
+    .caixa-money-input,
+    .caixa-participant-control,
+    .caixa-participant-control input
+  ) {
+  min-height: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: transparent !important;
+  font-size: 14px;
+  box-shadow: none;
+}
+.goal-page-shell.caixa-page-shell .caixa-money-input input {
+  height: 38px;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 0;
+}
+.goal-page-shell.caixa-page-shell .caixa-money-input > span {
+  padding-left: 10px;
+}
+.goal-page-shell.caixa-page-shell .caixa-field > span {
+  min-height: 18px;
+  font-size: 12px;
+}
+.goal-page-shell.caixa-page-shell .caixa-field-insight,
+.goal-page-shell.caixa-page-shell .caixa-field > small {
+  font-size: 11px;
+  line-height: 1.25;
+}
+.goal-page-shell.caixa-page-shell .caixa-toggle-card {
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+.goal-page-shell.caixa-page-shell .caixa-toggle {
+  gap: 4px;
+}
+.goal-page-shell.caixa-page-shell .caixa-toggle button {
+  min-height: 36px !important;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+.goal-page-shell.caixa-page-shell .caixa-confirmed-parameters {
+  background: transparent;
+  border-radius: 6px;
+}
+.goal-page-shell.caixa-page-shell .caixa-confirmed-parameters > summary {
+  min-height: 38px !important;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.goal-page-shell.caixa-page-shell :is(.caixa-clear-button, .caixa-back-button) {
+  min-height: 36px;
+  border-radius: 6px;
+  padding: 0 12px;
+}
+@media (max-width: 760px) {
+  .goal-page-shell.caixa-page-shell .caixa-workspace-content,
+  .goal-page-shell.caixa-page-shell
+    .caixa-workspace[data-sidebar-collapsed="true"]
+    .caixa-workspace-content {
+    margin-left: 44px;
+  }
+  .caixa-content-surface {
+    width: 100%;
+    zoom: 1;
+    padding: 8px 8px 20px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-sidebar-toggle {
+    display: flex;
+    min-height: 44px;
+    padding: 8px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-primary-grid,
+  .goal-page-shell.caixa-page-shell .caixa-secondary-grid,
+  .goal-page-shell.caixa-page-shell .caixa-binary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-property-condition-group {
+    grid-column: 1 / -1;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-primary-grid > .caixa-field {
+    grid-template-rows: minmax(18px, auto) 44px minmax(16px, auto);
+  }
+  .goal-page-shell.caixa-page-shell
+    :is(
+      .caixa-field input,
+      .caixa-field select,
+      .caixa-money-input,
+      .caixa-participant-control input
+    ) {
+    min-height: 44px;
+    height: 44px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-money-input input {
+    min-height: 42px;
+    height: 42px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-toggle button {
+    min-height: 44px !important;
+  }
+  .caixa-content-toolbar h1 {
+    font-size: 1.25rem;
+  }
+}
+@media (max-width: 360px) {
+  .goal-page-shell.caixa-page-shell .caixa-primary-grid,
+  .goal-page-shell.caixa-page-shell .caixa-secondary-grid,
+  .goal-page-shell.caixa-page-shell .caixa-binary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media print {
+  .goal-page-shell.caixa-page-shell .caixa-tool-sidebar,
+  .goal-page-shell.caixa-page-shell .caixa-content-toolbar {
+    display: none !important;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-workspace-content,
+  .goal-page-shell.caixa-page-shell
+    .caixa-workspace[data-sidebar-collapsed="true"]
+    .caixa-workspace-content {
+    margin: 0;
+  }
+  .caixa-content-surface {
+    width: 100%;
+    padding: 0;
+    zoom: 1;
+  }
+  body:has(.caixa-installments-dialog[open])
+    *:not(:has(.caixa-installments-dialog[open])):not(.caixa-installments-dialog):not(
+      .caixa-installments-dialog *
+    ) {
+    display: none !important;
+  }
+  body:has(.caixa-installments-dialog[open]) :has(.caixa-installments-dialog[open]) {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: #fff !important;
+  }
+  .caixa-installments-dialog[open] {
+    display: block !important;
+    position: static;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: #fff;
+    color: #111;
+  }
+  .caixa-installments-dialog[open] .caixa-installments-actions {
+    display: none !important;
+  }
+  .caixa-installments-dialog[open] .caixa-installments-scroll {
+    max-height: none;
+    overflow: visible;
+  }
+  .caixa-installments-dialog[open] thead {
+    position: static;
+    display: table-header-group;
+    background: #fff;
+  }
+  .caixa-installments-dialog[open] tr {
+    break-inside: avoid;
+  }
+  .caixa-installments-dialog[open] :is(th, td) {
+    color: #111;
+    padding: 5px;
+    border-color: #ccc;
+  }
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar nav,
+.goal-page-shell.caixa-page-shell
+  .caixa-workspace[data-sidebar-collapsed="true"]
+  .caixa-tool-sidebar
+  nav {
+  display: flex;
+  margin-top: 0;
+}
+@media (max-width: 480px) {
+  .goal-page-shell.caixa-page-shell .caixa-metric > strong {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+}
+.goal-page-shell.caixa-page-shell .caixa-property-condition-group {
+  grid-column: auto;
+}
+.goal-page-shell.caixa-page-shell .caixa-binary-grid > .caixa-field > span,
+.goal-page-shell.caixa-page-shell .caixa-property-condition-group > .caixa-field > span {
+  min-height: 30px;
+}
+@media (max-width: 760px) {
+  .goal-page-shell.caixa-page-shell .caixa-property-condition-group {
+    grid-column: 1 / -1;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-product-system-field {
+    grid-column: 1 / -1;
+  }
+}
+.goal-page-shell.caixa-page-shell {
+  font-family: var(--font-geist-sans, Geist), Arial, sans-serif;
+  background: var(--analytics-page) !important;
+  --caixa-layout-accent-strong: var(--analytics-cyan-strong);
+}
+.goal-page-shell.caixa-page-shell
+  :is(
+    .caixa-full-form,
+    .caixa-form-section,
+    .caixa-form-section-content,
+    .caixa-primary-grid,
+    .caixa-secondary-grid,
+    .caixa-binary-grid,
+    .caixa-qualification-item
+  ) {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.goal-page-shell.caixa-page-shell .caixa-toggle {
+  min-height: 40px;
+  padding: 0;
+}
+.goal-page-shell.caixa-page-shell .caixa-toggle button {
+  min-height: 40px !important;
+}
+@media (max-width: 760px) {
+  .goal-page-shell.caixa-page-shell .caixa-toggle button {
+    min-height: 44px !important;
+  }
+}
+@media print {
+  .goal-page-shell.caixa-page-shell {
+    background: #fff !important;
+  }
+}
+@media (min-width: 361px) and (max-width: 760px) {
+  .goal-page-shell.caixa-page-shell .caixa-primary-grid > .caixa-field > span > small {
+    display: none;
+  }
+}
+@media (min-width: 941px) and (max-width: 1100px) {
+  .goal-page-shell.caixa-page-shell .caixa-binary-grid .caixa-field > span {
+    font-size: 11px;
+    letter-spacing: normal;
+  }
+}
+@media (min-width: 761px) and (max-width: 940px) {
+  .goal-page-shell.caixa-page-shell .caixa-primary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .goal-page-shell.caixa-page-shell .caixa-secondary-grid {
+    grid-template-columns: 1fr 1.4fr 0.6fr;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-product-system-field {
+    grid-column: 2 / 4;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-binary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .goal-page-shell.caixa-page-shell .caixa-property-condition-group {
+    grid-column: 1 / -1;
   }
 }

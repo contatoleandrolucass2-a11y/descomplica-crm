@@ -4071,3 +4071,7 @@ Validação e publicação serão registradas com evidências ao concluir os gat
 - Publica Equipe Produtiva e as correções de Administração, Páginas e Usuários
   em6a0b1df5, após os quatro gates de main. Ativa as duas migrations autorizadas,
   preservando acessos anteriores e confirmando a proteção de acesso anônimo.
+
+- Compacta exclusivamente o Simulador CAIXA com lateral de altura completa
+  que abre no hover, canvas proporcional, campos sem fundo, título ao lado
+  do menu e parcelas centralizadas com impressão da tabela completa.

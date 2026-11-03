@@ -3278,3 +3278,16 @@ PR463 publicado/0dab1578; persistência, margem e prints aprovados. Evidências 
 - Sync do conhecimento impedido por documento acima do limite de exportação.
   Exceção restrita ao registro no Obsidian; reavaliar quando a infraestrutura
   permitir exportar. Não corrigir infraestrutura ou outras páginas neste chat.
+
+## 2026-11-03 — Abertura: ajustes visuais exclusivos da CAIXA
+
+- Git comum confirmado; branch codex/caixa-sidebar-hover, base main38bec742,
+  checkout limpo. GitHub CI41569465098 aprovada; health público HTTP200/ok
+  com produção6a0b1df5. Fontes consultadas em03/11/2026; versões distintas.
+- Pedido: sidebar rente à esquerda e altura da tela, hover como Agendamentos,
+  conteúdo expansivo sem reorganizar linhas durante hover, título ao lado,
+  formulário compacto com campos transparentes, modal central e impressão.
+  Referências Agendamentos/Associativo somente leitura; motor preservado.
+- Context/search indisponíveis por limite de exportação do conhecimento;
+  referências versionadas consultadas. Sync será tentado, sem ampliar escopo
+  para corrigir a infraestrutura de conhecimento.

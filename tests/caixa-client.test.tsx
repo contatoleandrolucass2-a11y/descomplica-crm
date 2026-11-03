@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { chromium, expect as browserExpect, type Browser, type Page } from "@playwright/test";
@@ -223,26 +223,155 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(page.locator(".caixa-city-picker.open")).toBeVisible();
       await page.getByRole("option", { name: "São Paulo SP", exact: true }).click();
     }
-    it("resizes the retractable sidebar and opens monthly installments with keyboard dismissal", async () => {
+    it("fills the viewport edge and resizes content on sidebar hover and keyboard focus", async () => {
       await open();
       const workspace = page.locator(".caixa-workspace");
+      const sidebar = page.locator(".caixa-tool-sidebar");
+      const content = page.locator(".caixa-workspace-content");
       await browserExpect(workspace).toHaveAttribute("data-sidebar-collapsed", "true");
-      await page.getByRole("button", { name: "Expandir menu de simulação" }).click();
+      const closed = await content.boundingBox();
+      const sidebarBox = await sidebar.boundingBox();
+      expect(sidebarBox).not.toBeNull();
+      expect(sidebarBox!.x).toBeCloseTo(0, 0);
+      expect(sidebarBox!.y).toBeGreaterThanOrEqual(0);
+      expect(sidebarBox!.y).toBeLessThan(90);
+      expect(sidebarBox!.y + sidebarBox!.height).toBeCloseTo(900, 0);
+      await sidebar.hover();
       await browserExpect(workspace).toHaveAttribute("data-sidebar-collapsed", "false");
+      await browserExpect
+        .poll(async () => (await content.boundingBox())!.width)
+        .toBeLessThan(closed!.width - 100);
       await browserExpect(
         page.getByRole("navigation", { name: "Simuladores disponíveis" }).getByRole("link"),
       ).toHaveCount(6);
-      await fillMain();
+      await page.mouse.move(1400, 80);
       await browserExpect(workspace).toHaveAttribute("data-sidebar-collapsed", "true");
+      await browserExpect
+        .poll(async () => (await content.boundingBox())!.width)
+        .toBeCloseTo(closed!.width, 0);
+      await page.keyboard.press("Tab");
+      await browserExpect(workspace).toHaveAttribute("data-sidebar-collapsed", "false");
+      await page.getByRole("button", { name: "Limpar", exact: true }).focus();
+      await browserExpect(workspace).toHaveAttribute("data-sidebar-collapsed", "true");
+      await page.evaluate(() => {
+        document.documentElement.dataset.theme = "dark";
+      });
+      const darkSidebar = await sidebar.boundingBox();
+      expect(darkSidebar!.x).toBeCloseTo(0, 0);
+      expect(darkSidebar!.y + darkSidebar!.height).toBeCloseTo(900, 0);
+      for (const link of await sidebar.getByRole("link").all()) {
+        await browserExpect(link).toBeVisible();
+        await browserExpect(link.locator("svg").first()).toBeVisible();
+      }
+      await browserExpect(
+        page.getByRole("heading", { name: "Simulador CAIXA", exact: true }),
+      ).toHaveText("Simulador Caixa");
+      expect(errors).toEqual([]);
+    });
+    it("centers monthly installments and prints the complete schedule with keyboard dismissal", async () => {
+      await open();
+      const directory = resolve("private-data/caixa-qa");
+      await mkdir(directory, { recursive: true });
+      const fontFamilies = await page.evaluate(() => ({
+        main: getComputedStyle(document.querySelector("main")!).fontFamily,
+        label: getComputedStyle(document.querySelector(".caixa-field > span")!).fontFamily,
+      }));
+      await writeFile(
+        resolve(directory, "caixa-font-families.json"),
+        JSON.stringify(fontFamilies, null, 2),
+      );
+      await fillMain();
       await page.getByRole("button", { name: "Exibir parcelas", exact: true }).click();
       const dialog = page.getByRole("dialog");
       await browserExpect(dialog).toBeVisible();
       await browserExpect(dialog.locator("tbody tr")).toHaveCount(420);
+      for (const width of [1440, 1024, 768, 390, 320]) {
+        await page.setViewportSize({ width, height: 900 });
+        const bounds = await dialog.boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.x + bounds!.width / 2, `${width}: centered horizontally`).toBeCloseTo(
+          width / 2,
+          0,
+        );
+        expect(bounds!.y + bounds!.height / 2, `${width}: centered vertically`).toBeCloseTo(450, 0);
+        expect(bounds!.width).toBeLessThanOrEqual(width);
+        expect(bounds!.height).toBeLessThanOrEqual(900);
+        const header = dialog.locator("header");
+        await browserExpect(header).toBeVisible();
+        for (const element of [
+          header,
+          dialog.getByRole("button", { name: "Imprimir", exact: true }),
+          dialog.getByRole("button", { name: "Fechar", exact: true }),
+        ]) {
+          const child = await element.boundingBox();
+          expect(child, `${width}: visible header and actions`).not.toBeNull();
+          expect(child!.x).toBeGreaterThanOrEqual(bounds!.x - 1);
+          expect(child!.y).toBeGreaterThanOrEqual(bounds!.y - 1);
+          expect(child!.x + child!.width).toBeLessThanOrEqual(bounds!.x + bounds!.width + 1);
+          expect(child!.y + child!.height).toBeLessThanOrEqual(bounds!.y + bounds!.height + 1);
+        }
+        for (const button of await dialog.getByRole("button").all()) {
+          const lines = await button.evaluate((element) => {
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size;
+          });
+          expect(lines, `${width}: action labels remain readable on one line`).toBe(1);
+        }
+        await page.screenshot({ path: resolve(directory, `caixa-parcelas-${width}.png`) });
+      }
+      await page.evaluate(() => {
+        window.print = () => document.documentElement.setAttribute("data-print-called", "true");
+      });
+      await dialog.getByRole("button", { name: "Imprimir", exact: true }).click();
+      await browserExpect(page.locator("html")).toHaveAttribute("data-print-called", "true");
+      await page.emulateMedia({ media: "print" });
+      await browserExpect(dialog).toBeVisible();
+      await browserExpect(dialog.locator("tbody tr").last()).toBeVisible();
+      await browserExpect(page.locator(".caixa-content-toolbar")).toBeHidden();
+      const printLayout = await dialog.evaluate((element) => {
+        const scroll = element.querySelector(".caixa-installments-scroll")!;
+        const style = getComputedStyle(scroll);
+        return {
+          scrollHeight: scroll.scrollHeight,
+          clientHeight: scroll.clientHeight,
+          overflowY: style.overflowY,
+          maxHeight: style.maxHeight,
+        };
+      });
+      expect(printLayout.maxHeight).toBe("none");
+      expect(printLayout.overflowY).toBe("visible");
+      expect(printLayout.scrollHeight).toBeLessThanOrEqual(printLayout.clientHeight + 1);
+      await page.emulateMedia({ media: "screen" });
       await page.keyboard.press("Escape");
       await browserExpect(dialog).not.toBeVisible();
       await browserExpect(
         page.getByRole("button", { name: "Exibir parcelas", exact: true }),
       ).toBeFocused();
+      expect(errors).toEqual([]);
+    });
+    it("keeps touch menu access without shrinking mobile form content", async () => {
+      await open();
+      await page.setViewportSize({ width: 390, height: 844 });
+      const workspace = page.locator(".caixa-workspace");
+      const before = await page.locator(".caixa-workspace-content").boundingBox();
+      await page.getByRole("button", { name: "Expandir menu de simulação", exact: true }).click();
+      await browserExpect(workspace).toHaveAttribute("data-sidebar-collapsed", "false");
+      expect((await page.locator(".caixa-workspace-content").boundingBox())!.width).toBeCloseTo(
+        before!.width,
+        0,
+      );
+      await page.getByRole("button", { name: "Recolher menu de simulação", exact: true }).click();
+      await browserExpect(workspace).toHaveAttribute("data-sidebar-collapsed", "true");
+      await browserExpect(page.locator(".caixa-tool-sidebar").getByRole("link")).toHaveCount(6);
+      for (const link of await page.locator(".caixa-tool-sidebar").getByRole("link").all()) {
+        await browserExpect(link).toBeVisible();
+        await browserExpect(link.locator("svg").first()).toBeVisible();
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+      expect(errors).toEqual([]);
     });
     async function auditCurrentTab(name: string) {
       const directory = resolve("private-data/caixa-qa");
@@ -254,6 +383,21 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             document.documentElement.dataset.theme = selected;
           }, theme);
           await page.waitForTimeout(200);
+          const pageColors = await page.evaluate(() => {
+            const probe = document.createElement("div");
+            probe.style.background = "var(--analytics-page)";
+            document.body.append(probe);
+            const expected = getComputedStyle(probe).backgroundColor;
+            probe.remove();
+            return {
+              actual: getComputedStyle(document.querySelector(".caixa-page-shell")!)
+                .backgroundColor,
+              expected,
+            };
+          });
+          expect(pageColors.actual, `${width}/${theme}: system page color`).toBe(
+            pageColors.expected,
+          );
           await page.screenshot({
             path: resolve(directory, `caixa-${name}-${width}-${theme}.png`),
             fullPage: true,
@@ -527,7 +671,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await open();
       const directory = resolve("private-data/caixa-qa");
       await mkdir(directory, { recursive: true });
-      for (const width of [1440, 1024, 390, 320]) {
+      for (const width of [1440, 1024, 768, 390, 320]) {
         await page.setViewportSize({
           width,
           height: width === 1440 ? 900 : width === 1024 ? 768 : 844,
@@ -541,11 +685,25 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             path: resolve(directory, `caixa-${width}-${theme}.png`),
             fullPage: true,
           });
+          const overflow = await page.evaluate(() => ({
+            viewport: innerWidth,
+            document: document.documentElement.scrollWidth,
+            elements: [...document.querySelectorAll("form *, .caixa-content-toolbar *")]
+              .filter((element) => element.getBoundingClientRect().right > innerWidth + 1)
+              .slice(0, 8)
+              .map((element) => ({
+                tag: element.tagName,
+                class: element.className,
+                right: element.getBoundingClientRect().right,
+                text: element.textContent?.slice(0, 60),
+              })),
+          }));
           expect(
-            await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
-            `${width}/${theme}`,
+            overflow.document <= overflow.viewport,
+            `${width}/${theme}: ${JSON.stringify(overflow)}`,
           ).toBe(true);
           const formBounds = await page.locator("form.caixa-form").evaluate((form) => {
+            // The mobile label must fit without relying on the local fallback font.
             const box = form.getBoundingClientRect();
             return Array.from(form.children).map((child) => {
               const bounds = child.getBoundingClientRect();
@@ -555,6 +713,13 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
               };
             });
           });
+          if (width === 390) {
+            for (const optional of await page
+              .locator(".caixa-primary-grid > .caixa-field > span > small")
+              .all()) {
+              await browserExpect(optional).toBeHidden();
+            }
+          }
           expect(
             formBounds.filter((child) => !child.contained),
             `${width}/${theme}`,
@@ -568,33 +733,43 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
               return (
                 box.left >= content.left &&
                 box.right <= content.right &&
-                box.right >= content.right - 1 &&
+                content.right - box.right <= 20 &&
                 box.bottom <= form.top
               );
             });
           expect(clearBounds, `${width}/${theme}: Limpar stays above the form at right`).toBe(true);
-          if (width === 1024) {
-            const geometry = await page.evaluate(() => {
-              const rectangle = (selector: string) => {
-                const box = document.querySelector(selector)!.getBoundingClientRect();
-                return {
-                  top: Math.round(box.top),
-                  left: Math.round(box.left),
-                  width: Math.round(box.width),
-                };
-              };
-              return {
-                participants: rectangle(".caixa-participants-field"),
-                productSystem: rectangle(".caixa-product-system-field"),
-                toggles: Array.from(
-                  document.querySelectorAll(".caixa-binary-grid > .caixa-fgts-choice"),
-                ).map((element) => Math.round(element.getBoundingClientRect().top)),
-                property: rectangle(".caixa-property-condition-group"),
-              };
-            });
-            expect(geometry.participants.width).toBeGreaterThan(geometry.productSystem.width * 0.9);
-            expect(new Set(geometry.toggles)).toHaveLength(1);
-            expect(geometry.property.top).toBeGreaterThan(geometry.toggles[0] ?? 0);
+          const fields = await page
+            .locator(
+              'form.caixa-form input:is([type="text"], [type="date"], [type="number"]), form.caixa-form select, .caixa-money-input',
+            )
+            .evaluateAll((elements) =>
+              elements
+                .filter((element) => element.getBoundingClientRect().height > 0)
+                .map((element) => ({
+                  label:
+                    element.getAttribute("aria-label") ?? element.closest("label")?.textContent,
+                  background: getComputedStyle(element).backgroundColor,
+                  height: element.getBoundingClientRect().height,
+                })),
+            );
+          for (const field of fields) {
+            expect(field.background, `${width}/${theme}: transparent ${field.label}`).toBe(
+              "rgba(0, 0, 0, 0)",
+            );
+            expect(field.height, `${width}/${theme}: compact ${field.label}`).toBeLessThanOrEqual(
+              48,
+            );
+          }
+          if (width >= 1024) {
+            const rows = await page
+              .locator(".caixa-binary-grid > *")
+              .evaluateAll((elements) =>
+                elements.map((element) => Math.round(element.getBoundingClientRect().top)),
+              );
+            expect(
+              new Set(rows),
+              `${width}/${theme}: financing options remain on one row`,
+            ).toHaveLength(1);
           }
           const inactiveButtons = await page
             .locator('.caixa-toggle button[aria-pressed="false"]')

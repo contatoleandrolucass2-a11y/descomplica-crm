@@ -31,9 +31,14 @@ export function CaixaInstallments({ result }: { result: Extract<HousingResult, {
       >
         <header>
           <h2 id="caixa-installments-title">Parcelas · {result.term} meses</h2>
-          <button type="button" autoFocus onClick={() => dialog.current?.close()}>
-            Fechar
-          </button>
+          <div className="caixa-installments-actions">
+            <button type="button" onClick={() => window.print()}>
+              Imprimir
+            </button>
+            <button type="button" autoFocus onClick={() => dialog.current?.close()}>
+              Fechar
+            </button>
+          </div>
         </header>
         <p>
           Projeção com taxa e seguros constantes, sem atualização futura pela TR. Valores
