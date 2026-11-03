@@ -74,3 +74,7 @@ requests externos. Script tests/appointments-metas.browser.mjs; result.json e
 12 imagens prefixadas sintetico- em test-results/appointments-metas. Imagens
 locais inspecionadas pelo coordenador. São evidências sintéticas, não prints
 do site publicado. Gates da CI e smoke real continuam etapas posteriores.
+
+## Reconciliação da base durante CI
+
+Main avançou de093453c6 para1f155c6b com detalhes de Equipe Produtiva. O componente compartilhado TiltCard ganhou details opcional; ausência conserva título, children e retorno de foco anteriores. O call site de Agendamentos não passa essa opção. Merge de código automático; conflitos apenas em WORKLOG, CHANGELOG e índice do conhecimento preservaram ambos os registros. Table, Columns, comparação e regras de vencidos/metas desta entrega não mudaram. Proteção strict exige CI no novo head combinado. Reavaliada a dependência compartilhada, sem editar a outra página ou atualizar baselines.

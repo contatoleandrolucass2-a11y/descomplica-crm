@@ -548,3 +548,45 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
 - Sync voltou a funcionar após integrar d83c9497, que reduziu o índice curado;
   a indisponibilidade anterior fica registrada como condição resolvida.
   Encerramento somente documental: sem novo restart ou republicação do runtime.
+
+## Tabelas nominais no pop-up — abertura em 03/11/2026
+
+- Pedido: dois grupos em cada pop-up dos quatro cards, Equipe Produtiva e
+  Equipe não Produtiva. Colunas na ordem Gerente Regional, Gerente de Vendas
+  e Responsável, com ordenação alfabética e os filtros vigentes do indicador.
+- Consulta em 03/11/2026, 08:38 America/Sao_Paulo: Git comum confirmado,
+  main/checkout 093453c68c05f3303ecf1f75a5e694707b8dbd5d sem mudanças locais;
+  CI documental 41592078541 concluída com sucesso. Runtime continua em
+  f3c4f126990ee634531d30c653403d66d44a4c7f, health HTTP 200/status ok.
+  Fontes: GitHub actions e https://crm.descomplicapro.com.br/api/health.
+- Branch nova codex/equipe-produtiva-detalhes. Reutilizar contratos autorizados
+  do cadastro e relatórios; nenhuma coleta, alteração remota ou migration
+  adicional autorizada por este pedido. Busca pertinente no Obsidian recuperou
+  registros locais e referências de outros worktrees; conferir no código.
+
+### Implementação do detalhe nominal — 03/11/2026
+
+- ProductiveTeamCard ganha listas produtiva/não produtiva por etapa a partir
+  do mesmo Set e cadastro filtrado dos números, sem alterar cálculo, acesso
+  ou snapshots. Deduplicação por chave e ordenação pt-BR por Regional, Gerente
+  de Vendas e Responsável. Sem cadastro confiável, listas ficam indisponíveis.
+- Fonte existente do cadastro contém key/owner/manager. Regional não está
+  armazenado nessa projeção; o detalhe usa somente vínculo conhecido e estável
+  de Agendamentos no período. Ausência/conflito/mudança aparece Não informado.
+  Fontes locais: ops/salesforce/export-candidate.mjs, productive-team-data.ts,
+  migration 20261102020840 e productive-team.ts. Nenhum relatório remoto foi
+  consultado; não se afirma inexistência do campo no relatório bruto remoto.
+- A RPC própria já retorna nomes e exige permissão da página/visão; não há
+  masking adicional a remover. Nenhuma nova concessão, endpoint, SQL ou migration.
+- UI: duas tabelas no pop-up dos quatro cards, com cabeçalhos na ordem pedida,
+  nomes integrais, vazio distinto de indisponível e montagem somente ao abrir.
+  Dois blocos no desktop, empilhados no celular, cabeçalho de fechamento fixo.
+- Validação inicial: 20 testes de análise e 13 testes de apresentação/regressão
+  aprovados, lint focado e tipos aprovados. Navegador isolado aprovou 48 cenários
+  de layout e 72 aberturas; cenário longo em celular identificou deslocamento
+  do modal herdado de position:relative do card. Correção exclusiva do modal
+  para position:fixed/inset:0 aprovada no mesmo contrato. Rerun aprovou também
+  listas de 180 corretores em desktop/celular, 90/90 linhas integrais, filtro
+  Responsável, Escape e retorno do foco, sem ampliar tolerâncias. Evidências:
+  test-results/productive-team-layout/current/evidence.json e capturas details-\*.png.
+  Cabeçalho/dados locais sintéticos; CI/merge/publicação ainda pendentes.

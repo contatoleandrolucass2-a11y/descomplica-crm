@@ -5,6 +5,10 @@
   Média anual arredondada para cima; metas semanal e mensal usam referências
   horizontais únicas, conforme o mês/equipe e o cadastro de corretores.
 
+- Detalha os quatro indicadores de Equipe Produtiva em tabelas de corretores
+  produtivos e não produtivos, ordenadas por Regional, Gerente e Responsável,
+  respeitando os filtros e a base usada nos cards.
+
 - Publica os ajustes visuais de Equipe Produtiva em f3c4f126, com CI completa,
   vidro confirmado no CSS de produção e encaixe desktop validado no navegador.
 
