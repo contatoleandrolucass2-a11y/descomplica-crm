@@ -383,6 +383,21 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             document.documentElement.dataset.theme = selected;
           }, theme);
           await page.waitForTimeout(200);
+          const pageColors = await page.evaluate(() => {
+            const probe = document.createElement("div");
+            probe.style.background = "var(--analytics-page)";
+            document.body.append(probe);
+            const expected = getComputedStyle(probe).backgroundColor;
+            probe.remove();
+            return {
+              actual: getComputedStyle(document.querySelector(".caixa-page-shell")!)
+                .backgroundColor,
+              expected,
+            };
+          });
+          expect(pageColors.actual, `${width}/${theme}: system page color`).toBe(
+            pageColors.expected,
+          );
           await page.screenshot({
             path: resolve(directory, `caixa-${name}-${width}-${theme}.png`),
             fullPage: true,

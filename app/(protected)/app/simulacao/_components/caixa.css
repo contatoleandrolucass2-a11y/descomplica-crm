@@ -4690,7 +4690,9 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
   }
 }
 .goal-page-shell.caixa-page-shell {
-  font-family: var(--font-geist-sans, Arial), sans-serif;
+  font-family: var(--font-geist-sans, Geist), Arial, sans-serif;
+  background: var(--analytics-page) !important;
+  --caixa-layout-accent-strong: var(--analytics-cyan-strong);
 }
 .goal-page-shell.caixa-page-shell
   :is(
@@ -4715,5 +4717,10 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
 @media (max-width: 760px) {
   .goal-page-shell.caixa-page-shell .caixa-toggle button {
     min-height: 44px !important;
+  }
+}
+@media print {
+  .goal-page-shell.caixa-page-shell {
+    background: #fff !important;
   }
 }
