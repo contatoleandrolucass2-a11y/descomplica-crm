@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-11-03 — Equipe Produtiva: tabelas publicadas
+
+- PR #481/merge 1f155c6b publicado na versão coordenada 82ee8deb, que inclui
+  também PR #482 e PR #478. Nenhuma nova alteração de outra página neste chat.
+- CI 41654312258 aprovou os quatro gates no SHA final. O contrato completo de
+  Equipe Produtiva passou também em 1f155c6b e 950dfb9a; arquivos da página,
+  análise nominal e extensão do card não mudaram entre 950dfb9a e 82ee8deb.
+- Publicação reconhecida pelo ledger/Docker/health em 03/11, 12:35:48.568 SP,
+  deployment 1d4c8ac7-f800-4513-ac2b-48ba4fd192a2, sem pendência. CSS das
+  tabelas/vidro confirmado; acesso anônimo redirecionado ao login. Sem migration.
+- A janela coordenada foi respeitada, sem segundo deploy. Imagem anterior
+  preservada. Registro documental não exige reiniciar a aplicação.
+
 ## 2026-11-03 — Agendamentos: metas e vencidos
 
 - PR474 e CI integrada41575950480 confirmados concluídos; código já incorporado
