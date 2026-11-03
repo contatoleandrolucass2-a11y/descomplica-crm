@@ -4207,15 +4207,19 @@
 }
 .caixa-installments-dialog header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 .caixa-installments-actions {
   display: flex;
+  flex: 0 0 auto;
+  margin-left: auto;
   gap: 8px;
 }
 .caixa-installments-dialog button {
+  white-space: nowrap;
   padding: 10px 16px;
   border: 1px solid currentColor;
   border-radius: 8px;

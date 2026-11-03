@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { chromium, expect as browserExpect, type Browser, type Page } from "@playwright/test";
@@ -270,6 +270,16 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
     });
     it("centers monthly installments and prints the complete schedule with keyboard dismissal", async () => {
       await open();
+      const directory = resolve("private-data/caixa-qa");
+      await mkdir(directory, { recursive: true });
+      const fontFamilies = await page.evaluate(() => ({
+        main: getComputedStyle(document.querySelector("main")!).fontFamily,
+        label: getComputedStyle(document.querySelector(".caixa-field > span")!).fontFamily,
+      }));
+      await writeFile(
+        resolve(directory, "caixa-font-families.json"),
+        JSON.stringify(fontFamilies, null, 2),
+      );
       await fillMain();
       await page.getByRole("button", { name: "Exibir parcelas", exact: true }).click();
       const dialog = page.getByRole("dialog");
@@ -286,6 +296,29 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         expect(bounds!.y + bounds!.height / 2, `${width}: centered vertically`).toBeCloseTo(450, 0);
         expect(bounds!.width).toBeLessThanOrEqual(width);
         expect(bounds!.height).toBeLessThanOrEqual(900);
+        const header = dialog.locator("header");
+        await browserExpect(header).toBeVisible();
+        for (const element of [
+          header,
+          dialog.getByRole("button", { name: "Imprimir", exact: true }),
+          dialog.getByRole("button", { name: "Fechar", exact: true }),
+        ]) {
+          const child = await element.boundingBox();
+          expect(child, `${width}: visible header and actions`).not.toBeNull();
+          expect(child!.x).toBeGreaterThanOrEqual(bounds!.x - 1);
+          expect(child!.y).toBeGreaterThanOrEqual(bounds!.y - 1);
+          expect(child!.x + child!.width).toBeLessThanOrEqual(bounds!.x + bounds!.width + 1);
+          expect(child!.y + child!.height).toBeLessThanOrEqual(bounds!.y + bounds!.height + 1);
+        }
+        for (const button of await dialog.getByRole("button").all()) {
+          const lines = await button.evaluate((element) => {
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size;
+          });
+          expect(lines, `${width}: action labels remain readable on one line`).toBe(1);
+        }
+        await page.screenshot({ path: resolve(directory, `caixa-parcelas-${width}.png`) });
       }
       await page.evaluate(() => {
         window.print = () => document.documentElement.setAttribute("data-print-called", "true");
