@@ -2,6 +2,11 @@
 // the authoritative values live in the database. Labels are presentation-only;
 // the technical keys remain unchanged for RPCs, RLS and audit records.
 export const PERMISSIONS = {
+  "crm.productive_team.view": {
+    label: "Visualizar Equipe Produtiva",
+    description: "Consulta os indicadores de corretores produtivos por etapa.",
+    minLevel: 10,
+  },
   "crm.useful_links.view": {
     label: "Visualizar Links Úteis",
     description: "Acesse os materiais e canais de apoio comercial.",

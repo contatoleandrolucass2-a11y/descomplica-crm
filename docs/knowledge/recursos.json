@@ -81,6 +81,7 @@
         "app/(protected)/app/meta-ads/contas-de-anuncios/page.tsx",
         "app/(protected)/app/meta-ads/relatorios/page.tsx",
         "app/(protected)/app/repasse/page.tsx",
+        "app/(protected)/app/equipe-produtiva/page.tsx",
         "app/(protected)/app/etapas/[stage]/page.tsx",
         "app/(protected)/app/ranking/page.tsx",
         "app/(protected)/app/canal-de-parcerias/page.tsx",

@@ -1,4 +1,6 @@
-.admin-canvas {
+/* Let ManagementCanvas own shared padding and panel tokens regardless of CSS chunk order.
+ * Admin descendant rules keep their intentional layout specificity. */
+:where(.admin-canvas) {
   min-height: calc(100vh - 58px);
   padding: 0.8rem 1.25rem 2rem;
   background: var(--analytics-page);
@@ -36,7 +38,7 @@
   gap: 0.9rem;
 }
 
-.admin-home-card {
+:where(.admin-home-card) {
   min-height: 6.5rem;
   align-items: center;
   border-color: var(--analytics-cyan-strong);
@@ -101,8 +103,8 @@
   contain: inline-size;
 }
 
-.admin-users-toolbar,
-.admin-pages-toolbar {
+:where(.admin-users-toolbar),
+:where(.admin-pages-toolbar) {
   border: 0;
   background: transparent;
   padding: 0;
@@ -165,7 +167,7 @@
   box-shadow: var(--analytics-shadow);
 }
 
-.admin-users-summary {
+:where(.admin-users-summary) {
   order: 2;
   gap: 0.75rem;
 }
@@ -194,8 +196,8 @@
   order: 3;
 }
 
-.admin-users-results,
-.admin-pages-results {
+:where(.admin-users-results),
+:where(.admin-pages-results) {
   overflow: clip;
   border-color: var(--analytics-cyan-strong);
   border-radius: 0.7rem;
@@ -348,8 +350,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-.admin-pages-results th,
-.admin-pages-results td {
+:where(.admin-pages-results) th,
+:where(.admin-pages-results) td {
   padding-block: 0.52rem;
 }
 
@@ -358,7 +360,7 @@
   border-radius: 0;
 }
 
-.admin-page-action {
+:where(.admin-page-action) {
   min-width: 3.2rem;
   border-color: transparent;
   background: transparent;
@@ -384,7 +386,7 @@
 }
 
 @media (max-width: 60rem) {
-  .admin-canvas {
+  :where(.admin-canvas) {
     padding: 0.7rem 0.75rem 1.5rem;
   }
 

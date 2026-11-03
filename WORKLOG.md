@@ -148,6 +148,73 @@
   Meta Ads excluído. Este checkpoint será entregue em candidato coordenado com
   as demais frentes, sem publicação independente.
 
+## 2026-11-02 — Evidências e bloqueio de Equipe Produtiva
+
+- CI41516437878 passou todos os contratos funcionais/axe/zoom/Team; somente
+  Usuários tablet excedeu pixels pela nova permissão e identidade sintética.
+  Revisão independente confirmou geometria intacta e diferenças restritas ao
+  conteúdo autorizado. Uma referência promovida; 241 preservadas nesta etapa.
+  Proveniência exata e limite registrados no README de QA. Nova CI obrigatória.
+- A CI41526633412 encontrou rótulo de metadado inválido na nova referência.
+  Corrigido para o valor contratual baseline_updated, sem alterar imagem,
+  limiar ou asserção. A validação focada do catálogo visual passou.
+- CI41527348860 e41536343313 passaram os quatro jobs. A proteção strict exige
+  integrar o main corrente antes do merge; entregas concorrentes foram
+  preservadas. Produção continua2556898d, sem aplicação das duas migrations.
+
+- Captura protegida 41385963470 aprovada: 242 cenários de tela/axe, navegação
+  compartilhada e contrato dedicado da página com seis telas e cinco zooms.
+  No candidato `cf284fac`, aplicação, banco, restauração e imagem passaram;
+  a comparação visual obrigatória ainda estava em execução na consulta final.
+- As referências Admin contêm diferenças anteriores à demanda (margens,
+  bordas e header), além das contagens afetadas pelo catálogo. Não há aprovação
+  para absorver essas divergências. Nenhum baseline foi substituído; integração
+  e publicação ficam bloqueadas até a resolução em demanda própria.
+- O estado sem coleta agora preserva o canal Imob autorizado e reinicia o
+  componente ao trocar a visão. Trinta testes focados passaram após esse ajuste;
+  o novo SHA precisa de sua própria CI. Nenhuma migration remota foi aplicada.
+
+## 2026-11-01 — Equipe Produtiva
+
+- Nova página `/app/equipe-produtiva`, com permissão própria e item autorizado na
+  sidebar de Visão Geral, Oportunidades, Agendamentos, Visitas, Pastas, Vendas e
+  Repasse. Reutiliza os filtros e cards de Agendamentos, mantendo seus defaults.
+- Quatro percentuais de corretores únicos com agendamentos, visitas, pastas e
+  vendas sobre o cadastro vigente filtrado. Período recorta atividade; cadastro
+  não é inferido da atividade. Empresa/Imob preservam indisponibilidade quando
+  a autoridade atual não fornece denominador conciliável.
+- RPC mínima independente, com sessão, permissão, catálogo e visão autorizados;
+  presença por corretor sem valores financeiros ou contas. Duas migrations
+  locais preparam catálogo e leitura; nenhuma ativação remota executada.
+- Evidências e limites em
+  `docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md`.
+- Build Next, lint e tipos aprovados. A primeira CI revelou inventários estáticos
+  diretamente afetados pela página: catálogos de páginas/permissões, matrizes de
+  acesso, duas versões não implantáveis pelo fluxo histórico Auth/MFA e plano de
+  restauração. Entradas exatas atualizadas; 130 testes focados passaram.
+  O contrato visual dedicado foi integrado à matriz autenticada, preservando
+  os canvases e baselines anteriores. Nova CI e banco ainda pendentes.
+- Revisão do PR465 identificou atividade histórica fora do elenco filtrado.
+  Quatro regressões reproduziram 100% indevido antes e 0% correto após o ajuste;
+  68 testes de cálculo e regressão de Agendamentos passaram. A análise anterior
+  somente expõe o cadastro já filtrado; seus indicadores permanecem intactos.
+- CI `31d95b1a` aprovou validação da aplicação e imagem. Restauração/banco
+  revelaram três expectativas/fixtures diretamente afetadas, corrigidas sem
+  alterar guards: allowlist da RPC, contagem Admin e preparação sem JWT do
+  teste de negação de Master. A captura real aprovou acesso/E2E e seis telas
+  da página; falhou na medição imediata do zoom antes de ResizeObserver.
+  Regressão agora inclui sidebar real e espera pela geometria observável.
+- Em `7cb6388`, banco/restauração e imagem passaram. A captura confirmou teclado,
+  seis telas e axe; diagnóstico adicional provou que o zoom por CSS mantinha as
+  media queries de desktop. O teste dedicado agora segue o método vigente da
+  matriz, com cinco viewports equivalentes e deviceScaleFactor, sem alterar UI,
+  limites ou baselines. A função exata passou localmente; nova CI necessária.
+- Captura `34fc2e14` aprovou a página autenticada: seis telas, teclado, axe e
+  cinco níveis de zoom. A matriz parou depois porque a expectativa do menu
+  compartilhado ainda tinha sete links. Acrescentada somente a nova entrada;
+  nenhuma regra ou tela de simulador foi alterada. Também foi alinhada a
+  asserção da assinatura do helper de captura. As duas suítes passaram 32 testes.
+
 ## 2026-11-01 — Margem do comparativo em cards estreitos
 
 - Duas declarações CSS reservam a mesma margem direita ao plot e ao eixo.
@@ -10698,6 +10765,24 @@ Candidato isolado a partir de 44707e359c99eabfafa2f37489062d9d87540522. As nove 
 Foram preparados a rota assinada /webhooks/meta e o worker supervisionado na mesma imagem, com configuração separada da credencial de métricas Meta Ads. A substituição não altera inscrições do C2S. Os gates do candidato e a validação visual autenticada ainda estão em andamento; esta nota não comprova publicação ou entrega real da Meta.
 
 Validação local do candidato Lead+: build Next e tipos aprovados, lint sem erros, formatação aprovada, catálogo de 49 páginas e inventário de 91 rotas conferidos, Gitleaks sem achados. A suíte completa executada passou com 4577 testes Vitest e 727 testes Node, preservados os skips já previstos para ambiente/CI. Testes adicionais focados verificam guards granulares, aposentadoria das ações legadas e supervisão de worker. A montagem standalone local importou o runtime do worker sem abrir conexão ao banco. Falta CI do SHA final, prova da imagem e validação visual autenticada; não foi promovida imagem à VPS.
+
+### 02/11/2026 — Retomada visual autorizada
+
+O usuário autorizou os três bloqueios Admin, as duas migrations e a publicação
+após gates. A cascata passa a dar prioridade determinística aos tokens do módulo
+nos empates administrativos; regras descendentes permanecem. Integração do main
+b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigidas.
+
+- Captura protegida1e43cdfb aprovada. Promovidas somente55 referências das cinco
+  rotas afetadas pelo sidebar;187 imagens e a proveniência anterior preservadas.
+  TodasAdmin permanecem contra a referência original; regressão de ordem CSS
+  inclui células, ações e resumo. CI verify final ainda obrigatória.
+
+- Verificação791b confirmou correçõesCSS:Administração/Páginas contraoriginais,
+  Usersdesktop/tablet aprovados. Só4Usersmóveis excederam pixels pela novapermissão.
+  Quatropares+12casosSSRreais extras foramrevistos;proveniência reproduzida com
+  fonteigual e19outputs sintéticos. Quatroreferências promovidas,238preservadas
+  nestaetapa;CIoriginal seguefalha,novaCIobrigatória. Semmutação remota.
 
 ### Revisão do candidato de leitura (PR469)
 

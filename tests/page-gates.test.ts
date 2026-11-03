@@ -65,7 +65,7 @@ describe("protected commercial page set", () => {
     expect(getProtectedPageGate(`/app/${route}`)?.permission).toBe(permission);
   });
 
-  it("matches the exact approved forty-nine-page protected set", () => {
+  it("matches the exact approved fifty-page protected set", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
@@ -76,6 +76,7 @@ describe("protected commercial page set", () => {
         "admin.pages|/admin/paginas|pages.manage",
         "admin.users|/admin/usuarios|users.view",
         "crm.dashboard|/app|crm.dashboard.view",
+        "crm.productive_team|/app/equipe-produtiva|crm.productive_team.view",
         "crm.leads.activities|/app/leads/atividades|crm.leads.activities.view",
         "crm.leads.audit|/app/leads/auditoria|crm.leads.audit.view",
         "crm.leads.distribution|/app/leads/distribuicao|crm.leads.distribution.view",
@@ -133,10 +134,21 @@ describe("protected commercial page set", () => {
     ).toEqual([]);
   });
 
-  it("keeps the full forty-nine-route smoke inventory unique", () => {
-    expect(PROTECTED_PAGE_GATES).toHaveLength(49);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(49);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(49);
+  it("keeps the full fifty-route smoke inventory unique", () => {
+    expect(PROTECTED_PAGE_GATES).toHaveLength(50);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(50);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(50);
+  });
+
+  it("protects productive team with its own page permission", () => {
+    const source = readFileSync(
+      new URL("../app/(protected)/app/equipe-produtiva/page.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(source).toContain('enforcePageAccess("/app/equipe-produtiva")');
+    expect(getProtectedPageGate("/app/equipe-produtiva")?.permission).toBe(
+      "crm.productive_team.view",
+    );
   });
 
   it("keeps Repasse restricted to Master and Admin in addition to its permission", () => {

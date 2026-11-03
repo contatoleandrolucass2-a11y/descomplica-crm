@@ -604,7 +604,7 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
     const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
-    expect(checkboxes).toHaveLength(75);
+    expect(checkboxes).toHaveLength(76);
     for (const checkbox of checkboxes) {
       expect(checkbox).not.toContain('checked=""');
       expect(checkbox).toContain('disabled=""');
@@ -786,7 +786,7 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).toMatch(/Total de usuários<\/span><strong[^>]*>40<\/strong>/);
     expect(markup).toMatch(/Com acesso ativo<\/span><strong[^>]*>32<\/strong>/);
   });
-  it("não exibe nem oferece salvar módulos ausentes do catálogo legado de 66 chaves", () => {
+  it("não exibe nem oferece salvar módulos ausentes do catálogo legado de 67 chaves", () => {
     const absent = new Set([
       ...usefulLinksPermissionKeys,
       "crm.management.forecast.view",
@@ -826,7 +826,7 @@ describe("catálogo localizado de acesso", () => {
         reportingScopes: [],
       }),
     );
-    expect(keys).toHaveLength(66);
+    expect(keys).toHaveLength(67);
     for (const permissionKey of usefulLinksPermissionKeys) {
       expect(keys).not.toContain(permissionKey);
       expect(markup).not.toContain(`aria-label="Acesso a ${PERMISSIONS[permissionKey].label}"`);
@@ -841,7 +841,7 @@ describe("catálogo localizado de acesso", () => {
     const checkboxes = [...markup.matchAll(/<input[^>]*type="checkbox"[^>]*>/g)].map(
       ([input]) => input,
     );
-    expect(checkboxes).toHaveLength(63);
+    expect(checkboxes).toHaveLength(64);
     expect(checkboxes.every((input) => input.includes('checked=""'))).toBe(true);
   });
 });

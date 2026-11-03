@@ -40,6 +40,7 @@ const dashboardLinks = [
   ["Pastas", "/app/etapas/pastas"],
   ["Vendas", "/app/etapas/vendas"],
   ["Repasse", "/app/repasse"],
+  ["Equipe Produtiva", "/app/equipe-produtiva"],
 ];
 export const archiveManagementNavigationContract = [
   ["Visão geral", "/app/gestao"],
