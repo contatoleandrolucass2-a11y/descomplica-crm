@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma Agendamentos publicado em82ee8deb, com CI completa e testes reais
+  no Chrome, integrado e celular simulado. Lista de outubro apresenta84
+  vencidos;32 cards mantêm dimensões e ordem após gravação e atualização.
+
 - Publica as tabelas de Equipe Produtiva e Equipe não Produtiva dos quatro
   indicadores em 82ee8deb, após validação e promoção coordenada.
 

@@ -26,8 +26,11 @@
 - Removidos texto informativo e botão CSV da interface das tabelas; leitura
   integral, contrato de exportação no servidor e estados recuperáveis mantidos.
   Contagem fica abaixo do título, fora da faixa flutuante das ferramentas.
-- Testes focados de cálculo/dados/componentes, tipos e lint aprovados; QA
-  visual integrado e publicação são etapas posteriores, registradas no arquivo
+- Testes focados, tipos, lint e QA visual9/9 aprovados. PR482 integrado em
+  950dfb9a; publicado na versão conjunta82ee8deb após quatro gates completos.
+  Chrome/integrado:136 registros gerais,84 vencidos, metas60/20 e média inteira.
+  Persistência entre navegadores e celular em390×844/844×390 comprovada;
+  32 cards com ordem/dimensões restauradas. Evidências no arquivo
   AGENDAMENTOS-METAS de03/11. Sem migration ou alteração de permissões.
 
 ## 2026-11-03 — Equipe Produtiva: detalhes nominais
