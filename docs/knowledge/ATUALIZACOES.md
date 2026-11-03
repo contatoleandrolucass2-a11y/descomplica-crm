@@ -1,5 +1,7 @@
 # Aprendizados e atualizacoes
 
+- Agendamentos: [recência e rolagem integral](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-ROLAGEM.md).
+
 ## 2026-11-02 — Correção autorizada do deploy documental e publicação CAIXA
 
 - Pedido explícito: corrigir a incompatibilidade e publicar a CAIXA, sem alterar
@@ -67,29 +69,7 @@ Encerramento documental não provoca outra promoção de runtime.
 - Implementação, testes, CI, integração e adoção em `main` são estados separados;
   esta nota não comprova publicação antes das respectivas evidências.
 
-## 2026-10-29: Agendamentos — sete achados corrigidos
-
-- Pedido e escopo: A1–A7 da análise de Agendamentos, com merge e publicação
-  autorizados. Base main b48ce8b4; produção observada a36de843e, health ok.
-  Nenhuma outra página, permissão, política comercial ou migration foi alterada.
-- Cadastro: empresa, ranking e canal sem elenco correspondente exibem base
-  indisponível; não usar só quem teve movimento como total cadastrado. Regional
-  das linhas é a original; facts usam observação de vínculo até a data civil,
-  sem atribuir uma regional quando o vínculo é desconhecido ou conflitante.
-  A base cadastral regional exige vínculo estável em todos os dias cobertos
-  selecionados, sem usar o vínculo de fechamento para movimentos anteriores.
-- Metas: cada competência vem da RPC autorizada; períodos compostos ponderam
-  o funil mensal pelos dias cobertos selecionados. Ausência não usa meta atual.
-- Apresentação: rolagem interna funcional sem barras visuais, wrappers de altura
-  limitada ao card, Hoje limpa restrições temporais e preserva dimensões. Meta,
-  torre e rótulo usam a mesma escala, com espaço para o máximo de 150% do editor.
-  Ampliação preserva apresentação mediante opção ativada apenas em Agendamentos.
-- Validação local: 87 testes focados, tipos, ESLint e formatação aprovados.
-  Navegador usa dados sintéticos locais e não grava perfil em produção. CI,
-  merge e publicação são estados posteriores, ainda não comprovados nesta nota.
-- Limite: elenco atual não contém histórico próprio de transferências ou vínculo
-  com empresas/Imob; indisponibilidade explícita preserva a leitura honesta.
-  Fontes: diff da branch codex/agendamentos-sete-correcoes e testes relacionados.
+- Histórico de Agendamentos de 29/10 preservado no [registro canônico](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-ROLAGEM.md).
 
 ## 2026-10-29: abertura da revisão de eficiência do processo
 
@@ -3235,11 +3215,7 @@ antes de qualquer ativação.
 
 ## 2026-10-30: tamanho e ordem persistidos ao sair e voltar a Agendamentos
 
-- Pedido específico: sair de Agendamentos, voltar e comprovar tamanho e posição, com print. Antes da navegação, foram registrados os 28 IDs em ordem e os valores DOM de width/height. A saída ocorreu pelo link Visão Geral e a URL https://crm.descomplicapro.com.br/app foi confirmada. O link de retorno estava oculto e as tentativas de abrir Lead não o tornaram disponível à ferramenta; sem investigar ou alterar a navegação global, foi usado o endereço conhecido https://crm.descomplicapro.com.br/app/etapas/agendamentos para retornar. Não alegar teste aprovado do menu Lead ou de outras jornadas.
-- Depois do retorno e carregamento do perfil, as listas completas de 28 registros (ID, width e height) foram comparadas: igualdade integral de ordem e dimensões. Exemplos observados: Visitas realizadas em 4º, 317×237 px; Agendamentos por semana em 15º, 477×439 px; Previstos e realizados hoje em 16º, 441×441 px. Nenhum editor, reconfiguração, arraste ou salvamento manual foi necessário neste teste; layouts e filtros não foram alterados.
-- Print nativo após o retorno em test-results/appointments-first-save/sair-voltar-resultado.jpg e resumo sanitizado sair-voltar-resultados.json, ignorados pelo Git. Captura do cabeçalho aos gráficos, sem rankings ou tabela de clientes. Listas contêm apenas identificadores de cards e dimensões, sem registros pessoais; não exportar imagem ou anexos ao GitHub/Obsidian. Aba de resultado mantida aberta.
-- Fontes atuais: árvore inicialmente limpa; HEAD/origin main e807357f650988e3a5b9870a487362f97ef3041c após fetch; CI documental main 41114951426 em andamento na consulta. Health público às 2026-10-30T19:28:57Z respondeu 200/ok/version 8d0d1a732fb008da2d5c1b162d5c61a66fb97ecd. CI funcional 41093030466 aprovada para esse runtime, reutilizada porque este complemento não muda código. Fontes: https://crm.descomplicapro.com.br/api/health e GitHub actions/run 41114951426.
-- Aceite aprovado para sair à Visão Geral e voltar por navegação direta, na sessão e viewport observados. Não extrapolar para troca de usuário/dispositivo, menu indisponível ou coordenadas absolutas em layouts responsivos. Somente registro documental e sync, sem novo deploy, alteração de dados comerciais ou mudança de permissões.
+Registro integral preservado no [arquivo de Agendamentos](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-ROLAGEM.md), particionado conforme limite de exportação.
 
 ## 2026-10-30: tamanho e ordem preservados após novo login
 

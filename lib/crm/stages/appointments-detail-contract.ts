@@ -40,10 +40,26 @@ export interface AppointmentDetailRequest {
   query: AppointmentDetailQuery;
   snapshot: string;
   cursor?: string | null | undefined;
+  /** Read the complete authorized query; cannot be combined with a cursor. */
+  all?: true | undefined;
 }
 export interface AppointmentDetailActions {
   loadDetails: (input: AppointmentDetailRequest) => Promise<AppointmentDetailResult>;
   exportDetails: (input: AppointmentDetailRequest) => Promise<AppointmentExportResult>;
+}
+
+/** Partial bootstrap pages must never be presented as the complete table. */
+export function isCompleteAppointmentDetailPage(
+  result: AppointmentDetailResult | null,
+): result is AppointmentDetailPage {
+  return (
+    result?.status === "ready" &&
+    result.rows !== null &&
+    result.offset === 0 &&
+    result.previousCursor === null &&
+    result.nextCursor === null &&
+    result.rows.length === result.total
+  );
 }
 
 /** A stable query identity shared by initial render, pagination and export. */

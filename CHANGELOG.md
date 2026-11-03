@@ -1,5 +1,9 @@
 # Changelog
 
+- Padroniza a recência de Agendamentos com os rankings, incluindo barras de
+  dias e data abaixo do responsável. Detalhamento geral e vencidos passam a
+  exibir a lista completa com rolagem, sem botões de paginação.
+
 - Confirma publicação e validação em produção do menu retrátil e das parcelas
   do Simulador CAIXA, em6a0b1df5, após correção da compatibilidade do deploy.
 

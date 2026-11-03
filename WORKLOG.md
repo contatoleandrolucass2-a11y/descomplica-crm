@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-11-02 — Agendamentos: recência e lista integral
+
+- Confirmado PR #472 integrado, CI do PR e do merge aprovadas, registro
+  sincronizado. A nova etapa muda somente Agendamentos e dependências diretas.
+- Recência no padrão dos rankings: índices, barras proporcionais aos dias,
+  data abaixo do responsável, colunas alinhadas e ausência de divisórias.
+- Detalhamento geral e vencidos carregam todos os registros filtrados em uma
+  leitura autorizada, sem paginação visual. Bootstrap parcial não é exibido;
+  cópias reutilizam a consulta. Filtros, snapshot, mascaramento e CSV preservados.
+- Validação: 20 testes de controller/actions; 20 testes de UI/resumo/SSR,
+  com ressalva de timeout local no caso de 20 mil registros; roteiro Chromium
+  de detalhes e seis cenários integrados nos três temas, desktop e celular.
+- Sem migration ou alteração de permissões. Publicação condicionada à CI do
+  candidato e ao coordenador de produção. Evidências no registro canônico
+  AGENDAMENTOS-ROLAGEM de 02/11.
+
 ## 2026-11-02 — CAIXA publicada e validada
 
 - PR470 (sidebar e parcelas) e PR475 (compatibilidade do deploy) integrados;

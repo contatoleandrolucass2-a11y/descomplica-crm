@@ -1,5 +1,6 @@
 import {
   appointmentDetailQueryKey,
+  isCompleteAppointmentDetailPage,
   type AppointmentDetailActions,
   type AppointmentDetailRequest,
   type AppointmentDetailResult,
@@ -37,9 +38,54 @@ export function createAppointmentDetailController(
     current.clear();
     publish();
   };
-  const keyFor = (query: string, cursor?: string | null) => `${query}\0${cursor ?? ""}`;
-  if (source.initialPage.status === "ready")
+  const keyFor = (query: string, cursor?: string | null, all = false) =>
+    `${query}\0${all ? "all" : "page"}\0${cursor ?? ""}`;
+  if (source.initialPage.status === "ready") {
     pages.set(keyFor(source.initialQueryKey), source.initialPage);
+    if (isCompleteAppointmentDetailPage(source.initialPage))
+      pages.set(keyFor(source.initialQueryKey, null, true), source.initialPage);
+  }
+  const loadDetails = async (input: AppointmentDetailRequest): Promise<AppointmentDetailResult> => {
+    if (invalidated) return stale;
+    if (input.snapshot !== source.snapshot) return actions.loadDetails(input);
+    const queryKey = appointmentDetailQueryKey(input.query);
+    const intent = ++nextIntent;
+    boundedSet(intents, queryKey, intent);
+    const key = keyFor(queryKey, input.cursor, input.all);
+    let pending = inFlight.get(key);
+    const cached = pages.get(key);
+    if (cached) pending = Promise.resolve(cached);
+    if (!pending) {
+      pending = Promise.resolve()
+        .then(() => actions.loadDetails(input))
+        .catch((): AppointmentDetailResult => ({ status: "unavailable" }))
+        .then((result): AppointmentDetailResult => {
+          if (
+            invalidated ||
+            result.status === "snapshot_changed" ||
+            (result.status === "ready" && result.snapshot !== source.snapshot)
+          ) {
+            if (!invalidated) invalidate();
+            return stale;
+          }
+          if (input.all && result.status === "ready" && !isCompleteAppointmentDetailPage(result))
+            return { status: "unavailable" };
+          if (result.status === "ready") boundedSet(pages, key, result);
+          return result;
+        })
+        .finally(() => {
+          inFlight.delete(key);
+        });
+      inFlight.set(key, pending);
+    }
+    const result = await pending;
+    if (invalidated) return stale;
+    if (intents.get(queryKey) === intent) {
+      boundedSet(current, queryKey, result);
+      publish();
+    }
+    return result;
+  };
   return {
     subscribe(listener: () => void) {
       listeners.add(listener);
@@ -50,42 +96,9 @@ export function createAppointmentDetailController(
     getVersion: () => version,
     peek: (queryKey: string): AppointmentDetailResult | null =>
       invalidated ? stale : (current.get(queryKey) ?? null),
-    async loadDetails(input: AppointmentDetailRequest): Promise<AppointmentDetailResult> {
-      if (invalidated) return stale;
-      if (input.snapshot !== source.snapshot) return actions.loadDetails(input);
-      const queryKey = appointmentDetailQueryKey(input.query);
-      const intent = ++nextIntent;
-      boundedSet(intents, queryKey, intent);
-      const key = keyFor(queryKey, input.cursor);
-      let pending = inFlight.get(key);
-      const cached = pages.get(key);
-      if (cached) pending = Promise.resolve(cached);
-      if (!pending) {
-        pending = Promise.resolve()
-          .then(() => actions.loadDetails(input))
-          .catch((): AppointmentDetailResult => ({ status: "unavailable" }))
-          .then((result): AppointmentDetailResult => {
-            if (
-              result.status === "snapshot_changed" ||
-              (result.status === "ready" && result.snapshot !== source.snapshot)
-            ) {
-              invalidate();
-              return stale;
-            }
-            if (result.status === "ready") boundedSet(pages, key, result);
-            return result;
-          })
-          .finally(() => {
-            inFlight.delete(key);
-          });
-        inFlight.set(key, pending);
-      }
-      const result = await pending;
-      if (intents.get(queryKey) === intent) {
-        boundedSet(current, queryKey, result);
-        publish();
-      }
-      return result;
+    loadDetails,
+    loadAllDetails(input: Omit<AppointmentDetailRequest, "all" | "cursor">) {
+      return loadDetails({ ...input, cursor: null, all: true });
     },
     // Full export always revalidates the server. CSV is never cached here.
     async exportDetails(input: AppointmentDetailRequest) {
