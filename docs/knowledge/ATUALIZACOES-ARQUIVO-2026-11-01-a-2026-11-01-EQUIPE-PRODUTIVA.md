@@ -389,3 +389,21 @@ As outras4.902asserções Vitest passaram;113skips já previstos. Nova execuçã
 do candidato continua obrigatória. Sync Obsidian ficou pendente porque o
 índice compartilhado recebido de main tem256.512bytes, além do limite256.000;
 sem ampliar o escopo para reorganizar notas de outra demanda.
+
+## Gates aprovados e atualização estrita — 03/11/2026 UTC
+
+CI41527348860 (e676c454) e CI41536343313 (ac27e6bb) concluíram os quatro jobs
+com sucesso, incluindo matriz visual completa. O primeiro merge foi recusado
+pelo GitHub: três checks esperados, proteção strict=true; main havia avançado
+para8697ade2 somente com documentos. A integração ac27 foi sem conflito e
+sincronizou9documentos no Obsidian. Nenhum código ou referência mudou nessa etapa.
+
+Nova conferência em03/11UTC (02/11SãoPaulo): main855f32d6 contém correção
+concorrente do publicador, permitindo CI manual completa na main exata sem
+dispensar os quatro jobs. A entrega será preservada, sem editar sua política.
+Health público HTTP200/ok e ledger ainda apontam2556898d, deployment
+28c48a83-4c9e-4923-91c8-3028aabc5555, data real20:39:49.477Z de02/11,
+sem pendência. Fontes: origin/main, GitHub runs/PR465, health e coordenador.
+Nova integração/CI exigidas pela proteção; nenhuma migration Team aplicada.
+O índice recebido de855 tem256.592bytes, excedendo o limite256.000; eventual
+falha de sync permanece externa ao escopo, sem reordenar notas de outro chat.

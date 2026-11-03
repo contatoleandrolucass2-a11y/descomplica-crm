@@ -149,6 +149,9 @@
 - A CI41526633412 encontrou rótulo de metadado inválido na nova referência.
   Corrigido para o valor contratual baseline_updated, sem alterar imagem,
   limiar ou asserção. A validação focada do catálogo visual passou.
+- CI41527348860 e41536343313 passaram os quatro jobs. A proteção strict exige
+  integrar o main corrente antes do merge; entregas concorrentes foram
+  preservadas. Produção continua2556898d, sem aplicação das duas migrations.
 
 - Captura protegida 41385963470 aprovada: 242 cenários de tela/axe, navegação
   compartilhada e contrato dedicado da página com seis telas e cinco zooms.
