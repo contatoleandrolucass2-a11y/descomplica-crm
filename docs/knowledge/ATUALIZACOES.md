@@ -3327,3 +3327,7 @@ PR463 publicado/0dab1578; persistência, margem e prints aprovados. Evidências 
 - Fonte: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/478
   e actions/runs/41654312258, health público e inspeção visual da rota solicitada.
   Registro final somente documental; não exige reinício nem nova publicação da aplicação.
+- Sync final tentou exportar o registro e falhou: documento excede o limite de
+  exportação. Obsidian permanece pendente para esta nota; o sync anterior ao
+  registro havia passado. Exceção somente de conhecimento, sem efeito no deploy;
+  reavaliar após ajuste da infraestrutura em demanda própria.
