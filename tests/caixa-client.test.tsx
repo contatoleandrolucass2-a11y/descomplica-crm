@@ -264,8 +264,8 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         await browserExpect(link.locator("svg").first()).toBeVisible();
       }
       await browserExpect(
-        page.getByRole("heading", { name: "Simulador Caixa", exact: true }),
-      ).toBeVisible();
+        page.getByRole("heading", { name: "Simulador CAIXA", exact: true }),
+      ).toHaveText("Simulador Caixa");
       expect(errors).toEqual([]);
     });
     it("centers monthly installments and prints the complete schedule with keyboard dismissal", async () => {
@@ -285,7 +285,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       const dialog = page.getByRole("dialog");
       await browserExpect(dialog).toBeVisible();
       await browserExpect(dialog.locator("tbody tr")).toHaveCount(420);
-      for (const width of [1440, 1024, 390, 320]) {
+      for (const width of [1440, 1024, 768, 390, 320]) {
         await page.setViewportSize({ width, height: 900 });
         const bounds = await dialog.boundingBox();
         expect(bounds).not.toBeNull();
@@ -671,7 +671,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await open();
       const directory = resolve("private-data/caixa-qa");
       await mkdir(directory, { recursive: true });
-      for (const width of [1440, 1024, 390, 320]) {
+      for (const width of [1440, 1024, 768, 390, 320]) {
         await page.setViewportSize({
           width,
           height: width === 1440 ? 900 : width === 1024 ? 768 : 844,

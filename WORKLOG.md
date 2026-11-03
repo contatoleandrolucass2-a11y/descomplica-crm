@@ -12,15 +12,22 @@
 - Validação focada:57 testes de cálculo/parcelas aprovados, tipos/lint locais;
   nove jornadas browser cobrem temas,320–1440px,Axe,hover/foco,toque e impressão.
   CI obrigatória e versão publicada serão conferidas no encerramento.
-- A primeira CI encontrou expectativas do título antigo no contrato E2E da
-  CAIXA. Atualizadas somente essas duas expectativas, preservando os testes de
-  autorização e cálculo. Referências visuais serão capturadas pelo workflow
-  existente de candidato, revisadas e incorporadas somente para a CAIXA;
-  a CI normal continuará obrigatória no candidato final.
+- O título visível é Simulador Caixa; o nome acessível oficial Simulador CAIXA
+  foi preservado para leitores de tela e consumidores existentes. O contrato
+  E2E compartilhado permanece sem alterações no diff final. Referências
+  serão incorporadas somente para a CAIXA após revisão; a CI normal continua
+  obrigatória no candidato final.
 - Captura real86796b44: autorização, funções, acessibilidade e zoom aprovados;
   a fonte Geist real expôs overflow dos rótulos opcionais em375/390px.
   Corrigida somente essa indicação redundante nas duas colunas estreitas.
   Nenhuma referência foi promovida enquanto havia overflow.
+- CI41582668319: todos os checks funcionais, responsivos, temas, Axe,
+  canvas e zoom passaram; diferença visual restrita às11 imagens da CAIXA.
+  Nove imagens revisadas incorporadas;768/1024px excluídas para ajuste de
+  legibilidade em tablet. Proveniência reproduzida por hash dos19 arquivos
+  gerados, sem diff de código; nenhum baseline de outra página alterado.
+- Tablet768 usa distribuição própria sem sobrepor rótulos;1024 conserva
+  a linha com tipografia ajustada. Hover conserva as linhas em cada largura.
 
 ## 2026-11-02 — Agendamentos: recência e lista integral
 

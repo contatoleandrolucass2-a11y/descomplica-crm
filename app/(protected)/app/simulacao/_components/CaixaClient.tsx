@@ -774,7 +774,7 @@ export function CaixaClient({
       <div className="caixa-workspace-content" onPointerDown={() => setSidebarTouchOpen(false)}>
         <div className="caixa-content-surface" style={surfaceStyle}>
           <header className="caixa-content-toolbar">
-            <h1>Simulador Caixa</h1>
+            <h1 aria-label="Simulador CAIXA">Simulador Caixa</h1>
             {tab === "simulador" ? (
               <button type="button" className="caixa-clear-button" onClick={clear}>
                 <RotateCcw aria-hidden="true" />

@@ -4729,3 +4729,26 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
     display: none;
   }
 }
+@media (min-width: 941px) and (max-width: 1100px) {
+  .goal-page-shell.caixa-page-shell .caixa-binary-grid .caixa-field > span {
+    font-size: 11px;
+    letter-spacing: normal;
+  }
+}
+@media (min-width: 761px) and (max-width: 940px) {
+  .goal-page-shell.caixa-page-shell .caixa-primary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .goal-page-shell.caixa-page-shell .caixa-secondary-grid {
+    grid-template-columns: 1fr 1.4fr 0.6fr;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-product-system-field {
+    grid-column: 2 / 4;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-binary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .goal-page-shell.caixa-page-shell .caixa-property-condition-group {
+    grid-column: 1 / -1;
+  }
+}
