@@ -3271,6 +3271,7 @@ PR463 publicado/0dab1578; persistência, margem e prints aprovados. Evidências 
 - Health https://crm.descomplicapro.com.br/api/health: HTTP 200, status ok, version 0dab1578063eece6b9b5c86fa184c722388578fb. Código local/integrado e publicado são distintos; diferença histórica documental será preservada.
 - Contexto e busca temática de conhecimento executados. Dependências deste worktree ausentes; Next/Chrome MCP declarados no config, mas ferramentas locais não expostas nesta sessão. Não confundir declaração com conexão funcional. Validação e métricas dependerão de fixtures/ambiente isolado; não usar dados pessoais de produção.
 - Registro canônico desta execução: docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-HANDOFF.md, a preparar com matriz por frente, evidências e bloqueios. Sem autorização implícita para políticas comerciais, contas, DNS ou migrations remotas.
+
 ## 2026-11-02 — Encerramento CAIXA: publicação comprovada
 
 - Escopo: somente CAIXA (PR470) e correção autorizada do protocolo (PR475).
