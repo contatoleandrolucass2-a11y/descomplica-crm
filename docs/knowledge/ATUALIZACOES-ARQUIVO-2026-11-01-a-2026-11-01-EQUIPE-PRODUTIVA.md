@@ -511,3 +511,40 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
   WebKit após a propriedade padrão elimina a declaração padrão na otimização.
   Ordem corrigida; teste de navegador passou a usar esse otimizador e aprovou
   48 combinações. Referência57e2f6eb falha precisamente em blur=none.
+
+## Ajuste visual publicado — 03/11/2026
+
+- PR479: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/479.
+  Headbc335da7, merge/mainf3c4f126990ee634531d30c653403d66d44a4c7f.
+  CI do PR41579177528 e da main41585221159: validate, release-gates,
+  isolated-restore e promotable-image concluídos com sucesso.
+- Evidência autenticada do PR: productive-team-results.json, seis capturas
+  nos três temas (390/1440px), teclado e cinco níveis equivalentes de zoom
+  aprovados; nenhum erro de navegador ou violação bloqueante de acessibilidade.
+  Desktop1920×714,1440×900,1280×720,1280×476 e960×600 sem overflow vertical.
+  Sidebar externo alinhado ao cabeçalho58px, sem breadcrumb/horário duplicado,
+  blur12px/saturate1.12 computados. Captura: test-results/productive-team-layout/ci-dark-1440.webp.
+- Local: 24 testes Vitest, lint focado e tipos aprovados antes do ajuste CSS;
+  48 combinações Chromium com componentes reais, fixtures sintéticas e
+  otimizador de produção aprovadas após integrar a base. Build local compilou,
+  mas foi interrompido durante tipos após a causa do prefixo ser reproduzida;
+  não foi usado como gate completo. A CI do candidato fornece esse gate.
+- Diff produção6a0b1df5→f3c4f126 inclui PR474/Agendamentos previamente integrado;
+  nenhuma migration nova. A CI completa do SHA integrado valida esse conjunto.
+  Sem alterações adicionais de páginas, regras, dados, acesso ou baselines.
+- Artefato da CI41585221159: SHA256 do arquivo8786353338d7e179dc384cf03deed6fedb48f294897b22484edfb608e3883da0;
+  configCIsha256:7cd42f95372720d69d0f9113490cf4b06b02c9712efb95266faa90b8ae9935d1;
+  ID local/manifestsha256:8f0382311f406b762fed486aa6c0b22f8e0f2592b18307832dc75d30e9494606.
+  Prova de30blobs/14camadas, rootfs/config/revision equivalentes; perfis
+  homologação e produção aprovados com a mesma imagem e segredos sintéticos.
+- Coordenador release:production publicou deploymentb66918d3-6a95-4012-b96c-41ecabf27a70
+  em2026-11-03T06:42:26.927Z (03:42:26.927 America/Sao_Paulo), com consulta no
+  próprio minuto, CAS, locks, imagem anterior preservada e pendingDeploymentId=null.
+- Pós-publicação observacional: https://crm.descomplicapro.com.br/api/health
+  HTTP200/statusok/versionf3c4f126990ee634531d30c653403d66d44a4c7f;
+  /app/equipe-produtiva e /app/etapas/agendamentos HTTP307 para/login sem sessão.
+  CSS da imagem ativa contém vidro e shell condicional. A jornada autenticada
+  foi conferida no ambiente isolado da CI; nenhum login pessoal em produção.
+- Sync voltou a funcionar após integrar d83c9497, que reduziu o índice curado;
+  a indisponibilidade anterior fica registrada como condição resolvida.
+  Encerramento somente documental: sem novo restart ou republicação do runtime.
