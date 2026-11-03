@@ -30,6 +30,8 @@ describe("authorized breadcrumbs", () => {
     "/app/",
     "/app/etapas/agendamentos",
     "/app/etapas/agendamentos/",
+    "/app/equipe-produtiva",
+    "/app/equipe-produtiva/",
     "/app/simulacao/associativo-fluxo-linear",
     "/app/simulacao/associativo-fluxo-linear/",
     "/app/gestao/rotina",

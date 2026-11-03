@@ -5703,6 +5703,7 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
     route,
     contract: "docs/qa/equipe-produtiva/README.md",
     screens: [],
+    desktopFitChecks: [],
     keyboard: false,
     zoom: false,
     zoomMethod: "CSS viewport equivalents with deviceScaleFactor on a 1440×900 physical canvas",
@@ -5721,9 +5722,23 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
     target.evaluate(() => {
       const shell = document.querySelector("[data-dashboard-shell]");
       const surface = document.querySelector("[data-dashboard-surface]");
+      const sidebar = document.querySelector('aside[aria-label="Dashboard"]');
+      const topbar = document.querySelector("[data-protected-topbar]");
+      const content = document.querySelector("[data-protected-main-content]");
+      const card = document.querySelector(
+        'section[aria-label="Corretores produtivos por etapa"] > article',
+      );
       return {
         width: innerWidth,
+        height: innerHeight,
         scrollWidth: document.documentElement.scrollWidth,
+        scrollHeight: document.documentElement.scrollHeight,
+        sidebarTop: sidebar?.getBoundingClientRect().top ?? null,
+        headerBottom: topbar?.getBoundingClientRect().bottom ?? null,
+        outsideContent: Boolean(sidebar && content && !content.contains(sidebar)),
+        breadcrumbCount: document.querySelectorAll('nav[aria-label="Breadcrumb"]').length,
+        duplicateTimestampCount: document.querySelectorAll("[data-dashboard-updated-at]").length,
+        glass: card ? getComputedStyle(card).backdropFilter : null,
         shellWidth: shell?.clientWidth ?? null,
         railWidth: shell
           ? Number.parseFloat(getComputedStyle(shell).getPropertyValue("--dashboard-sidebar-rail"))
@@ -5770,12 +5785,20 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
         if (unavailableCards.some((text) => /\b0%|0 de 0/.test(text)))
           throw new Error("Equipe Produtiva rendered an unavailable source as zero.");
         evidence.stage = `geometry:${theme}:${width}`;
-        const geometry = await page.evaluate(() => ({
-          width: innerWidth,
-          scrollWidth: document.documentElement.scrollWidth,
-        }));
+        const geometry = await readGeometry();
         if (geometry.scrollWidth > geometry.width + 1)
           throw new Error(`Equipe Produtiva overflows at ${theme}/${width}`);
+        if (
+          geometry.breadcrumbCount ||
+          geometry.duplicateTimestampCount ||
+          !geometry.outsideContent ||
+          !geometry.glass?.includes("blur(12px)")
+        )
+          throw new Error(
+            `Equipe Produtiva compact shell/glass contract failed at ${theme}/${width}`,
+          );
+        if (width === 1440 && geometry.scrollHeight > geometry.height + 1)
+          throw new Error(`Equipe Produtiva has desktop vertical overflow at ${theme}/${width}`);
         evidence.stage = `accessibility:${theme}:${width}`;
         const accessibility = await inspectAccessibility(
           page,
@@ -5802,6 +5825,35 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
           screenshot,
         });
       }
+    }
+    for (const viewport of [
+      { width: 1920, height: 714 },
+      { width: 1280, height: 720 },
+      { width: 1280, height: 476 },
+      { width: 960, height: 600 },
+    ]) {
+      evidence.stage = `desktop-fit:${viewport.width}:${viewport.height}`;
+      await page.setViewportSize(viewport);
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await expect
+        .poll(
+          async () => {
+            const geometry = await readGeometry();
+            return (
+              geometry.scrollHeight <= geometry.height + 1 &&
+              geometry.scrollWidth <= geometry.width + 1 &&
+              geometry.sidebarTop !== null &&
+              geometry.headerBottom !== null &&
+              Math.abs(geometry.sidebarTop - geometry.headerBottom) <= 1
+            );
+          },
+          {
+            timeout: 10000,
+            message: "Equipe Produtiva must fit desktop with its rail below the global header",
+          },
+        )
+        .toBe(true);
+      evidence.desktopFitChecks.push({ viewport, geometry: await readGeometry() });
     }
     const period = page
       .getByRole("region", { name: "Filtros de Equipe Produtiva" })

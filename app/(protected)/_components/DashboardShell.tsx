@@ -95,9 +95,22 @@ function AppointmentsDashboardShell({
   const [keyboardFocused, setKeyboardFocused] = useState(false);
   const collapsed = !hovered && !keyboardFocused;
   const [updatedAt, setUpdatedAt] = useState("");
+  const productiveTeam = activePageKey === "crm.productive_team";
+  const [headerHeight, setHeaderHeight] = useState(58);
   const contextValue = useMemo(() => ({ setUpdatedAt }), [setUpdatedAt]);
   const shellRef = useRef<HTMLDivElement>(null);
   const [shellSize, setShellSize] = useState({ width: 0, overlay: false });
+
+  useEffect(() => {
+    if (!productiveTeam) return;
+    const header = document.querySelector<HTMLElement>("[data-protected-topbar]");
+    if (!header) return;
+    const measure = () => setHeaderHeight(header.getBoundingClientRect().height);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, [productiveTeam]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -167,11 +180,14 @@ function AppointmentsDashboardShell({
     <DashboardSidebarContext.Provider value={contextValue}>
       <div
         ref={shellRef}
-        className={styles.dashboardShell}
+        className={[styles.dashboardShell, productiveTeam && styles.productiveTeamShell]
+          .filter(Boolean)
+          .join(" ")}
         style={
           {
             "--dashboard-sidebar-rail": `${SIDEBAR_RAIL_WIDTH}px`,
             "--dashboard-sidebar-expanded": `${SIDEBAR_EXPANDED_WIDTH}px`,
+            ...(productiveTeam ? { "--dashboard-header-height": `${headerHeight}px` } : {}),
           } as CSSProperties
         }
         data-dashboard-shell

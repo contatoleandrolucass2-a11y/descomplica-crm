@@ -481,3 +481,33 @@ estados distintos e agora verificados para a entrega funcional. Este encerrament
 pendente porque o índice compartilhado recebido de main excede256.000bytes
 (arquivo atual256.679); reavaliar após correção dessa fonte, sem alterar notas
 de outras demandas para ocultar a falha.
+
+## Ajuste visual solicitado — 03/11/2026
+
+Escopo: somente Equipe Produtiva. Remover breadcrumb, elevar conteúdo e sidebar
+ao padrão externo de Agendamentos, acrescentar vidro mantendo os efeitos atuais
+e compactar para o desktop do print, preservando acesso ao conteúdo em telas
+estreitas/zoom. Sem alteração de cálculos, permissões ou banco.
+Abertura: Git comum confirmado, árvore limpa, branch base38bec742. Main remoto
+no mesmo SHA, CI documental41569465098 aprovada. Site observado200/ok na versão
+6a0b1df51ff8e8f9ed0711bd114f4c5ab6d41573. Busca do conhecimento indisponível:
+índice compartilhado excede o limite de exportação; não alegar sincronização.
+Fontes: origin/main, GitHub e /api/health em03/11/2026. Reutilizados contexto e
+ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
+
+### Validação local do ajuste visual — 03/11/2026
+
+- Implementado: breadcrumb/horário duplicado removidos, sidebar externo com
+  offset medido do cabeçalho e vidro nos cards. Bordas e eventos preservados.
+- Chromium isolado aprovou 48 combinações (oito viewports, três temas, fonte
+  presente/ausente), sem overflow vertical nos desktops testados; referência
+  6a0b1df5 falha. Evidência local: test-results/productive-team-layout/current.
+- Cabeçalho e dados sintéticos; aprovação de runtime Next depende da CI.
+  Nenhuma migration nova. Sync segue limitado pelo índice compartilhado acima
+  de 256000 bytes; não alterar notas de outras demandas para liberar esta.
+- CI41575292605/PR479 aprovou validate, restore e imagem, mas bloqueou
+  no contrato da própria Equipe Produtiva: backdrop-filter computado como none
+  em 390px. Causa reproduzida com Lightning CSS do PostCSS de produção: prefixo
+  WebKit após a propriedade padrão elimina a declaração padrão na otimização.
+  Ordem corrigida; teste de navegador passou a usar esse otimizador e aprovou
+  48 combinações. Referência57e2f6eb falha precisamente em blur=none.
