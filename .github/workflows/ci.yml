@@ -338,7 +338,7 @@ jobs:
         run: pnpm exec supabase stop --no-backup
 
   isolated-restore:
-    if: needs.validate.outputs.documentation_only != 'true' && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+    if: needs.validate.outputs.documentation_only != 'true' && (github.event_name == 'pull_request' || ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'))
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -385,7 +385,7 @@ jobs:
           retention-days: 14
 
   promotable-image:
-    if: needs.validate.outputs.documentation_only != 'true' && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+    if: needs.validate.outputs.documentation_only != 'true' && (github.event_name == 'pull_request' || ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'))
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 30

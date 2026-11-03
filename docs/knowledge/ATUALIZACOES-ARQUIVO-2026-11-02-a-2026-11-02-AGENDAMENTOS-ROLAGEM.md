@@ -60,3 +60,44 @@ sem botões de paginação. Preservar autorização, snapshot, mascaramento,
 filtros e exportação. Nenhuma alteração de outra página, dados comerciais,
 permissões, n8n ou schema autorizada por contexto. Não repetir migrations já
 aplicadas. Implementação, testes e publicação desta nova alteração pendentes.
+
+## Histórico preservado integralmente do índice
+
+## Reconciliação após CI aprovada
+
+CI41534244751 aprovou os quatro jobs do head10c6132a. Antes do merge, main
+avançou para855f32d6 com uma atualização autorizada do protocolo de publicação.
+O GitHub recusou o merge por conflito somente em CHANGELOG, WORKLOG e índice
+do conhecimento. Os dois conteúdos foram preservados; código funcional de
+Agendamentos permanece igual ao candidato testado. As regras integradas de
+main foram relidas, sem alterações incidentais nesta demanda. Nova CI do
+head reconciliado e depois do main exato continuam obrigatórias.
+
+A soma dos registros ultrapassava o limite de exportação. Somente a própria
+nota histórica de Agendamentos de29/10 foi movida integralmente abaixo, com
+referência no índice;1765bytes preservados, índice255090bytes antes do formato.
+O registro da outra entrega e suas regras não foram removidos ou reescritos.
+
+## 2026-10-29: Agendamentos — sete achados corrigidos
+
+- Pedido e escopo: A1–A7 da análise de Agendamentos, com merge e publicação
+  autorizados. Base main b48ce8b4; produção observada a36de843e, health ok.
+  Nenhuma outra página, permissão, política comercial ou migration foi alterada.
+- Cadastro: empresa, ranking e canal sem elenco correspondente exibem base
+  indisponível; não usar só quem teve movimento como total cadastrado. Regional
+  das linhas é a original; facts usam observação de vínculo até a data civil,
+  sem atribuir uma regional quando o vínculo é desconhecido ou conflitante.
+  A base cadastral regional exige vínculo estável em todos os dias cobertos
+  selecionados, sem usar o vínculo de fechamento para movimentos anteriores.
+- Metas: cada competência vem da RPC autorizada; períodos compostos ponderam
+  o funil mensal pelos dias cobertos selecionados. Ausência não usa meta atual.
+- Apresentação: rolagem interna funcional sem barras visuais, wrappers de altura
+  limitada ao card, Hoje limpa restrições temporais e preserva dimensões. Meta,
+  torre e rótulo usam a mesma escala, com espaço para o máximo de 150% do editor.
+  Ampliação preserva apresentação mediante opção ativada apenas em Agendamentos.
+- Validação local: 87 testes focados, tipos, ESLint e formatação aprovados.
+  Navegador usa dados sintéticos locais e não grava perfil em produção. CI,
+  merge e publicação são estados posteriores, ainda não comprovados nesta nota.
+- Limite: elenco atual não contém histórico próprio de transferências ou vínculo
+  com empresas/Imob; indisponibilidade explícita preserva a leitura honesta.
+  Fontes: diff da branch codex/agendamentos-sete-correcoes e testes relacionados.

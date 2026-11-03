@@ -55,7 +55,7 @@ describe("release-candidate migration train", () => {
     expect(workflow).toContain("if: steps.documentation_source_scope.outputs.required == 'true'");
     expect(
       workflow.match(
-        /if: needs\.validate\.outputs\.documentation_only != 'true' && \(github\.event_name == 'pull_request' \|\| \(github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'\)\)/g,
+        /if: needs\.validate\.outputs\.documentation_only != 'true' && \(github\.event_name == 'pull_request' \|\| \(\(github\.event_name == 'push' \|\| github\.event_name == 'workflow_dispatch'\) && github\.ref == 'refs\/heads\/main'\)\)/g,
       ),
     ).toHaveLength(2);
     expect(workflow).toContain(

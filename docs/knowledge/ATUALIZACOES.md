@@ -2,6 +2,19 @@
 
 - Agendamentos: [recência e rolagem integral](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-ROLAGEM.md).
 
+## 2026-11-02 — Correção autorizada do deploy documental e publicação CAIXA
+
+- Pedido explícito: corrigir a incompatibilidade e publicar a CAIXA, sem alterar
+  outras páginas. Base main8697ade2; CAIXA a93d65b2 com quatro gates aprovados
+  no run41523108306. CI documental41527166188 ignora três jobs e não é aprovação
+  para runtime. Produção2556898d saudável; versão será reconferida na promoção.
+- Solução: execução manual completa somente sobre main exata, com os mesmos
+  quatro gates e imagem própria. Sem herdar aprovação, aceitar SHA antigo,
+  enfraquecer CAS/locks ou transformar jobs ignorados em aprovação.
+- Validação focada Node24.19/pnpm11.20: 65 testes de política/motor de deploy
+  e 41 testes do contrato de CI/release aprovados. A classificação documental
+  segue recusando workflow_dispatch, que executa o caminho completo.
+
 ## 2026-11-02 — CAIXA: sidebar retrátil e parcelas
 
 - Escopo: somente `/app/simulacao/caixa`, sidebar responsiva baseada em
@@ -54,29 +67,7 @@ Encerramento documental não provoca outra promoção de runtime.
 - Implementação, testes, CI, integração e adoção em `main` são estados separados;
   esta nota não comprova publicação antes das respectivas evidências.
 
-## 2026-10-29: Agendamentos — sete achados corrigidos
-
-- Pedido e escopo: A1–A7 da análise de Agendamentos, com merge e publicação
-  autorizados. Base main b48ce8b4; produção observada a36de843e, health ok.
-  Nenhuma outra página, permissão, política comercial ou migration foi alterada.
-- Cadastro: empresa, ranking e canal sem elenco correspondente exibem base
-  indisponível; não usar só quem teve movimento como total cadastrado. Regional
-  das linhas é a original; facts usam observação de vínculo até a data civil,
-  sem atribuir uma regional quando o vínculo é desconhecido ou conflitante.
-  A base cadastral regional exige vínculo estável em todos os dias cobertos
-  selecionados, sem usar o vínculo de fechamento para movimentos anteriores.
-- Metas: cada competência vem da RPC autorizada; períodos compostos ponderam
-  o funil mensal pelos dias cobertos selecionados. Ausência não usa meta atual.
-- Apresentação: rolagem interna funcional sem barras visuais, wrappers de altura
-  limitada ao card, Hoje limpa restrições temporais e preserva dimensões. Meta,
-  torre e rótulo usam a mesma escala, com espaço para o máximo de 150% do editor.
-  Ampliação preserva apresentação mediante opção ativada apenas em Agendamentos.
-- Validação local: 87 testes focados, tipos, ESLint e formatação aprovados.
-  Navegador usa dados sintéticos locais e não grava perfil em produção. CI,
-  merge e publicação são estados posteriores, ainda não comprovados nesta nota.
-- Limite: elenco atual não contém histórico próprio de transferências ou vínculo
-  com empresas/Imob; indisponibilidade explícita preserva a leitura honesta.
-  Fontes: diff da branch codex/agendamentos-sete-correcoes e testes relacionados.
+- Histórico de Agendamentos de 29/10 preservado no [registro canônico](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-ROLAGEM.md).
 
 ## 2026-10-29: abertura da revisão de eficiência do processo
 

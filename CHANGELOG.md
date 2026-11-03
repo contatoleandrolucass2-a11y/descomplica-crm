@@ -4,6 +4,9 @@
   dias e data abaixo do responsável. Detalhamento geral e vencidos passam a
   exibir a lista completa com rolagem, sem botões de paginação.
 
+- Corrige publicação após avanço documental da main: CI manual completa no SHA
+  atual executa os quatro gates e gera imagem imutável própria, aceita pelo guard.
+
 - Publica as melhorias de leitura de Agendamentos em2556898d e aplica a
   expansão autorizada dos layouts salvos, preservando os cards anteriores.
   Persistência de dimensão/ordem comprovada entre Chrome, integrado e

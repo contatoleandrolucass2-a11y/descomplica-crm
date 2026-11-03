@@ -184,11 +184,13 @@ export function assertApprovedCandidate(candidate, targetSha) {
     run.id <= 0 ||
     run.status !== "completed" ||
     run.conclusion !== "success" ||
-    run.event !== "push" ||
+    !["push", "workflow_dispatch"].includes(run.event) ||
     run.head_branch !== "main" ||
     run.head_sha !== targetSha
   ) {
-    fail("The candidate requires a successful completed push CI run on the exact main SHA.");
+    fail(
+      "The candidate requires a successful completed push or manual CI run on the exact main SHA.",
+    );
   }
   if (!Array.isArray(jobs)) {
     fail("Candidate CI jobs are unavailable.");
