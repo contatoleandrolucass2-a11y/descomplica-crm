@@ -4681,6 +4681,9 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
   .goal-page-shell.caixa-page-shell .caixa-property-condition-group {
     grid-column: 1 / -1;
   }
+  .goal-page-shell.caixa-page-shell .caixa-product-system-field {
+    grid-column: 1 / -1;
+  }
 }
 .goal-page-shell.caixa-page-shell {
   font-family: var(--font-geist-sans, Arial), sans-serif;
