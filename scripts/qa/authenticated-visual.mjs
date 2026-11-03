@@ -5704,6 +5704,7 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
     contract: "docs/qa/equipe-produtiva/README.md",
     screens: [],
     desktopFitChecks: [],
+    detailsChecks: [],
     keyboard: false,
     zoom: false,
     zoomMethod: "CSS viewport equivalents with deviceScaleFactor on a 1440×900 physical canvas",
@@ -5824,6 +5825,137 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
           unavailableCards: unavailableCards.length,
           screenshot,
         });
+        await expect(page.locator("table")).toHaveCount(0);
+        for (const [index, activity] of ["Agendamentos", "Visitas", "Pastas", "Vendas"].entries()) {
+          evidence.stage = `details:${theme}:${width}:${activity}`;
+          const card = cards.locator("article").nth(index);
+          const cardText = await card.innerText();
+          const sourceUnavailable = /indispon[ií]ve|aguardando|n[aã]o conciliado|amb[ií]gua/i.test(
+            cardText,
+          );
+          const trigger = card.getByRole("button", {
+            name: "Abrir detalhes deste indicador",
+            exact: true,
+          });
+          await trigger.focus();
+          await page.keyboard.press("Enter");
+          const dialog = page.getByRole("dialog", {
+            name: `Equipe Produtiva — ${activity}`,
+            exact: true,
+          });
+          await expect(dialog).toBeVisible();
+          await expect(
+            dialog.getByRole("button", { name: "Fechar detalhes do indicador", exact: true }),
+          ).toBeFocused();
+          const tableChecks = [];
+          for (const name of ["Equipe Produtiva", "Equipe não Produtiva"]) {
+            const table = dialog.getByRole("table", { name, exact: true });
+            await expect(table.getByRole("columnheader")).toHaveText([
+              "Gerente Regional",
+              "Gerente de Vendas",
+              "Responsável",
+            ]);
+            await expect(table.locator('thead th[scope="col"]')).toHaveCount(3);
+            const body = table.locator("tbody");
+            if (sourceUnavailable) {
+              await expect(body).toHaveText("Detalhamento nominal indisponível.");
+              await expect(
+                body.getByText("Nenhum corretor nesta equipe.", { exact: true }),
+              ).toHaveCount(0);
+            }
+            const rows = await body
+              .locator("tr")
+              .evaluateAll((elements) =>
+                elements
+                  .filter((element) => element.children.length === 3)
+                  .map((element) =>
+                    Array.from(element.children, (cell) => cell.textContent?.trim() ?? ""),
+                  ),
+              );
+            const collator = new Intl.Collator("pt-BR", { sensitivity: "base", numeric: true });
+            const compare = (left, right) =>
+              (left[0] === "Não informado"
+                ? right[0] === "Não informado"
+                  ? 0
+                  : 1
+                : right[0] === "Não informado"
+                  ? -1
+                  : collator.compare(left[0], right[0])) ||
+              collator.compare(left[1], right[1]) ||
+              collator.compare(left[2], right[2]);
+            if (rows.some((row, rowIndex) => rowIndex > 0 && compare(rows[rowIndex - 1], row) > 0))
+              throw new Error(
+                `Equipe Produtiva details are not alphabetical at ${theme}/${width}/${activity}`,
+              );
+            tableChecks.push({
+              name,
+              rows: rows.length,
+              nominalUnavailable:
+                (await body.innerText()).trim() === "Detalhamento nominal indisponível.",
+            });
+          }
+          const count = cardText.match(/([\d.]+) de ([\d.]+) corretores/);
+          if (count && tableChecks.every((table) => !table.nominalUnavailable)) {
+            const productiveCount = Number(count[1].replaceAll(".", ""));
+            const totalCount = Number(count[2].replaceAll(".", ""));
+            if (
+              tableChecks[0].rows !== productiveCount ||
+              tableChecks[1].rows !== totalCount - productiveCount
+            )
+              throw new Error(
+                `Equipe Produtiva details disagree with its indicator at ${theme}/${width}/${activity}`,
+              );
+          }
+          const dialogGeometry = await dialog.evaluate((element) => {
+            const box = element.getBoundingClientRect();
+            return {
+              left: box.left,
+              right: box.right,
+              top: box.top,
+              bottom: box.bottom,
+              width: innerWidth,
+              height: innerHeight,
+              scrollWidth: element.scrollWidth,
+              clientWidth: element.clientWidth,
+            };
+          });
+          if (
+            dialogGeometry.left < -1 ||
+            dialogGeometry.right > dialogGeometry.width + 1 ||
+            dialogGeometry.top < -1 ||
+            dialogGeometry.bottom > dialogGeometry.height + 1 ||
+            dialogGeometry.scrollWidth > dialogGeometry.clientWidth + 1
+          )
+            throw new Error(`Equipe Produtiva details overflow at ${theme}/${width}/${activity}`);
+          const detailsCheck = {
+            width,
+            theme,
+            activity,
+            geometry: dialogGeometry,
+            tables: tableChecks,
+          };
+          if (activity === "Visitas") {
+            const detailAccessibility = await inspectAccessibility(
+              page,
+              route,
+              `productive-team-details-${width}`,
+              theme,
+            );
+            if (!detailAccessibility.passed)
+              throw new Error(`Equipe Produtiva details accessibility failed at ${theme}/${width}`);
+            detailsCheck.accessibility = detailAccessibility;
+            const detailBuffer = await capturePersistedScreenshot(page);
+            detailsCheck.screenshot = await saveLosslessWebp(
+              detailBuffer,
+              path.join(destinationRoot, `details-${theme}-${width}.webp`),
+            );
+          }
+          evidence.detailsChecks.push(detailsCheck);
+          await page.keyboard.press("Escape");
+          await expect(dialog).not.toBeVisible();
+          await expect(trigger).toBeFocused();
+          await expect(page.locator("table")).toHaveCount(0);
+        }
       }
     }
     for (const viewport of [

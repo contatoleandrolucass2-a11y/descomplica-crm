@@ -146,17 +146,26 @@ function Empty({ children = "Nenhum agendamento no período coberto." }: { child
   return <p className={styles.empty}>{children}</p>;
 }
 
+type CardDetails = {
+  title: string;
+  content: ReactNode;
+  className?: string | undefined;
+};
+
 function TiltCard({
   className,
   children,
   goalStatus = "neutral",
   statusLabel,
+  details,
 }: {
   className: string | undefined;
   children: ReactNode;
   goalStatus?: GoalStatus;
   statusLabel?: string | undefined;
+  details?: CardDetails | undefined;
 }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const close = useRef<HTMLButtonElement>(null);
@@ -190,22 +199,26 @@ function TiltCard({
         aria-label="Abrir detalhes deste indicador"
         aria-haspopup="dialog"
         onClick={() => {
+          if (details) setDetailsOpen(true);
           dialog.current?.showModal();
           requestAnimationFrame(() => close.current?.focus());
         }}
       />
       <dialog
         ref={dialog}
-        className={styles.cardDialog}
+        className={[styles.cardDialog, details?.className].filter(Boolean).join(" ")}
         aria-labelledby={titleId}
         onClick={(event) => {
           if (event.target === event.currentTarget) dialog.current?.close();
         }}
-        onClose={() => trigger.current?.focus()}
+        onClose={() => {
+          if (details) setDetailsOpen(false);
+          trigger.current?.focus();
+        }}
       >
         <div className={styles.cardDialogPanel}>
           <header>
-            <h2 id={titleId}>Detalhes do indicador</h2>
+            <h2 id={titleId}>{details?.title ?? "Detalhes do indicador"}</h2>
             <button
               ref={close}
               type="button"
@@ -215,7 +228,9 @@ function TiltCard({
               <X aria-hidden="true" size={18} />
             </button>
           </header>
-          <div className={styles.cardDialogContent}>{children}</div>
+          <div className={styles.cardDialogContent}>
+            {details ? (detailsOpen ? details.content : null) : children}
+          </div>
           {statusLabel ? <p className={styles.cardDialogStatus}>{statusLabel}</p> : null}
         </div>
       </dialog>
@@ -509,6 +524,7 @@ export function ProductiveTeamCard({
   unavailableDetail,
   title = "Equipe Produtiva",
   activity = "agendamento",
+  details,
 }: {
   productive: number | null;
   brokers: number | null;
@@ -516,12 +532,14 @@ export function ProductiveTeamCard({
   unavailableDetail: string;
   title?: string;
   activity?: string;
+  details?: CardDetails | undefined;
 }) {
   const progress = Math.min(Math.max(percent ?? 0, 0), 100);
   const goalStatus = atLeastStatus(percent, 100);
   return (
     <TiltCard
       className={`${styles.kpiCard} ${styles.productiveCard}`}
+      details={details}
       goalStatus={goalStatus}
       statusLabel={
         percent === null
