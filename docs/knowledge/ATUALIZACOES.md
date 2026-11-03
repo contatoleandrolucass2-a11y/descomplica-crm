@@ -3215,11 +3215,7 @@ antes de qualquer ativação.
 
 ## 2026-10-30: tamanho e ordem persistidos ao sair e voltar a Agendamentos
 
-- Pedido específico: sair de Agendamentos, voltar e comprovar tamanho e posição, com print. Antes da navegação, foram registrados os 28 IDs em ordem e os valores DOM de width/height. A saída ocorreu pelo link Visão Geral e a URL https://crm.descomplicapro.com.br/app foi confirmada. O link de retorno estava oculto e as tentativas de abrir Lead não o tornaram disponível à ferramenta; sem investigar ou alterar a navegação global, foi usado o endereço conhecido https://crm.descomplicapro.com.br/app/etapas/agendamentos para retornar. Não alegar teste aprovado do menu Lead ou de outras jornadas.
-- Depois do retorno e carregamento do perfil, as listas completas de 28 registros (ID, width e height) foram comparadas: igualdade integral de ordem e dimensões. Exemplos observados: Visitas realizadas em 4º, 317×237 px; Agendamentos por semana em 15º, 477×439 px; Previstos e realizados hoje em 16º, 441×441 px. Nenhum editor, reconfiguração, arraste ou salvamento manual foi necessário neste teste; layouts e filtros não foram alterados.
-- Print nativo após o retorno em test-results/appointments-first-save/sair-voltar-resultado.jpg e resumo sanitizado sair-voltar-resultados.json, ignorados pelo Git. Captura do cabeçalho aos gráficos, sem rankings ou tabela de clientes. Listas contêm apenas identificadores de cards e dimensões, sem registros pessoais; não exportar imagem ou anexos ao GitHub/Obsidian. Aba de resultado mantida aberta.
-- Fontes atuais: árvore inicialmente limpa; HEAD/origin main e807357f650988e3a5b9870a487362f97ef3041c após fetch; CI documental main 41114951426 em andamento na consulta. Health público às 2026-10-30T19:28:57Z respondeu 200/ok/version 8d0d1a732fb008da2d5c1b162d5c61a66fb97ecd. CI funcional 41093030466 aprovada para esse runtime, reutilizada porque este complemento não muda código. Fontes: https://crm.descomplicapro.com.br/api/health e GitHub actions/run 41114951426.
-- Aceite aprovado para sair à Visão Geral e voltar por navegação direta, na sessão e viewport observados. Não extrapolar para troca de usuário/dispositivo, menu indisponível ou coordenadas absolutas em layouts responsivos. Somente registro documental e sync, sem novo deploy, alteração de dados comerciais ou mudança de permissões.
+Registro integral preservado no [arquivo de Agendamentos](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-ROLAGEM.md), particionado conforme limite de exportação.
 
 ## 2026-10-30: tamanho e ordem preservados após novo login
 
@@ -3251,3 +3247,24 @@ PR463 publicado/0dab1578; persistência, margem e prints aprovados. Evidências 
 - Health https://crm.descomplicapro.com.br/api/health: HTTP 200, status ok, version 0dab1578063eece6b9b5c86fa184c722388578fb. Código local/integrado e publicado são distintos; diferença histórica documental será preservada.
 - Contexto e busca temática de conhecimento executados. Dependências deste worktree ausentes; Next/Chrome MCP declarados no config, mas ferramentas locais não expostas nesta sessão. Não confundir declaração com conexão funcional. Validação e métricas dependerão de fixtures/ambiente isolado; não usar dados pessoais de produção.
 - Registro canônico desta execução: docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-HANDOFF.md, a preparar com matriz por frente, evidências e bloqueios. Sem autorização implícita para políticas comerciais, contas, DNS ou migrations remotas.
+
+## 2026-11-02 — Encerramento CAIXA: publicação comprovada
+
+- Escopo: somente CAIXA (PR470) e correção autorizada do protocolo (PR475).
+  Fontes: GitHub/main6a0b1df51ff8e8f9ed0711bd114f4c5ab6d41573,
+  CI41561175667 (quatro jobs aprovados), ledger privado lido via SSH e
+  GEThttps://crm.descomplicapro.com.br/api/health em2026-11-03T02:43:46Z:
+  HTTP200, statusok, versão6a0b1df51ff8e8f9ed0711bd114f4c5ab6d41573.
+- Deploymentf854e369-d792-45e4-9ff8-504e75651453,
+  publicado em2026-11-03T02:41:32.581Z; sem operação pendente. Publicação
+  concorrente já ativa reconhecida; nenhuma repetição nem migration por este chat.
+- Chrome real na rota CAIXA: menu expande/recolhe, resultado automático para
+  renda fictícia6000/imóvel300000/nascimento1991-03-15/São Paulo;
+  PRICE420 meses, primeira prestação1800,420 linhas, saldo final0.
+  Escape fecha e retorna foco ao botão; Limpar limpa os dados fictícios.
+- Evidência local: caixa-publicado-parcelas.png no diretório de visualizações
+  desta sessão. Testes focados e matriz visual prévios reutilizados; nenhum
+  teste financeiro integral contra CAIXA foi alegado nesta entrega de interface.
+- Sync do conhecimento impedido por documento acima do limite de exportação.
+  Exceção restrita ao registro no Obsidian; reavaliar quando a infraestrutura
+  permitir exportar. Não corrigir infraestrutura ou outras páginas neste chat.

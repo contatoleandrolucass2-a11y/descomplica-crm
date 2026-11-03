@@ -4,6 +4,9 @@
   dias e data abaixo do responsável. Detalhamento geral e vencidos passam a
   exibir a lista completa com rolagem, sem botões de paginação.
 
+- Confirma publicação e validação em produção do menu retrátil e das parcelas
+  do Simulador CAIXA, em6a0b1df5, após correção da compatibilidade do deploy.
+
 - Corrige publicação após avanço documental da main: CI manual completa no SHA
   atual executa os quatro gates e gera imagem imutável própria, aceita pelo guard.
 
