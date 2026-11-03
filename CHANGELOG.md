@@ -4084,3 +4084,5 @@ Validação e publicação serão registradas com evidências ao concluir os gat
   do menu e parcelas centralizadas com impressão da tabela completa.
 - Publica e valida o novo visual CAIXA em82ee8deb, com os quatro gates de main,
   artefato imutável, backup e smoke autenticado desktop/mobile concluídos.
+- Resolve a pendência do Obsidian particionando o histórico CAIXA sem perda de
+  conteúdo; sincroniza e confere12 documentos, preservando o limite de exportação.
