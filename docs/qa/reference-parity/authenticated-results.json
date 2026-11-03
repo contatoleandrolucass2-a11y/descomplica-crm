@@ -50368,31 +50368,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1214464,
+        "totalPixels": 786432,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
+          "tracked": true,
+          "bytes": 36338,
+          "sha256": "60067de9222f7f85b54778d763db6fcd373fe7b0d718a765a835098cedb8bbfc"
+        }
+      },
+      "path": "target-authenticated/simulacao-caixa-1024x768.webp",
+      "bytes": 36338,
+      "sha256": "60067de9222f7f85b54778d763db6fcd373fe7b0d718a765a835098cedb8bbfc",
+      "width": 1024,
+      "height": 768,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1024,
+          "height": 1186
+        },
+        "actual": {
+          "width": 1024,
+          "height": 768
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
           "tracked": true,
           "bytes": 45456,
           "sha256": "35bc922d9de49cec20951f00afc8727bd7fd907e929deee01c63b4a2ceb08311"
-        }
-      },
-      "path": "target-authenticated/simulacao-caixa-1024x768.webp",
-      "bytes": 45456,
-      "sha256": "35bc922d9de49cec20951f00afc8727bd7fd907e929deee01c63b4a2ceb08311",
-      "width": 1024,
-      "height": 1186,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "pixel_drift",
-        "changedPixels": 225505,
-        "totalPixels": 1214464,
-        "changedPixelRatio": 0.18568273740514335,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
-          "tracked": true,
-          "bytes": 139162,
-          "sha256": "fb7b590640baf4bad759402a60500216148ee371f83a2021a171c376b6683fea"
         }
       }
     },
@@ -51212,37 +51218,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 910848,
+        "totalPixels": 786432,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-768x1024.webp",
           "tracked": true,
-          "bytes": 50630,
-          "sha256": "41c11bfd8f67a0dc40d6cdeb269bb48a1078557ee57c572bebacf69a607ea199"
+          "bytes": 34872,
+          "sha256": "3883e86777a269cde78a153516c2c277a161de853c1707cfa81cc2714567ce33"
         }
       },
       "path": "target-authenticated/simulacao-caixa-768x1024.webp",
-      "bytes": 50630,
-      "sha256": "41c11bfd8f67a0dc40d6cdeb269bb48a1078557ee57c572bebacf69a607ea199",
+      "bytes": 34872,
+      "sha256": "3883e86777a269cde78a153516c2c277a161de853c1707cfa81cc2714567ce33",
       "width": 768,
-      "height": 1186,
+      "height": 1024,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 768,
-          "height": 1424
+          "height": 1186
         },
         "actual": {
           "width": 768,
-          "height": 1186
+          "height": 1024
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-768x1024.webp",
           "tracked": true,
-          "bytes": 187268,
-          "sha256": "d61b99daff22e059321f80b9db39fb734440e532588ee763fc153e733ba58fef"
+          "bytes": 50630,
+          "sha256": "41c11bfd8f67a0dc40d6cdeb269bb48a1078557ee57c572bebacf69a607ea199"
         }
       }
     },
@@ -56723,6 +56729,43 @@
       "manualReview": "Coordinator inspected desktop light/balanced/dark, notebook1280, mobile320/375/390 and mobile dark. Sidebar reaches viewport edges; fields transparent, title compact, no clipping. Two tablet captures excluded pending responsive adjustments. No thresholds changed.",
       "limits": "These nine viewports have no visual changes after capture. Later heading aria-label preserves the official accessible name without changing pixels. Changes at768/1024px remain pending; no publication until exact final CI passes.",
       "previousBaselineManifestSha256": "af834954f04487e5385930715fe70795d91aa304afb1ebfaab53e02660bf8cc8"
+    },
+    {
+      "route": "/app/simulacao/caixa",
+      "sourceRun": 41590386249,
+      "sourceArtifact": 13212625941,
+      "sourceZipSha256": "0ffadaef9870b713292a032bda7b499075c21a0d95b99d67062bf429bf289e44",
+      "sourceCaptureCommit": "fe20973be77d01bffd513eacd8f116d2e643a551",
+      "sourceHead": "237e84c1c5d95a83c6c4161f584cabf94183ac13",
+      "sourceTree": "af15a628d0fa547f7e4ed214f4ac628b1ea5f322",
+      "sourceWorktreeDirtyAtCapture": true,
+      "sourceWorktreeFingerprint": "98d070569b29a1c7b9e10b17e1bfb22468267474c60ec417af494680a31fdaf8",
+      "sourceDirtyExplanation": "Fingerprint reproduced exactly with empty tracked diff and 19 generated connected-systems artifact files; capture tree equals PR head tree.",
+      "sourceCapturedAt": "2026-11-03T07:21:41.559Z",
+      "candidateOverallPassed": false,
+      "candidateFailure": "Only the two intentionally redesigned CAIXA tablet images differ. All required focused functional, responsive, theme, accessibility, canvas and zoom checks passed.",
+      "functionalPassed": true,
+      "functionalCoverage": {
+        "responsiveScreenshots": 49,
+        "themeScreenshots": 28,
+        "accessibilityAudits": 77,
+        "baselineComparisons": 77,
+        "approvedCanvasComparisons": 7,
+        "approvedCanvasColorDistanceThreshold": 23,
+        "approvedCanvasEdgeDistanceThreshold": 52,
+        "changedPixelRatioThreshold": 0.01,
+        "channelTolerance": 16
+      },
+      "reviewedPaths": [
+        "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-caixa-768x1024.webp"
+      ],
+      "updatedImages": 2,
+      "preservedImages": 240,
+      "method": "Verified artifact-byte copy and CAIXA-only manifest row replacement; committed together.",
+      "manualReview": "Coordinator inspected1024x768 and768x1024 captures. Labels have separated bounds, PRICE is fully readable, property condition stays right of in-construction, controls transparent. Tablet rows adapt to viewport while sidebar hover preserves their arrangement. These two references complete the eleven CAIXA images; no other-page baseline changed.",
+      "limits": "The source CI remains failed due only to these pixel deltas. Exact final CI and main release gates remain mandatory. Thresholds unchanged.",
+      "previousBaselineManifestSha256": "76adf65f5db52cb48531eff7f493a6c82e2cbc7b8cc70162d17739e86d7ff035"
     }
   ]
 }

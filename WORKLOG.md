@@ -28,6 +28,11 @@
   gerados, sem diff de código; nenhum baseline de outra página alterado.
 - Tablet768 usa distribuição própria sem sobrepor rótulos;1024 conserva
   a linha com tipografia ajustada. Hover conserva as linhas em cada largura.
+- CI41590386249: todos os checks requeridos passaram, exceto a comparação
+  com as duas referências antigas de tablet. Capturas768/1024 revisadas e
+  incorporadas;11 referências CAIXA completas. Manifesto:15 testes aprovados,
+  um condicional não aplicável. Hash de proveniência reproduzido novamente;
+  nenhuma imagem de outra página alterada. CI final permanece obrigatória.
 
 ## 2026-11-03 — Equipe Produtiva compacta
 
