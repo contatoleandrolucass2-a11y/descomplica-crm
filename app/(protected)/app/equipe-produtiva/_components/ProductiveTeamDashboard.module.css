@@ -10,8 +10,8 @@
   background:
     linear-gradient(135deg, rgb(255 255 255 / 9%), transparent 55%),
     color-mix(in srgb, var(--analytics-surface) 78%, transparent);
-  backdrop-filter: blur(12px) saturate(1.12);
   -webkit-backdrop-filter: blur(12px) saturate(1.12);
+  backdrop-filter: blur(12px) saturate(1.12);
 }
 
 .cards > article > h2 {

@@ -31,6 +31,9 @@ Evidências: `test-results/productive-team-layout/current`. A referência
 `TEAM_LAYOUT_REF=6a0b1df5` falha nesse contrato. Cabeçalho e dados são sintéticos;
 esse teste não substitui a CI autenticada, que verifica geometria no runtime
 Next em 1920×714, 1440×900, 1280×720, 1280×476 e 960×600, além de mobile e zoom.
+O CSS do teste também passa pelo Lightning CSS resolvido a partir do PostCSS
+de produção. A referência57e2f6eb reproduz a perda do blur quando o prefixo
+WebKit aparece depois da propriedade padrão; a ordem corrigida passa.
 
 Executar `node scripts/qa/productive-team-preview.mjs` com Node 24.19.x e as
 dependências fixadas no lockfile. O preview usa somente fixtures sintéticas e

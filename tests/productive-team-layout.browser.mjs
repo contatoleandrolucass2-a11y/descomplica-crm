@@ -79,10 +79,19 @@ test(
       },
     });
     const output = (Array.isArray(built) ? built : [built]).flatMap((x) => x.output);
-    const css = output
+    const rawCss = output
       .filter((x) => x.type === "asset" && x.fileName.endsWith(".css"))
       .map((x) => String(x.source))
       .join("\n");
+    // Use the production PostCSS dependency's optimizer too: Vite alone does
+    // not expose prefix ordering regressions in backdrop-filter declarations.
+    const productionRequire = createRequire(require.resolve("@tailwindcss/postcss"));
+    const { transform } = productionRequire("lightningcss");
+    const css = transform({
+      filename: "productive-team-layout.css",
+      code: Buffer.from(rawCss),
+      minify: true,
+    }).code.toString();
     const js = output
       .filter((x) => x.type === "chunk")
       .map((x) => x.code)

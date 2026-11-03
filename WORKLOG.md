@@ -10,6 +10,8 @@
   condições de fonte aprovadas; versão anterior falha no mesmo contrato.
   Componentes/CSS reais e dados/cabeçalho sintéticos; CI autenticada continua
   obrigatória. Nenhuma migration ou alteração de dados nesta revisão.
+- Primeiro run de CI bloqueou vidro na própria rota. Ordem dos prefixos CSS
+  corrigida e regressão reproduzida com o otimizador de produção no teste local.
 
 ## 2026-11-02 — CAIXA publicada e validada
 

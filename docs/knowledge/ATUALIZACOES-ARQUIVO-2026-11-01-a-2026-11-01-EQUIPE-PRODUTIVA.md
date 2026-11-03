@@ -505,3 +505,9 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
 - Cabeçalho e dados sintéticos; aprovação de runtime Next depende da CI.
   Nenhuma migration nova. Sync segue limitado pelo índice compartilhado acima
   de 256000 bytes; não alterar notas de outras demandas para liberar esta.
+- CI41575292605/PR479 aprovou validate, restore e imagem, mas bloqueou
+  no contrato da própria Equipe Produtiva: backdrop-filter computado como none
+  em 390px. Causa reproduzida com Lightning CSS do PostCSS de produção: prefixo
+  WebKit após a propriedade padrão elimina a declaração padrão na otimização.
+  Ordem corrigida; teste de navegador passou a usar esse otimizador e aprovou
+  48 combinações. Referência57e2f6eb falha precisamente em blur=none.
