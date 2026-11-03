@@ -252,9 +252,11 @@ describe("lossless appointment summary and separate operational pages", () => {
         goalsByMonth={model.goalsByMonth}
       />,
     );
-    expect(html).toContain("Conta sintética 00001");
+    expect(html).not.toContain("Conta sintética 00001");
     expect(html).not.toContain("Conta sintética 00101");
-    expect(html).toContain("Exibindo 1–50 de 10000");
+    expect(html).toContain("Carregando todos os registros…");
+    expect(html).not.toContain("Próxima página");
+    expect(html).not.toContain("Página anterior");
     expect(html).toContain("Exportar CSV completo");
   });
 });

@@ -30,6 +30,7 @@ import {
 } from "@/lib/crm/stages/appointments-summary";
 import {
   appointmentDetailQueryKey,
+  isCompleteAppointmentDetailPage,
   type AppointmentDetailActions,
   type AppointmentDetailQuery,
   type AppointmentDetailSource,
@@ -1014,6 +1015,10 @@ type RecencyItem = {
 function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] }) {
   const presentation = useDashboardBarHeightControl();
   const visibleTitle = presentation?.title ?? title;
+  const maximumDays = items.reduce(
+    (maximum, item) => Math.max(maximum, item.daysSinceLastAppointment),
+    1,
+  );
   const tone =
     items.length === 0
       ? "blue"
@@ -1036,20 +1041,31 @@ function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] })
             <span>Dias</span>
           </div>
           <ol className={styles.recencyList} tabIndex={0} aria-label={title}>
-            {items.map((item) => (
+            {items.map((item, index) => (
               <li key={item.owner}>
-                <div className={styles.recencyOwner}>
-                  <strong title={item.owner}>{shortName(item.owner)}</strong>
-                  <small>Último: {displayDate(item.lastAppointmentDate)}</small>
+                <div className={styles.recencyHeading}>
+                  <div className={styles.recencyOwner}>
+                    <strong title={item.owner}>
+                      {index + 1}. {shortName(item.owner)}
+                    </strong>
+                    <small className={styles.recencyDate}>
+                      Último: {displayDate(item.lastAppointmentDate)}
+                    </small>
+                  </div>
+                  <span className={styles.recencyManager} title={item.manager}>
+                    {item.manager ? shortName(item.manager) : "Gerente não informado"}
+                  </span>
+                  <b>
+                    {item.daysSinceLastAppointment === 0
+                      ? "Hoje"
+                      : `${number.format(item.daysSinceLastAppointment)} ${item.daysSinceLastAppointment === 1 ? "dia" : "dias"}`}
+                  </b>
                 </div>
-                <span className={styles.recencyManager} title={item.manager}>
-                  <span>{item.manager ? shortName(item.manager) : "Gerente não informado"}</span>
-                </span>
-                <b>
-                  {item.daysSinceLastAppointment === 0
-                    ? "Hoje"
-                    : `${number.format(item.daysSinceLastAppointment)} ${item.daysSinceLastAppointment === 1 ? "dia" : "dias"}`}
-                </b>
+                <div className={styles.recencyTrack} aria-hidden="true">
+                  <span
+                    style={{ width: `${(item.daysSinceLastAppointment / maximumDays) * 100}%` }}
+                  />
+                </div>
               </li>
             ))}
           </ol>
@@ -1141,6 +1157,7 @@ function AppointmentTable({
     ? (detailController?.peek(queryKey) ??
       (detailSource.initialQueryKey === queryKey ? detailSource.initialPage : null))
     : null;
+  const page = isCompleteAppointmentDetailPage(current) ? current : null;
   useEffect(() => {
     if (!detailSource || !tableRef.current) return;
     if (typeof IntersectionObserver === "undefined") {
@@ -1154,23 +1171,19 @@ function AppointmentTable({
     observer.observe(tableRef.current);
     return () => observer.disconnect();
   }, [detailSource]);
-  const requestPage = useCallback(
-    async (cursor: string | null) => {
-      if (!detailSource || !detailQuery || !detailController) return;
-      const request = ++sequence.current.value;
-      setPending(true);
-      try {
-        await detailController.loadDetails({
-          query: detailQuery,
-          snapshot: detailSource.snapshot,
-          cursor,
-        });
-      } finally {
-        if (request === sequence.current.value) setPending(false);
-      }
-    },
-    [detailController, detailQuery, detailSource],
-  );
+  const requestAll = useCallback(async () => {
+    if (!detailSource || !detailQuery || !detailController) return;
+    const request = ++sequence.current.value;
+    setPending(true);
+    try {
+      await detailController.loadAllDetails({
+        query: detailQuery,
+        snapshot: detailSource.snapshot,
+      });
+    } finally {
+      if (request === sequence.current.value) setPending(false);
+    }
+  }, [detailController, detailQuery, detailSource]);
   useEffect(() => {
     const tracker = sequence.current;
     ++tracker.value;
@@ -1180,9 +1193,14 @@ function AppointmentTable({
       if (cancelled) return;
       setPending(false);
       // Coalesce rapid filter changes; KPI/filter computation remains immediate.
-      if (detailSource && detailController && visible && current === null)
+      if (
+        detailSource &&
+        detailController &&
+        visible &&
+        (current === null || (current.status === "ready" && !page))
+      )
         timer = setTimeout(() => {
-          if (!cancelled) void requestPage(null);
+          if (!cancelled) void requestAll();
         }, 150);
     });
     return () => {
@@ -1190,11 +1208,10 @@ function AppointmentTable({
       clearTimeout(timer);
       ++tracker.value;
     };
-  }, [queryKey, detailSource, detailController, visible, current, requestPage]);
-  const page = current?.status === "ready" ? current : null;
+  }, [queryKey, detailSource, detailController, visible, current, page, requestAll]);
   const visibleRows = detailSource ? (page?.rows ?? []) : rows;
-  const total = detailSource ? (page?.total ?? null) : rows.length;
-  const unavailable = detailSource && current?.status !== "ready";
+  const total = detailSource ? (current?.status === "ready" ? current.total : null) : rows.length;
+  const unavailable = detailSource && !page;
   const exportAll = async () => {
     if (!detailController || !detailQuery || !detailSource) return;
     setExporting(true);
@@ -1253,33 +1270,21 @@ function AppointmentTable({
         <>
           <p role="status" aria-live="polite">
             {pending
-              ? "Atualizando o detalhamento…"
+              ? "Carregando todos os registros…"
               : current?.status === "snapshot_changed"
                 ? "A fonte foi atualizada. Recarregue os dados para não misturar atualizações."
                 : current?.status === "unavailable" || current?.status === "invalid_request"
                   ? "Detalhamento indisponível. Tente novamente."
                   : page
-                    ? `Exibindo ${page.total === 0 ? 0 : page.offset + 1}–${page.offset + visibleRows.length} de ${page.total}. PDF: captura da visualização atual. CSV: recorte integral.`
-                    : "Detalhes serão carregados ao visualizar esta tabela."}
+                    ? `Exibindo todos os ${number.format(page.total)} registros. PDF: visualização atual. CSV: lista completa.`
+                    : current?.status === "ready"
+                      ? "Carregando todos os registros…"
+                      : "Detalhes serão carregados ao visualizar esta tabela."}
           </p>
           <div
             style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}
             data-dashboard-export-ignore
           >
-            <button
-              type="button"
-              disabled={pending || !detailController || !page?.previousCursor}
-              onClick={() => void requestPage(page?.previousCursor ?? null)}
-            >
-              Página anterior
-            </button>
-            <button
-              type="button"
-              disabled={pending || !detailController || !page?.nextCursor}
-              onClick={() => void requestPage(page?.nextCursor ?? null)}
-            >
-              Próxima página
-            </button>
             {current && current.status !== "ready" ? (
               <button
                 type="button"
@@ -1287,7 +1292,7 @@ function AppointmentTable({
                 onClick={() =>
                   current.status === "snapshot_changed"
                     ? window.location.reload()
-                    : void requestPage(null)
+                    : void requestAll()
                 }
               >
                 {current.status === "snapshot_changed" ? "Atualizar dados" : "Tentar novamente"}
@@ -1309,12 +1314,7 @@ function AppointmentTable({
       {unavailable ? null : visibleRows.length === 0 ? (
         <Empty />
       ) : (
-        <div
-          className={styles.tableViewport}
-          tabIndex={0}
-          role="region"
-          aria-label="Detalhamento dos agendamentos"
-        >
+        <div className={styles.tableViewport} tabIndex={0} role="region" aria-label={title}>
           <table>
             <thead>
               <tr>
