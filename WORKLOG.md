@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-11-03 — Equipe Produtiva compacta
+
+- Remove breadcrumb e atualização duplicada; alinha o sidebar externo com a
+  altura real do cabeçalho, exclusivamente nesta rota.
+- Acrescenta vidro aos quatro cards, preservando bordas, brilho, hover,
+  inclinação e detalhes. Compacta cards e filtros sem esconder conteúdo.
+- Chromium isolado: 48 combinações de oito viewports, três temas e duas
+  condições de fonte aprovadas; versão anterior falha no mesmo contrato.
+  Componentes/CSS reais e dados/cabeçalho sintéticos; CI autenticada continua
+  obrigatória. Nenhuma migration ou alteração de dados nesta revisão.
+
 ## 2026-11-02 — CAIXA publicada e validada
 
 - PR470 (sidebar e parcelas) e PR475 (compatibilidade do deploy) integrados;

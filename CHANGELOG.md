@@ -1,5 +1,8 @@
 # Changelog
 
+- Compacta Equipe Produtiva, remove breadcrumb e atualização duplicada, alinha
+  o menu externo ao cabeçalho e acrescenta vidro aos cards com efeitos preservados.
+
 - Confirma publicação e validação em produção do menu retrátil e das parcelas
   do Simulador CAIXA, em6a0b1df5, após correção da compatibilidade do deploy.
 

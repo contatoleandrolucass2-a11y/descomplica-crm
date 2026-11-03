@@ -1396,6 +1396,11 @@
   min-width: 0;
 }
 
+.productiveTeamShell .dashboardSidebar {
+  top: var(--dashboard-header-height, 58px);
+  min-height: calc(100dvh - var(--dashboard-header-height, 58px));
+}
+
 .dashboardSurface {
   width: var(--dashboard-layout-width, 100%);
   min-width: 0;

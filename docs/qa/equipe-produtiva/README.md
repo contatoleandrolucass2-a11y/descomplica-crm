@@ -20,6 +20,18 @@ dados permitida.
 
 ## Validação reproduzível
 
+A revisão de 03/11/2026 remove o breadcrumb e a atualização duplicada, mantém
+o sidebar fora do conteúdo e mede a altura do cabeçalho para posicioná-lo.
+Os cards recebem translucidez e blur de 12px, preservando bordas e interações.
+`node --test tests/productive-team-layout.browser.mjs` confere oito viewports,
+três temas e duas condições de fonte (48 combinações), expansão do sidebar,
+vidro, borda e diálogo. Exige encaixe vertical a partir de 960px nas alturas
+testadas e ausência de overflow horizontal em todas; celular conserva rolagem.
+Evidências: `test-results/productive-team-layout/current`. A referência
+`TEAM_LAYOUT_REF=6a0b1df5` falha nesse contrato. Cabeçalho e dados são sintéticos;
+esse teste não substitui a CI autenticada, que verifica geometria no runtime
+Next em 1920×714, 1440×900, 1280×720, 1280×476 e 960×600, além de mobile e zoom.
+
 Executar `node scripts/qa/productive-team-preview.mjs` com Node 24.19.x e as
 dependências fixadas no lockfile. O preview usa somente fixtures sintéticas e
 o DashboardShell real, com transporte de navegação sintético. O teste de zoom
