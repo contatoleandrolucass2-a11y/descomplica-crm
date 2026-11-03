@@ -185,6 +185,9 @@ export function analyzeAppointments(
   const daily = new Map<string, number>(),
     weekly = new Map<string, number>(),
     monthly = new Map<string, number>();
+  // The weekly benchmark uses the whole selected month. Drill-downs into a
+  // day or week may filter visible bars, but must not lower the month's record.
+  const monthWeeklyTotals = new Map<string, number>();
   const managers = new Map<string, number>(),
     owners = new Map<string, number>();
   const regionalManagers = new Map<string, number>(),
@@ -444,6 +447,7 @@ export function analyzeAppointments(
       const date = saoPauloDate(appointment.createdAt);
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
       if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7));
+      if (date.slice(0, 7) === month) add(monthWeeklyTotals, String(appointmentWeekOfMonth(date)));
     }
   } else {
     for (const fact of dimensionFacts) {
@@ -451,6 +455,8 @@ export function analyzeAppointments(
       const date = fact[1];
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
       if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7), fact[7]);
+      if (date.slice(0, 7) === month)
+        add(monthWeeklyTotals, String(appointmentWeekOfMonth(date)), fact[7]);
     }
   }
 
@@ -738,6 +744,13 @@ export function analyzeAppointments(
         selectedCoveredDays;
 
   const funnelAvailable = slice.version === 4 && conversionAvailable && coverage !== "unavailable";
+  const weeklyTarget =
+    coverage === "unavailable" ||
+    (dimensionFilteredOperations === null &&
+      (Boolean(filters.accountRanking) ||
+        (Boolean(filters.regionalManager) && !regionalFactsAvailable)))
+      ? null
+      : Math.max(0, ...monthWeeklyTotals.values());
 
   return {
     total,
@@ -751,6 +764,7 @@ export function analyzeAppointments(
     todayGoal,
     yesterdayGoal,
     monthlyGoal: monthlyGoalFor(month),
+    weeklyTarget,
     goalBrokerCount,
     performedToday: filteredOperations === null || !todayAvailable ? null : today,
     filterOptions,

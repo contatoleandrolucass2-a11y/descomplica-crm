@@ -1,5 +1,10 @@
 # Changelog
 
+- Corrige vencidos de Agendamentos pela data prevista, mantém a contagem
+  legível no hover e remove o bloco informativo/exportação das tabelas.
+  Média anual arredondada para cima; metas semanal e mensal usam referências
+  horizontais únicas, conforme o mês/equipe e o cadastro de corretores.
+
 - Publica os ajustes visuais de Equipe Produtiva em f3c4f126, com CI completa,
   vidro confirmado no CSS de produção e encaixe desktop validado no navegador.
 

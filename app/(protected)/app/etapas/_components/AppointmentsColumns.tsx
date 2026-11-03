@@ -29,6 +29,14 @@ export function appointmentsGoalPath(
   height: number,
   pixelsPerUnit: number,
 ) {
+  const fixedGoal = goals[0];
+  if (
+    fixedGoal != null &&
+    Number.isFinite(fixedGoal) &&
+    goals.every((goal) => goal === fixedGoal)
+  ) {
+    return `M0,${height - Math.min(height, Math.max(0, fixedGoal * pixelsPerUnit))} H100`;
+  }
   let path = "";
   let previousKnown = false;
   for (const [index, goal] of goals.entries()) {
@@ -64,7 +72,7 @@ export function AppointmentsColumns({
   onSelect?: (bucket: AppointmentBucket) => void;
   monthly?: boolean;
   verticalLabels?: boolean;
-  reference?: { value: number | null; label: string; classify?: boolean };
+  reference?: { value: number | null; label: string; classify?: boolean; showSummary?: boolean };
 }) {
   const control = useDashboardBarHeightControl();
   const host = useRef<HTMLDivElement>(null);
@@ -206,6 +214,12 @@ export function AppointmentsColumns({
               ? ` · ${daily ? largest.key.split("-").reverse().join("/") : largest.label}`
               : ""}
           </span>
+          {reference?.showSummary && (
+            <span className={styles.maximumSummary} data-appointments-reference-summary>
+              {referenceName}{" "}
+              {referenceValue === null ? "indisponível" : number.format(referenceValue)}
+            </span>
+          )}
         </p>
         {editable && (
           <div className={styles.barHeightTools}>
@@ -370,7 +384,11 @@ export function AppointmentsColumns({
                   viewBox={`0 0 100 ${Math.max(1, frame.height)}`}
                   preserveAspectRatio="none"
                   role="img"
-                  aria-label={`${referenceName}: referência dinâmica por período; valores nos detalhes de cada torre`}
+                  aria-label={
+                    reference && referenceValue !== null
+                      ? `${referenceName}: linha horizontal em ${number.format(referenceValue)} agendamentos`
+                      : `${referenceName}: referência dinâmica por período; valores nos detalhes de cada torre`
+                  }
                 >
                   <title>{`${referenceName} ${minGoal === maxGoal ? number.format(minGoal ?? 0) : `${number.format(minGoal ?? 0)} a ${number.format(maxGoal ?? 0)}`}${outsideGoals ? "; há referências fora da área disponível" : ""}`}</title>
                   <path

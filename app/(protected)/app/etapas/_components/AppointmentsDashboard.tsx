@@ -1130,6 +1130,7 @@ function AppointmentTable({
   detailSource,
   detailQuery,
   detailController,
+  overdue: overdueRows = false,
 }: {
   title?: string;
   rows: NonNullable<ReturnType<typeof analyzeAppointments>["details"]>;
@@ -1139,14 +1140,13 @@ function AppointmentTable({
   detailSource?: AppointmentDetailSource | undefined;
   detailQuery?: AppointmentDetailQuery | undefined;
   detailController?: AppointmentDetailController | undefined;
+  overdue?: boolean;
 }) {
   const tableRef = useRef<HTMLElement>(null);
   const headingId = useId();
   const sequence = useRef({ value: 0 });
   const [visible, setVisible] = useState(false);
   const [pending, setPending] = useState(false);
-  const [exporting, setExporting] = useState(false);
-  const [exportMessage, setExportMessage] = useState("");
   const queryKey = detailQuery ? appointmentDetailQueryKey(detailQuery) : "";
   useSyncExternalStore(
     detailController?.subscribe ?? emptyDetailSubscribe,
@@ -1212,38 +1212,6 @@ function AppointmentTable({
   const visibleRows = detailSource ? (page?.rows ?? []) : rows;
   const total = detailSource ? (current?.status === "ready" ? current.total : null) : rows.length;
   const unavailable = detailSource && !page;
-  const exportAll = async () => {
-    if (!detailController || !detailQuery || !detailSource) return;
-    setExporting(true);
-    setExportMessage("");
-    try {
-      const result = await detailController.exportDetails({
-        query: detailQuery,
-        snapshot: detailSource.snapshot,
-      });
-      if (result.status !== "ready") {
-        setExportMessage(
-          result.status === "snapshot_changed"
-            ? "A fonte foi atualizada. Recarregue os dados antes de exportar."
-            : "Não foi possível exportar. Tente novamente.",
-        );
-        return;
-      }
-      const url = URL.createObjectURL(
-        new Blob(["\uFEFF", result.csv], { type: "text/csv;charset=utf-8" }),
-      );
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `agendamentos-${detailQuery.subset === "overdue" ? "vencidos-" : ""}${detailQuery.month}.csv`;
-      link.click();
-      URL.revokeObjectURL(url);
-      setExportMessage(`${number.format(result.total)} registros exportados integralmente.`);
-    } catch {
-      setExportMessage("Não foi possível exportar. Tente novamente.");
-    } finally {
-      setExporting(false);
-    }
-  };
   const date = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeZone: timezone });
   const time = new Intl.DateTimeFormat("pt-BR", {
     hour: "2-digit",
@@ -1251,6 +1219,8 @@ function AppointmentTable({
     timeZone: timezone,
   });
   const value = (text: string) => text || "Não informado";
+  const overdue = overdueRows || detailQuery?.subset === "overdue";
+  const attendanceColumn = overdue ? "Data prevista de comparecimento" : "Data de comparecimento";
   return (
     <section
       ref={tableRef}
@@ -1258,7 +1228,7 @@ function AppointmentTable({
       aria-labelledby={headingId}
       aria-busy={pending}
     >
-      <header className={styles.cardHeader}>
+      <header className={`${styles.cardHeader} ${styles.detailTableHeader}`}>
         <h2 id={headingId}>{title}</h2>
         <span>
           {total === null
@@ -1266,53 +1236,36 @@ function AppointmentTable({
             : `${number.format(total)} registros no período`}
         </span>
       </header>
-      {detailSource ? (
+      {detailSource && !page ? (
         <>
           <p role="status" aria-live="polite">
-            {pending
+            {pending || current?.status === "ready"
               ? "Carregando todos os registros…"
               : current?.status === "snapshot_changed"
                 ? "A fonte foi atualizada. Recarregue os dados para não misturar atualizações."
                 : current?.status === "unavailable" || current?.status === "invalid_request"
                   ? "Detalhamento indisponível. Tente novamente."
-                  : page
-                    ? `Exibindo todos os ${number.format(page.total)} registros. PDF: visualização atual. CSV: lista completa.`
-                    : current?.status === "ready"
-                      ? "Carregando todos os registros…"
-                      : "Detalhes serão carregados ao visualizar esta tabela."}
+                  : "Detalhes serão carregados ao visualizar esta tabela."}
           </p>
-          <div
-            style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}
-            data-dashboard-export-ignore
-          >
-            {current && current.status !== "ready" ? (
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() =>
-                  current.status === "snapshot_changed"
-                    ? window.location.reload()
-                    : void requestAll()
-                }
-              >
-                {current.status === "snapshot_changed" ? "Atualizar dados" : "Tentar novamente"}
-              </button>
-            ) : null}
+          {current && current.status !== "ready" ? (
             <button
               type="button"
-              disabled={
-                exporting || pending || !detailController || current?.status === "snapshot_changed"
+              disabled={pending}
+              onClick={() =>
+                current.status === "snapshot_changed" ? window.location.reload() : void requestAll()
               }
-              onClick={() => void exportAll()}
             >
-              {exporting ? "Exportando…" : "Exportar CSV completo"}
+              {current.status === "snapshot_changed" ? "Atualizar dados" : "Tentar novamente"}
             </button>
-          </div>
-          {exportMessage ? <p role="status">{exportMessage}</p> : null}
+          ) : null}
         </>
       ) : null}
       {unavailable ? null : visibleRows.length === 0 ? (
-        <Empty />
+        <Empty>
+          {overdue
+            ? "Nenhum agendamento vencido sem visita nos filtros selecionados."
+            : "Nenhum agendamento no período coberto."}
+        </Empty>
       ) : (
         <div className={styles.tableViewport} tabIndex={0} role="region" aria-label={title}>
           <table>
@@ -1321,7 +1274,7 @@ function AppointmentTable({
                 <th>Data de criação</th>
                 <th>Qnt. de dias</th>
                 <th>Horário</th>
-                <th>Data de comparecimento</th>
+                <th>{attendanceColumn}</th>
                 <th>Visita Realizada</th>
                 <th>Gerente Regional</th>
                 <th>Gerente de Vendas</th>
@@ -1363,8 +1316,10 @@ function AppointmentTable({
                     <td data-label="Horário">
                       {row.scheduledAt ? time.format(new Date(row.scheduledAt)) : "Não informado"}
                     </td>
-                    <td data-label="Data de comparecimento">
-                      {row.attendedAt ? date.format(new Date(row.attendedAt)) : "Não informado"}
+                    <td data-label={attendanceColumn}>
+                      {(overdue ? row.scheduledAt : row.attendedAt)
+                        ? date.format(new Date((overdue ? row.scheduledAt : row.attendedAt)!))
+                        : "Não informado"}
                     </td>
                     <td data-label="Visita realizada">{row.visitPerformed ? "Sim" : "Não"}</td>
                     <td data-label="Gerente Regional" title={row.regionalManager}>
@@ -2045,6 +2000,7 @@ export function AppointmentsDashboard({
               <Columns
                 buckets={result.weekly}
                 label="Agendamentos por semana do mês selecionado"
+                reference={{ value: result.weeklyTarget, label: "Meta semanal", showSummary: true }}
                 selected={filters.week ? String(filters.week) : undefined}
                 onSelect={(bucket) => toggleFilter("week", Number(bucket.key))}
               />
@@ -2214,7 +2170,11 @@ export function AppointmentsDashboard({
             buckets={result.monthly}
             label={`Agendamentos por mês de ${selectedYear}`}
             monthly
-            reference={{ value: monthlyGoal, label: "Meta do mês selecionado" }}
+            reference={{
+              value: result.goalBrokerCount,
+              label: "Meta de agendamentos",
+              showSummary: true,
+            }}
             onSelect={(bucket) => selectMonth(`${selectedYear}-${bucket.key}`)}
           />
         </Chart>
@@ -2256,14 +2216,15 @@ export function AppointmentsDashboard({
         ) : (
           <AppointmentTable
             title="Agendamentos vencidos sem visita realizada"
+            overdue
             rows={
               compactSummary
                 ? []
                 : (result.details ?? []).filter(
                     (row) =>
                       !row.visitPerformed &&
-                      row.attendedAt !== null &&
-                      saoPauloDate(row.attendedAt) < currentCalendarDate,
+                      row.scheduledAt !== null &&
+                      saoPauloDate(row.scheduledAt) < currentCalendarDate,
                   )
             }
             detailSource={detailSource}

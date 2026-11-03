@@ -2,10 +2,54 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
   appointmentWeekendDay,
+  appointmentsGoalPath,
   AppointmentsColumns,
 } from "@/app/(protected)/app/etapas/_components/AppointmentsColumns";
 
 describe("appointments reference and calendar labels", () => {
+  it("draws a single horizontal target from the start to the end without steps", () => {
+    expect(appointmentsGoalPath([60, 60, 60, 60, 60], 300, 4)).toBe("M0,60 H100");
+    expect(appointmentsGoalPath([0, 0], 300, 4)).toBe("M0,300 H100");
+    expect(appointmentsGoalPath([null, null], 300, 4)).toBe("");
+    // Unknown periods still break the line rather than bridge unavailable data.
+    expect(appointmentsGoalPath([20, null, 20], 300, 4)).toBe(
+      "M0,220 H33.33333333333333 M66.66666666666666,220 H100",
+    );
+  });
+
+  it("shows the selected target below the observed maximum only when requested", () => {
+    const html = renderToStaticMarkup(
+      <AppointmentsColumns
+        label="Agendamentos por mês"
+        monthly
+        reference={{ value: 20, label: "Meta de agendamentos", showSummary: true }}
+        buckets={[{ key: "2026-07", label: "Julho", total: 196, goal: 480 }]}
+      />,
+    );
+    expect(html).toMatch(
+      /Máximo 196[^]*data-appointments-reference-summary="true"[^]*Meta de agendamentos 20/u,
+    );
+    expect(html).toContain("Julho: 196 agendamentos; Meta de agendamentos 20");
+    expect(html).not.toContain("meta 480");
+  });
+
+  it.each([
+    [0, "0"],
+    [null, "indisponível"],
+  ] as const)("keeps target summary %s distinct from unavailable coverage", (value, expected) => {
+    const html = renderToStaticMarkup(
+      <AppointmentsColumns
+        label="Agendamentos por mês"
+        reference={{ value, label: "Meta de agendamentos", showSummary: true }}
+        buckets={[{ key: "2026-07", label: "Julho", total: 0 }]}
+      />,
+    );
+    expect(html).toContain(
+      `data-appointments-reference-summary="true">Meta de agendamentos ${expected}</span>`,
+    );
+    if (value === null) expect(html).not.toContain("meta 0");
+  });
+
   it.each([
     ["2026-10-03", "sábado"],
     ["2026-10-04", "domingo"],

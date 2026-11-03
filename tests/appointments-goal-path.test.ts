@@ -8,7 +8,7 @@ describe("appointments connected target reference", () => {
     expect(path.match(/M/gu)).toHaveLength(1);
   });
   it("keeps zero targets at the real zero baseline", () => {
-    expect(appointmentsGoalPath([0, 0], 100, 10)).toBe("M0,100 H50 V100 H100");
+    expect(appointmentsGoalPath([0, 0], 100, 10)).toBe("M0,100 H100");
   });
   it("leaves unknown targets unavailable rather than inventing zero or interpolation", () => {
     expect(appointmentsGoalPath([null, 2, undefined, 3], 100, 10)).toBe("M25,80 H50 M75,70 H100");

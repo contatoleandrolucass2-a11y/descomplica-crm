@@ -1,5 +1,7 @@
 # Aprendizados e atualizacoes
 
+- Agendamentos 03/11: [metas, média inteira e vencidos](ATUALIZACOES-ARQUIVO-2026-11-03-a-2026-11-03-AGENDAMENTOS-METAS.md).
+
 - 03/11/2026: Equipe Produtiva compacta publicada em f3c4f126, CI 41585221159
   com quatro gates aprovados e health 200/ok. Vidro e menu externo confirmados;
   evidências e limites no [registro da página](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).

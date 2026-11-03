@@ -117,7 +117,9 @@ export function buildAppointmentComparison(
     const covered = yearMonths
       .map((values) => values[index])
       .filter((value): value is number => typeof value === "number");
-    return covered.length ? covered.reduce((sum, value) => sum + value, 0) / covered.length : null;
+    return covered.length
+      ? Math.ceil(covered.reduce((sum, value) => sum + value, 0) / covered.length)
+      : null;
   });
   const monthLabel = new Intl.DateTimeFormat("pt-BR", {
     month: "long",
