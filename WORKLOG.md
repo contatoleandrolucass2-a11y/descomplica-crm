@@ -148,7 +148,21 @@
   Meta Ads excluído. Este checkpoint será entregue em candidato coordenado com
   as demais frentes, sem publicação independente.
 
-## 2026-11-02 — Evidências e bloqueio de Equipe Produtiva
+## 2026-11-02 — Equipe Produtiva: publicação validada
+
+- Publicada a versão6a0b1df51ff8e8f9ed0711bd114f4c5ab6d41573 pelo coordenador,
+  em03/11/2026 02:41:32.581UTC (02/11 23:41:32.581SãoPaulo). PR465 e os quatro
+  jobs da CI41561175667 aprovados. Imagem imutável conferida e dois perfis reais
+  validados na VPS; nenhum build na produção.
+- Duas migrations autorizadas aplicadas com backup privado e CAS. Catálogo
+  49→50, permissões75→76 e grants260→262;16vínculos e71exceções preservados.
+  Preservados schema/ACL/RLS, as85linhas antigas do histórico e os conteúdos
+  anteriores de permissões. Histórico final87, versões canônicas reconciliadas.
+- Página ativa, defaults somenteAdmin/Master. RPC anônima negada401/42501;
+  onze rotas afetadas redirecionam ao login e health200/ok no SHA publicado.
+  Evidências, hashes e limites no arquivo próprio de conhecimento. Encerramento
+  documental não reinicia a aplicação. Sync Obsidian pendente pelo limite do
+  índice compartilhado recebido de main,256.679bytes para limite256.000.
 
 - CI41516437878 passou todos os contratos funcionais/axe/zoom/Team; somente
   Usuários tablet excedeu pixels pela nova permissão e identidade sintética.

@@ -407,3 +407,77 @@ sem pendência. Fontes: origin/main, GitHub runs/PR465, health e coordenador.
 Nova integração/CI exigidas pela proteção; nenhuma migration Team aplicada.
 O índice recebido de855 tem256.592bytes, excedendo o limite256.000; eventual
 falha de sync permanece externa ao escopo, sem reordenar notas de outro chat.
+
+## Publicação e ativação verificadas — 03/11/2026 UTC
+
+Estado funcional: publicado e ativo. PR465 integrado no SHA
+6a0b1df51ff8e8f9ed0711bd114f4c5ab6d41573. CI41555924747 aprovou os quatro jobs
+do PR; CI41561175667 aprovou os quatro jobs do main exato, incluindo banco,
+restauração, autorização, matriz visual completa e contrato dedicado Team.
+Fontes: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/465 e
+https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/41561175667.
+
+Artefato de imagem13197220640 da mesma CI. image.tar.gz SHA256 conferido:
+fc2ab400d1de6a4cfec1c6651ea89ef0f535c61c5c8bbb265755692a3088b0d3.
+Config ID da CI:sha256:177d1c5166bec40747b34776d3822d43e0c9ebc96b337c367664ec7bf22ce98a.
+Manifesto/ID local:sha256:a1d98a02f7565162d6d5a7f6ef735fc7774d5364f9c9c39e3d2fca7cecfd9e3a.
+Prova validou30blobs,14camadas, revisão, linux/amd64 e equivalência integral de
+rootfs e formatos Docker/OCI. image:prove confirmou dois perfis na mesma imagem,
+sem imprimir segredos. Não houve rebuild ou retag na VPS. A instalação própria
+de dependências do publicador reutilizou545pacotes em cache, sem downloads;
+o primeiro vínculo compartilhado foi recusado antes de qualquer remoção e
+substituído por instalação frozen no checkout isolado, preservando o anterior.
+
+Publicação exclusiva por release:production, três locks e CAS. Consulta viva em
+03/11 02:41:15UTC confirmou deployment anterior28c48a83-4c9e-4923-91c8-3028aabc5555,
+SHA2556898d e data real02/11 20:39:49.477UTC. Publicação nova concluída em
+03/11 02:41:32.581UTC (02/11 23:41:32.581America/Sao_Paulo): deployment
+f854e369-d792-45e4-9ff8-504e75651453, SHA6a0b1df5 e ID local comprovado acima,
+sem pendência. A conferência final de minuto e CI/main foi feita pelo coordenador.
+
+Após runtime compatível, operação de banco manteve os mesmos três locks até
+verificação final; liberação normal confirmada. Backup consistente de cinco
+tabelas, schema/ACL/RLS, funções e85linhas de histórico, capturado02:42:47.36875UTC,
+persistido somente no arquivo privado root:root0600:
+/etc/descomplica-crm/migration-backups/equipe-6a0b1df51ff8e8f9ed0711bd114f4c5ab6d41573-preapply.json.
+SHA256:c011fca6cd849c1b4052f64b169b59504b17f6a28b21859908345bc83cd22efb.
+Cópias temporárias locais privadas removidas após comparação; nenhuma linha,
+identidade ou justificativa individual foi exportada para Git ou Obsidian.
+
+Aplicadas somente as duas migrations autorizadas, com pins originais já
+registrados, locks/CAS das cinco tabelas e preservação verificada no próprio DO:
+20261102020840_productive_team_read.sql e20261102020921_sync_page_catalog.sql.
+Envelopes SHA256:696f8caf3ce63770a1b68950d932121da9b497313bc640570dfd439843247366
+e31025e019faf7c556cb7a96b6648659c2d4efec9419edd2946b1170067692b13.
+O MCP gerou versões20261103024406 e20261103024523; após releitura de nome,
+statement único, hash e corpos reais, somente essas linhas foram reconciliadas
+por CAS para20261102020840/productive_team_read e20261102020921/sync_page_catalog.
+Histórico final87, com todas as85linhas anteriores integralmente preservadas.
+
+Comparação pós-aplicação02:46:41UTC: app_pages49→50, permissions75→76,
+role_permissions260→262, user_roles16→16 e user_permission_overrides71→71.
+Todos os conteúdos antigos de permissões/concessões/exceções, estados das páginas,
+schema, owners, ACL e RLS permaneceram iguais; somente updated_at das páginas
+foi desconsiderado como metadado do UPDATE. Treze descrições legadas preservadas.
+Página ativa, permissão crm.productive_team.view/min_level10 e defaults somente
+admin/master. Duas funções com corpos exatos, ownerpostgres e search_path vazio:
+projetor privado invoker sem execução cliente; leitura pública STABLE/SECDEF com
+execução apenas authenticated, guardada por sessão, página e visão autorizadas.
+anon e service_role continuam sem EXECUTE em ambas; authenticated não executa
+diretamente o projetor privado. Nenhuma terceira migration foi aplicada por este chat.
+
+Provas de produção: RPC com chave pública anônima negadaHTTP401/código42501;
+as onze rotas afetadas (sete Dashboard, Team e três Admin) redirecionaram307 ao
+login, sem cookies. Health público200/ok/6a0b1df51ff8e8f9ed0711bd114f4c5ab6d41573.
+Credenciais e corpos de respostas privadas não foram impressos. Não houve login
+com contas reais; jornada autenticada e dados financeiros permaneceram na CI
+isolada com dados sintéticos. Não foi feita gravação comercial para smoke.
+
+Limites preservados: Imob/Empresa indicam indisponibilidade quando a autoridade
+não fornece cadastro conciliável. Nenhum denominador foi inferido da atividade,
+nenhuma coleta ou workflow n8n foi alterado. CI/merge/publicação/ativação são
+estados distintos e agora verificados para a entrega funcional. Este encerramento
+é somente documental, sem outro restart ou promoção. Sync Obsidian permanece
+pendente porque o índice compartilhado recebido de main excede256.000bytes
+(arquivo atual256.679); reavaliar após correção dessa fonte, sem alterar notas
+de outras demandas para ocultar a falha.
