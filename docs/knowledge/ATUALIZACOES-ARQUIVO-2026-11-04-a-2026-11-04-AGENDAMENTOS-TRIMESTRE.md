@@ -326,6 +326,12 @@ Helper operacional ignorado test-results/hold-ingest-migration-lock.mjs não
 executa SQL. Valida CI/main exatos e app atual, mantém as três travas existentes,
 exige snapshot compatível com CAS, grava backup privado com fsync/hash e compara
 metadados posteriores. Onze testes locais de guards aprovados; SHA256
-52be93167e77d1566ac3bbaa1a2c543aef18db27a9c9ceabd742234886a2558e.
+1b27ee802cef2be24975082831dda4be80c6574bd11563c4b8b4ed2e9aad0d25.
 Uso remoto, migration e comprovação de ciclos continuam pendentes de gates e
 autorização específica. Nenhum timeout global ou controle de acesso afrouxado.
+
+PR493, primeiro candidato83b27b40: CI41905313680 interrompida no validate pelos
+inventários dependentes da migration nova. Total passou103→104 migrations e
+2436→2445 asserts pgTAP em49arquivos; allowlist de homologação também exigiu
+entrada explícita. Correção delimitada desses inventários, preservando suas
+asserções e os gates. REST/banco ainda não haviam sido executados nessa rodada.
