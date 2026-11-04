@@ -4086,3 +4086,5 @@ Validação e publicação serão registradas com evidências ao concluir os gat
   artefato imutável, backup e smoke autenticado desktop/mobile concluídos.
 - Resolve a pendência do Obsidian particionando o histórico CAIXA sem perda de
   conteúdo; sincroniza e confere12 documentos, preservando o limite de exportação.
+- Registra o PR #487 de compactação CAIXA, validado localmente e pendente de
+  publicação por falha repetida do gate Associativo; nenhuma outra página alterada.
