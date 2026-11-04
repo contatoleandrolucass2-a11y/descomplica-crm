@@ -1,5 +1,41 @@
 # Worklog
 
+## 2026-11-04 — Prazo delimitado para gravação Salesforce
+
+- Dois ciclos da versão publicada falharam com57014/statement_timeout;
+  último snapshot válido preservado. A falha reapareceu em posições diferentes
+  dos validadores; não foi atribuída a uma expressão isolada sem evidência.
+- Migration20261104201024 propõe30s somente para a RPC de ingestão, preservando
+  implementação, proprietário, ACL e search_path. Sem alteração de limites
+  globais, contas, dados existentes, workflow ou agenda. Aplicação remota pendente
+  de CI e autorização específica; não confundir proposta com produção.
+- Testes Node3/3, lint, sintaxe e formatação aprovados. Nove asserts pgTAP e
+  prova REST PostgreSQL17 obrigatórios na CI:8s herdados da role sintética,
+  sucesso9s com override30s, cancelamento31s, cinco chamadas posteriores8s,
+  anon/auth sem execução, configurações existentes e RPC real preservadas.
+  Docker local indisponível; esses testes de banco não foram alegados localmente.
+- Operação proposta mantém travas compartilhadas, backup privado da definição
+  e metadados, CAS e rollback restrito ao parâmetro. Não requer reinício do app.
+
+## 2026-11-04 — PR #490 publicado e persistência conferida
+
+- PR #490 integrado em 5da46964, CI do PR41875106244 e main41882885306 com
+  quatro gates aprovados. Página inicial corrigida sem alterar baseline;
+  imagem imutável publicada15:57:29 BRT, deployment302cbc32-6472-472d-9903-fb8ecf52042b.
+  Health20:01:54Z HTTP200/ok e SHA exato, ledger sem pendência na publicação.
+- Chrome e integrado:32 cards preservados após redimensionamento/movimento pelos
+  controles de teclado, gravação em um Salvar, reload e navegação. Modelo inteiro
+  restaurado; limite128 px das torres persistiu e voltou ao automático. Viewports
+  390x844/844x390 sem overflow da página; prints reais locais, sem dados no Git.
+- Quarta série, médias inteiras, dias/feriados, meta mensal e popup diário
+  conferidos. Nova carga34 corretores: outubro 884, equipe29/10 com7 + 27 pessoas.
+  Tabelas136 detalhes/84 vencidos sem paginação e rolagem até o último resultado.
+- Equipe Produtiva atualizou15:33→16:36 na mesma aba, sem reload manual,
+  comprovado20:00:21Z. Coletor novo aplicado com backup/CAS e dependências
+  isoladas, sem mudar agenda, memória, credenciais, permissões ou banco.
+  Histórico, recibos, falha inicial57014 e critérios de reavaliação no
+  registro AGENDAMENTOS-TRIMESTRE. Registro documental não reinicia aplicação.
+
 ## 2026-11-04 — Página inicial: margem estável para liberar PR490
 
 - Pedido explícito autorizou corrigir a diferença visual de `/app` e concluir
