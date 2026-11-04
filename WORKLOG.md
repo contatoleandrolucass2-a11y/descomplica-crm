@@ -10980,3 +10980,15 @@ b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigi
 - Sync real:12 documentos; cópias, hashes e geração única conferidos no Obsidian.
   Dois testes focados de particionamento e limite aprovados. Sem código de página,
   instalação, alteração de hooks ou reinício do CRM. Evidência em ATUALIZACOES.
+
+### 04/11/2026 — CAIXA compacta: bloqueio externo de publicação
+
+- PR #487,359c784f: campos pelo conteúdo e duas linhas principais no desktop,
+  valores9.999.999,99 visíveis, proponentes64px, UF76px e Sim/Não50px.
+- Dez cenários locais de navegador, tipos e lint aprovados; teste CAIXA na CI
+  aprovado. validate, restauração e imagem também aprovados.
+- CI41765258280 falhou duas vezes no foco Anual 1 do Associativo, fora do escopo.
+  Não alterado o Associativo, pipeline, proteções ou baselines. Captura autenticada
+  final permanece pendente; implementação não integrada nem publicada.
+- Retomar após correção externa e CI obrigatória, revisar referências CAIXA e
+  cumprir publicação exata. Detalhes/proveniência em ATUALIZACOES. Registro documental.
