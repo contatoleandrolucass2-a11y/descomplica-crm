@@ -1,5 +1,9 @@
 # Changelog
 
+- Publica CAIXA compacta emc97d5fd2, com campos principais em duas linhas e
+  valores até9.999.999,99 legíveis. CI final e smoke em produção aprovados;
+  teste Anual 1 estabilizado pela data sintética, sem alterar o Associativo.
+
 - Confirma Agendamentos publicado em82ee8deb, com CI completa e testes reais
   no Chrome, integrado e celular simulado. Lista de outubro apresenta84
   vencidos;32 cards mantêm dimensões e ordem após gravação e atualização.

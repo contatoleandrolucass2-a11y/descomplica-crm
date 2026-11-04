@@ -1,5 +1,39 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-04 — CAIXA compacta publicada e validada
+
+- PR #487 integrado em c97d5fd212d2bd62bd4bd435f19d96d0e9b2bc6f. CI do PR
+  41776989504 e CI push/main 41783149013 aprovaram os quatro gates. Alterações
+  de aplicação restritas à CAIXA; exceção autorizada: duas linhas no harness
+  Associativo fixam a data sintética para estabilizar Anual 1, sem mudar suas
+  asserções, interface ou regras financeiras. O teste passou nas duas CIs finais.
+- Imagem da CI main: artefato13299888990, ZIP SHA-256
+  419727dd75a0eae1db2cb2dd5578f8c997fe7f7ee409a2cf1de50af96798ae29.
+  Config1910d4489bed7e2ede20b0ba4c4547bdea99e00bfa9ec5779a66dc60d623db15,
+  manifest/runtime80890b0c486d82e2ae16a033061c4b381268806f06ebb7098931bb54a1417f00;
+  encadeamento OCI/Docker e14 camadas comprovados, linux/amd64, dois perfis
+  image:prove com a mesma imagem. Sem segredos nas evidências.
+- Publicação exclusiva pelo release:production, consulta CI/main e versão ao
+  vivo, locks/CAS e backup privado do ambiente/ledger preservados. Anterior
+  82ee8deb e sua imagem mantidos para rollback. Sem migration ou mudança de dados.
+  Deployment cf228044-06b5-4bb3-9dbc-1dcd0ca1c016 concluído em
+  2026-11-04T13:05:49.311Z (10:05:49.311 America/Sao_Paulo), sem pendência.
+- Pós-publicação04/11 às13:08UTC: health HTTP200/ok, versão c97d5fd2; ledger
+  concordante. Acesso anônimo à CAIXA HTTP307 para /login. Chrome autenticado:
+  quatro campos exibem9.999.999,99 integralmente; duas linhas em1200/1280px,
+  sem overflow após estabilização do viewport. Sim/Não50px; sidebar44→208px
+  por entrada do ponteiro e recolhimento ao sair; fundo herdado rgb(6,31,53).
+- Cenário exclusivamente fictício: renda6000, imóvel300000, São Paulo/SP,
+  nascimento15/03/1991. Cálculo automático:420 meses, encargo inicial1800;
+  diálogo centralizado com420 parcelas, saldo final0, Imprimir habilitado e
+  foco devolvido a Exibir parcelas ao fechar. Sem impressão, compartilhamento
+  ou gravação. Dados fictícios limpos e viewport restaurado no encerramento.
+- Evidência visual local: caixa-duas-linhas-publicado-c97d5fd2.png na pasta
+  de visualizações deste chat. Limite: smoke de produção confirma apresentação
+  e funcionamento do cenário; não constitui nova certificação das taxas CAIXA.
+  Registro final apenas documental: publicar no Git e sincronizar Obsidian,
+  sem reinício adicional ou ciclo recursivo de registro.
+
 ## 2026-11-04 — Retomada autorizada: teste Anual 1 e publicação CAIXA
 
 - Usuário autorizou somente a correção do teste Anual 1 bloqueador e a publicação
