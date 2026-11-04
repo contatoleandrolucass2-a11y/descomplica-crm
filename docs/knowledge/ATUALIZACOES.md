@@ -1,5 +1,16 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-04 — Agendamentos: PR490 bloqueado por referência externa
+
+- Implementação concluída no candidato2bb866f4; não integrado nem publicado.
+  CI41853820787 aprovou funções, autorização, tipos, build, imagem e restore;
+  comparação visual de `/app` falhou por altura10px menor em11capturas.
+  Sem dependência comprovada com o diff solicitado; baseline e página preservadas.
+- Coletor anterior recuperado e32cards preservados nos dois navegadores.
+  Retry novo e conferência final da versão nova no site continuam bloqueados.
+  Evidências e critério de retomada no
+  [registro específico](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-CI-490.md).
+
 ## 2026-11-04 — CAIXA compacta publicada e validada
 
 - PR #487 integrado em c97d5fd212d2bd62bd4bd435f19d96d0e9b2bc6f. CI do PR

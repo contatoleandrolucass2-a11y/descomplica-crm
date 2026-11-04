@@ -1,5 +1,9 @@
 # Changelog
 
+- Registra o bloqueio de publicação do PR490: comparação visual externa de
+  `/app` na CI41853820787, sem alteração de baseline ou aplicação em produção.
+  Ajustes de Agendamentos implementados e testes funcionais aprovados no candidato.
+
 - Publica CAIXA compacta emc97d5fd2, com campos principais em duas linhas e
   valores até9.999.999,99 legíveis. CI final e smoke em produção aprovados;
   teste Anual 1 estabilizado pela data sintética, sem alterar o Associativo.
