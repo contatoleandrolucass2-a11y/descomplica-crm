@@ -776,6 +776,8 @@ export async function runSyntheticAssociativePageGuide(options) {
       if (message.type() === "error")
         errors.push({ text: message.text(), url: message.location().url });
     });
+    // Match the synthetic inventory reference date so annual eligibility cannot drift with CI time.
+    await page.clock.setFixedTime(new Date("2026-09-05T12:00:00-03:00"));
     await page.goto(`${origin}${routePath}`, { waitUntil: "networkidle" });
     await expect(page.getByRole("columnheader", { name: "Vaga", exact: true })).toBeVisible();
     // Exercise the real row selection and selected-unit summary for zero, one and unknown.

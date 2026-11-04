@@ -10981,6 +10981,32 @@ b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigi
   Dois testes focados de particionamento e limite aprovados. Sem código de página,
   instalação, alteração de hooks ou reinício do CRM. Evidência em ATUALIZACOES.
 
+### CAIXA — larguras pelo conteúdo e duas linhas
+
+- Compacta somente a rota CAIXA: quatro valores de até9.999.999,99, proponentes
+  com largura de um dígito, data/cidade/UF/prazo/produto/sistema proporcionais,
+  Sim/Não de50px e duas linhas principais em desktop a partir de1200px.
+- Campos adicionais de subsídio ficam após as condições, preservando teclado
+  e cálculos. Sem alterações de limites financeiros ou de outras páginas.
+- Dez cenários de navegador aprovados por execução e repetição focada após
+  ajuste da medição de display:contents. Matriz de temas, mobile, axe e hover
+  aprovada. CI e referências definitivas da aplicação real ainda obrigatórias.
+
+### 04/11/2026 — Correção autorizada do teste Anual 1
+
+- Fixa somente o relógio do navegador no harness Associativo em05/09/2026,
+  referência de seus dados sintéticos; evita esperar Anual 1 em data que a torna
+  inelegível. Mantém asserções de foco, timeout e regras comerciais.
+- Comando original passou localmente em9 cenários/18 estados, três temas e
+  desktop/celular, sem erros de console ou requisições externas. A alteração da
+  aplicação continua exclusivamente CAIXA. CI final/publicação permanecem obrigatórias.
+- CI41770246907 aprovou o guia Associativo e todos os funcionais/temas/axe/zoom;
+  falhou somente nos11 deltas intencionais CAIXA. Artefato13296034620 e cadeia de
+  hashes conferidos;11 capturas revisadas/promovidas,231 referências preservadas.
+  Proveniência completa em ATUALIZACOES e reviewedUpdates do manifesto.
+- Tipografia/padding de1200–1279px não alteram as capturas revisadas. Teste focado
+  do limite1200 e dos demais desktops passou; CI do candidato final obrigatória.
+
 ### 04/11/2026 — CAIXA compacta: bloqueio externo de publicação
 
 - PR #487,359c784f: campos pelo conteúdo e duas linhas principais no desktop,

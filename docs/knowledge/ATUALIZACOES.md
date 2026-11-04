@@ -1,5 +1,58 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-04 — Retomada autorizada: teste Anual 1 e publicação CAIXA
+
+- Usuário autorizou somente a correção do teste Anual 1 bloqueador e a publicação
+  CAIXA. Escopo anterior ampliado apenas para essa dependência de QA; nenhuma
+  alteração de regra financeira ou layout do Associativo autorizada/necessária.
+- Mainbf955fa5, CI41768449253 documental aprovada, produção82ee8deb saudável.
+  PR #487359c784f integrado à base documental local emdd0a31d9, preservando
+  implementação e registro anterior do bloqueio. Consultas em04/11/2026.
+- Evidência: CI41765258280/2 mostra Ocultar Anual 2 e zerar valor enquanto o
+  teste exige Anual 1. Harness sintético usa snapshotReferenceDate2026-09-05,
+  mas não fixa relógio do navegador; todayIso usa a data corrente de São Paulo.
+  Corrigir somente o relógio do harness, mantendo as asserções de foco e regras.
+- Correção:duas linhas no harness fixam o relógio do navegador em05/09/2026,
+  alinhado ao snapshot sintético, antes da navegação. Datas reais do host e
+  registros de execução continuam reais; aplicação/financeiro Associativo intactos.
+- Prova local em04/11: comando original associative-page-guide concluiu com
+  sucesso em9 cenários e18 estados de proposta, três temas e larguras1440/375/320.
+  Asserção Anual 1/foco preservada, sem aumento de timeout ou skip. Sem erros
+  de console nem requisições externas; CI integrada e revisão CAIXA seguem obrigatórias.
+- CI41770246907, headbaa85962/capturab931400b, árvorebd962d3f: guia Associativo,
+  demais funcionais,154 telas responsivas,88 temas,242 axe e zoom aprovados.
+  Somente11 comparações visuais CAIXA divergiram pelo redesenho solicitado.
+- Artefato13296034620, ZIP SHA-256
+  9cdeb6f36f6f260b5f6f490d78d529e95478a3df8144dc8d812cef032c57d09b conferido.
+  Fingerprint88b7eba90091cd0d6bd56039876c3dbab94f65f66c40ba5c79bc3f5211d322fa
+  reproduzido com diff rastreado vazio e19 outputs sintéticos Conectar Sistemas.
+  Árvore da captura igual à do head; dirty e resultado geral falho preservados.
+- Onze imagens CAIXA revisadas em desktop/tablet/celular e três temas, sem cortes;
+  somente essas11 imagens/linhas do manifesto atualizadas. Outras231 preservadas,
+  deltas antigos retidos e limiares intactos. Nova CI do candidato continua exigida.
+- Limite1200–1279px recebeu tipografia/padding próprios para conservar espaço
+  entre rótulos e leitura do valor máximo; isso não afeta nenhuma das11 larguras
+  capturadas. Prova focada passou em1200/1280/1440/1920, duas linhas e oito estados
+  de sidebar, com9.999.999,99 inteiro nos quatro campos. Validar CI final exata.
+
+## 2026-11-03 — CAIXA: campos dimensionados e duas linhas no desktop
+
+- Pedido restrito à CAIXA: reduzir larguras de campos e Sim/Não, acomodar valores
+  monetários até9.999.999,99 e distribuir os campos principais em duas linhas.
+- Abertura: Git comum confirmado, mainbc4a1c51 com CI41689755186 aprovada;
+  health público HTTP200/ok, produção82ee8deb. Fontes consultadas em03/11/2026.
+  Ajuste de interface; fórmulas e limites financeiros permanecem preservados.
+- Implementação: grid de24 trilhas em telas a partir de1200px, duas linhas
+  principais, largura máxima de1320px; campos monetários sem padding excedente,
+  proponentes64px, UF76px e Sim/Não50px. Campos adicionais de subsídio seguem
+  após as condições para conservar a ordem visual e de teclado; regras intactas.
+- Provas locais: valor9.999.999,99 nos quatro campos, duas linhas em1280/1440/1920
+  com lateral aberta/fechada, sem corte ou overflow; demais jornadas e matriz
+  de três temas/desktop/tablet/celular aprovadas,10 cenários de navegador.
+  Testes de geometria usam as caixas renderizadas quando o agrupador usa
+  display:contents; não ignoram os campos. Referências visuais CAIXA serão
+  revisadas por mudança intencional; CI final e artefato de main continuam obrigatórios.
+
 ## 2026-11-04 — CAIXA: duas linhas implementadas; publicação bloqueada externamente
 
 - Pedido: reduzir larguras dos campos monetários até9.999.999,99, proponentes,
