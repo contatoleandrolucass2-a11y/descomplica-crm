@@ -84,3 +84,37 @@ weekdays3letras/feriado, popup com/sem, foco/ArrowDown/Escape, toque/seleção e
 rolagem final aprovados. Tabelas136/84, contagem visível, sem overflow do
 documento, errosJS ou requests externos. Imagens identificadas como sintéticas;
 não comprovam o site publicado. Artefatos locais ignorados pelo Git.
+
+## Retomada observacional — 04/11 às14:28Z
+
+Após intervalo inesperado das ferramentas, fontes reconferidas: origin/main
+permanece1356b4b5, PR490 aberto no head8cfe5015e20e6360e267f3cb95c043d159111ce9,
+árvore limpa antes desta nota. Health200/ok ainda na versão c97d5fd2. CI
+41840653369 aprovou validate, isolated-restore e promotable-image; release-gates
+falhou na matriz visual autenticada completa. Diagnóstico do artefato será
+consultado antes de qualquer correção; não dispensar gate ou alterar outra área.
+Publicação do novo código ainda não ocorreu. Registro reservado ao fechamento,
+sem criar novo candidato funcional apenas por esta atualização documental.
+
+Causa da CI visual confirmada no artifact13330776626: etapa
+details:light:390:Agendamentos da própria página Equipe Produtiva ainda exigia
+nome antigo do diálogo/captions. Alinhadas somente expectativas de Agendamentos
+em scripts/qa/authenticated-visual.mjs, preservando outros três estágios,
+geometria, foco, contagens, a11y e baselines. Testes49/49 das suítes de escopo
+visual e SSR aprovados; syntax/lint/format/diffcheck aprovados. Nova CI real
+necessária. captureCommit09bc6ffc pertence ao merge sintético do PR, distinto
+do head8cfe5015; fonte exata do artefato registrada, sem confundir os SHAs.
+
+Ensaio diagnóstico13:40:33–13:46:19Z terminou exit0, sem publicação; pico355MiB.
+Coletor original restaurado13:46:20Z. Publicação comercial13:52:24Z, HTTP201,
+requestId705b07c8-8925-47db-9d2e-2e2ad4a8584f; estoque13:52:57Z/3500itens.
+Contagens agregadas20645/1266/620/2739/793/21/7. Ciclo automático14:00 falhou
+14:02:31 antes do primeiro relatório, semOOM/restart, lockliberado. Isso prova
+uma carga nova, não regularidade resolvida. Próximo ciclo14:30 acompanhado.
+
+Para identificar a causa sem expor mensagem/payload privado, scheduler agora
+registra safeSalesforceError(error), que só permite códigos e textos fixos já
+validados. Teste específico verifica mensagem sensível/response não chegam aos
+logs;9/9 testes Node aprovados. Cadência e regras de publicação não mudam.
+Código local não será aplicado ao serviço sem CI main exata, backup/CAS e
+confronto da árvore transitiva com a release do coletor322a4166.

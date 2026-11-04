@@ -19,6 +19,11 @@
 - Testes focados de calendário/análise58/58, tipos e QA visual9/9 aprovados
   (três temas em1440×1000,390×844 e844×390). CI do candidato e publicação
   são etapas posteriores. Sem migration ou mudança de permissões.
+- Primeira CI aprovou validação, imagem e restauração; matriz visual exigia
+  rótulos antigos do diálogo de Agendamentos. Expectativas condicionais foram
+  alinhadas ao pedido sem alterar baselines ou os outros estágios. Scheduler
+  Salesforce passa a registrar o código seguro da falha, preservando cadência,
+  publicação e dados privados; diagnóstico da falha intermitente segue aberto.
 
 ## 2026-11-04 — CAIXA: duas linhas publicadas
 

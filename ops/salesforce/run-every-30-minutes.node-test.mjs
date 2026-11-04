@@ -7,6 +7,7 @@ import {
   runCollector,
 } from "./run-every-30-minutes.mjs";
 import { createCollectorProgress } from "./connection-monitor.mjs";
+import { SalesforceCollectionError } from "./report-request.mjs";
 import { salesforceReportKeys } from "../../lib/crm/salesforce/connection-contract.ts";
 
 test("schedules the next run on a 30-minute boundary", () => {
@@ -49,6 +50,41 @@ test("keeps the scheduler alive after a failed cycle", async () => {
     waitFor: async () => {},
   });
   assert.equal(runs, 2);
+});
+
+test("records the safe source error code without private messages or payloads", async () => {
+  for (const error of [
+    new SalesforceCollectionError("SALESFORCE_INVALID_REPORT"),
+    Object.assign(new Error("private payload or credential must never reach logs"), {
+      code: "SALESFORCE_INVALID_REPORT",
+      response: { privateData: "sensitive" },
+    }),
+  ]) {
+    const controller = new AbortController();
+    const logs = [];
+    await runEveryThirtyMinutes({
+      signal: controller.signal,
+      run: async () => {
+        throw error;
+      },
+      log: (message, details) => logs.push({ message, ...details }),
+      now: () => 15 * 60 * 1_000,
+      waitFor: async () => controller.abort(),
+    });
+    assert.deepEqual(logs[0], {
+      message: "candidate cycle failed; publication not confirmed",
+      code:
+        error instanceof SalesforceCollectionError
+          ? "SALESFORCE_INVALID_REPORT"
+          : "SALESFORCE_EXPORT_FAILED",
+      error:
+        error instanceof SalesforceCollectionError
+          ? "Salesforce report integrity validation failed"
+          : "Salesforce candidate export failed",
+    });
+    assert.equal(logs[1].message, "next Salesforce candidate cycle scheduled");
+    assert.doesNotMatch(JSON.stringify(logs), /private payload|credential|privateData|sensitive/);
+  }
 });
 
 test("collector shutdown cancels monitor and does not overlap export cycles", async () => {

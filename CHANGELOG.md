@@ -5,6 +5,8 @@
   úteis e quintas em dobro, com meta zero nos feriados de São Paulo capital.
   Equipe Produtiva recebe releitura automática a cada30min e detalhes de
   Agendamentos com nomes compactos e equipes com/sem agendamento.
+  Diagnóstico da coleta Salesforce registra códigos seguros de falha, sem
+  expor mensagens privadas ou alterar a agenda de publicação.
 
 - Publica CAIXA compacta emc97d5fd2, com campos principais em duas linhas e
   valores até9.999.999,99 legíveis. CI final e smoke em produção aprovados;

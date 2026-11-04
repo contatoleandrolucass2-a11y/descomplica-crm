@@ -8,6 +8,7 @@ import {
   runConnectionMonitor,
   statusDestination,
 } from "./connection-monitor.mjs";
+import { safeSalesforceError } from "./report-request.mjs";
 
 const INTERVAL_MS = 30 * 60 * 1_000;
 
@@ -32,8 +33,8 @@ export async function runEveryThirtyMinutes(options = {}) {
   while (!signal?.aborted) {
     try {
       await run();
-    } catch {
-      writeLog("candidate cycle failed; publication not confirmed");
+    } catch (error) {
+      writeLog("candidate cycle failed; publication not confirmed", safeSalesforceError(error));
     }
 
     const scheduledAt = now();
