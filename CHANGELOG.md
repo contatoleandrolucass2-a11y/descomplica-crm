@@ -1,5 +1,12 @@
 # Changelog
 
+- Compacta todos os campos CAIXA em duas linhas, reduz controles e resumo,
+  exibe juros junto da parcela e leva parâmetros opcionais ao final.
+- Corrige o piso do subsídio antes dos redutores e separa a comparação da
+  calculadora rápida oficial do cálculo do perfil informado.
+- Inclui Unidades disponíveis por ranking, com estoque vivo, recálculo por
+  unidade e fluxo Associativo de84mensais/anuais automáticas, sem alterar o Associativo.
+
 - Estabiliza a margem do aviso dos filtros da página inicial em10px,
   independentemente da ordem dos módulos CSS, preservando a referência visual.
 

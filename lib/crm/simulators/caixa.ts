@@ -340,9 +340,12 @@ export function calculateMcmvSubsidy(
     ),
     operationCeiling,
   );
+  // MFOM v034 3.1.1.8 checks the formula minimum before 3.1.2 reducers.
+  // Applying the minimum again afterwards incorrectly erases legal reduced discounts.
+  if (amount < 1500) amount = 0;
   if (input.propertyCondition === "used") amount *= 0.5;
   if (input.singlePersonFamily) amount *= 0.3;
-  amount = amount < 1500 ? 0 : cents(amount);
+  amount = cents(amount);
   return {
     amount,
     incomeFactor: cents(incomeFactor),
@@ -586,8 +589,16 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     );
   if (subsidy > 0 && (product !== "mcmv" || middleClass || input.previousSubsidy || income > 4000))
     errors.push("Subsídio incompatível com o perfil informado. Confirme o enquadramento na CAIXA.");
-  if (subsidy > 0 && subsidy < 1500)
-    errors.push("Desconto complemento FGTS confirmado deve ser zero ou de pelo menos R$ 1.500.");
+  const subsidyReduction =
+    (input.singlePersonFamily ? 0.3 : 1) * (input.propertyCondition === "used" ? 0.5 : 1);
+  if (
+    input.confirmedSubsidy !== undefined &&
+    subsidy > 0 &&
+    subsidy < cents(1500 * subsidyReduction)
+  )
+    errors.push(
+      "Desconto confirmado abaixo do mínimo aplicável aos redutores deste perfil; confira na CAIXA.",
+    );
   if (publicContribution > 0 && product !== "mcmv")
     errors.push("Aporte MCMV Cidades só pode compor uma operação MCMV confirmada.");
   const fgts = input.hasFgts36 ? (input.fgts ?? 0) : 0,
@@ -676,12 +687,16 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     warnings.push(
       "Subsídio calculado pela fórmula do MFOM Habitação v034. O valor é indicativo e depende da validação cadastral e documental pela CAIXA.",
     );
+  if (subsidyEligibility === "automatic" && input.inConstruction === false)
+    warnings.push(
+      "Imóvel pronto: aplicado conservadoramente o teto de desconto CCI de R$ 49.500; confirme a modalidade na proposta CAIXA.",
+    );
   if (rateAdjustedByProperty)
     warnings.push(
       `O imóvel supera o limite municipal de ${municipalLimit!.toLocaleString("pt-BR", {
         style: "currency",
         currency: "BRL",
-      })}; a estimativa rápida foi enquadrada na taxa da Faixa 3, como na calculadora pública CAIXA.`,
+      })}; o perfil informado usa a taxa da Faixa 3. A calculadora rápida pública possui tabela própria.`,
     );
   if (input.inConstruction && !input.constructionMonths)
     warnings.push(

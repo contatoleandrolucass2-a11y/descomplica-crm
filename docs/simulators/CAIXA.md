@@ -1,5 +1,73 @@
 # Simulação CAIXA: referência, matemática e limites
 
+## Revisão de 04/11/2026: perfil e comparação pública separados
+
+O resumo calcula o perfil informado, com tabela municipal, cotista, composição
+familiar e dados do imóvel. A auditoria inclui uma comparação independente com
+a calculadora rápida oficial1.16.0.2. Essa calculadora utiliza limites genéricos,
+80% de cota e parâmetros médios; não coleta FGTS/cotista, município, área ou
+dependentes e não calcula subsídio. O comparador não substitui os valores do
+perfil nem seus tetos comerciais (SBPE SAC90%/Price80%).
+
+Conferência da interface pública em04/11, dados fictícios: nascimento22/01/1987,
+renda4000, imóvel275000 → financiamento157599,38, entrada117400,62, Price420,
+efetiva8,47%; nascimento15/03/1991, renda6000, imóvel300000 →239295,30,
+entrada60704,70, parcela1800. O helper isolado reproduz a busca binária de30
+iterações e arredondamento `toFixed(2)`, inclusive DFI sobre o imóvel virtual da
+busca. Esses critérios não são transplantados para o seguro do perfil individual.
+
+Fontes públicas consultadas: [calculadora CAIXA](https://simuladorhabitacao.caixa.gov.br/calculadora),
+recurso `237.1b0cf2e0c38ee0d5.js`, SHA256
+83c4f248819193c1d0c1c1cb815aa907861862926f88327a4308eb78cd03c669;
+configuração `main.848219c8ea107ec1.js`, SHA256
+b332a9ec0fc4bf075a0bc33395bd2ab602d666c2b12ff22a7ea637a4df98ac2a.
+MCID consultado confirma a diferenciação de cotista e limites municipais.
+
+Correção efetiva no desconto: o piso1500 é aplicado ao resultado da fórmula
+MFOM034 §3.1.1.8, antes dos redutores do §3.1.2. Desconto base3638,05 pode
+resultar1091,41 após redução unipessoal; não deve ser zerado ou rejeitado por
+reaplicar o piso. A parábola RD1750/3700 permanece conforme o texto consultado.
+Para pronto sem modalidade identificada, o tetoCCI49500 continua como hipótese
+conservadora explicitada na auditoria, sem presumir que todo pronto éCCI.
+
+Limite de fonte: nova obtenção do PDF oficial MFOM034 retornou ciclo de
+redirecionamento. Conferidas pp131–133 da cópia anteriormente obtida, SHA256
+896f9f11aae2add4a9cd7f4e70301b08512b2606ca3b7e301e90f4511217e830.
+Não foi comprovada ausência de versão posterior. A simulação completa exige
+identificação/consentimento; não foi submetida nem se declara aprovação bancária.
+
+R$3357,01 do exemplo é reproduzível para renda4000, imóvel275000, São Paulo/SP,
+apartamento39m², novo/na planta, cotista e família não unipessoal. Área50m² dá
+3557,55. A auditoria conserva esses dados para comparação de cenários iguais.
+
+### Unidades disponíveis por ranking
+
+O botão existe apenas no resultado válido. O diálogo solicita ranking antes da
+consulta; para MCMV, primeiro imóvel é uma qualificação independente e não é
+deduzido de subsídio anterior. Renda/modalidade/recursos permanecem do perfil.
+Usa `/api/inventory` autorizado por `crm.simulators.view`, com recorte de marca
+no servidor. Snapshot somente enriquece fatos; falha do estoque vivo não gera
+lista disponível. Aceita apenas status comercial explícito Disponível.
+
+Cada unidade é recalculada com preço comercial, avaliação, município/UF, área,
+tipo, condição, entrega e progresso próprios. Financiamento respeita cota e
+capacidade original; não transplanta subsídio, aporte público, avaliação ou
+seguros específicos do imóvel anterior. Dados indispensáveis ausentes ficam
+não avaliáveis, com contagem explícita, nunca aprovados por presunção.
+
+A entrada é `max(150, recursos próprios)` e abate uma única vez. Mantém84
+mensais; anuais de15/12 elegíveis são preenchidas por renda/2 truncada em
+centavos, limitadas pelo saldo disponível. Datas seguem o calendário canônico
+do Associativo, inclusive exclusão do mês da entrada e vencimentos após entrega.
+Os motores e rankings existentes são importados sem alterações; ambas as
+avaliações Linear/Decrescente precisam aprovar. Isso é enquadramento comercial
+simulado, não concessão bancária. Saldo totalmente quitado não recebe um fluxo
+fictício de84 prestações: a validade continua sendo decidida pelo motor canônico.
+
+A avaliação usa lotes canceláveis; mudança do perfil/ranking ou reabertura do
+diálogo invalida a lista anterior imediatamente. Filtros e detalhes exibem apenas
+unidades já aprovadas. Sem gravação de proposta ou alteração da página Associativo.
+
 Consultas: 25, 26 e 27/10/2026, America/Sao_Paulo. Escopo exclusivo:
 `/app/simulacao/caixa`.
 A origem `https://descomplicapro.com.br/simulacao/caixa` foi consultada somente

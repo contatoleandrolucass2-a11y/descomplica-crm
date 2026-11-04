@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-11-04 — CAIXA: formulário completo e unidades por ranking
+
+- 19 controles, incluindo área/tipo/dependentes, em duas linhas desktop; 32px,
+  bordas em ambos Sim/Não, opções no tema, parâmetros no final e resumo compacto.
+  Juros junto da parcela; ações Copiar/WhatsApp/Salvar removidas; auditoria menor.
+
+- Corrigido piso do subsídio antes dos redutores MFOM; comparador rápido oficial
+  independente, sem misturar taxa/cota/seguros médios com perfil individual.
+- Unidades disponíveis: ranking obrigatório, estoque vivo autorizado/status
+  disponível, recálculo por unidade e aprovação de ambos fluxos Associativo,
+  entrada mínima150 sem duplicar recursos,84mensais e anuais válidas automáticas.
+- Local:65testes de cálculo/projeção/comparador aprovados;508032cenários de
+  renda/idade/pessoas/área/fator social e juros adicionais passaram em87,89s.
+  UI CAIXA11/11 aprovada, incluindo19campos em oito estados de desktop/sidebar.
+  Revisão independente fechou status indevido e lista antiga na reabertura.
+  CI integrada, referências visuais e publicação ainda pendentes neste registro.
+
 ## 2026-11-04 — Página inicial: margem estável para liberar PR490
 
 - Pedido explícito autorizou corrigir a diferença visual de `/app` e concluir
