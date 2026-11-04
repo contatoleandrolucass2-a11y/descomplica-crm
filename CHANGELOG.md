@@ -1,5 +1,9 @@
 # Changelog
 
+- Registra o bloqueio de publicação do PR490: comparação visual externa de
+  `/app` na CI41853820787, sem alteração de baseline ou aplicação em produção.
+  Ajustes de Agendamentos implementados e testes funcionais aprovados no candidato.
+
 - Acrescenta média do trimestre anterior, dias da semana abreviados e detalhes
   da equipe por dia em Agendamentos. Corrige a linha mensal pela regra de dias
   úteis e quintas em dobro, com meta zero nos feriados de São Paulo capital.
