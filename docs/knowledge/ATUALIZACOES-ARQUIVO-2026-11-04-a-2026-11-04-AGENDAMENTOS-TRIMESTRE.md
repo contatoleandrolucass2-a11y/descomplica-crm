@@ -1,5 +1,41 @@
 # Agendamentos: trimestre, meta e atualização
 
+## Correção comprovada da página inicial — 04/11/2026
+
+Na retomada autorizada, investigação local comprovou disputa entre
+DashboardFilters.module.css `.filters p` e DashboardReport.module.css `.report p`.
+Ambos tinham especificidade0,1,1. Ordem dos chunks fazia o aviso de disponibilidade
+alternar margem superior10px/0px; o conteúdo seguinte alternava top101px/91px,
+reproduzindo exatamente a redução de10px nas11capturas da CI anterior.
+
+Correção mínima: classe statusNotice nos dois avisos de DashboardFilters,
+com seletor `.filters > .statusNotice` (0,2,0). Mantidos conteúdo, valores
+de margem, fonte, cores e referência; não foi necessário promover baseline.
+O seletor original `.filters p` permanece, preservando avisos de opções vazias.
+Teste novo tests/dashboard-filter-spacing.browser.mjs usa componentes e CSS
+reais, adiciona reset original depois dos estilos para reproduzir ordem adversa.
+Antes falhou; depois12/12aprovado em três temas e320/390/768/1440px, ambos
+os status (pendente com useTransition real e indisponível), ambas
+as ordens com margem10px e fluxo idêntico, sem overflow, errosJS ou rede externa.
+Artefatos ignorados: test-results/dashboard-filter-spacing/before-fix.json,
+result.json,before-fix.png,after-fix.png. Não são dados de produção.
+As suítes anteriores dos comportamentos inalterados foram reutilizadas;
+CI completa no novo SHA continua obrigatória antes de merge/publicação.
+
+## Retomada autorizada — 04/11/2026, 14:02 America/Sao_Paulo
+
+Usuário solicitou expressamente corrigir a diferença visual da página inicial
+para liberar PR490, publicar e testar Chrome, integrado e celular simulado.
+Esse comportamento agora integra o escopo; o diagnóstico deve provar a causa
+dos10px antes de alterar produto ou referência. Demais páginas preservadas.
+Git comum confirmado, checkout limpo antes da integração do registro491;
+PR490 aberto no head2bb866f4, CI41853820787 concluída com falha apenas na
+comparação visual /app; validate, imagem e restore aprovados. Mainad3fc34e
+documental foi integrado localmente preservando ambas as notas históricas.
+Health público às17:02:51UTC:200/ok,c97d5fd2, ainda sem novas funções.
+Fontes atuais: Git/GitHub e /api/health. Registro/Obsidian consultados por assunto;
+diagnóstico e publicação continuam dependentes de nova CI exata após correção.
+
 ## Abertura — 04/11/2026
 
 Escopo explícito: dias da semana abreviados nos eixos diários de barras/linhas;

@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-11-04 — Página inicial: margem estável para liberar PR490
+
+- Pedido explícito autorizou corrigir a diferença visual de `/app` e concluir
+  a entrega de Agendamentos. Causa: `.filters p` e `.report p` têm a mesma
+  especificidade; ordem dos módulos CSS alternava a margem do aviso entre10px
+  e zero, deslocando toda a página. Aviso agora possui classe própria, com
+  seletor específico; valor10px e referência visual preservados.
+- Regressão reproduzida antes da correção. Teste com componentes/CSS reais
+  aprovado12/12: três temas em320/390/768/1440px, com as duas ordens de CSS,
+  mesmo espaçamento/fluxo, sem overflow, erros ou consultas externas.
+- Sem mudança de dados, baseline, outras páginas ou gates. CI do candidato
+  corrigido, integração, publicação e testes reais continuam etapas posteriores.
+
 ## 2026-11-04 — Agendamentos: entrega bloqueada pela referência externa
 
 - PR490, candidato2bb866f4: implementação e validações locais concluídas;

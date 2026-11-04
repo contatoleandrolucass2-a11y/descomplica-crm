@@ -189,8 +189,16 @@ export function DashboardFilters({
           </div>
         ))}
       </div>
-      {pending ? <p role="status">Atualizando resultados...</p> : null}
-      {!available ? <p role="status">Filtros aguardando coleta detalhada dos relatórios.</p> : null}
+      {pending ? (
+        <p role="status" className={styles.statusNotice}>
+          Atualizando resultados...
+        </p>
+      ) : null}
+      {!available ? (
+        <p role="status" className={styles.statusNotice}>
+          Filtros aguardando coleta detalhada dos relatórios.
+        </p>
+      ) : null}
     </div>
   );
 }

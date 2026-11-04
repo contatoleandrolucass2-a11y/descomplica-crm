@@ -110,7 +110,8 @@
   margin-top: 0.2rem;
   accent-color: var(--analytics-cyan-strong);
 }
-.filters p {
+.filters p,
+.filters > .statusNotice {
   font-size: 0.8125rem;
   color: var(--analytics-muted);
   margin: 0.625rem 0 0;

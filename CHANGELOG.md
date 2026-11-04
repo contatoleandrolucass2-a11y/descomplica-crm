@@ -1,5 +1,8 @@
 # Changelog
 
+- Estabiliza a margem do aviso dos filtros da página inicial em10px,
+  independentemente da ordem dos módulos CSS, preservando a referência visual.
+
 - Registra o bloqueio de publicação do PR490: comparação visual externa de
   `/app` na CI41853820787, sem alteração de baseline ou aplicação em produção.
   Ajustes de Agendamentos implementados e testes funcionais aprovados no candidato.
