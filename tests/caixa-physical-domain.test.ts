@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { calculateHousingSimulation, type HousingInput } from "@/lib/crm/simulators/caixa";
+import {
+  calculateHousingSimulation,
+  calculateMcmvSubsidy,
+  type HousingInput,
+} from "@/lib/crm/simulators/caixa";
 
 const thresholds = [2160, 2850, 3200, 3500, 4000, 5000, 9600, 13000];
 const incomes = thresholds.flatMap((value) => [value - 0.01, value, value + 0.01]);
@@ -24,6 +28,33 @@ const base: HousingInput = {
 };
 
 describe("CAIXA requested physical domain and financial boundaries", () => {
+  it.each([
+    [1750, 50000],
+    [3700, 1900],
+  ])(
+    "checks the MFOM income-factor anchor at %s and adjacent cents",
+    (income, expectedIncomeFactor) => {
+      for (const delta of [-0.01, 0, 0.01]) {
+        const value = calculateMcmvSubsidy({
+          income: income + delta,
+          propertyValue: 275000,
+          state: "SP",
+          city: "São Paulo",
+          propertyType: "apartment",
+          propertyArea: 50,
+          propertyCondition: "new",
+          inConstruction: true,
+          singlePersonFamily: false,
+          nominalRate: 6,
+        });
+        expect(value).not.toBeNull();
+        expect(Number.isFinite(value!.amount)).toBe(true);
+        expect(value!.amount).toBeGreaterThanOrEqual(0);
+        expect(value!.amount).toBeLessThanOrEqual(55000);
+        if (delta === 0) expect(value!.incomeFactor).toBe(expectedIncomeFactor);
+      }
+    },
+  );
   it.each([
     ["apartment", 39, 59],
     ["house", 46, 66],

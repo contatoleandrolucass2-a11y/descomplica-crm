@@ -4956,10 +4956,10 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
     grid-area: 1 / 16 / 2 / 21;
   }
   .goal-page-shell.caixa-page-shell .caixa-participants-field {
-    grid-area: 1 / 21 / 2 / 23;
+    grid-area: 1 / 21 / 2 / 24;
   }
   .goal-page-shell.caixa-page-shell .caixa-date-field {
-    grid-area: 1 / 23 / 2 / 28;
+    grid-area: 1 / 24 / 2 / 28;
   }
   .goal-page-shell.caixa-page-shell .caixa-city-field {
     grid-area: 1 / 28 / 2 / 35;
@@ -5054,10 +5054,17 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
   font-size: 12px;
 }
 @media (min-width: 1200px) {
-  .goal-page-shell.caixa-page-shell .caixa-participants-field > span {
-    font-size: 10px;
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-participants-field > span {
+    font-size: 11px;
     white-space: nowrap;
+    letter-spacing: 0;
   }
+}
+
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle button {
+  white-space: nowrap;
+  letter-spacing: 0;
+  padding-inline: 4px !important;
 }
 
 .goal-page-shell.caixa-page-shell .caixa-result-summary > .caixa-result-summary-heading {

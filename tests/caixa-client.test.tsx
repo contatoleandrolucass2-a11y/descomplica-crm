@@ -351,6 +351,111 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(result.getByRole("alert")).toHaveCount(0);
       expect(errors).toEqual([]);
     });
+    it("integrates ranked units inside the real financial summary without leaking modal layout", async () => {
+      await open();
+      await browserExpect(
+        page.getByRole("button", { name: "Unidades disponíveis", exact: true }),
+      ).toHaveCount(0);
+      await fillMain();
+      const unit = {
+        id: "synthetic-caixa-summary-unit",
+        businessUnit: "Incorporadora fictícia",
+        project: "Projeto fictício",
+        product: "Apartamento integrado",
+        status: "Disponível",
+        unitType: "Apartamento",
+        finalWithKit: 240000,
+        unitBonus: 10000,
+        tableSlack: 1000,
+        finalPrice: 229000,
+        appraisal: 240000,
+        city: "São Paulo",
+        state: "SP",
+        privateArea: 60,
+        completionDate: "2030-04-30",
+        progress: 0.2,
+        constructionStatus: "Em obras",
+        plant: "2Q",
+        parkingSpaces: 1,
+      };
+      await page.route("**/api/inventory**", (route) =>
+        route.fulfill({
+          contentType: "application/json",
+          body: JSON.stringify({ count: 1, items: [unit] }),
+        }),
+      );
+      await page.getByRole("button", { name: "Unidades disponíveis", exact: true }).click();
+      const dialog = page.getByRole("dialog", { name: "Unidades disponíveis", exact: true });
+      await browserExpect(dialog).toBeVisible();
+      await page.getByLabel("Ranking do cliente", { exact: true }).selectOption("diamond");
+      await page.getByLabel("Primeiro imóvel?", { exact: true }).selectOption("yes");
+      await browserExpect(dialog.getByRole("status")).toContainText("1 unidade dentro do ranking");
+      await page
+        .getByRole("button", { name: "Exibir fluxo de Apartamento integrado", exact: true })
+        .click();
+      await dialog.getByText("Exibir 84 parcelas e anuais", { exact: true }).click();
+      const bounds = await dialog.boundingBox();
+      expect(Math.abs(bounds!.x + bounds!.width / 2 - 720)).toBeLessThan(10);
+      expect(Math.abs(bounds!.y + bounds!.height / 2 - 450)).toBeLessThan(10);
+      await page.evaluate(() => (document.documentElement.dataset.theme = "dark"));
+      const audit = await new AxeBuilder({ page }).include("dialog").analyze();
+      expect(axeFailureDetails(audit.violations)).toEqual([]);
+      await page.setViewportSize({ width: 390, height: 844 });
+      const mobileBounds = await dialog.boundingBox();
+      expect(mobileBounds!.width).toBeLessThanOrEqual(390);
+      expect(Math.abs(mobileBounds!.x + mobileBounds!.width / 2 - 195)).toBeLessThan(10);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+      await page.keyboard.press("Escape");
+      await browserExpect(dialog).not.toBeVisible();
+      await browserExpect(
+        page.getByRole("button", { name: "Unidades disponíveis", exact: true }),
+      ).toBeFocused();
+      expect(errors).toEqual([]);
+    });
+    it("keeps short choice labels unbroken with the protected-shell typography", async () => {
+      await open();
+      await page.addStyleTag({
+        content: ".caixa-page-shell{letter-spacing:.05em;font-weight:700}",
+      });
+      for (const width of [320, 375, 390, 1200, 1280, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        const choices = await page
+          .locator(".caixa-full-form .caixa-toggle button")
+          .evaluateAll((buttons) =>
+            buttons.map((button) => {
+              const style = getComputedStyle(button);
+              const range = document.createRange();
+              range.selectNodeContents(button);
+              return {
+                text: button.textContent,
+                lines: range.getClientRects().length,
+                whiteSpace: style.whiteSpace,
+                fits: button.scrollWidth <= button.clientWidth,
+              };
+            }),
+          );
+        expect(choices).toHaveLength(8);
+        for (const choice of choices) {
+          expect(choice.lines, `${width}: ${choice.text}`).toBe(1);
+          expect(choice.whiteSpace).toBe("nowrap");
+          expect(choice.fits).toBe(true);
+        }
+        if (width >= 1200) {
+          const label = await page.locator(".caixa-participants-field>span").evaluate((span) => ({
+            nowrap: getComputedStyle(span).whiteSpace,
+            fits: span.scrollWidth <= span.clientWidth,
+            font: getComputedStyle(span).fontSize,
+            width: span.clientWidth,
+            scroll: span.scrollWidth,
+          }));
+          expect(label.nowrap).toBe("nowrap");
+          expect(label.fits, `${width}: ${JSON.stringify(label)}`).toBe(true);
+        }
+      }
+      expect(errors).toEqual([]);
+    });
     it("fits maximum currency values and compact controls in two desktop rows", async () => {
       await open();
       await fillMain();

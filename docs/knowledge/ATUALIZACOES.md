@@ -41,6 +41,21 @@
   calculadas sob demanda para não armazenar grades completas de todo o estoque.
   Fronteiras decimais de área39/59 e46/66±0,01 aprovadas. O teste do perfil agora
   exige239287,18 exatos; a antiga tolerância ampla não mascara diferença de modelo.
+- CI41895060765/head93b23921: validate/imagem/restore aprovados; funcionais,
+  49 responsivos,28 temas,77 axe e zoom aprovados. Onze deltas visuais só CAIXA.
+  Artefato13358507199, ZIPfd1b177f52f1cfbbf2c776a53ed521ebd98c573f05d84179f9c5e87a55d4853f;
+  captura8b7c51d0/árvore51dfe5c2 igual ao head, fingerprint2a0494bd7882609c500dec54ca0b4ff714dd77c705ccc9fb8fd4c0780cccdd29
+  reproduzido com19 outputs sintéticos. Imagens NÃO aprovadas como nova referência:
+  revisão detectou palavras Sim/Não partidas no celular e Proponentes no desktop.
+- Correção localizada posterior: padding/nowrap das escolhas e uma trilha de
+  data redistribuída ao rótulo Proponentes, preservando input56px e duas linhas.
+  Teste com tipografia do shell adicionada verifica palavra em uma linha e sem
+  corte em320/375/390/1200/1280/1440; três provas focadas passaram. Nova captura
+  do candidato corrigido é exigida antes de revisar as referências.
+- Prova adicional do diálogo dentro do resumo real passou em1440 e390px,
+  com ranking, estoque fictício,84parcelas abertas, centro da tela, axe e foco.
+  Acrescentadas âncoras MFOM de renda1750/3700 e centavos vizinhos. Sem alteração
+  adicional de fórmula nessa etapa. Testes existentes reaproveitados por impacto.
 
 ## 2026-11-04 — Agendamentos: PR490 bloqueado por referência externa
 
