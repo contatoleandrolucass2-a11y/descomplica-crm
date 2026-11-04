@@ -223,6 +223,84 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(page.locator(".caixa-city-picker.open")).toBeVisible();
       await page.getByRole("option", { name: "São Paulo SP", exact: true }).click();
     }
+    it("fits maximum currency values and compact controls in two desktop rows", async () => {
+      await open();
+      await fillMain();
+      const directory = resolve("private-data/caixa-qa");
+      await mkdir(directory, { recursive: true });
+      for (const input of await page
+        .locator(".caixa-primary-grid .caixa-money-input input")
+        .all()) {
+        await input.fill("999999999");
+        await browserExpect(input).toHaveValue("9.999.999,99");
+      }
+      for (const width of [1280, 1440, 1920]) {
+        await page.setViewportSize({ width, height: 900 });
+        for (const expanded of [false, true]) {
+          if (expanded) await page.locator(".caixa-tool-sidebar").hover();
+          else await page.getByRole("heading", { name: "Simulador CAIXA", exact: true }).hover();
+          const layout = await page.evaluate(() => {
+            const controls = [
+              ...document.querySelectorAll(
+                ".caixa-full-form input, .caixa-full-form select, .caixa-full-form .caixa-toggle",
+              ),
+            ].filter(
+              (element) => !element.closest(".caixa-confirmed-parameters, .caixa-subsidy-inputs"),
+            );
+            const currency = [
+              ...document.querySelectorAll<HTMLInputElement>(
+                ".caixa-primary-grid .caixa-money-input input",
+              ),
+            ].map((input) => {
+              const style = getComputedStyle(input);
+              const context = document.createElement("canvas").getContext("2d")!;
+              context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+              return {
+                text: context.measureText(input.value).width,
+                space:
+                  input.clientWidth -
+                  parseFloat(style.paddingLeft) -
+                  parseFloat(style.paddingRight),
+              };
+            });
+            return {
+              fieldTops: controls.map((element) => ({
+                name:
+                  element.getAttribute("aria-label") ??
+                  element.closest(".caixa-field")?.querySelector("span")?.textContent,
+                top: element.closest(".caixa-field")!.getBoundingClientRect().top,
+              })),
+              rows: new Set(
+                controls.map((element) =>
+                  Math.round(element.closest(".caixa-field")!.getBoundingClientRect().top),
+                ),
+              ).size,
+              currency,
+              participantsWidth: document
+                .querySelector(".caixa-participant-control")!
+                .getBoundingClientRect().width,
+              buttonWidths: [...document.querySelectorAll(".caixa-toggle button")].map(
+                (element) => element.getBoundingClientRect().width,
+              ),
+              overflow: document.documentElement.scrollWidth > innerWidth,
+            };
+          });
+          await page.screenshot({
+            path: resolve(directory, `caixa-two-rows-${width}-${expanded}.png`),
+          });
+          await writeFile(
+            resolve(directory, `caixa-two-rows-${width}-${expanded}.json`),
+            JSON.stringify(layout, null, 2),
+          );
+          expect(layout.rows, `${width}/${expanded}: main controls use two rows`).toBe(2);
+          expect(layout.overflow).toBe(false);
+          expect(layout.participantsWidth).toBeLessThanOrEqual(64);
+          for (const value of layout.currency) expect(value.text).toBeLessThanOrEqual(value.space);
+          for (const buttonWidth of layout.buttonWidths)
+            expect(buttonWidth).toBeLessThanOrEqual(56);
+        }
+      }
+    });
     it("fills the viewport edge and resizes content on sidebar hover and keyboard focus", async () => {
       await open();
       const workspace = page.locator(".caixa-workspace");
@@ -705,7 +783,12 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           const formBounds = await page.locator("form.caixa-form").evaluate((form) => {
             // The mobile label must fit without relying on the local fallback font.
             const box = form.getBoundingClientRect();
-            return Array.from(form.children).map((child) => {
+            const renderedChildren = Array.from(form.children).flatMap((child) =>
+              getComputedStyle(child).display === "contents"
+                ? Array.from(child.querySelectorAll(".caixa-field"))
+                : [child],
+            );
+            return renderedChildren.map((child) => {
               const bounds = child.getBoundingClientRect();
               return {
                 class: child.className,
@@ -762,7 +845,9 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           }
           if (width >= 1024) {
             const rows = await page
-              .locator(".caixa-binary-grid > *")
+              .locator(
+                ".caixa-binary-grid > .caixa-field, .caixa-property-condition-group > .caixa-field",
+              )
               .evaluateAll((elements) =>
                 elements.map((element) => Math.round(element.getBoundingClientRect().top)),
               );

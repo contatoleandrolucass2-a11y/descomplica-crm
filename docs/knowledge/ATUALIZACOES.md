@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-03 — CAIXA: campos dimensionados e duas linhas no desktop
+
+- Pedido restrito à CAIXA: reduzir larguras de campos e Sim/Não, acomodar valores
+  monetários até9.999.999,99 e distribuir os campos principais em duas linhas.
+- Abertura: Git comum confirmado, mainbc4a1c51 com CI41689755186 aprovada;
+  health público HTTP200/ok, produção82ee8deb. Fontes consultadas em03/11/2026.
+  Ajuste de interface; fórmulas e limites financeiros permanecem preservados.
+- Implementação: grid de24 trilhas em telas a partir de1200px, duas linhas
+  principais, largura máxima de1320px; campos monetários sem padding excedente,
+  proponentes64px, UF76px e Sim/Não50px. Campos adicionais de subsídio seguem
+  após as condições para conservar a ordem visual e de teclado; regras intactas.
+- Provas locais: valor9.999.999,99 nos quatro campos, duas linhas em1280/1440/1920
+  com lateral aberta/fechada, sem corte ou overflow; demais jornadas e matriz
+  de três temas/desktop/tablet/celular aprovadas,10 cenários de navegador.
+  Testes de geometria usam as caixas renderizadas quando o agrupador usa
+  display:contents; não ignoram os campos. Referências visuais CAIXA serão
+  revisadas por mudança intencional; CI final e artefato de main continuam obrigatórios.
+
 - CAIXA: [histórico integral de 26/10 a 03/11/2026](ATUALIZACOES-ARQUIVO-2026-10-26-a-2026-11-03-CAIXA.md).
 
 ## 2026-11-03 — Obsidian: recuperação do limite de exportação

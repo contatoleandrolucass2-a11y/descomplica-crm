@@ -884,47 +884,6 @@ export function CaixaClient({
                         </div>
                       </Field>
                     </div>
-                    {subsidyEligibility === "eligible-review" && (
-                      <div className="caixa-form-grid caixa-subsidy-inputs">
-                        <Field label="Tipo da unidade *">
-                          <select
-                            required
-                            value={form.propertyType}
-                            onChange={(event) => update("propertyType", event.target.value)}
-                          >
-                            <option value="">Selecione…</option>
-                            <option value="apartment">Apartamento</option>
-                            <option value="house">Casa</option>
-                          </select>
-                        </Field>
-                        <Field label="Área oficial da unidade (m²) *">
-                          <input
-                            required
-                            type="number"
-                            min="1"
-                            max="10000"
-                            step="0.01"
-                            value={form.propertyArea}
-                            onChange={(event) => update("propertyArea", event.target.value)}
-                          />
-                          <small>Use a área coberta indicada no documento do imóvel.</small>
-                        </Field>
-                        {participants === 1 && (
-                          <Field label="Possui dependentes? *">
-                            <select
-                              required
-                              value={form.hasDependents}
-                              onChange={(event) => update("hasDependents", event.target.value)}
-                            >
-                              <option value="">Selecione…</option>
-                              <option value="yes">Sim</option>
-                              <option value="no">Não</option>
-                            </select>
-                            <small>Sem dependentes aplica a regra de família unipessoal.</small>
-                          </Field>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </section>
                 <section
@@ -1107,6 +1066,47 @@ export function CaixaClient({
                     </div>
                   </div>
                 </section>
+                {subsidyEligibility === "eligible-review" && (
+                  <div className="caixa-form-grid caixa-subsidy-inputs">
+                    <Field label="Tipo da unidade *">
+                      <select
+                        required
+                        value={form.propertyType}
+                        onChange={(event) => update("propertyType", event.target.value)}
+                      >
+                        <option value="">Selecione…</option>
+                        <option value="apartment">Apartamento</option>
+                        <option value="house">Casa</option>
+                      </select>
+                    </Field>
+                    <Field label="Área oficial da unidade (m²) *">
+                      <input
+                        required
+                        type="number"
+                        min="1"
+                        max="10000"
+                        step="0.01"
+                        value={form.propertyArea}
+                        onChange={(event) => update("propertyArea", event.target.value)}
+                      />
+                      <small>Use a área coberta indicada no documento do imóvel.</small>
+                    </Field>
+                    {participants === 1 && (
+                      <Field label="Possui dependentes? *">
+                        <select
+                          required
+                          value={form.hasDependents}
+                          onChange={(event) => update("hasDependents", event.target.value)}
+                        >
+                          <option value="">Selecione…</option>
+                          <option value="yes">Sim</option>
+                          <option value="no">Não</option>
+                        </select>
+                        <small>Sem dependentes aplica a regra de família unipessoal.</small>
+                      </Field>
+                    )}
+                  </div>
+                )}
                 <details className="caixa-confirmed-parameters">
                   <summary>Parâmetros confirmados e valores opcionais</summary>
                   <p>

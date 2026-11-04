@@ -4086,3 +4086,5 @@ Validação e publicação serão registradas com evidências ao concluir os gat
   artefato imutável, backup e smoke autenticado desktop/mobile concluídos.
 - Resolve a pendência do Obsidian particionando o histórico CAIXA sem perda de
   conteúdo; sincroniza e confere12 documentos, preservando o limite de exportação.
+- Compacta os campos CAIXA por conteúdo e organiza os dados principais em duas
+  linhas no desktop, com Sim/Não menores e leitura integral de9.999.999,99.

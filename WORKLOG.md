@@ -10980,3 +10980,14 @@ b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigi
 - Sync real:12 documentos; cópias, hashes e geração única conferidos no Obsidian.
   Dois testes focados de particionamento e limite aprovados. Sem código de página,
   instalação, alteração de hooks ou reinício do CRM. Evidência em ATUALIZACOES.
+
+### CAIXA — larguras pelo conteúdo e duas linhas
+
+- Compacta somente a rota CAIXA: quatro valores de até9.999.999,99, proponentes
+  com largura de um dígito, data/cidade/UF/prazo/produto/sistema proporcionais,
+  Sim/Não de50px e duas linhas principais em desktop a partir de1200px.
+- Campos adicionais de subsídio ficam após as condições, preservando teclado
+  e cálculos. Sem alterações de limites financeiros ou de outras páginas.
+- Dez cenários de navegador aprovados por execução e repetição focada após
+  ajuste da medição de display:contents. Matriz de temas, mobile, axe e hover
+  aprovada. CI e referências definitivas da aplicação real ainda obrigatórias.
