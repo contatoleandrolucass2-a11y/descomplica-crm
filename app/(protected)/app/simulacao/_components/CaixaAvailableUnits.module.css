@@ -1,0 +1,262 @@
+.dialog {
+  box-sizing: border-box;
+  width: min(1240px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--caixa-layout-line, var(--line, #3b7c98));
+  border-radius: 14px;
+  background: var(--caixa-layout-panel, var(--surface, #061f35));
+  color: var(--caixa-layout-ink, var(--ink, #e5f4ff));
+  font: inherit;
+  box-shadow: 0 20px 80px #0006;
+}
+.dialog::backdrop {
+  background: #00101cbf;
+  backdrop-filter: blur(3px);
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--caixa-layout-line, var(--line, #3b7c98));
+}
+.header h2 {
+  margin: 0;
+  font-size: 21px;
+}
+.header p {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+.body {
+  padding: 16px 20px;
+  overflow: auto;
+  max-height: calc(100dvh - 145px);
+}
+.dialog button,
+.dialog input,
+.dialog select {
+  box-sizing: border-box;
+  min-height: 36px;
+  border: 1px solid var(--caixa-layout-line, var(--line, #3b7c98));
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.dialog button {
+  cursor: pointer;
+  font-weight: 650;
+}
+.dialog button:hover {
+  background: #54c7dd1f;
+}
+.dialog button:focus-visible,
+.dialog select:focus-visible,
+.dialog input:focus-visible {
+  outline: 2px solid #50d6e8;
+  outline-offset: 2px;
+}
+.dialog option {
+  background: var(--caixa-layout-panel, var(--surface, #061f35));
+  color: inherit;
+}
+.profile {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.dialog label {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 650;
+  min-width: 0;
+}
+.profile label {
+  width: 190px;
+}
+.profile p {
+  font-size: 13px;
+  flex: 1;
+  min-width: 220px;
+}
+.filterHeader {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin-top: 16px;
+}
+.filterHeader p {
+  flex: 1;
+}
+.search {
+  width: min(300px, 40%);
+}
+.filters {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.filters select {
+  width: 100%;
+  font-size: 12px;
+}
+.tableScroll {
+  overflow: auto;
+  max-height: 340px;
+  border: 1px solid var(--caixa-layout-line, var(--line, #3b7c98));
+  border-radius: 8px;
+}
+.dialog table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+  text-align: left;
+  min-width: 840px;
+}
+.dialog th,
+.dialog td {
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--caixa-layout-line, var(--line, #3b7c98));
+}
+.dialog thead th {
+  position: sticky;
+  top: 0;
+  background: var(--caixa-layout-panel, var(--surface, #061f35));
+  z-index: 1;
+}
+.dialog td:nth-child(3) {
+  min-width: 250px;
+}
+.dialog td:last-child {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.dialog td button {
+  width: 30px;
+  min-height: 30px;
+  padding: 2px;
+  border-radius: 50%;
+}
+.details {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--caixa-layout-line, var(--line, #3b7c98));
+  border-radius: 10px;
+}
+.details h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+.details dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 24px;
+  margin: 0;
+}
+.details dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #609ab635;
+  padding: 5px 0;
+  font-size: 13px;
+}
+.details dd {
+  margin: 0;
+  white-space: nowrap;
+  font-weight: 650;
+}
+.details h4 {
+  margin-bottom: 8px;
+}
+.schedule {
+  margin-top: 12px;
+}
+.schedule summary {
+  cursor: pointer;
+  padding: 8px 10px;
+  width: fit-content;
+  border: 1px solid var(--caixa-layout-line, var(--line, #3b7c98));
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 650;
+}
+.schedule[open] summary {
+  margin-bottom: 10px;
+}
+.details ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  padding-left: 18px;
+  font-size: 13px;
+}
+.note {
+  font-size: 12px;
+  opacity: 1;
+  line-height: 1.5;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 760px) {
+  .dialog {
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+  .header,
+  .body {
+    padding: 12px;
+  }
+  .dialog button,
+  .dialog input,
+  .dialog select {
+    min-height: 44px;
+  }
+  .profile label {
+    width: calc(50% - 8px);
+  }
+  .profile p {
+    min-width: 100%;
+  }
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .filterHeader {
+    flex-wrap: wrap;
+  }
+  .filterHeader p {
+    width: 100%;
+    flex: auto;
+  }
+  .search {
+    flex: 1;
+    width: auto;
+  }
+  .details dl {
+    grid-template-columns: 1fr;
+  }
+  .body {
+    max-height: calc(100dvh - 130px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dialog {
+    scroll-behavior: auto;
+  }
+}

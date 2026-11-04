@@ -357,7 +357,7 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
         propertyCondition: "new",
         singlePersonFamily: true,
       })?.amount,
-    ).toBe(0);
+    ).toBe(1091.41);
   });
   it("keeps public contribution separate and enforces the minimum FGTS complement", () => {
     const subsidyProfile = {
@@ -379,7 +379,57 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
       }).publicContribution,
     ).toBe(30000);
   });
-  it("tracks the public quick-calculator parameters without presenting them as confirmed", () => {
+  it("keeps the lawful reduced subsidy below 1500 in the final financing composition", () => {
+    const result = success({
+      income: 4000,
+      propertyValue: 275000,
+      ownFunds: 0,
+      confirmedSubsidy: undefined,
+      propertyType: "apartment",
+      propertyArea: 50,
+      singlePersonFamily: true,
+      propertyCondition: "new",
+      inConstruction: false,
+    });
+    expect(result.subsidy).toBe(1091.41);
+    expect(result.subsidyEligibility).toBe("automatic");
+    expect(result.entryNeeded + result.financing + result.subsidy + result.fgts).toBeCloseTo(
+      275000,
+      2,
+    );
+    expect(
+      success({
+        income: 4000,
+        propertyValue: 275000,
+        confirmedSubsidy: 1091.41,
+        singlePersonFamily: true,
+      }).subsidy,
+    ).toBe(1091.41);
+  });
+  it.each([
+    [true, "new", 450],
+    [false, "used", 750],
+    [true, "used", 225],
+  ] as const)(
+    "enforces the reduced confirmed minimum for family=%s condition=%s",
+    (singlePersonFamily, propertyCondition, minimum) => {
+      const input = {
+        ...base,
+        income: 4000,
+        propertyValue: 275000,
+        singlePersonFamily,
+        propertyCondition,
+        inConstruction: false,
+      };
+      expect(calculateHousingSimulation({ ...input, confirmedSubsidy: minimum - 0.01 }).ok).toBe(
+        false,
+      );
+      const result = calculateHousingSimulation({ ...input, confirmedSubsidy: minimum });
+      expect(result.ok).toBe(true);
+      if (result.ok) expect(result.subsidy).toBe(minimum);
+    },
+  );
+  it("uses reference insurance on the actual profile property without claiming public-quick parity", () => {
     const result = success({
       income: 6000,
       propertyValue: 300000,
@@ -392,9 +442,9 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
       birthDate: "1991-03-15",
       asOf: "2026-10-26",
     });
-    expect(result.financing).toBeCloseTo(239295.3, -2);
+    expect(result.financing).toBe(239287.18);
     expect(result.firstPayment).toBe(1800);
-    expect(result.effectiveRate).toBeCloseTo(8.4722, 3);
+    expect(result.effectiveRate).toBeCloseTo(8.4722, 4);
     expect(result).toMatchObject({
       insuranceKnown: false,
       insuranceEstimated: true,
