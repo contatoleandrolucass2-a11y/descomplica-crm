@@ -1,5 +1,7 @@
 # Aprendizados e atualizacoes
 
+- Agendamentos04/11: [trimestre, meta e atualização](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md).
+
 ## 2026-11-04 — CAIXA compacta publicada e validada
 
 - PR #487 integrado em c97d5fd212d2bd62bd4bd435f19d96d0e9b2bc6f. CI do PR

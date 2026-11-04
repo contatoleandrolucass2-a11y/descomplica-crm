@@ -9,6 +9,7 @@ import {
   appointmentHoliday,
   appointmentHolidayDescription,
 } from "@/lib/crm/stages/appointment-holidays";
+import { appointmentWeekdayLabel } from "./appointment-day-label";
 
 const number = new Intl.NumberFormat("pt-BR");
 type Bucket = AppointmentBucket & { goal?: number | null };
@@ -303,6 +304,10 @@ export function AppointmentsColumns({
               const goal = goals[index];
               const weekend = daily ? appointmentWeekendDay(item.key) : null;
               const holiday = daily ? appointmentHoliday(item.key) : null;
+              const weekdayLabel = daily ? appointmentWeekdayLabel(item.key) : null;
+              const dayTitle = holiday
+                ? `${weekdayLabel} — ${appointmentHolidayDescription(holiday)}`
+                : (weekdayLabel ?? undefined);
               return (
                 <li key={item.key}>
                   <button
@@ -352,14 +357,8 @@ export function AppointmentsColumns({
                         className={`${overrides.dayMarker} ${weekend ? overrides.weekend : ""} ${holiday ? overrides.holiday : ""}`}
                         data-appointments-weekend={weekend ?? undefined}
                         data-appointments-holiday={holiday?.name}
-                        title={
-                          holiday ? appointmentHolidayDescription(holiday) : (weekend ?? undefined)
-                        }
-                        aria-label={
-                          holiday
-                            ? `${item.label}: ${appointmentHolidayDescription(holiday)}`
-                            : undefined
-                        }
+                        title={dayTitle}
+                        aria-label={daily ? `${item.label}: ${dayTitle}` : undefined}
                       >
                         {item.label}
                       </span>

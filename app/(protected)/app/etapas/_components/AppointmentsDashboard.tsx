@@ -18,6 +18,7 @@ import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configura
 import type { ConfigurableDashboardCanvasProps } from "@/lib/dashboard-canvas/ui/configurable/types";
 import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
 import { AppointmentsColumns as Columns } from "./AppointmentsColumns";
+import { DailyAppointmentsTeamDetails } from "./DailyAppointmentsTeamDetails";
 import { AppointmentsComparison, DailyChartTypeControl } from "./AppointmentsComparison";
 import { buildAppointmentComparison, type AppointmentComparison } from "./appointments-comparison";
 import comparisonStyles from "./AppointmentsComparison.module.css";
@@ -44,6 +45,7 @@ import type {
   AppointmentConversionGoalsByMonth,
 } from "@/lib/crm/stages/data";
 import { resolveAppointmentConversionPeriod } from "@/lib/crm/stages/appointment-conversion-goals";
+import { plannedAppointmentsForMonth } from "@/lib/crm/stages/appointments-monthly-target";
 import {
   analyzeAppointments,
   appointmentYears,
@@ -1967,16 +1969,24 @@ export function AppointmentsDashboard({
           {monthUnavailable ? (
             <Empty>Período sem cobertura disponível.</Empty>
           ) : (
-            <Columns
+            <DailyAppointmentsTeamDetails
+              analysis={analysis}
+              brokerRoster={brokerRoster}
+              filters={filters}
+              month={selectedMonth}
               buckets={result.daily}
-              label="Agendamentos por dia do mês selecionado"
-              daily
-              reference={{ value: result.goalBrokerCount, label: "Corretores no recorte" }}
-              isSelected={(bucket) =>
-                filters.createdDate === bucket.key || selectedDates.includes(bucket.key)
-              }
-              onSelect={(bucket) => toggleCalendarDate(bucket.key)}
-            />
+            >
+              <Columns
+                buckets={result.daily}
+                label="Agendamentos por dia do mês selecionado"
+                daily
+                reference={{ value: result.goalBrokerCount, label: "Corretores no recorte" }}
+                isSelected={(bucket) =>
+                  filters.createdDate === bucket.key || selectedDates.includes(bucket.key)
+                }
+                onSelect={(bucket) => toggleCalendarDate(bucket.key)}
+              />
+            </DailyAppointmentsTeamDetails>
           )}
         </Chart>
       ),
@@ -2189,7 +2199,7 @@ export function AppointmentsDashboard({
             label={`Agendamentos por mês de ${selectedYear}`}
             monthly
             reference={{
-              value: result.goalBrokerCount,
+              value: plannedAppointmentsForMonth(selectedMonth, result.goalBrokerCount),
               label: "Meta de agendamentos",
               showSummary: true,
             }}

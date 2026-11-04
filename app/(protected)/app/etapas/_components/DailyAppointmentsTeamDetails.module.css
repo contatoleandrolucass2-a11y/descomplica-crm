@@ -1,0 +1,130 @@
+.root {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.openButton {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.openButton:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  align-self: flex-end;
+  overflow: visible;
+  clip-path: none;
+}
+
+.panel {
+  --daily-team-position: clamp(12px, var(--daily-team-top), max(12px, calc(100dvh - 20rem)));
+
+  position: fixed;
+  top: var(--daily-team-position);
+  z-index: 100;
+  box-sizing: border-box;
+  display: flex;
+  width: min(64rem, calc(100vw - 1.5rem));
+  max-height: calc(100dvh - var(--daily-team-position) - 12px);
+  flex-direction: column;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.9rem;
+  background: var(--analytics-surface);
+  color: var(--analytics-ink);
+  box-shadow: var(--analytics-shadow);
+  text-align: left;
+}
+
+.header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--analytics-line);
+  padding: 0.65rem 0.8rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.close,
+.openButton:focus-visible {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-ink);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.controls select {
+  min-height: 2.25rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.4rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-ink);
+}
+
+.content {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0.6rem 0.8rem 0.8rem;
+  scrollbar-color: var(--analytics-cyan-strong) var(--analytics-surface-muted);
+  scrollbar-width: thin;
+}
+
+.close:focus-visible,
+.controls select:focus-visible,
+.content:focus-visible {
+  outline: 2px solid var(--analytics-cyan-strong);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .openButton {
+    position: static;
+    width: auto;
+    height: auto;
+    min-height: 2.75rem;
+    align-self: flex-end;
+    overflow: visible;
+    clip-path: none;
+    border: 1px solid var(--analytics-line);
+    border-radius: 0.5rem;
+    padding: 0.3rem 0.6rem;
+    background: var(--analytics-surface-muted);
+    color: var(--analytics-ink);
+  }
+
+  .close,
+  .controls select {
+    min-height: 2.75rem;
+  }
+}

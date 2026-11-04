@@ -1,5 +1,11 @@
 # Changelog
 
+- Acrescenta média do trimestre anterior, dias da semana abreviados e detalhes
+  da equipe por dia em Agendamentos. Corrige a linha mensal pela regra de dias
+  úteis e quintas em dobro, com meta zero nos feriados de São Paulo capital.
+  Equipe Produtiva recebe releitura automática a cada30min e detalhes de
+  Agendamentos com nomes compactos e equipes com/sem agendamento.
+
 - Publica CAIXA compacta emc97d5fd2, com campos principais em duas linhas e
   valores até9.999.999,99 legíveis. CI final e smoke em produção aprovados;
   teste Anual 1 estabilizado pela data sintética, sem alterar o Associativo.

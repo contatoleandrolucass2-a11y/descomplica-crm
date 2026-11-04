@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-11-04 — Agendamentos: trimestre e calendário útil
+
+- Dias dos eixos de barras/linhas exibem Seg/Ter/Qua/Qui/Sex/Sáb/Dom no hover.
+  Quarta série compara o último trimestre calendário completo por dia, com
+  média arredondada para cima, filtros e indisponibilidade preservados.
+- Linha mensal calcula o mês inteiro: um por dia útil, quinta vale dois,
+  multiplicado pelo elenco oficial filtrado. Feriados nacionais e os aplicáveis
+  a São Paulo capital têm meta zero. Metas diárias seguem a mesma exclusão.
+- Prévia diária divide o elenco em equipe com/sem agendamento, mostra primeiro
+  e último nome e oferece foco, Escape, rolagem e acionamento explícito em toque.
+  Detalhes de Agendamentos em Equipe Produtiva usam os mesmos nomes de equipe.
+- Equipe Produtiva relê a rota autorizada a cada30min sem resetar filtros;
+  aba oculta suspende a leitura e retoma quando vencida. Diagnóstico operacional
+  confirmou trava residual após OOM do coletor na etapa de estoque, bloqueando
+  ciclos posteriores. Recuperação manual com backup/CAS, sem editar dados,
+  credenciais, n8n ou unidade; evidências e acompanhamento no registro04/11.
+- Testes focados de calendário/análise58/58, tipos e QA visual9/9 aprovados
+  (três temas em1440×1000,390×844 e844×390). CI do candidato e publicação
+  são etapas posteriores. Sem migration ou mudança de permissões.
+
 ## 2026-11-04 — CAIXA: duas linhas publicadas
 
 - PR487/c97d5fd2 publicado pelo coordenador após CI main41783149013 com

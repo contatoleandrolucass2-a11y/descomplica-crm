@@ -4,13 +4,19 @@ import { useId, useMemo, useState, type CSSProperties } from "react";
 import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
 import type { AppointmentComparison } from "./appointments-comparison";
 import styles from "./AppointmentsComparison.module.css";
+import { appointmentWeekdayLabel } from "./appointment-day-label";
 import {
   appointmentHoliday,
   appointmentHolidayDescription,
 } from "@/lib/crm/stages/appointment-holidays";
 
 const number = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
-const colors = ["var(--analytics-cyan-strong)", "var(--analytics-warning)", "var(--analytics-ink)"];
+const colors = [
+  "var(--analytics-cyan-strong)",
+  "var(--analytics-warning)",
+  "var(--analytics-ink)",
+  "var(--analytics-positive)",
+];
 
 export function DailyChartTypeControl() {
   const control = useDashboardBarHeightControl();
@@ -28,7 +34,7 @@ export function DailyChartTypeControl() {
         }
       >
         <option value="bars">Torres</option>
-        <option value="line">Linhas: mês, anterior e média anual</option>
+        <option value="line">Linhas: mês, anterior, média anual e trimestre</option>
       </select>
     </label>
   );
@@ -117,7 +123,15 @@ export function AppointmentsComparison({
                         fill="none"
                         stroke={colors[index]}
                         strokeWidth="2.5"
-                        strokeDasharray={index === 0 ? undefined : index === 1 ? "7 4" : "2 4"}
+                        strokeDasharray={
+                          index === 0
+                            ? undefined
+                            : index === 1
+                              ? "7 4"
+                              : index === 2
+                                ? "2 4"
+                                : "10 3 2 3"
+                        }
                         vectorEffect="non-scaling-stroke"
                         data-comparison-series={series.key}
                       />
@@ -168,6 +182,12 @@ export function AppointmentsComparison({
                     `${comparison.month}-${String(day).padStart(2, "0")}T12:00:00Z`,
                   ).getUTCDay();
                   const weekend = weekday === 0 || weekday === 6;
+                  const weekdayLabel = appointmentWeekdayLabel(
+                    `${comparison.month}-${String(day).padStart(2, "0")}`,
+                  );
+                  const dayTitle = holiday
+                    ? `${weekdayLabel} — ${appointmentHolidayDescription(holiday)}`
+                    : (weekdayLabel ?? undefined);
                   return (
                     <span
                       key={day}
@@ -175,10 +195,8 @@ export function AppointmentsComparison({
                       data-comparison-weekend={weekend || undefined}
                       data-comparison-holiday={holiday?.name}
                       className={`${weekend ? styles.weekend : ""} ${holiday ? styles.holiday : ""}`}
-                      title={holiday ? appointmentHolidayDescription(holiday) : undefined}
-                      aria-label={
-                        holiday ? `${day}: ${appointmentHolidayDescription(holiday)}` : undefined
-                      }
+                      title={dayTitle}
+                      aria-label={`${day}: ${dayTitle}`}
                       style={{ left: `${(x(index) / 720) * 100}%` }}
                     >
                       {String(day).padStart(2, "0")}

@@ -74,7 +74,11 @@ describe("comparison calendar day axis", () => {
     expect(html).toContain('aria-label="Mês de referência · outubro de 2026, dia 3: 22"');
     expect(result.series[2].values[2]).toBe(4);
     expect(html).toContain('aria-label="Média de 2026, dia 3: 4"');
-    expect(html).toContain('<th scope="row">3</th><td>22</td><td>11</td><td>4</td>');
+    expect(html).toContain('<th scope="row">3</th><td>22</td><td>11</td><td>4</td><td>4</td>');
+    expect(html).toContain('data-comparison-series="quarter-average"');
+    expect(html).toContain('title="Sáb" aria-label="3: Sáb"');
+    expect(html).toContain('title="Qui" aria-label="1: Qui"');
+    expect(html).toContain('title="Seg — Nossa Senhora Aparecida');
     // Points identify the series/date accessibly without a verbose native popup.
     expect(html).not.toContain("<title>Mês de referência");
   });

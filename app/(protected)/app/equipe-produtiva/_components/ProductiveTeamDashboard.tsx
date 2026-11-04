@@ -187,10 +187,15 @@ export function ProductiveTeamDashboard({
               brokers={card?.brokerCount ?? null}
               percent={card?.percent ?? null}
               details={{
-                title: `Equipe Produtiva — ${labels[stage][0]}`,
+                title:
+                  stage === "appointments"
+                    ? "Equipe com agendamento — Agendamentos"
+                    : `Equipe Produtiva — ${labels[stage][0]}`,
                 className: styles.detailsDialog,
                 content: (
                   <ProductiveTeamDetails
+                    appointmentLabels={stage === "appointments"}
+                    shortNames={stage === "appointments"}
                     productiveMembers={card?.productiveMembers ?? null}
                     unproductiveMembers={card?.unproductiveMembers ?? null}
                     unavailableDetail={
