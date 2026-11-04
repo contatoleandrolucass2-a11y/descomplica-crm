@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-11-04 — Agendamentos: entrega bloqueada pela referência externa
+
+- PR490, candidato2bb866f4: implementação e validações locais concluídas;
+  publicação bloqueada pela comparação visual de `/app` na CI41853820787.
+  Onze capturas apresentam altura10px menor, sem dependência comprovada do diff.
+  Não alterados Dashboard, baseline, gates ou permissões para liberar a entrega.
+- Calendário inclui feriados nacionais e de São Paulo, todos com meta zero;
+  trimestre anterior, detalhes diários e atualização30min permanecem no PR.
+- Coletor antigo recuperado, com dois ciclos automáticos completos às15:06/15:36 UTC.
+  Retry novo não instalado. Chrome/integrado preservam32cards com ordem e dimensões
+  idênticas à abertura. Testes finais da versão nova em produção não executados.
+- Registro detalhado: `docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-CI-490.md`.
+  Registro documental separado preserva o SHA funcional e não reinicia aplicação.
+
 ## 2026-11-04 — CAIXA: duas linhas publicadas
 
 - PR487/c97d5fd2 publicado pelo coordenador após CI main41783149013 com
