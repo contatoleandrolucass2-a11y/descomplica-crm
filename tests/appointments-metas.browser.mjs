@@ -393,14 +393,12 @@ try {
               theme,
               viewport,
               id,
-              controls: await card
-                .locator("button")
-                .evaluateAll((elements) =>
-                  elements.map((el) => ({
-                    name: el.getAttribute("aria-label"),
-                    text: el.textContent,
-                  })),
-                ),
+              controls: await card.locator("button").evaluateAll((elements) =>
+                elements.map((el) => ({
+                  name: el.getAttribute("aria-label"),
+                  text: el.textContent,
+                })),
+              ),
             }),
           );
         const controlsBox = await controls.boundingBox();
