@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-11-04 — CAIXA: duas linhas publicadas
+
+- PR487/c97d5fd2 publicado pelo coordenador após CI main41783149013 com
+  quatro gates aprovados. Deployment cf228044-06b5-4bb3-9dbc-1dcd0ca1c016,
+  10:05:49.311 SP; health/ledger conferidos, sem pendência. Backup e rollback mantidos.
+- Chrome: valores máximos nos quatro campos legíveis, duas linhas1200/1280,
+  sem overflow; sidebar hover44/208px; simulação automática e diálogo com420
+  parcelas, impressão habilitada e saldo final zero. Dados fictícios limpos.
+- Única dependência externa autorizada: relógio sintético do teste Anual 1;
+  aplicação Associativo intacta. Registro documental final não reinicia o CRM.
+
 ## 2026-11-03 — Equipe Produtiva: tabelas publicadas
 
 - PR #481/merge 1f155c6b publicado na versão coordenada 82ee8deb, que inclui
