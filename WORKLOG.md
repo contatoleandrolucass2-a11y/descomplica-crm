@@ -29,6 +29,10 @@
   somente nesse erro final de contagem, sem reusar partes ou alterar o total
   esperado. Duas divergências, erro de contrato, cancelamento e prazo mantêm
   rejeição; orçamento25min não reinicia. Testes41/41 de coleta e agenda aprovados.
+- Verificação final de teclado reproduziu foco no botão de abertura em vez
+  do novo diálogo. Abertura explícita agora foca Fechar; hover e troca de dia
+  preservam foco. Browser dedicado2/2 e unitário9/9 aprovados, sem repetir a
+  matriz de nove combinações ou alterar suas asserções.
 
 ## 2026-11-04 — CAIXA: duas linhas publicadas
 

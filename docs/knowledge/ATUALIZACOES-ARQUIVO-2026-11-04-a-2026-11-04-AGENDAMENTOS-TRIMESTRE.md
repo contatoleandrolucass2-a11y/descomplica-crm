@@ -149,3 +149,22 @@ interno de metas ausentes; paridade de payload comprovada4/4 cenários sintétic
 com analysisEnabledfalse/true e goalsundefined/null, conforme uso do coletor.
 Playwright1.62.1 eZod4.6.7 iguais. Pacotes adicionais não são importados nessa
 árvore. Código novo ainda não aplicado ao serviço.
+
+Conferência final de acessibilidade do novo popup reproduziu uma falha na
+abertura explícita: Enter abria o portal, mas foco permanecia no botão fora
+dele. Corrigido pedido de foco apenas nessa abertura; hover não rouba foco e
+troca do dia não o retira do select. Escape/fechamento devolvem ao acionador.
+Browser dedicado com componente real production, teclado e toque2/2 aprovado,
+unitário9/9 e lint/format/diffcheck aprovados. Baseline da falha e resultado
+em test-results/appointments-daily-team-focus/result-before.json/result-after.json.
+A matriz9/9 anterior permanece evidência dos comportamentos inalterados;
+os fluxos de foco afetados foram reexecutados isoladamente, sem repetir nove
+combinações. Nova CI do SHA resultante é obrigatória.
+
+Helper operacional específico preparado localmente, sem executar na VPS:
+test-results/update-salesforce-collector-20261104.mjs,
+sha2567d3c63fca78222404fc5fda53c3d9a94147dbd531dfa0ed558704a29f2691955.
+Sintaxe e11 asserts isolados aprovados, sem acesso ao sistema/serviços.
+Exige parâmetros do main/CI exatos e app já publicado, backup/CAS/installation.lock,
+preserva demais configurações e verifica precedência/WorkingDirectory efetivo.
+Operação Linux e dois ciclos posteriores continuam pendentes, não alegados.

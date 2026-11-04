@@ -9,6 +9,8 @@
   expor mensagens privadas ou alterar a agenda de publicação.
   Relatório cuja contagem muda durante o particionamento ganha uma única
   repetição consistente, mantendo os controles de integridade e o prazo global.
+  A abertura explícita do detalhe diário move o foco para o diálogo e devolve
+  ao botão ao fechar, preservando o foco durante hover e seleção do dia.
 
 - Publica CAIXA compacta emc97d5fd2, com campos principais em duas linhas e
   valores até9.999.999,99 legíveis. CI final e smoke em produção aprovados;

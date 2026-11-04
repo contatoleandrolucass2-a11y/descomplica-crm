@@ -58,6 +58,7 @@ export function DailyAppointmentsTeamDetails({
   const anchor = useRef<HTMLElement | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const dismissedDate = useRef<string | null>(null);
+  const focusExplicitOpen = useRef(false);
   const titleId = useId();
   const panelId = useId();
   const selectId = useId();
@@ -86,6 +87,10 @@ export function DailyAppointmentsTeamDetails({
     if (!buckets.some((bucket) => bucket.key === day) || dismissedDate.current === day) return;
     cancelClose();
     anchor.current = element;
+    if (pinned) {
+      if (closeButton.current) closeButton.current.focus();
+      else focusExplicitOpen.current = true;
+    }
     const rect = element.getBoundingClientRect();
     const height = Math.min(440, window.innerHeight - 24);
     const top = Math.max(12, Math.min(rect.bottom + 8, window.innerHeight - height - 12));
@@ -108,6 +113,11 @@ export function DailyAppointmentsTeamDetails({
   };
 
   useEffect(() => () => clearTimeout(closeTimer.current), []);
+  useEffect(() => {
+    if (date === null || !focusExplicitOpen.current) return;
+    focusExplicitOpen.current = false;
+    closeButton.current?.focus();
+  }, [date]);
   useEffect(() => {
     if (date === null) return;
     const dismiss = (event: KeyboardEvent) => {
