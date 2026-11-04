@@ -10992,6 +10992,15 @@ b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigi
   ajuste da medição de display:contents. Matriz de temas, mobile, axe e hover
   aprovada. CI e referências definitivas da aplicação real ainda obrigatórias.
 
+### 04/11/2026 — Correção autorizada do teste Anual 1
+
+- Fixa somente o relógio do navegador no harness Associativo em05/09/2026,
+  referência de seus dados sintéticos; evita esperar Anual 1 em data que a torna
+  inelegível. Mantém asserções de foco, timeout e regras comerciais.
+- Comando original passou localmente em9 cenários/18 estados, três temas e
+  desktop/celular, sem erros de console ou requisições externas. A alteração da
+  aplicação continua exclusivamente CAIXA. CI final/publicação permanecem obrigatórias.
+
 ### 04/11/2026 — CAIXA compacta: bloqueio externo de publicação
 
 - PR #487,359c784f: campos pelo conteúdo e duas linhas principais no desktop,

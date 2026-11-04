@@ -4088,6 +4088,8 @@ Validação e publicação serão registradas com evidências ao concluir os gat
   conteúdo; sincroniza e confere12 documentos, preservando o limite de exportação.
 - Compacta os campos CAIXA por conteúdo e organiza os dados principais em duas
   linhas no desktop, com Sim/Não menores e leitura integral de9.999.999,99.
+- Estabiliza o teste Anual 1 com o relógio da fixture sintética, preservando
+  a regra do Associativo e liberando a retomada da validação CAIXA.
 
 - Registra o PR #487 de compactação CAIXA, validado localmente e pendente de
   publicação por falha repetida do gate Associativo; nenhuma outra página alterada.

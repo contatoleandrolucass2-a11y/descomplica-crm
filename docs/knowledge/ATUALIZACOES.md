@@ -1,5 +1,25 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-04 — Retomada autorizada: teste Anual 1 e publicação CAIXA
+
+- Usuário autorizou somente a correção do teste Anual 1 bloqueador e a publicação
+  CAIXA. Escopo anterior ampliado apenas para essa dependência de QA; nenhuma
+  alteração de regra financeira ou layout do Associativo autorizada/necessária.
+- Mainbf955fa5, CI41768449253 documental aprovada, produção82ee8deb saudável.
+  PR #487359c784f integrado à base documental local emdd0a31d9, preservando
+  implementação e registro anterior do bloqueio. Consultas em04/11/2026.
+- Evidência: CI41765258280/2 mostra Ocultar Anual 2 e zerar valor enquanto o
+  teste exige Anual 1. Harness sintético usa snapshotReferenceDate2026-09-05,
+  mas não fixa relógio do navegador; todayIso usa a data corrente de São Paulo.
+  Corrigir somente o relógio do harness, mantendo as asserções de foco e regras.
+- Correção:duas linhas no harness fixam o relógio do navegador em05/09/2026,
+  alinhado ao snapshot sintético, antes da navegação. Datas reais do host e
+  registros de execução continuam reais; aplicação/financeiro Associativo intactos.
+- Prova local em04/11: comando original associative-page-guide concluiu com
+  sucesso em9 cenários e18 estados de proposta, três temas e larguras1440/375/320.
+  Asserção Anual 1/foco preservada, sem aumento de timeout ou skip. Sem erros
+  de console nem requisições externas; CI integrada e revisão CAIXA seguem obrigatórias.
+
 ## 2026-11-03 — CAIXA: campos dimensionados e duas linhas no desktop
 
 - Pedido restrito à CAIXA: reduzir larguras de campos e Sim/Não, acomodar valores
