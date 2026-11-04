@@ -120,6 +120,25 @@ por requestId antes de nova tentativa. Manter backup e registro da tentativa.
 
 ## Falhas e reversao
 
+### Mudança de contagem durante o particionamento
+
+Um relatório pode receber registros enquanto suas partições são consultadas.
+As instâncias podem terminar com sucesso e, ainda assim, a soma das folhas
+divergir da contagem inicial. Essa geração continua sendo rejeitada.
+`collectReportRows` permite uma única nova tentativa desse erro final específico:
+refaz describe, root e todas as partições, sem misturar gerações ou ajustar o
+total esperado para caber nas linhas. Somente a segunda geração integral e
+validada pode seguir para a publicação normal dos sete relatórios.
+
+O orçamento da chamada é25min compartilhado entre as duas tentativas, além
+do cancelamento global já existente no coletor e dos limites por instância.
+Dois erros de contagem, indisponibilidade, contrato inválido, cancelamento ou
+prazo expirado preservam o snapshot anterior. Erros diferentes não recebem
+essa repetição. Lock, cadência00/30 e condições de publicação permanecem iguais.
+O scheduler registra somente `safeSalesforceError`, sem mensagem privada,
+resposta bruta ou linhas. Para incidentes, reter apenas códigos, horários,
+contagens, intervalos e requestId autorizado.
+
 Falha de coleta/publicacao marca o ciclo como falho e preserva o ultimo
 snapshot valido no banco. A rotina tenta novamente na proxima fronteira.
 Um SIGTERM cancela e aguarda limpeza; encerramento forcado pode deixar lock.

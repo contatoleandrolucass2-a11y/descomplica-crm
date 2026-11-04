@@ -118,3 +118,34 @@ validados. Teste específico verifica mensagem sensível/response não chegam ao
 logs;9/9 testes Node aprovados. Cadência e regras de publicação não mudam.
 Código local não será aplicado ao serviço sem CI main exata, backup/CAS e
 confronto da árvore transitiva com a release do coletor322a4166.
+
+Causa atual comprovada por metadados do lote automático14:30:31 instâncias
+Success,16 folhas completas/contíguas, filtros e colunas idênticos. Root14:30:08
+contou20645; folhas concluídas14:32:22 somaram20646. RamoJan–Jun13253 manteve
+contagem; ramoJun–Nov7393 difere por1 do implícito7392. Guard final rejeitou
+corretamente SALESFORCE_INVALID_REPORT. Não era agenda, login ou novo OOM.
+Listagem/results emRAM foram necessárias para extrair somente contagens;
+includeDetails=false no GET não remove rows quando a instância original contém
+detalhes. Linhas/células não foram inspecionadas ou persistidas; somente
+metadados sanitizados em test-results/collector-instance-counts.ndjson.
+
+Correção mínima em report-collection.mjs: erro privado derivado mantém código
+público existente e é emitido somente pelo compare final de contagem. Wrapper
+permite no máximo duas gerações completas, captura só esse erro e não guarda
+rows descartadas. Cada tentativa refaz describe/root/folhas. Guard de outros
+erros, abort, lock e publicação preservados; orçamento25min é único e timeout
+por instância não aumenta. Falha na segunda tentativa continua rejeitando.
+
+41/41 testes Node24.19 aprovados na suíte integral de coleta e scheduler:
+primeira divergência seguida de geração coerente usa apenas a segunda;
+duas divergências rejeitam; erro diferente não repete; cancelamento impede
+tentativa nova; prazo compartilhado expira sem reiniciar após24min na primeira.
+Lint, Prettier e diffcheck aprovados. Nova CI obrigatória antes de aplicação.
+
+Confronto transitivo do coletor instalado322a4166:18 arquivos runtime,
+zero imports sem resolver. Diferenças atuais limitadas a scheduler/logging,
+report-collection/retry e transform histórico. Este último só muda diagnóstico
+interno de metas ausentes; paridade de payload comprovada4/4 cenários sintéticos
+com analysisEnabledfalse/true e goalsundefined/null, conforme uso do coletor.
+Playwright1.62.1 eZod4.6.7 iguais. Pacotes adicionais não são importados nessa
+árvore. Código novo ainda não aplicado ao serviço.

@@ -7,6 +7,8 @@
   Agendamentos com nomes compactos e equipes com/sem agendamento.
   Diagnóstico da coleta Salesforce registra códigos seguros de falha, sem
   expor mensagens privadas ou alterar a agenda de publicação.
+  Relatório cuja contagem muda durante o particionamento ganha uma única
+  repetição consistente, mantendo os controles de integridade e o prazo global.
 
 - Publica CAIXA compacta emc97d5fd2, com campos principais em duas linhas e
   valores até9.999.999,99 legíveis. CI final e smoke em produção aprovados;

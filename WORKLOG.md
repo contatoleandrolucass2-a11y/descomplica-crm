@@ -24,6 +24,11 @@
   alinhadas ao pedido sem alterar baselines ou os outros estágios. Scheduler
   Salesforce passa a registrar o código seguro da falha, preservando cadência,
   publicação e dados privados; diagnóstico da falha intermitente segue aberto.
+- Causa atual comprovada: durante o particionamento, root20645 e folhas20646
+  divergiram por um registro novo. Coleta repete uma única geração completa
+  somente nesse erro final de contagem, sem reusar partes ou alterar o total
+  esperado. Duas divergências, erro de contrato, cancelamento e prazo mantêm
+  rejeição; orçamento25min não reinicia. Testes41/41 de coleta e agenda aprovados.
 
 ## 2026-11-04 — CAIXA: duas linhas publicadas
 
