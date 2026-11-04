@@ -18,6 +18,35 @@
   display:contents; não ignoram os campos. Referências visuais CAIXA serão
   revisadas por mudança intencional; CI final e artefato de main continuam obrigatórios.
 
+## 2026-11-04 — CAIXA: duas linhas implementadas; publicação bloqueada externamente
+
+- Pedido: reduzir larguras dos campos monetários até9.999.999,99, proponentes,
+  data/cidade/UF/prazo/produto/sistema e Sim/Não; duas linhas principais no desktop.
+  Implementado exclusivamente na CAIXA, PR #487, SHA359c784f83cda1587f6e9f4c8ac939cd9f1982be.
+- Grid de24 trilhas a partir de1200px, largura máxima1320px, proponentes64px,
+  UF76px, Sim/Não50px e padding monetário reduzido. Campos adicionais do subsídio
+  seguem após as condições para preservar a sequência de teclado. Motor intacto.
+- Local:10 cenários de navegador aprovados por execução e repetição focada da
+  medição de agrupadores display:contents. Valores máximos inteiros em quatro
+  campos, duas linhas em1280/1440/1920 com sidebar aberto/fechado, temas, tablet,
+  celular, axe e jornadas aprovados. Tipos e lint focado aprovados.
+- CI41765258280, tentativas1 e2: validate, isolated-restore e promotable-image
+  aprovados. Teste dedicado CAIXA passou nas duas tentativas. release-gates falhou
+  nas duas no Associativo:1440x900-light:fill-proposal, expect(toBeFocused) do
+  textbox Anual 1, elemento ausente após5000ms. Fontes: logs sanitizados da CI,
+  falhas em04/11/2026 03:21 e03:31UTC. Nenhum código/teste Associativo alterado.
+- A falha antecedeu a matriz autenticada; referências finais da aplicação real
+  ainda não foram capturadas/revisadas. Não atualizar baselines usando a fixture
+  sintética nem promover imagem de execução com gate falho.
+- DEPLOY-002/AGENTS: bloqueio externo ao escopo, sem contornar ou corrigir outra
+  página. Reavaliar após correção do gate Associativo em demanda própria e nova
+  CI obrigatória; então revisar somente referências CAIXA, integrar e publicar
+  main exato pelo coordenador. Nenhuma publicação desta mudança foi feita.
+- Main consultado continua bc4a1c51; produção observada82ee8deb, HTTP200/ok.
+  Registro final somente documental, sem reinício. PR de implementação:
+  https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/487;
+  CI: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/41765258280.
+
 - CAIXA: [histórico integral de 26/10 a 03/11/2026](ATUALIZACOES-ARQUIVO-2026-10-26-a-2026-11-03-CAIXA.md).
 
 ## 2026-11-03 — Obsidian: recuperação do limite de exportação

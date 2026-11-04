@@ -10991,3 +10991,15 @@ b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigi
 - Dez cenários de navegador aprovados por execução e repetição focada após
   ajuste da medição de display:contents. Matriz de temas, mobile, axe e hover
   aprovada. CI e referências definitivas da aplicação real ainda obrigatórias.
+
+### 04/11/2026 — CAIXA compacta: bloqueio externo de publicação
+
+- PR #487,359c784f: campos pelo conteúdo e duas linhas principais no desktop,
+  valores9.999.999,99 visíveis, proponentes64px, UF76px e Sim/Não50px.
+- Dez cenários locais de navegador, tipos e lint aprovados; teste CAIXA na CI
+  aprovado. validate, restauração e imagem também aprovados.
+- CI41765258280 falhou duas vezes no foco Anual 1 do Associativo, fora do escopo.
+  Não alterado o Associativo, pipeline, proteções ou baselines. Captura autenticada
+  final permanece pendente; implementação não integrada nem publicada.
+- Retomar após correção externa e CI obrigatória, revisar referências CAIXA e
+  cumprir publicação exata. Detalhes/proveniência em ATUALIZACOES. Registro documental.
