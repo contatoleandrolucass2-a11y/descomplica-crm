@@ -20,6 +20,9 @@
   atualizadas com proveniência,231 outras preservadas. Contrato visual13/13;
   layout funcional/49responsivos/28temas/77axe/zoom aprovados, apenas pixels
   intencionais falharam antes da atualização. Nenhum limiar alterado. Nova CI pendente.
+- Corrige sincronização do harness de viewport CAIXA: aguarda ResizeObserver
+  atualizar o canvas antes da medição, preservando todas as exigências visuais.
+  Três repetições focadas aprovadas; código da aplicação/referências intactos.
 
 ## 2026-11-04 — Página inicial: margem estável para liberar PR490
 

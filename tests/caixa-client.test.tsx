@@ -215,6 +215,25 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(page.getByRole("main")).toHaveCount(1);
       await browserExpect(page.locator('main[data-canvas-layout="caixa"]')).toHaveCount(1);
     }
+    async function resizeViewport(width: number, height: number) {
+      await page.setViewportSize({ width, height });
+      // ResizeObserver updates the responsive canvas in a later rendering turn.
+      // Measure only after the visible canvas matches the new workspace width.
+      await browserExpect
+        .poll(
+          async () =>
+            page.evaluate(() => {
+              const workspace = document.querySelector<HTMLElement>(".caixa-workspace")!;
+              const surface = document.querySelector<HTMLElement>(".caixa-content-surface")!;
+              const actual = parseFloat(
+                getComputedStyle(surface).getPropertyValue("--caixa-content-width"),
+              );
+              return Math.abs(actual - Math.max(1, workspace.clientWidth - 44)) < 1;
+            }),
+          { message: "Responsive canvas settles before measuring controls" },
+        )
+        .toBe(true);
+    }
     async function fillMain() {
       await page.getByLabel("Renda familiar bruta", { exact: false }).fill("600000");
       await page.getByLabel("Valor do imóvel *", { exact: false }).fill("30000000");
@@ -234,7 +253,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       const directory = resolve("private-data/caixa-qa");
       await mkdir(directory, { recursive: true });
       for (const width of [1200, 1280, 1440, 1920]) {
-        await page.setViewportSize({ width, height: 900 });
+        await resizeViewport(width, 900);
         for (const expanded of [false, true]) {
           if (expanded) await page.locator(".caixa-tool-sidebar").hover();
           else await page.getByRole("heading", { name: "Simulador CAIXA", exact: true }).hover();
@@ -400,7 +419,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await page.evaluate(() => (document.documentElement.dataset.theme = "dark"));
       const audit = await new AxeBuilder({ page }).include("dialog").analyze();
       expect(axeFailureDetails(audit.violations)).toEqual([]);
-      await page.setViewportSize({ width: 390, height: 844 });
+      await resizeViewport(390, 844);
       const mobileBounds = await dialog.boundingBox();
       expect(mobileBounds!.width).toBeLessThanOrEqual(390);
       expect(Math.abs(mobileBounds!.x + mobileBounds!.width / 2 - 195)).toBeLessThan(10);
@@ -420,7 +439,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         content: ".caixa-page-shell{letter-spacing:.05em;font-weight:700}",
       });
       for (const width of [320, 375, 390, 1200, 1280, 1440]) {
-        await page.setViewportSize({ width, height: 900 });
+        await resizeViewport(width, 900);
         const choices = await page
           .locator(".caixa-full-form .caixa-toggle button")
           .evaluateAll((buttons) =>
@@ -468,7 +487,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         await browserExpect(input).toHaveValue("9.999.999,99");
       }
       for (const width of [1200, 1280, 1440, 1920]) {
-        await page.setViewportSize({ width, height: 900 });
+        await resizeViewport(width, 900);
         for (const expanded of [false, true]) {
           if (expanded) await page.locator(".caixa-tool-sidebar").hover();
           else await page.getByRole("heading", { name: "Simulador CAIXA", exact: true }).hover();
@@ -597,7 +616,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(dialog).toBeVisible();
       await browserExpect(dialog.locator("tbody tr")).toHaveCount(420);
       for (const width of [1440, 1024, 768, 390, 320]) {
-        await page.setViewportSize({ width, height: 900 });
+        await resizeViewport(width, 900);
         const bounds = await dialog.boundingBox();
         expect(bounds).not.toBeNull();
         expect(bounds!.x + bounds!.width / 2, `${width}: centered horizontally`).toBeCloseTo(
@@ -663,7 +682,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
     });
     it("keeps touch menu access without shrinking mobile form content", async () => {
       await open();
-      await page.setViewportSize({ width: 390, height: 844 });
+      await resizeViewport(390, 844);
       const workspace = page.locator(".caixa-workspace");
       const before = await page.locator(".caixa-workspace-content").boundingBox();
       await page.getByRole("button", { name: "Expandir menu de simulação", exact: true }).click();
@@ -688,7 +707,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       const directory = resolve("private-data/caixa-qa");
       await mkdir(directory, { recursive: true });
       for (const width of [1440, 390]) {
-        await page.setViewportSize({ width, height: width === 1440 ? 900 : 844 });
+        await resizeViewport(width, width === 1440 ? 900 : 844);
         for (const theme of ["light", "balanced", "dark"]) {
           await page.evaluate((selected) => {
             document.documentElement.dataset.theme = selected;
@@ -825,7 +844,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           }
         }
       }
-      await page.setViewportSize({ width: 1440, height: 900 });
+      await resizeViewport(1440, 900);
       await page.evaluate(() => {
         document.documentElement.dataset.theme = "light";
       });
@@ -993,10 +1012,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       const directory = resolve("private-data/caixa-qa");
       await mkdir(directory, { recursive: true });
       for (const width of [1440, 1024, 768, 390, 320]) {
-        await page.setViewportSize({
-          width,
-          height: width === 1440 ? 900 : width === 1024 ? 768 : 844,
-        });
+        await resizeViewport(width, width === 1440 ? 900 : width === 1024 ? 768 : 844);
         for (const theme of ["light", "balanced", "dark"]) {
           await page.evaluate((selected) => {
             document.documentElement.dataset.theme = selected;

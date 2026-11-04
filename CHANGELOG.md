@@ -8,6 +8,7 @@
   unidade e fluxo Associativo de84mensais/anuais automáticas, sem alterar o Associativo.
 - Atualiza somente as11 referências visuais CAIXA após revisão dos três temas
   e tamanhos, com textos inteiros e bordas visíveis; demais referências preservadas.
+- Estabiliza a medição responsiva do teste CAIXA sem reduzir as exigências de layout.
 
 - Estabiliza a margem do aviso dos filtros da página inicial em10px,
   independentemente da ordem dos módulos CSS, preservando a referência visual.

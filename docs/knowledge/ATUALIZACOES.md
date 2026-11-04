@@ -72,6 +72,17 @@
   ao chat Ajustar cards e sidebar. Esse chat registrou que aguardará a liberação
   para integrar. Liberar a janela após a conferência do deploy; não há autorização
   para modificar o escopo daquele chat ou suas alterações.
+- CI41913034337/f0cc3e33 aprovou validate/imagem/restore, mas a etapa CAIXA
+  falhou em uma medição logo após trocar viewport móvel→1200px: span com20px
+  enquanto ResizeObserver ainda atualizava o canvas, contra texto67px. A captura
+  aprovada a231a042 continua válida: nenhum código da aplicação foi alterado.
+- Harness agora espera a largura observável do canvas corresponder ao workspace
+  antes de medir. Asserções de uma linha, tamanho, corte e bordas mantidas, sem
+  aumento de timeout ou tolerância. Três repetições focadas passaram. A mesma
+  sincronização cobre as demais trocas de viewport do teste CAIXA. Nova CI exigida.
+- Reexecução local completa após a sincronização:13/13 testes da interface
+  aprovados em103,19s (11 de navegador e2SSR). Os5 testes de navegador do diálogo
+  são adicionais. Nenhuma fórmula, CSS ou captura foi alterada por essa correção.
 
 ## 2026-11-04 — Agendamentos: PR490 bloqueado por referência externa
 
