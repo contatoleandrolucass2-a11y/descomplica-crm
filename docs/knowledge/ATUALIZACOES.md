@@ -56,6 +56,22 @@
   com ranking, estoque fictício,84parcelas abertas, centro da tela, axe e foco.
   Acrescentadas âncoras MFOM de renda1750/3700 e centavos vizinhos. Sem alteração
   adicional de fórmula nessa etapa. Testes existentes reaproveitados por impacto.
+- Captura corrigida: CI41904125837/heada231a042, merge531c7a0c e árvore
+  918f575bc8e674b96becbc91ad79d129590b19b8, igual ao head. Validate/imagem/restore,
+  funcionais,49 responsivos,28 temas,77 axe e zoom aprovados. Falha somente nos
+  11 deltas intencionais CAIXA; resultado original falho e deltas preservados.
+- Artefato13363550585, ZIP SHA256
+  d7c525e640274832b285e5c819907f69f02608c8b4fe5a13979217d11b9115aa conferido;
+  fingerprintb8a497a84621eab8ab96fc0a191cfff1507faa267f85b9f8a5ab03623785f4ea
+  reproduzido com19 outputs sintéticos e diff rastreado vazio. Onze imagens
+  corrigidas revisadas em desktop/tablet/celular e três temas: palavras inteiras,
+  bordas e controles legíveis. Atualizadas somente11 imagens/linhas CAIXA;
+  231 outras linhas semanticamente idênticas, limiar1% intacto. Contrato visual13/13.
+  Não houve mudança de aplicação após a captura aprovada; nova CI exata pendente.
+- Janela de integração/publicação comunicada, conforme autorização humana prévia,
+  ao chat Ajustar cards e sidebar. Esse chat registrou que aguardará a liberação
+  para integrar. Liberar a janela após a conferência do deploy; não há autorização
+  para modificar o escopo daquele chat ou suas alterações.
 
 ## 2026-11-04 — Agendamentos: PR490 bloqueado por referência externa
 

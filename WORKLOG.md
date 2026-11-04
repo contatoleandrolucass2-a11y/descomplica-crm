@@ -16,6 +16,10 @@
   UI CAIXA11/11 aprovada, incluindo19campos em oito estados de desktop/sidebar.
   Revisão independente fechou status indevido e lista antiga na reabertura.
   CI integrada, referências visuais e publicação ainda pendentes neste registro.
+- Captura corrigida a231a042/CI41904125837 revisada;11 referências CAIXA
+  atualizadas com proveniência,231 outras preservadas. Contrato visual13/13;
+  layout funcional/49responsivos/28temas/77axe/zoom aprovados, apenas pixels
+  intencionais falharam antes da atualização. Nenhum limiar alterado. Nova CI pendente.
 
 ## 2026-11-04 — Página inicial: margem estável para liberar PR490
 
