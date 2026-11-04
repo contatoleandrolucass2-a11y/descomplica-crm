@@ -62,6 +62,7 @@ describe("appointment month comparison", () => {
       "selected",
       "previous",
       "year-average",
+      "quarter-average",
     ]);
     expect(result.series[1].label).toContain("dezembro de 2025");
     expect(result.series[0].values[0]).toBe(2);
@@ -138,9 +139,10 @@ describe("appointment month comparison", () => {
     expect(november.days).toHaveLength(30);
     expect(november.series[2].values).toHaveLength(30);
     const nextYear = buildAppointmentComparison(input, { month: "2027-02" });
-    expect(nextYear.series.every((series) => series.values.every((value) => value === null))).toBe(
-      true,
-    );
+    expect(
+      nextYear.series.slice(0, 3).every((series) => series.values.every((value) => value === null)),
+    ).toBe(true);
+    expect(nextYear.series[3].values.every((value) => value === null)).toBe(true);
   });
 
   it("compares selected day numbers while preserving dimensions and the original temporal selection", () => {
@@ -232,4 +234,64 @@ describe("appointment month comparison", () => {
       expect(() => buildAppointmentComparison(slice(), { month })).toThrow(RangeError);
     },
   );
+
+  it("adds the previous complete calendar quarter, not a rolling three-month window", () => {
+    const input = slice({
+      coverageStart: "2026-01-01",
+      referenceDate: "2026-11-30",
+      facts: [
+        fact("2026-07-01", 2),
+        fact("2026-08-01", 4),
+        fact("2026-09-01", 7),
+        fact("2026-10-01", 90),
+        fact("2026-07-31", 3),
+        fact("2026-08-31", 4),
+      ],
+    });
+    for (const month of ["2026-10", "2026-11"]) {
+      const result = buildAppointmentComparison(input, { month });
+      expect(result.series[3].label).toBe("Último trimestre · julho de 2026 a setembro de 2026");
+      expect(result.series[3].values[0]).toBe(5);
+      expect(result.series[3].values[1]).toBe(0);
+    }
+    const october = buildAppointmentComparison(input, { month: "2026-10" });
+    expect(october.series[3].values[30]).toBe(4);
+  });
+
+  it("rolls the quarter back across the year and keeps missing source dates unavailable", () => {
+    const input = slice({
+      coverageStart: "2025-10-02",
+      referenceDate: "2026-01-31",
+      facts: [fact("2025-10-02", 1), fact("2025-11-02", 2), fact("2025-12-02", 4)],
+    });
+    const result = buildAppointmentComparison(input, { month: "2026-01" });
+    expect(result.series[3].label).toBe("Último trimestre · outubro de 2025 a dezembro de 2025");
+    expect(result.series[3].values[0]).toBeNull();
+    expect(result.series[3].values[1]).toBe(3);
+    expect(result.series[3].values[2]).toBe(0);
+  });
+
+  it("preserves quarter dimensions and reference-day selections without mutating filters", () => {
+    const input = slice({
+      coverageStart: "2026-07-01",
+      referenceDate: "2026-10-31",
+      facts: [
+        fact("2026-07-05", 2),
+        fact("2026-08-05", 3),
+        fact("2026-09-05", 5),
+        fact("2026-07-05", 90, 1, 1),
+      ],
+    });
+    const filters: AppointmentFilters = { manager: "Gerente A", createdDates: ["2026-10-05"] };
+    const before = JSON.stringify(filters);
+    const result = buildAppointmentComparison(input, { month: "2026-10", filters });
+    expect(result.days).toEqual([5]);
+    expect(result.series[3].values).toEqual([4]);
+    expect(JSON.stringify(filters)).toBe(before);
+  });
+
+  it("does not fail for the earliest supported reference year", () => {
+    const result = buildAppointmentComparison(slice(), { month: "0001-01" });
+    expect(result.series[3].values.every((value) => value === null)).toBe(true);
+  });
 });

@@ -13,6 +13,14 @@ const FORMATS = new Set(["TABULAR", "SUMMARY", "MATRIX"]);
 const object = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 const invalid = () => new SalesforceCollectionError("SALESFORCE_INVALID_REPORT");
 
+// Private discriminator: only a final, fully validated partition-count drift can retry.
+// Keep the public safe error contract and never retain the discarded generation's rows.
+class SalesforceReportCountDrift extends SalesforceCollectionError {
+  constructor() {
+    super("SALESFORCE_INVALID_REPORT");
+  }
+}
+
 function instanceStatus(value) {
   if (value.status && value.attributes?.status && value.status !== value.attributes.status)
     throw invalid();
@@ -183,6 +191,35 @@ function rowsFrom(result) {
 }
 
 export async function collectReportRows(sessionId, definition, startDate, endDate, options = {}) {
+  const now = options.now ?? Date.now;
+  const collectionDeadline = now() + 25 * 60_000;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    throwIfSalesforceAborted(options.signal);
+    if (now() >= collectionDeadline) throw new SalesforceCollectionError("SALESFORCE_TIMEOUT");
+    try {
+      return await collectReportRowsAttempt(
+        sessionId,
+        definition,
+        startDate,
+        endDate,
+        options,
+        collectionDeadline,
+      );
+    } catch (error) {
+      if (!(error instanceof SalesforceReportCountDrift) || attempt === 1) throw error;
+      // The next attempt starts from describe/root, with the same global time budget.
+    }
+  }
+}
+
+async function collectReportRowsAttempt(
+  sessionId,
+  definition,
+  startDate,
+  endDate,
+  options,
+  collectionDeadline,
+) {
   if (definition.dated) {
     validateReportDate(startDate);
     validateReportDate(endDate);
@@ -192,7 +229,7 @@ export async function collectReportRows(sessionId, definition, startDate, endDat
   const sleep = options.sleep ?? delay;
   const now = options.now ?? Date.now;
   const endpoint = `${API_ROOT}/${definition.id}`;
-  const describe = await request(`${endpoint}/describe`);
+  const describe = await request(`${endpoint}/describe`, { deadline: collectionDeadline });
   validateMetadata(describe.reportMetadata, definition);
   const metadata = structuredClone(describe.reportMetadata);
   const labelColumns = resolveLabelColumns(describe, definition, metadata);
@@ -220,7 +257,7 @@ export async function collectReportRows(sessionId, definition, startDate, endDat
         startDate: range[0],
         endDate: range[1],
       };
-    const deadline = now() + (options.reportTimeoutMs ?? 180_000);
+    const deadline = Math.min(collectionDeadline, now() + (options.reportTimeoutMs ?? 180_000));
     const started = await request(`${endpoint}/instances?includeDetails=true`, {
       method: "POST",
       body: { reportMetadata: requested },
@@ -288,7 +325,7 @@ export async function collectReportRows(sessionId, definition, startDate, endDat
     }
     rows.push(...rowsFrom(result));
   }
-  if (rows.length !== expectedCount) throw invalid();
+  if (rows.length !== expectedCount) throw new SalesforceReportCountDrift();
   return rows.map((row) => ({
     ...row,
     ...Object.fromEntries([...labelColumns].map(([alias, column]) => [alias, row[column]])),

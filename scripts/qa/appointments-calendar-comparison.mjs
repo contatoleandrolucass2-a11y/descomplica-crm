@@ -22,11 +22,18 @@ const sourcePaths = [
     "AppointmentsColumns.tsx",
     "AppointmentsComparison.tsx",
     "AppointmentsComparison.module.css",
+    "DailyAppointmentsTeamDetails.tsx",
+    "DailyAppointmentsTeamDetails.module.css",
     "AppointmentsDashboard.module.css",
     "appointments-comparison.ts",
+    "appointment-day-label.ts",
     "appointments-canvas-config.ts",
   ].map((file) => `${directory}/${file}`),
   "lib/crm/stages/appointments.ts",
+  "lib/crm/stages/appointment-goal-calendar.ts",
+  "lib/crm/stages/appointments-monthly-target.ts",
+  "lib/crm/stages/appointments-daily-team.ts",
+  "app/(protected)/app/equipe-produtiva/_components/ProductiveTeamDetails.tsx",
   "lib/dashboard-canvas/ui/configurable/configurable-dashboard-canvas.tsx",
   "lib/dashboard-canvas/ui/configurable/bar-height-controls.tsx",
 ];
@@ -355,7 +362,7 @@ try {
 
   await daily().getByLabel("Tipo do gráfico diário", { exact: true }).selectOption("line");
   await saved();
-  await expect(daily().locator("[data-comparison-series]")).toHaveCount(3);
+  await expect(daily().locator("[data-comparison-series]")).toHaveCount(4);
   await expect
     .poll(() => profiles[0].cards.find((card) => card.id === "appointments-daily").type)
     .toBe("line");
@@ -459,7 +466,7 @@ try {
         document.documentElement.dataset.theme = value;
       }, theme);
       await daily().scrollIntoViewIfNeeded();
-      await expect(daily().locator("[data-comparison-series]")).toHaveCount(3);
+      await expect(daily().locator("[data-comparison-series]")).toHaveCount(4);
       const axes = await daily().evaluate((element) => {
         const svg = element.querySelector("[data-appointments-comparison] svg");
         const plot = svg.getBoundingClientRect();
@@ -547,7 +554,7 @@ try {
   );
   const leapDaily = leapPage.locator('[data-dashboard-card-id="appointments-daily"]');
   await leapDaily.getByLabel("Tipo do gráfico diário", { exact: true }).selectOption("line");
-  await expect(leapDaily.locator("[data-comparison-series]")).toHaveCount(3);
+  await expect(leapDaily.locator("[data-comparison-series]")).toHaveCount(4);
   await leapDaily.getByText("Ver valores e cobertura", { exact: true }).click();
   const rows = leapDaily.locator("tbody tr");
   await expect(rows.nth(28).locator("td").nth(1)).toHaveText("7");

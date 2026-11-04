@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-11-04 — Página inicial: margem estável para liberar PR490
+
+- Pedido explícito autorizou corrigir a diferença visual de `/app` e concluir
+  a entrega de Agendamentos. Causa: `.filters p` e `.report p` têm a mesma
+  especificidade; ordem dos módulos CSS alternava a margem do aviso entre10px
+  e zero, deslocando toda a página. Aviso agora possui classe própria, com
+  seletor específico; valor10px e referência visual preservados.
+- Regressão reproduzida antes da correção. Teste com componentes/CSS reais
+  aprovado12/12: três temas em320/390/768/1440px, com as duas ordens de CSS,
+  mesmo espaçamento/fluxo, sem overflow, erros ou consultas externas.
+- Sem mudança de dados, baseline, outras páginas ou gates. CI do candidato
+  corrigido, integração, publicação e testes reais continuam etapas posteriores.
+
 ## 2026-11-04 — Agendamentos: entrega bloqueada pela referência externa
 
 - PR490, candidato2bb866f4: implementação e validações locais concluídas;
@@ -13,6 +26,40 @@
   idênticas à abertura. Testes finais da versão nova em produção não executados.
 - Registro detalhado: `docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-CI-490.md`.
   Registro documental separado preserva o SHA funcional e não reinicia aplicação.
+
+## 2026-11-04 — Agendamentos: trimestre e calendário útil
+
+- Dias dos eixos de barras/linhas exibem Seg/Ter/Qua/Qui/Sex/Sáb/Dom no hover.
+  Quarta série compara o último trimestre calendário completo por dia, com
+  média arredondada para cima, filtros e indisponibilidade preservados.
+- Linha mensal calcula o mês inteiro: um por dia útil, quinta vale dois,
+  multiplicado pelo elenco oficial filtrado. Feriados nacionais e os aplicáveis
+  a São Paulo capital têm meta zero. Metas diárias seguem a mesma exclusão.
+- Prévia diária divide o elenco em equipe com/sem agendamento, mostra primeiro
+  e último nome e oferece foco, Escape, rolagem e acionamento explícito em toque.
+  Detalhes de Agendamentos em Equipe Produtiva usam os mesmos nomes de equipe.
+- Equipe Produtiva relê a rota autorizada a cada30min sem resetar filtros;
+  aba oculta suspende a leitura e retoma quando vencida. Diagnóstico operacional
+  confirmou trava residual após OOM do coletor na etapa de estoque, bloqueando
+  ciclos posteriores. Recuperação manual com backup/CAS, sem editar dados,
+  credenciais, n8n ou unidade; evidências e acompanhamento no registro04/11.
+- Testes focados de calendário/análise58/58, tipos e QA visual9/9 aprovados
+  (três temas em1440×1000,390×844 e844×390). CI do candidato e publicação
+  são etapas posteriores. Sem migration ou mudança de permissões.
+- Primeira CI aprovou validação, imagem e restauração; matriz visual exigia
+  rótulos antigos do diálogo de Agendamentos. Expectativas condicionais foram
+  alinhadas ao pedido sem alterar baselines ou os outros estágios. Scheduler
+  Salesforce passa a registrar o código seguro da falha, preservando cadência,
+  publicação e dados privados; diagnóstico da falha intermitente segue aberto.
+- Causa atual comprovada: durante o particionamento, root20645 e folhas20646
+  divergiram por um registro novo. Coleta repete uma única geração completa
+  somente nesse erro final de contagem, sem reusar partes ou alterar o total
+  esperado. Duas divergências, erro de contrato, cancelamento e prazo mantêm
+  rejeição; orçamento25min não reinicia. Testes41/41 de coleta e agenda aprovados.
+- Verificação final de teclado reproduziu foco no botão de abertura em vez
+  do novo diálogo. Abertura explícita agora foca Fechar; hover e troca de dia
+  preservam foco. Browser dedicado2/2 e unitário9/9 aprovados, sem repetir a
+  matriz de nove combinações ou alterar suas asserções.
 
 ## 2026-11-04 — CAIXA: duas linhas publicadas
 

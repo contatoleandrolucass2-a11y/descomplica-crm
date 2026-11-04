@@ -2,6 +2,7 @@ import type {
   DashboardAnalysisSlice,
   DashboardAppointmentDetail,
 } from "../dashboard/analysis-contract";
+import { isAppointmentGoalHoliday } from "./appointment-goal-calendar.ts";
 
 export interface AppointmentBucket {
   key: string;
@@ -141,6 +142,7 @@ export function appointmentMonthlyGoal(individualGoal: number | null, brokerCoun
 
 export function plannedAppointmentsForDate(referenceDate: string, brokerCount: number | null) {
   if (brokerCount === null) return null;
+  if (isAppointmentGoalHoliday(referenceDate)) return 0;
   const weekday = new Date(`${referenceDate}T12:00:00Z`).getUTCDay();
   if (weekday === 4) return brokerCount * 2;
   if ([1, 2, 3, 5].includes(weekday)) return brokerCount;

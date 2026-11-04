@@ -179,13 +179,17 @@ function intersects(a, b) {
   );
 }
 try {
-  for (const theme of ["light", "medium", "dark"])
+  for (const theme of ["light", "medium", "dark"].filter(
+    (theme) => !process.env.QA_THEME || process.env.QA_THEME === theme,
+  ))
     for (const viewport of [
       { width: 1440, height: 1000 },
       { width: 390, height: 844 },
       { width: 844, height: 390 },
     ]) {
-      const page = await browser.newPage({ viewport });
+      if (process.env.QA_WIDTH && Number(process.env.QA_WIDTH) !== viewport.width) continue;
+      const touch = viewport.width < 1000;
+      const page = await browser.newPage({ viewport, hasTouch: touch });
       await page.clock.install({ time: new Date("2026-10-31T12:00:00Z") });
       page.on("pageerror", (error) => evidence.errors.push(error.message));
       await page.route("**/*", async (route) => {
@@ -230,10 +234,10 @@ try {
       await monthly.scrollIntoViewIfNeeded();
       await expect(monthly.locator("[data-dashboard-goal-line]")).toHaveAttribute(
         "aria-label",
-        "Meta de agendamentos: linha horizontal em 2 agendamentos",
+        "Meta de agendamentos: linha horizontal em 52 agendamentos",
       );
       const summary = monthly.locator("[data-appointments-reference-summary]");
-      await expect(summary).toHaveText("Meta de agendamentos 2");
+      await expect(summary).toHaveText("Meta de agendamentos 52");
       const summaryGeometry = await summary.evaluate((el) => {
         const previous = el.previousElementSibling;
         return { below: el.getBoundingClientRect().top >= previous.getBoundingClientRect().bottom };
@@ -241,6 +245,13 @@ try {
       assert.ok(summaryGeometry.below);
       const comparison = page.locator('[data-dashboard-card-id="appointments-daily"]');
       await comparison.scrollIntoViewIfNeeded();
+      await expect(comparison.locator("[data-comparison-series]")).toHaveCount(4);
+      await expect(comparison.locator('[data-comparison-day="1"]')).toHaveAttribute("title", "Qui");
+      await expect(comparison.locator('[data-comparison-day="3"]')).toHaveAttribute("title", "Sáb");
+      await expect(comparison.locator('[data-comparison-day="12"]')).toHaveAttribute(
+        "title",
+        /^Seg — Nossa Senhora Aparecida/u,
+      );
       const averagePoints = comparison
         .locator('[data-comparison-series="year-average"]')
         .locator("..")
@@ -253,8 +264,91 @@ try {
       await expect(averagePoints.nth(4)).toHaveAttribute("aria-label", /dia 5: 5$/);
       await averagePoints.nth(4).focus();
       await expect(comparison.getByRole("tooltip")).toHaveText("5");
+      const quarterPoints = comparison
+        .locator('[data-comparison-series="quarter-average"]')
+        .locator("..")
+        .locator("circle");
+      await expect(quarterPoints).toHaveCount(31);
+      await expect(quarterPoints.nth(4)).toHaveAttribute("aria-label", /dia 5: 3$/);
+      await quarterPoints.nth(4).focus();
+      await expect(comparison.getByRole("tooltip")).toHaveText("3");
       await comparison.getByText("Ver valores e cobertura", { exact: true }).click();
-      await expect(comparison.locator("tbody tr").nth(4).locator("td").last()).toHaveText("5");
+      await expect(comparison.locator("tbody tr").nth(4).locator("td").nth(2)).toHaveText("5");
+      await expect(comparison.locator("tbody tr").nth(4).locator("td").nth(3)).toHaveText("3");
+      await comparison.getByText("Ver valores e cobertura", { exact: true }).click();
+      await comparison.getByLabel("Tipo do gráfico diário", { exact: true }).selectOption("bars");
+      await expect(
+        comparison.locator('[data-appointments-day="2026-10-01"] [title="Qui"]'),
+      ).toHaveCount(1);
+      await expect(
+        comparison.locator('[data-appointments-day="2026-10-03"] [title="Sáb"]'),
+      ).toHaveCount(1);
+      const dayFive = comparison.locator('[data-appointments-day="2026-10-05"]');
+      await dayFive.locator("[data-appointments-column-label]").hover();
+      await expect(
+        page.getByRole("dialog", { name: "Equipe — 05/10/2026", exact: true }),
+      ).toHaveCount(0);
+      await dayFive.locator("[data-appointments-track]").hover();
+      const teamDialog = page.getByRole("dialog", { name: "Equipe — 05/10/2026", exact: true });
+      await expect(teamDialog).toBeVisible();
+      await expect(
+        teamDialog.getByRole("table", { name: "Equipe com agendamento", exact: true }),
+      ).toContainText("Corretor B");
+      await expect(
+        teamDialog.getByRole("table", { name: "Equipe sem agendamento", exact: true }),
+      ).toContainText("Corretor A");
+      const teamBox = await teamDialog.boundingBox();
+      assert.ok(teamBox.x >= 0 && teamBox.x + teamBox.width <= viewport.width);
+      if (teamBox.y < 0 || teamBox.y + teamBox.height > viewport.height)
+        await page.screenshot({
+          path: path.join(out, `falha-equipe-dia-${theme}-${viewport.width}.png`),
+        });
+      assert.ok(
+        teamBox.y >= 0 && teamBox.y + teamBox.height <= viewport.height,
+        JSON.stringify({ theme, viewport, teamBox }),
+      );
+      await page.keyboard.press("Escape");
+      await expect(teamDialog).toHaveCount(0);
+      await comparison
+        .getByRole("heading", { name: "Evolução de agendamentos por dia", exact: true })
+        .hover();
+      await dayFive.focus();
+      await expect(teamDialog).toBeVisible();
+      await dayFive.press("ArrowDown");
+      await expect(
+        teamDialog.getByRole("button", { name: "Fechar equipe do dia", exact: true }),
+      ).toBeFocused();
+      await page.keyboard.press("Escape");
+      await expect(teamDialog).toHaveCount(0);
+      if (touch) {
+        // Stop the preceding mouse scenario before exercising real touch input;
+        // otherwise scrolling the button under a stationary mouse may hover a bar.
+        await page.mouse.move(0, 0);
+        const openTeam = comparison.getByRole("button", {
+          name: "Ver equipe por dia",
+          exact: true,
+        });
+        await expect(openTeam).toBeVisible();
+        await openTeam.tap();
+        const explicitDialog = page.getByRole("dialog", { name: /^Equipe — /u });
+        await expect(explicitDialog).toBeVisible();
+        await explicitDialog.getByLabel("Dia", { exact: true }).selectOption("2026-10-05");
+        await expect(teamDialog).toBeVisible();
+        const teamScroll = teamDialog.getByRole("region", {
+          name: "Equipes de 05/10/2026",
+          exact: true,
+        });
+        await teamScroll.focus();
+        await page.keyboard.press("End");
+        await expect(teamDialog.locator("tbody tr").last()).toBeInViewport();
+        if (theme === "dark")
+          await teamDialog.screenshot({
+            path: path.join(out, `sintetico-equipe-dia-${viewport.width}.png`),
+          });
+        await teamDialog.getByRole("button", { name: "Fechar equipe do dia", exact: true }).click();
+        await expect(teamDialog).toHaveCount(0);
+      }
+      await comparison.getByLabel("Tipo do gráfico diário", { exact: true }).selectOption("line");
       const tables = [];
       for (const [id, count] of [
         ["appointments-details", 136],
@@ -287,9 +381,42 @@ try {
         await expect(countText).toBeInViewport();
         const countBox = await countText.boundingBox();
         assert.ok(countBox);
-        const controls = card.locator('button[aria-label^="Copiar"]');
-        const controlsBox = await controls.locator("..").boundingBox();
-        assert.ok(controlsBox);
+        const coarseControls = await page.evaluate(
+          () => matchMedia("(hover: none), (pointer: coarse)").matches,
+        );
+        const controls = coarseControls
+          ? card.locator('button[aria-label^="Ações de "]')
+          : card.locator('button[aria-label^="Copiar"]').locator("..");
+        if ((await controls.count()) !== 1)
+          throw Error(
+            JSON.stringify({
+              theme,
+              viewport,
+              id,
+              controls: await card.locator("button").evaluateAll((elements) =>
+                elements.map((el) => ({
+                  name: el.getAttribute("aria-label"),
+                  text: el.textContent,
+                })),
+              ),
+            }),
+          );
+        const controlsBox = await controls.boundingBox();
+        assert.ok(
+          controlsBox,
+          JSON.stringify(
+            await controls.evaluate((el) => ({
+              theme: document.documentElement.dataset.theme,
+              coarse: matchMedia("(pointer: coarse)").matches,
+              hoverNone: matchMedia("(hover: none)").matches,
+              display: getComputedStyle(el).display,
+              visibility: getComputedStyle(el).visibility,
+              parentDisplay: getComputedStyle(el.parentElement).display,
+              rect: el.getBoundingClientRect().toJSON(),
+              className: el.className,
+            })),
+          ),
+        );
         assert.ok(!intersects(countBox, controlsBox));
         const scroll = card.locator('[role="region"]').last();
         await scroll.focus();
@@ -322,13 +449,21 @@ try {
         weeklyTarget: 96,
         weeklyTargetStableAfterWeekSelection: true,
         weeklyPath: pathBefore,
-        monthlyTarget: 2,
+        monthlyTarget: 52,
         monthlySummaryBelowMaximum: true,
         annualAverageDayFive: 5,
+        previousQuarterAverageDayFive: 3,
+        fourComparisonSeries: true,
+        dayWeekdayTooltips: true,
+        dailyTeamHover: true,
+        dailyTeamWeekdayLabelDoesNotOpen: true,
+        dailyTeamEscapeAndKeyboard: true,
+        dailyTeamTouchControl: touch,
         tooltipOnlyNumeric: true,
         tables,
         overflow,
       });
+      console.log(JSON.stringify({ theme, viewport, passed: true }));
       if (theme === "dark") {
         await weekly.screenshot({ path: path.join(out, `sintetico-weekly-${viewport.width}.png`) });
         await monthly.screenshot({
@@ -339,6 +474,7 @@ try {
     }
   assert.deepEqual(evidence.errors, []);
   assert.deepEqual(evidence.externalRequests, []);
+  assert.ok(evidence.checks.length > 0);
   evidence.passed = true;
 } finally {
   await browser.close();

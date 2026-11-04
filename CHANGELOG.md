@@ -1,8 +1,23 @@
 # Changelog
 
+- Estabiliza a margem do aviso dos filtros da página inicial em10px,
+  independentemente da ordem dos módulos CSS, preservando a referência visual.
+
 - Registra o bloqueio de publicação do PR490: comparação visual externa de
   `/app` na CI41853820787, sem alteração de baseline ou aplicação em produção.
   Ajustes de Agendamentos implementados e testes funcionais aprovados no candidato.
+
+- Acrescenta média do trimestre anterior, dias da semana abreviados e detalhes
+  da equipe por dia em Agendamentos. Corrige a linha mensal pela regra de dias
+  úteis e quintas em dobro, com meta zero nos feriados de São Paulo capital.
+  Equipe Produtiva recebe releitura automática a cada30min e detalhes de
+  Agendamentos com nomes compactos e equipes com/sem agendamento.
+  Diagnóstico da coleta Salesforce registra códigos seguros de falha, sem
+  expor mensagens privadas ou alterar a agenda de publicação.
+  Relatório cuja contagem muda durante o particionamento ganha uma única
+  repetição consistente, mantendo os controles de integridade e o prazo global.
+  A abertura explícita do detalhe diário move o foco para o diálogo e devolve
+  ao botão ao fechar, preservando o foco durante hover e seleção do dia.
 
 - Publica CAIXA compacta emc97d5fd2, com campos principais em duas linhas e
   valores até9.999.999,99 legíveis. CI final e smoke em produção aprovados;

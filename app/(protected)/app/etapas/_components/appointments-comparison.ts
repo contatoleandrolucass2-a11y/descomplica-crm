@@ -8,7 +8,7 @@ import {
 } from "@/lib/crm/stages/appointments";
 
 export interface AppointmentComparisonSeries {
-  key: "selected" | "previous" | "year-average";
+  key: "selected" | "previous" | "year-average" | "quarter-average";
   label: string;
   values: (number | null)[];
 }
@@ -16,7 +16,12 @@ export interface AppointmentComparisonSeries {
 export interface AppointmentComparison {
   month: string;
   days: number[];
-  series: [AppointmentComparisonSeries, AppointmentComparisonSeries, AppointmentComparisonSeries];
+  series: [
+    AppointmentComparisonSeries,
+    AppointmentComparisonSeries,
+    AppointmentComparisonSeries,
+    AppointmentComparisonSeries,
+  ];
   description: string;
 }
 
@@ -51,6 +56,13 @@ export function buildAppointmentComparison(
   const previousDate = new Date(selectedDate);
   previousDate.setUTCMonth(previousDate.getUTCMonth() - 1);
   const previousMonth = previousDate.toISOString().slice(0, 7);
+  const quarterStart = new Date(selectedDate);
+  quarterStart.setUTCMonth(Math.floor(selectedDate.getUTCMonth() / 3) * 3 - 3);
+  const quarterMonths = Array.from({ length: 3 }, (_, index) => {
+    const date = new Date(quarterStart);
+    date.setUTCMonth(date.getUTCMonth() + index);
+    return date.toISOString().slice(0, 7);
+  });
   const year = month.slice(0, 4);
   const allDays = Array.from({ length: 31 }, (_, index) => index + 1);
   const selectedDates = filters.createdDates?.length
@@ -121,6 +133,19 @@ export function buildAppointmentComparison(
       ? Math.ceil(covered.reduce((sum, value) => sum + value, 0) / covered.length)
       : null;
   });
+  const quarterAverage = allDays.map((day, index) => {
+    if (quarterMonths.some((requestedMonth) => requestedMonth.startsWith("0000-"))) return null;
+    const validMonths = quarterMonths.filter(
+      (requestedMonth) =>
+        `${requestedMonth}-${String(day).padStart(2, "0")}` <= lastDay(requestedMonth),
+    );
+    const values = validMonths.map((requestedMonth) => valuesForMonth(requestedMonth)[index]!);
+    // Missing coverage is not a zero or a three-month average. Calendar dates
+    // that do not exist (such as September 31) never enter the denominator.
+    return values.length && values.every((value): value is number => value !== null)
+      ? Math.ceil(values.reduce((sum, value) => sum + value, 0) / values.length)
+      : null;
+  });
   const monthLabel = new Intl.DateTimeFormat("pt-BR", {
     month: "long",
     year: "numeric",
@@ -145,9 +170,15 @@ export function buildAppointmentComparison(
         label: `Média de ${year}`,
         values: days.map((day) => average[day - 1]!),
       },
+      {
+        key: "quarter-average",
+        label: `Último trimestre · ${monthLabel.format(quarterStart)} a ${monthLabel.format(new Date(`${quarterMonths[2]!}-01T12:00:00Z`))}`,
+        values: days.map((day) => quarterAverage[day - 1]!),
+      },
     ],
     description:
       `Dias válidos do mês de referência e filtros de período e equipe mantidos. ` +
-      `Comparação dos mesmos números de dia; média de ${year} entre datas cobertas.`,
+      `Comparação dos mesmos números de dia; média de ${year} entre datas cobertas. ` +
+      `Último trimestre calendário completo, com média arredondada para cima; datas sem cobertura ficam indisponíveis.`,
   };
 }

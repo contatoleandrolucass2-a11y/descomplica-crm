@@ -8,6 +8,7 @@ import { saoPauloDate } from "@/lib/crm/stages/appointments";
 import { AnalyticsCanvas } from "../_components/analytics";
 import analytics from "../_components/analytics/analytics.module.css";
 import { ProductiveTeamDashboard } from "./_components/ProductiveTeamDashboard";
+import { ProductiveTeamAutoRefresh } from "./_components/useProductiveTeamRefresh";
 
 export default async function ProductiveTeamPage({
   searchParams,
@@ -22,6 +23,7 @@ export default async function ProductiveTeamPage({
   const data = await loadProductiveTeamReadModel(view);
   return (
     <main className={analytics.canvasMain}>
+      <ProductiveTeamAutoRefresh />
       <AnalyticsCanvas kind="stage">
         <ProductiveTeamDashboard
           key={view}

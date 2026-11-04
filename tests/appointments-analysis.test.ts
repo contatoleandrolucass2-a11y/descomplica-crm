@@ -140,7 +140,8 @@ describe("appointment chart analysis", () => {
       goal: 4,
     });
     expect(result.daily.find(({ key }) => key === "2026-10-03")?.goal).toBe(0);
-    expect(result.weekly.map(({ goal }) => goal)).toEqual([6, 12, 12, 12]);
+    expect(result.daily.find(({ key }) => key === "2026-10-12")?.goal).toBe(0);
+    expect(result.weekly.map(({ goal }) => goal)).toEqual([6, 12, 10, 12]);
     expect(result.todayGoal).toBe(2);
     expect(result.plannedToday).toBe(2);
     expect(result.monthlyGoal).toBe(58);
@@ -149,7 +150,7 @@ describe("appointment chart analysis", () => {
       ["09", 34],
       ["10", 58],
     ]);
-    expect(result.daily.reduce((sum, bucket) => sum + bucket.goal!, 0)).toBe(32);
+    expect(result.daily.reduce((sum, bucket) => sum + bucket.goal!, 0)).toBe(30);
   });
 
   it("intersects date/week filters and uses the deduplicated filtered roster", () => {
@@ -239,7 +240,7 @@ describe("appointment chart analysis", () => {
     expect(result.weekly.map(({ key, goal }) => [key, goal])).toEqual([
       ["1", 6],
       ["2", 12],
-      ["3", 12],
+      ["3", 10],
       ["4", 12],
     ]);
   });

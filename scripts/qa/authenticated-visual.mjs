@@ -5840,7 +5840,10 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
           await trigger.focus();
           await page.keyboard.press("Enter");
           const dialog = page.getByRole("dialog", {
-            name: `Equipe Produtiva — ${activity}`,
+            name:
+              activity === "Agendamentos"
+                ? "Equipe com agendamento — Agendamentos"
+                : `Equipe Produtiva — ${activity}`,
             exact: true,
           });
           await expect(dialog).toBeVisible();
@@ -5848,7 +5851,9 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
             dialog.getByRole("button", { name: "Fechar detalhes do indicador", exact: true }),
           ).toBeFocused();
           const tableChecks = [];
-          for (const name of ["Equipe Produtiva", "Equipe não Produtiva"]) {
+          for (const name of activity === "Agendamentos"
+            ? ["Equipe com agendamento", "Equipe sem agendamento"]
+            : ["Equipe Produtiva", "Equipe não Produtiva"]) {
             const table = dialog.getByRole("table", { name, exact: true });
             await expect(table.getByRole("columnheader")).toHaveText([
               "Gerente Regional",

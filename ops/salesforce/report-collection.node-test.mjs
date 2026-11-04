@@ -799,6 +799,102 @@ test("rejects reconciliation drift after date partitioning", async () => {
   await assert.rejects(collect("opportunities", fixture, "2026-10-07", REFERENCE), {
     code: "SALESFORCE_INVALID_REPORT",
   });
+  assert.equal(fixture.calls.filter(({ url }) => url.endsWith("/describe")).length, 2);
+  assert.equal(fixture.calls.filter(({ method }) => method === "POST").length, 6);
+});
+
+test("retries one count drift from a new root and returns only the consistent generation", async () => {
+  let generation = 0;
+  const ranges = [];
+  const fixture = client({
+    describeFor: (metadata) => {
+      generation += 1;
+      return metadata;
+    },
+    resultFor: (definition, metadata) => {
+      const { startDate, endDate } = metadata.standardDateFilter;
+      ranges.push([generation, startDate, endDate]);
+      const result = complete(definition, metadata, [
+        generation * 10 + (startDate.endsWith("07") ? 1 : 2),
+      ]);
+      if (startDate !== endDate) {
+        result.allData = false;
+        result.factMap["T!T"].aggregates[0].value = generation === 1 ? 1 : 2;
+      }
+      return result;
+    },
+  });
+  const rows = await collect("opportunities", fixture, "2026-10-07", REFERENCE);
+  assert.equal(generation, 2);
+  assert.deepEqual(
+    rows.map((row) => row.recordId),
+    ["006000000000021AAA", "006000000000022AAA"],
+  );
+  assert.deepEqual(ranges, [
+    [1, "2026-10-07", REFERENCE],
+    [1, "2026-10-07", "2026-10-07"],
+    [1, REFERENCE, REFERENCE],
+    [2, "2026-10-07", REFERENCE],
+    [2, "2026-10-07", "2026-10-07"],
+    [2, REFERENCE, REFERENCE],
+  ]);
+});
+
+test("does not retry an unrelated report guard failure", async () => {
+  const fixture = client({
+    resultFor: (definition, metadata) => {
+      metadata.standardDateFilter.column = "UnexpectedDateColumn";
+      return complete(definition, metadata);
+    },
+  });
+  await assert.rejects(collect("opportunities", fixture), { code: "SALESFORCE_INVALID_REPORT" });
+  assert.equal(fixture.calls.filter(({ url }) => url.endsWith("/describe")).length, 1);
+  assert.equal(fixture.calls.filter(({ method }) => method === "POST").length, 1);
+});
+
+test("count-drift retry shares the original 25-minute budget instead of resetting it", async () => {
+  let time = 0;
+  const fixture = client({
+    resultFor: (definition, metadata) => {
+      const result = complete(definition, metadata);
+      if (metadata.standardDateFilter.startDate !== metadata.standardDateFilter.endDate) {
+        result.allData = false;
+        result.factMap["T!T"].aggregates[0].value = 1;
+      }
+      return result;
+    },
+  });
+  fixture.options.now = () => time;
+  fixture.options.reportTimeoutMs = 30 * 60_000;
+  fixture.options.sleep = async () => {
+    time += 8 * 60_000;
+  };
+  await assert.rejects(collect("opportunities", fixture, "2026-10-07", REFERENCE), {
+    code: "SALESFORCE_TIMEOUT",
+  });
+  assert.equal(fixture.calls.filter(({ url }) => url.endsWith("/describe")).length, 2);
+  assert.equal(fixture.calls.filter(({ method }) => method === "POST").length, 4);
+});
+
+test("caller cancellation prevents another generation from starting", async () => {
+  const controller = new AbortController();
+  const fixture = client({
+    resultFor: (definition, metadata) => {
+      const result = complete(definition, metadata);
+      if (metadata.standardDateFilter.startDate !== metadata.standardDateFilter.endDate) {
+        result.allData = false;
+        result.factMap["T!T"].aggregates[0].value = 1;
+      } else if (metadata.standardDateFilter.startDate === REFERENCE) {
+        controller.abort("PRIVATE caller cancellation");
+      }
+      return result;
+    },
+  });
+  fixture.options.signal = controller.signal;
+  await assert.rejects(collect("opportunities", fixture, "2026-10-07", REFERENCE), {
+    code: "SALESFORCE_CANCELLED",
+  });
+  assert.equal(fixture.calls.filter(({ url }) => url.endsWith("/describe")).length, 1);
 });
 
 test("export awaits onCollected, keeps candidate return shape, and releases the cycle lock", async (t) => {

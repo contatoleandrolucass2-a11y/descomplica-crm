@@ -28,6 +28,40 @@ um mês atual sem dados aparece indisponível, sem reutilizar o mês anterior.
 Hoje e ontem usam as datas civis correspondentes; fora da cobertura não são zero.
 A atualização da fonte aparece ao lado do título da página.
 
+### Calendário de metas e comparação diária
+
+A referência pontilhada do gráfico mensal usa o mês selecionado no filtro:
+meta individual do mês inteiro multiplicada pelo elenco oficial filtrado.
+Cada segunda, terça, quarta e sexta úteis vale um; quinta útil vale dois.
+Sábados, domingos e feriados nacionais, estaduais e municipais aplicáveis a
+São Paulo capital valem zero. Não confundir feriado com ponto facultativo,
+emenda ou recesso de repartições públicas. A regra foi confirmada pelo usuário
+em04/11/2026 e conferida no
+[calendário municipal oficial](https://prefeitura.sp.gov.br/web/gestao/w/calendario_2026).
+Exemplo: outubro2026 tem26 por corretor;20 corretores resultam520.
+O ano exclusivo do gráfico não troca o mês de referência da meta. Esta linha
+não altera a configuração comercial mensal do medidor/funil.
+
+Metas diárias e seus agregados também zeram nos feriados. Cadastro indisponível
+continua indisponível, não zero. Os marcadores visuais de feriado continuam
+seguindo o calendário nacional solicitado anteriormente.
+
+O comparativo diário possui quatro séries: mês de referência, mês anterior,
+média anual e média do trimestre calendário completo anterior. Outubro usa
+julho/agosto/setembro; janeiro usa outubro/novembro/dezembro do ano anterior.
+As médias arredondam para cima. Data existente sem cobertura no trimestre
+mantém indisponibilidade; dias inexistentes não entram no divisor. O eixo
+respeita dias válidos e filtros do período de referência, mantendo a equipe.
+Hover do eixo informa o dia da semana em três letras; o valor do ponto mantém
+tooltip exclusivamente numérico.
+
+Hover de uma torre diária mostra equipe com/sem agendamento, conciliada com
+o cadastro e os mesmos filtros. Nomes compactos são apenas apresentação;
+identidades completas continuam sendo usadas no cálculo. Foco/ArrowDown,
+Escape e controle explícito em toque dão acesso à mesma prévia, com rolagem
+independente e sem mudar o tamanho do card. Hover do rótulo do dia não abre
+a lista nominal.
+
 O card de vendas mostra quantidade e soma de **Valor Real de Venda**, campo
 `Opportunity.Valor_Real_de_Venda__c` do relatório `00OU600000EjFyyMAF`.
 O coletor já transporta esse valor e o projetor v4 vigente preserva a soma em
