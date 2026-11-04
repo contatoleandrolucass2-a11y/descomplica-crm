@@ -4876,3 +4876,13 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
     line-height: 1.25;
   }
 }
+@media (min-width: 1200px) and (max-width: 1279px) {
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field > span {
+    font-size: 11px;
+    letter-spacing: normal;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-primary-grid .caixa-money-input input {
+    padding-inline: 4px;
+    font-size: 13px;
+  }
+}

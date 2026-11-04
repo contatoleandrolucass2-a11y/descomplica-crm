@@ -19,6 +19,21 @@
   sucesso em9 cenários e18 estados de proposta, três temas e larguras1440/375/320.
   Asserção Anual 1/foco preservada, sem aumento de timeout ou skip. Sem erros
   de console nem requisições externas; CI integrada e revisão CAIXA seguem obrigatórias.
+- CI41770246907, headbaa85962/capturab931400b, árvorebd962d3f: guia Associativo,
+  demais funcionais,154 telas responsivas,88 temas,242 axe e zoom aprovados.
+  Somente11 comparações visuais CAIXA divergiram pelo redesenho solicitado.
+- Artefato13296034620, ZIP SHA-256
+  9cdeb6f36f6f260b5f6f490d78d529e95478a3df8144dc8d812cef032c57d09b conferido.
+  Fingerprint88b7eba90091cd0d6bd56039876c3dbab94f65f66c40ba5c79bc3f5211d322fa
+  reproduzido com diff rastreado vazio e19 outputs sintéticos Conectar Sistemas.
+  Árvore da captura igual à do head; dirty e resultado geral falho preservados.
+- Onze imagens CAIXA revisadas em desktop/tablet/celular e três temas, sem cortes;
+  somente essas11 imagens/linhas do manifesto atualizadas. Outras231 preservadas,
+  deltas antigos retidos e limiares intactos. Nova CI do candidato continua exigida.
+- Limite1200–1279px recebeu tipografia/padding próprios para conservar espaço
+  entre rótulos e leitura do valor máximo; isso não afeta nenhuma das11 larguras
+  capturadas. Prova focada passou em1200/1280/1440/1920, duas linhas e oito estados
+  de sidebar, com9.999.999,99 inteiro nos quatro campos. Validar CI final exata.
 
 ## 2026-11-03 — CAIXA: campos dimensionados e duas linhas no desktop
 

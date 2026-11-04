@@ -11000,6 +11000,12 @@ b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigi
 - Comando original passou localmente em9 cenários/18 estados, três temas e
   desktop/celular, sem erros de console ou requisições externas. A alteração da
   aplicação continua exclusivamente CAIXA. CI final/publicação permanecem obrigatórias.
+- CI41770246907 aprovou o guia Associativo e todos os funcionais/temas/axe/zoom;
+  falhou somente nos11 deltas intencionais CAIXA. Artefato13296034620 e cadeia de
+  hashes conferidos;11 capturas revisadas/promovidas,231 referências preservadas.
+  Proveniência completa em ATUALIZACOES e reviewedUpdates do manifesto.
+- Tipografia/padding de1200–1279px não alteram as capturas revisadas. Teste focado
+  do limite1200 e dos demais desktops passou; CI do candidato final obrigatória.
 
 ### 04/11/2026 — CAIXA compacta: bloqueio externo de publicação
 

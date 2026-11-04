@@ -234,7 +234,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         await input.fill("999999999");
         await browserExpect(input).toHaveValue("9.999.999,99");
       }
-      for (const width of [1280, 1440, 1920]) {
+      for (const width of [1200, 1280, 1440, 1920]) {
         await page.setViewportSize({ width, height: 900 });
         for (const expanded of [false, true]) {
           if (expanded) await page.locator(".caixa-tool-sidebar").hover();
