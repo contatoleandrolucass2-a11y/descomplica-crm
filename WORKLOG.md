@@ -19,14 +19,47 @@
   comercial20107:36:48.976UTC, estoque3494às07:37:14UTC. MesmoPID4134053
   desde07:07, sem start/stop no intervalo. Nenhuma coleta manual foi disparada.
 - Chrome perdeu controle às06:49UTC (Debugger unattached), após baseline;
-  releitura e captura documentadas indisponíveis. Solicitada reativação da
-  mesma aba sem reload; resposta pendente. Não aprovar Chrome por inferência.
-  Aba própria preservada para retomada; as duas abas IAB de teste foram
-  encerradas após os prints e o viewport temporário foi restaurado.
-- Registro somente documental preparado sobre mainb1544dd1, que contém
-  entrega CAIXA independente ainda não publicada na última consulta. Runtime
-  observado continua02fcbc06; não confundir main atual com app publicado.
-  Integração deste registro aguarda a janela de publicação concorrente.
+  primeira aba não aprovada. Nova aba própria9834, na versão b1544dd1 já
+  publicada por outra entrega, montada07:51:06UTC com04:33. Às09:40:48UTC
+  mostrava06:32 sem reload, navegação ou filtro.32cards/estilos/ordem/filtros/
+  rolagem idênticos ao baseline. A espera de60s excedeu6084s na ferramenta;
+  não alegar observações individuais dos horários intermediários.
+- Fonte: ciclo08:00 iniciou08:00:06UTC, comercial20108:06:44UTC; último201
+  09:36:08UTC, estoque3494às09:36:36UTC. MesmoPID4134053 e nenhum start/stop
+  desde07:51. Origem não foi executada manualmente. Três prints finais reais.
+- Todas as abas próprias foram encerradas após as capturas, preservando as
+  abas originais do usuário. Viewport temporário IAB restaurado. Sem novos
+  testes redundantes de IAB/celular após sua aprovação; sem nova publicação
+  da aplicação para esta documentação.
+- Registros paralelos CAIXA de main36b8fbe6 preservados integralmente na
+  conciliação. Health09:40:26UTC HTTP200/ok na versão publicada b1544dd1;
+  os quatro arquivos runtime do refresh são idênticos a02fcbc06. Registro
+  de encerramento segue no mesmo PR498, com CI documental e sync próprios.
+
+## 2026-11-05 — CAIXA publicada e validada: unidades na página
+
+- PR495 integrado em b1544dd13aacb12690fa75e60e43e9881e1627ff; árvore idêntica
+  ao candidato aprovado50993c01. CI PR41976197227 e main41981829345 com
+  validate, release-gates, isolated-restore e promotable-image aprovados.
+- Artefato13393699737, ZIP6c558f507788344e9cbeb0169f3e03b6f279645692de30d06b70f2e9e243478a;
+  checksum, manifesto/configuração,14camadas linux/amd64 e dois perfis de runtime
+  conferidos. Imagem local7f4ad9a8e701be07dcb9256296833aed910c1ded609f23f72cfce77a11a0d482.
+- Backup privado env/ledger comparado e imagem anterior preservada. Janela
+  concorrente liberada pelo responsável antes da troca, preservando sua prova.
+  Coordenador único publicou07:47:19.438UTC (04:47:19America/Sao_Paulo),
+  deploymentf834574b-d487-49fd-b7f8-b145be55fd4a, sem pendência.
+- Health público200/ok na versão b1544dd1 e acesso anônimo307/login.
+  Chrome autenticado1280/390: expansão inline sem diálogo,1516unidades
+  aprovadas de3494, descrição, fluxo84mensais, aprovação, documentação e6ações.
+  Desconto fictício10000: compra247790→237790 e financiamento198232→190232
+  (80%); sem autorização, aprovação/cronograma/proposta pronta bloqueados;
+  zerar desconto restaura o fluxo. Cenário4k/275k/50m²/1proponente sem dependentes
+  e sem36mesesFGTS calculou subsídio1091,41 automaticamente.
+- Formulário com19campos em duas linhas no desktop, borda integral e sem
+  overflow no celular. Capturas locais de viewport registradas; captura full-page
+  excedeu o timeout, sem afetar o smoke. Perfil limpo e viewport restaurado.
+  Nenhuma proposta salva/enviada, impressão física ou alteração em outra página.
+- Encerramento documental e sincronização Obsidian; não requer novo runtime.
 
 ## 2026-11-04 — CAIXA: unidades na página e campos com borda completa
 
