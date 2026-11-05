@@ -1407,6 +1407,117 @@
   zoom: var(--dashboard-content-scale, 1);
 }
 
+/* Appointment composition is fitted, never repacked, when viewport/zoom changes. */
+.appointmentsShell .dashboardSidebar {
+  top: var(--dashboard-header-height, 58px);
+  height: var(--appointments-sidebar-height, calc(100dvh - var(--dashboard-header-height, 58px)));
+  min-height: 0;
+  max-height: var(
+    --appointments-sidebar-height,
+    calc(100dvh - var(--dashboard-header-height, 58px))
+  );
+}
+
+.appointmentsShell .dashboardSidebar > nav {
+  min-height: 0;
+  flex: 0 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.appointmentsShell .dashboardGuide {
+  flex-shrink: 0;
+}
+
+.appointmentsShell[data-dashboard-shell][data-appointments-composition="true"]
+  :global(
+    [data-free-resize="true"]
+      [data-dashboard-canvas-grid]
+      > :is([data-dashboard-card-id], [aria-hidden="true"])
+  ) {
+  width: var(--dashboard-card-width, auto) !important;
+}
+
+.appointmentsPresentationBar {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  color: var(--analytics-ink);
+}
+
+.appointmentsPresentationBar button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  border: 1px solid var(--analytics-line);
+  border-radius: 6px;
+  background: var(--analytics-surface);
+  padding: 4px 8px;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.appointmentsPresentationBar button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.appointmentsPresentationBar p {
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appointmentsShell[data-presentation-active="true"]
+  :global([data-appointments-dashboard] > :not([data-appointments-canvas])) {
+  display: none;
+}
+
+.appointmentsShell[data-presentation-active="true"]
+  :global([data-appointments-canvas] > :not([data-free-resize])) {
+  display: none;
+}
+
+.appointmentsShell[data-appointments-composition="true"][data-presentation-active="true"]
+  :global([data-dashboard-canvas-grid]) {
+  display: grid;
+  height: var(--appointments-focus-height);
+  min-height: var(--appointments-focus-height);
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+}
+
+.appointmentsShell[data-presentation-active="true"]
+  :global([data-dashboard-card-id]:not([data-appointments-presented])) {
+  display: none;
+}
+
+.appointmentsShell[data-presentation-active="true"] :global([data-appointments-presented]) {
+  grid-column: 1 !important;
+  justify-self: center;
+  align-self: center;
+  zoom: var(--appointments-focused-zoom, 1);
+}
+
+.appointmentsShell[data-presentation-active="true"] :global([data-appointments-presented] > header),
+.appointmentsShell[data-presentation-active="true"]
+  :global([data-appointments-presented] > [data-dashboard-export-ignore]) {
+  display: none;
+}
+
+.appointmentsShell[data-presentation-active="true"] :global([data-appointments-presented]:focus) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+
 .dashboardSurface :global([data-protected-main-content] > main) {
   padding: 8px;
 }

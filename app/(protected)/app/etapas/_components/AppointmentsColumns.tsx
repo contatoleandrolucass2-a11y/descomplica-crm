@@ -64,6 +64,8 @@ export function AppointmentsColumns({
   monthly = false,
   verticalLabels = false,
   reference,
+  goalLabel,
+  showGoalSummary = false,
 }: {
   buckets: Bucket[];
   label: string;
@@ -74,6 +76,8 @@ export function AppointmentsColumns({
   monthly?: boolean;
   verticalLabels?: boolean;
   reference?: { value: number | null; label: string; classify?: boolean; showSummary?: boolean };
+  goalLabel?: string;
+  showGoalSummary?: boolean;
 }) {
   const control = useDashboardBarHeightControl();
   const host = useRef<HTMLDivElement>(null);
@@ -151,7 +155,7 @@ export function AppointmentsColumns({
   );
   const maximum = Math.max(1, largest?.total ?? 0);
   const pixelsPerUnit = renderedLimit / maximum;
-  const referenceName = reference?.label ?? "Meta";
+  const referenceName = reference?.label ?? goalLabel ?? "Meta";
   const classifyReference = reference?.classify !== false;
   const referenceValue =
     reference?.value != null && Number.isFinite(reference.value) && reference.value >= 0
@@ -215,10 +219,18 @@ export function AppointmentsColumns({
               ? ` · ${daily ? largest.key.split("-").reverse().join("/") : largest.label}`
               : ""}
           </span>
-          {reference?.showSummary && (
+          {(reference?.showSummary || showGoalSummary) && (
             <span className={styles.maximumSummary} data-appointments-reference-summary>
               {referenceName}{" "}
-              {referenceValue === null ? "indisponível" : number.format(referenceValue)}
+              {reference
+                ? referenceValue === null
+                  ? "indisponível"
+                  : number.format(referenceValue)
+                : minGoal === null
+                  ? "indisponível"
+                  : minGoal === maxGoal
+                    ? number.format(minGoal)
+                    : `${number.format(minGoal)}–${number.format(maxGoal!)}`}
             </span>
           )}
         </p>
@@ -347,6 +359,12 @@ export function AppointmentsColumns({
                       <span
                         className={styles.columnValue}
                         data-appointments-value
+                        data-appointments-team-day={daily ? item.key : undefined}
+                        data-appointments-value-status={
+                          classifyReference && goal != null && item.total < goal
+                            ? "negative"
+                            : undefined
+                        }
                         style={{ bottom: item.total * pixelsPerUnit }}
                       >
                         {number.format(item.total)}

@@ -11,6 +11,8 @@ export interface AppointmentBucket {
 }
 export interface AppointmentGoalBucket extends AppointmentBucket {
   goal: number | null;
+  /** Known cohort only: may prove a shortfall, never that an exact target was met. */
+  goalLowerBound?: number;
 }
 
 /** House projected individual monthly targets, resolved by the authorized RPC per month. */
@@ -187,9 +189,6 @@ export function analyzeAppointments(
   const daily = new Map<string, number>(),
     weekly = new Map<string, number>(),
     monthly = new Map<string, number>();
-  // The weekly benchmark uses the whole selected month. Drill-downs into a
-  // day or week may filter visible bars, but must not lower the month's record.
-  const monthWeeklyTotals = new Map<string, number>();
   const managers = new Map<string, number>(),
     owners = new Map<string, number>();
   const regionalManagers = new Map<string, number>(),
@@ -449,7 +448,6 @@ export function analyzeAppointments(
       const date = saoPauloDate(appointment.createdAt);
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
       if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7));
-      if (date.slice(0, 7) === month) add(monthWeeklyTotals, String(appointmentWeekOfMonth(date)));
     }
   } else {
     for (const fact of dimensionFacts) {
@@ -457,8 +455,6 @@ export function analyzeAppointments(
       const date = fact[1];
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
       if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7), fact[7]);
-      if (date.slice(0, 7) === month)
-        add(monthWeeklyTotals, String(appointmentWeekOfMonth(date)), fact[7]);
     }
   }
 
@@ -669,6 +665,7 @@ export function analyzeAppointments(
   const dailyGoalFor = (date: string) => plannedAppointmentsForDate(date, goalBrokerCount);
   const dailyGoals = new Map<string, number | null>();
   const weeklyGoals = new Map<string, number | null>();
+  let individualPeriodGoal = 0;
   const coveredWeeks = new Set<string>();
   if (coverage !== "unavailable") {
     const goalDates = hasExplicitPeriod
@@ -683,6 +680,7 @@ export function analyzeAppointments(
       if (covered) coveredWeeks.add(week);
       if (!matchesSelectedPeriod(date)) continue;
       const goal = dailyGoalFor(date);
+      individualPeriodGoal += plannedAppointmentsForDate(date, 1)!;
       if (covered) dailyGoals.set(date, goal);
       const accumulated = weeklyGoals.get(week);
       weeklyGoals.set(
@@ -746,13 +744,46 @@ export function analyzeAppointments(
         selectedCoveredDays;
 
   const funnelAvailable = slice.version === 4 && conversionAvailable && coverage !== "unavailable";
+  const knownWeeklyGoals = [...weeklyGoals.values()].filter((goal) => goal !== null);
   const weeklyTarget =
-    coverage === "unavailable" ||
-    (dimensionFilteredOperations === null &&
-      (Boolean(filters.accountRanking) ||
-        (Boolean(filters.regionalManager) && !regionalFactsAvailable)))
+    coverage === "unavailable" || goalBrokerCount === null || !knownWeeklyGoals.length
       ? null
-      : Math.max(0, ...monthWeeklyTotals.values());
+      : Math.max(...knownWeeklyGoals);
+  // A rank is compared with its registered cohort's calendar target, never
+  // with the largest observed rank or the count of brokers who had activity.
+  const rankingWithGoals = (
+    totals: Map<string, number>,
+    dimension: "owner" | "manager" | "regionalManager",
+  ): AppointmentGoalBucket[] => {
+    const eligibleRoster =
+      rosterUnavailableReason === null && coverage !== "unavailable" ? filteredRoster : null;
+    const regionalRosterKnown =
+      dimension !== "regionalManager" ||
+      (eligibleRoster !== null &&
+        eligibleRoster.every((broker) => stableRegionForManager(broker.manager) !== null));
+    return ranking(totals).map((bucket) => {
+      if (eligibleRoster === null) return { ...bucket, goal: null };
+      const cohort = eligibleRoster.filter((broker) => {
+        const name =
+          dimension === "regionalManager"
+            ? stableRegionForManager(broker.manager)
+            : broker[dimension];
+        return name !== null && appointmentIdentity(name) === appointmentIdentity(bucket.key);
+      });
+      const brokerCount = new Set(cohort.map((broker) => broker.key)).size;
+      if (!regionalRosterKnown) {
+        return {
+          ...bucket,
+          goal: null,
+          ...(brokerCount > 0 ? { goalLowerBound: individualPeriodGoal * brokerCount } : {}),
+        };
+      }
+      return {
+        ...bucket,
+        goal: brokerCount > 0 ? individualPeriodGoal * brokerCount : null,
+      };
+    });
+  };
 
   return {
     total,
@@ -791,7 +822,8 @@ export function analyzeAppointments(
     selectedCoveredDays,
     daysInMonth: Number(end.slice(8, 10)),
     details,
-    regionalManagers: filteredOperations === null ? null : ranking(regionalManagers),
+    regionalManagers:
+      filteredOperations === null ? null : rankingWithGoals(regionalManagers, "regionalManager"),
     accountRankings: filteredOperations === null ? null : ranking(accountRankings),
     coverage,
     daily: withGoals(
@@ -809,8 +841,8 @@ export function analyzeAppointments(
       monthGoals,
       (key) => APPOINTMENT_MONTHS[Number(key) - 1]!,
     ),
-    managers: ranking(managers),
-    owners: ranking(owners),
+    managers: rankingWithGoals(managers, "manager"),
+    owners: rankingWithGoals(owners, "owner"),
     stores: ranking(stores),
     developments: slice.version === 2 ? ranking(developments) : null,
     developmentRankings: (() => {

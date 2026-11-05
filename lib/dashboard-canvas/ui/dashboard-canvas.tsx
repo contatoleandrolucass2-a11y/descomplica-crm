@@ -420,14 +420,16 @@ export function DashboardCanvas({
     : undefined;
 
   function cardStyle(card: DashboardCard, columnSpan: number): CSSProperties {
+    const width =
+      card.layout.width ??
+      `calc(${(columnSpan * 100) / 12}% - ${(gap * (12 - columnSpan)) / 12}px)`;
     return {
       gridColumn: `span ${columnSpan}`,
       height: card.layout.height,
       ...(layoutPolicy?.freeResize
         ? {
-            width:
-              card.layout.width ??
-              `calc(${(columnSpan * 100) / 12}% - ${(gap * (12 - columnSpan)) / 12}px)`,
+            width,
+            "--dashboard-card-width": typeof width === "number" ? `${width}px` : width,
             maxWidth: "100%",
           }
         : {}),
@@ -446,6 +448,7 @@ export function DashboardCanvas({
       <div
         ref={gridRef}
         className={styles.grid}
+        data-dashboard-canvas-grid
         style={{ gap }}
         onPointerMove={handlePointerMove}
         onPointerUp={finishInteraction}
@@ -471,6 +474,7 @@ export function DashboardCanvas({
               style={cardStyle(card, columnSpan)}
               data-fixed-width={card.layout.width !== undefined ? "true" : undefined}
               data-dashboard-card-id={card.id}
+              data-dashboard-card-metric={card.metric}
             >
               <header className={styles.header}>
                 <button

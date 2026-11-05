@@ -145,17 +145,19 @@ test(
           await expect
             .poll(() =>
               page.locator("[data-dashboard-surface]").evaluate((surface) => {
-                const shell = surface.closest("[data-dashboard-shell]");
                 return (
                   Math.abs(
                     Number.parseFloat(surface.style.getPropertyValue("--dashboard-layout-width")) -
-                      (shell.clientWidth - 44),
+                      1236,
                   ) < 1
                 );
               }),
             )
             .toBe(true);
           const collapsedContent = await content.boundingBox();
+          const collapsedScale = await page
+            .locator("[data-dashboard-surface]")
+            .evaluate((surface) => Number(surface.dataset.contentScale));
           const collapsedCards = await readCards(page);
           if (screenshotDirectory && (width === 390 || width === 1440)) {
             await page.screenshot({
@@ -167,9 +169,10 @@ test(
           await expect(sidebar).toHaveCSS("width", "136px");
           await expect(appointments.locator("span").last()).toBeVisible();
           const expandedContent = await content.boundingBox();
-          const contentScale = await page
+          const expandedScale = await page
             .locator("[data-dashboard-surface]")
             .evaluate((surface) => Number(surface.dataset.contentScale));
+          const contentScale = expandedScale / collapsedScale;
           assert.ok(
             width > 760 ? contentScale > 0 && contentScale < 1 : contentScale === 1,
             "Desktop compacts uniformly; mobile overlays without shrinking content",
@@ -252,6 +255,9 @@ test(
         "true",
       );
       const zoomBefore = await readCards(page);
+      const zoomCollapsedScale = await page
+        .locator("[data-dashboard-surface]")
+        .evaluate((surface) => Number(surface.dataset.contentScale));
       await zoomAppointments.hover();
       await expect(page.locator("[data-dashboard-shell]")).toHaveAttribute(
         "data-collapsed",
@@ -260,7 +266,7 @@ test(
       const zoomScale = await page
         .locator("[data-dashboard-surface]")
         .evaluate((surface) => Number(surface.dataset.contentScale));
-      assertUniformLayout(zoomBefore, await readCards(page), zoomScale);
+      assertUniformLayout(zoomBefore, await readCards(page), zoomScale / zoomCollapsedScale);
       await page.mouse.move(1400, 450);
       await expect(page.locator("[data-dashboard-shell]")).toHaveAttribute(
         "data-collapsed",

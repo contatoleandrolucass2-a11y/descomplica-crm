@@ -1,5 +1,10 @@
 # Changelog
 
+- Ajusta somente Agendamentos: composição proporcional estável por tela/zoom,
+  navegação por gráfico centralizado, cards e pop-ups, filtros e tabelas compactos.
+  Metas diárias/semanais e por equipe seguem o calendário útil de São Paulo;
+  a lista inclui todos os agendamentos sem visita confirmada.
+
 - Corrige o cálculo das unidades CAIXA: capacidade de crédito própria de cada
   imóvel e elegibilidade por fluxo Linear ou Decrescente aprovado. Preserva
   anuais, preço real, cota e ranking; bloqueia proposta/impressão do fluxo reprovado.

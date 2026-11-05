@@ -6,7 +6,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type FocusEvent,
   type ReactNode,
 } from "react";
@@ -34,7 +33,7 @@ const unavailableMessage = (reason: DailyAppointmentTeam["unavailableReason"]) =
   return "Não foi possível conciliar com segurança a equipe cadastrada neste dia.";
 };
 
-/** Mouse/focus preview stays outside the card's clipped canvas. Touch has an explicit control. */
+/** Only the numeric result opens the centered preview; keyboard/touch have an explicit control. */
 export function DailyAppointmentsTeamDetails({
   analysis,
   brokerRoster,
@@ -50,7 +49,7 @@ export function DailyAppointmentsTeamDetails({
   buckets: AppointmentBucket[];
   children: ReactNode;
 }) {
-  const [active, setActive] = useState<{ date: string; pinned: boolean; top: number } | null>(null);
+  const [active, setActive] = useState<{ date: string; pinned: boolean } | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
@@ -86,22 +85,17 @@ export function DailyAppointmentsTeamDetails({
   const open = (element: HTMLElement, day: string, pinned = false) => {
     if (!buckets.some((bucket) => bucket.key === day) || dismissedDate.current === day) return;
     cancelClose();
-    anchor.current = element;
+    anchor.current = element.closest<HTMLElement>("button") ?? element;
     if (pinned) {
       if (closeButton.current) closeButton.current.focus();
       else focusExplicitOpen.current = true;
     }
-    const rect = element.getBoundingClientRect();
-    const height = Math.min(440, window.innerHeight - 24);
-    const top = Math.max(12, Math.min(rect.bottom + 8, window.innerHeight - height - 12));
     setActive((previous) =>
-      previous?.date === day && previous.pinned === pinned && previous.top === top
-        ? previous
-        : { date: day, pinned, top },
+      previous?.date === day && previous.pinned === pinned ? previous : { date: day, pinned },
     );
   };
   const triggerFor = (target: EventTarget | null) =>
-    target instanceof Element ? target.closest<HTMLElement>("button[data-appointments-day]") : null;
+    target instanceof Element ? target.closest<HTMLElement>("[data-appointments-team-day]") : null;
   const onBlur = (event: FocusEvent<HTMLElement>) => {
     const target = event.relatedTarget;
     if (
@@ -152,15 +146,8 @@ export function DailyAppointmentsTeamDetails({
       className={styles.root}
       onPointerOver={(event) => {
         if (event.pointerType === "touch" || active?.pinned) return;
-        if (
-          event.target instanceof Element &&
-          event.target.closest("[data-appointments-column-label]")
-        ) {
-          scheduleClose();
-          return;
-        }
         const trigger = triggerFor(event.target);
-        if (trigger) open(trigger, trigger.dataset.appointmentsDay!);
+        if (trigger) open(trigger, trigger.dataset.appointmentsTeamDay!);
       }}
       onPointerOut={(event) => {
         const trigger = triggerFor(event.target);
@@ -169,13 +156,12 @@ export function DailyAppointmentsTeamDetails({
           (!(event.relatedTarget instanceof Node) || !trigger.contains(event.relatedTarget))
         ) {
           dismissedDate.current = null;
-          scheduleClose();
         }
       }}
       onFocusCapture={(event) => {
         if (active?.pinned) return;
         const trigger = triggerFor(event.target);
-        if (trigger) open(trigger, trigger.dataset.appointmentsDay!);
+        if (trigger) open(trigger, trigger.dataset.appointmentsTeamDay!);
       }}
       onBlurCapture={onBlur}
       onKeyDownCapture={(event) => {
@@ -211,15 +197,7 @@ export function DailyAppointmentsTeamDetails({
               aria-modal="false"
               aria-labelledby={titleId}
               className={styles.panel}
-              style={
-                {
-                  "--daily-team-top": `${active.top}px`,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                } as CSSProperties
-              }
               onPointerEnter={cancelClose}
-              onPointerLeave={scheduleClose}
               onFocusCapture={cancelClose}
               onBlurCapture={onBlur}
             >

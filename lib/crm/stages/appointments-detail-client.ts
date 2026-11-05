@@ -1,5 +1,6 @@
 import {
   appointmentDetailQueryKey,
+  isAppointmentWithoutConfirmedVisit,
   isCompleteAppointmentDetailPage,
   type AppointmentDetailActions,
   type AppointmentDetailRequest,
@@ -53,7 +54,18 @@ export function createAppointmentDetailController(
     boundedSet(intents, queryKey, intent);
     const key = keyFor(queryKey, input.cursor, input.all);
     let pending = inFlight.get(key);
-    const cached = pages.get(key);
+    let cached = pages.get(key);
+    if (!cached && input.all && input.query.subset === "without_visit") {
+      // A complete authorized result may be reused for its own subset. Never
+      // filter a paginated bootstrap, different filters, or another generation.
+      const baseQueryKey = appointmentDetailQueryKey({ ...input.query, subset: undefined });
+      const base = pages.get(keyFor(baseQueryKey, null, true));
+      if (base && isCompleteAppointmentDetailPage(base) && base.snapshot === source.snapshot) {
+        const rows = base.rows!.filter(isAppointmentWithoutConfirmedVisit);
+        cached = { ...base, rows, total: rows.length };
+        boundedSet(pages, key, cached);
+      }
+    }
     if (cached) pending = Promise.resolve(cached);
     if (!pending) {
       pending = Promise.resolve()

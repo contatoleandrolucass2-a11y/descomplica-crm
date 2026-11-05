@@ -87,6 +87,34 @@ const conversionGoals = {
 };
 
 describe("appointment dashboard availability", () => {
+  it("marks a regional result below a proven minimum red without promoting an incomplete target to exact", () => {
+    const source = { ...current, viewKey: "without_canal_imob" as const };
+    const brokerRoster = [
+      { key: "known", owner: "Responsável sintético", manager: "Gerente sintético" },
+      { key: "unknown", owner: "Sem vínculo", manager: "Gerente desconhecido" },
+    ];
+    const markupFor = (count: number) =>
+      renderToStaticMarkup(
+        <AppointmentsDashboard
+          analysis={{
+            ...source,
+            appointments: Array.from({ length: count }, () => ({
+              ...source.appointments![0]!,
+              createdAt: "2026-10-01T12:00:00Z",
+            })),
+          }}
+          brokerRoster={brokerRoster}
+          calendarDate="2026-10-19"
+        />,
+      ).match(/<section[^>]*aria-label="Ranking por gerente regional"[^]*?<\/section>/u)?.[0] ?? "";
+    const below = markupFor(1);
+    expect(below).toContain('data-goal-status="negative"');
+    expect(below).toContain("Meta mínima comprovada: 26; meta total indisponível");
+    expect(below).not.toContain("Meta de agendamentos: 26");
+    const aboveMinimum = markupFor(30);
+    expect(aboveMinimum).toContain('data-goal-status="unavailable"');
+    expect(aboveMinimum).not.toContain('data-goal-status="positive"');
+  });
   it("opens the civil current month even when the validated snapshot is from last month", () => {
     const markup = renderToStaticMarkup(
       <AppointmentsDashboard
@@ -146,7 +174,13 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain("Filtros do painel de agendamentos");
     expect(markup).toContain("Canal de vendas");
     expect(markup).toContain("Gerente Regional");
-    expect(markup).toContain("Todos os gerentes regionais");
+    expect(markup).toMatch(
+      /id="appointment-filter-regionalManager"[^]*?<option value="" selected="">Todos<\/option>/u,
+    );
+    expect(markup).toMatch(
+      /id="appointment-filter-company"[^]*?<option value="" selected="">Todas<\/option>/u,
+    );
+    expect(markup).not.toContain("Todos os gerentes regionais");
     expect(markup).toContain("Gerente de Vendas");
     expect(markup).toContain("Responsável da conta");
     expect(markup).toContain(">Empresa</span>");
