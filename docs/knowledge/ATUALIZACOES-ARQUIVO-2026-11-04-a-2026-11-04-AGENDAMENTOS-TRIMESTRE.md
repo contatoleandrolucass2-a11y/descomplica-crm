@@ -335,3 +335,24 @@ inventários dependentes da migration nova. Total passou103→104 migrations e
 2436→2445 asserts pgTAP em49arquivos; allowlist de homologação também exigiu
 entrada explícita. Correção delimitada desses inventários, preservando suas
 asserções e os gates. REST/banco ainda não haviam sido executados nessa rodada.
+
+### Retomada após publicação concorrente
+
+Usuário autorizou expressamente a migration20261104201024 do PR493 somente
+após todos os gates do PR e do main verdes. Não pedir essa autorização novamente
+para o mesmo arquivo e condições. Ainda não aplicada nesta conferência.
+
+Janela de integração da CAIXA respeitada, sem merges concorrentes ou mudanças
+nessa página. Liberação recebida; conferência05/11 às00:02:28–33UTC
+(04/11 às21:02 America/Sao_Paulo): origin/main e health HTTP200/ok em
+fa068c439eacdd70f0c6d8cfc9bcba5394e1ef43. PR492 integrado22:20:53Z;
+publicação informada23:55:41Z, deployment e349e769-a543-44ee-b60e-71196de356da,
+CI main41924476763. Health confrontado ao vivo, sem confundir com a aplicação
+anterior5da46964. AGENTS, contexto, ferramentas e regra de eficiência não mudaram.
+
+PR493/candidato4eab64ee: CI41906251839 concluiu os quatro gates com sucesso,
+incluindo prova REST delimitada e banco. Main avançou durante a espera;
+conflitos de registro exigem integrar a base atual e nova CI do candidato,
+preservando integralmente a CAIXA publicada. Helper operacional ainda não
+executado: precondições serão atualizadas para a publicação real e novamente
+conferidas sob trava, sem reutilizar identidade de deployment antiga.

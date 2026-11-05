@@ -25,6 +25,8 @@ import {
   type ReactNode,
 } from "react";
 import { CaixaInstallments } from "./CaixaInstallments";
+import { CaixaAvailableUnits } from "./CaixaAvailableUnits";
+import { calculateCaixaPublicReference } from "@/lib/crm/simulators/caixa-public-reference";
 import {
   calculateExtraAmortization,
   calculateFgtsTime,
@@ -36,7 +38,6 @@ import {
   getMcmvSubsidyEligibility,
   getMunicipalLimit,
   type HousingInput,
-  type HousingResult,
 } from "@/lib/crm/simulators/caixa";
 import {
   CAIXA_CITIES,
@@ -105,7 +106,6 @@ const initialForm = {
 };
 type Form = typeof initialForm;
 type Tab = "simulador" | "documentos" | "diagnostico" | "utilitarios";
-type SuccessfulResult = Extract<HousingResult, { ok: true }>;
 
 const simulatorNavigation = [
   {
@@ -508,9 +508,6 @@ export function CaixaClient({
   } as CSSProperties;
   const [form, setForm] = useState(initialForm);
   const [participants, setParticipants] = useState(1);
-  const [saved, setSaved] = useState<
-    { form: Form; participants: number; result: SuccessfulResult }[]
-  >([]);
   const lastProfileSyncSignature = useRef("");
   const [construction, setConstruction] = useState({ months: "36", progress: "0", tr: "0" });
   const [profiles, setProfiles] = useState<ApplicantProfile[]>([createApplicant(0)]);
@@ -635,31 +632,16 @@ export function CaixaClient({
         : null,
     [result, construction],
   );
-  const simulationText = result?.ok
-    ? [
-        "SIMULAÇÃO CAIXA — DESCOMPLICA CRM",
-        `${result.rateBand} · ${result.system.toUpperCase()} · ${result.term} meses`,
-        `Valor do imóvel: ${money.format(result.propertyValue)}`,
-        `Base da cota (menor entre compra e avaliação): ${money.format(result.quotaBaseValue)}`,
-        `Potencial de financiamento indicativo: ${money.format(result.financing)}`,
-        `Subsídio: ${
-          result.subsidyConfirmed || result.subsidyEligibility === "automatic"
-            ? money.format(result.subsidy)
-            : result.subsidyEligibility === "eligible-review"
-              ? "renda elegível à análise; valor não abatido"
-              : "não aplicável neste cenário"
-        }`,
-        ...(result.publicContribution > 0
-          ? [`Aporte MCMV Cidades: ${money.format(result.publicContribution)}`]
-          : []),
-        `FGTS + recursos próprios: ${money.format(result.totalResources)}`,
-        `Cota aplicada: ${decimal.format(result.financingQuota * 100)}%`,
-        `Complemento de entrada: ${money.format(result.entryNeeded)}`,
-        `Primeiro encargo estimado${result.insuranceEstimated ? " com seguros de referência" : result.insuranceKnown ? "" : " parcial; seguros não confirmados"}: ${money.format(result.firstPayment)}`,
-        `Taxa nominal: ${rate.format(result.rate)}% a.a.`,
-        "Simulação indicativa, sem atualização futura por TR e sem aprovação de crédito. Confirme valores e elegibilidade com a CAIXA.",
-      ].join("\n")
-    : "";
+  const publicReference = useMemo(
+    () =>
+      calculateCaixaPublicReference({
+        income: Number(form.income),
+        propertyValue: Number(form.propertyValue),
+        birthDate: form.birthDate,
+        asOf: baseDate,
+      }),
+    [form.income, form.propertyValue, form.birthDate, baseDate],
+  );
   const checklistText = profiles
     .flatMap((profile, index) => [
       `PROPONENTE ${index + 1} — ${profile.name}`,
@@ -913,7 +895,7 @@ export function CaixaClient({
                             });
                           }}
                         />
-                        <small>Informe a data do proponente mais velho.</small>
+                        <small>Data do proponente mais velho.</small>
                       </Field>
                       <CityPicker
                         value={form.city}
@@ -962,7 +944,7 @@ export function CaixaClient({
                           }}
                         />
                         <small>
-                          Máximo automático pela idade:{" "}
+                          Máximo pela idade:{" "}
                           {maximumTerm > 0 ? `${maximumTerm} meses` : "não disponível"}.
                         </small>
                       </Field>
@@ -1058,7 +1040,7 @@ export function CaixaClient({
                           </select>
                           <small>
                             {form.inConstruction
-                              ? "Novo definido automaticamente para imóvel na planta."
+                              ? "Novo para imóvel na planta."
                               : "Escolha Novo ou Usado para continuar."}
                           </small>
                         </Field>
@@ -1068,7 +1050,7 @@ export function CaixaClient({
                 </section>
                 {subsidyEligibility === "eligible-review" && (
                   <div className="caixa-form-grid caixa-subsidy-inputs">
-                    <Field label="Tipo da unidade *">
+                    <Field className="caixa-unit-type-field" label="Tipo da unidade *">
                       <select
                         required
                         value={form.propertyType}
@@ -1079,7 +1061,7 @@ export function CaixaClient({
                         <option value="house">Casa</option>
                       </select>
                     </Field>
-                    <Field label="Área oficial da unidade (m²) *">
+                    <Field className="caixa-unit-area-field" label="Área oficial da unidade (m²) *">
                       <input
                         required
                         type="number"
@@ -1089,10 +1071,10 @@ export function CaixaClient({
                         value={form.propertyArea}
                         onChange={(event) => update("propertyArea", event.target.value)}
                       />
-                      <small>Use a área coberta indicada no documento do imóvel.</small>
+                      <small>Área coberta no documento do imóvel.</small>
                     </Field>
                     {participants === 1 && (
-                      <Field label="Possui dependentes? *">
+                      <Field className="caixa-dependents-field" label="Possui dependentes? *">
                         <select
                           required
                           value={form.hasDependents}
@@ -1102,139 +1084,11 @@ export function CaixaClient({
                           <option value="yes">Sim</option>
                           <option value="no">Não</option>
                         </select>
-                        <small>Sem dependentes aplica a regra de família unipessoal.</small>
+                        <small>Sem dependentes: família unipessoal.</small>
                       </Field>
                     )}
                   </div>
                 )}
-                <details className="caixa-confirmed-parameters">
-                  <summary>Parâmetros confirmados e valores opcionais</summary>
-                  <p>
-                    Preencha com os valores da simulação oficial. A base da cota é o menor entre
-                    valor de compra e avaliação da CAIXA. Ter 36 meses de FGTS não garante a
-                    elegibilidade para usar o saldo.
-                  </p>
-                  <div className="caixa-form-grid">
-                    {form.hasFgts36 && (
-                      <Field label="Saldo de FGTS disponível">
-                        <MoneyInput value={form.fgts} onChange={(value) => update("fgts", value)} />
-                      </Field>
-                    )}
-                    <Field label="Avaliação confirmada pela CAIXA">
-                      <MoneyInput
-                        value={form.appraisalValue}
-                        onChange={(value) => update("appraisalValue", value)}
-                      />
-                      <small>Se ficar vazio, o valor de compra será usado provisoriamente.</small>
-                    </Field>
-                    {form.product === "mcmv" && (
-                      <>
-                        {!automaticMiddleClass && (
-                          <Field label="Desconto complemento FGTS confirmado">
-                            <MoneyInput
-                              value={form.confirmedSubsidy}
-                              onChange={(value) => update("confirmedSubsidy", value)}
-                            />
-                          </Field>
-                        )}
-                        <Field label="Aporte MCMV Cidades confirmado">
-                          <MoneyInput
-                            value={form.confirmedPublicContribution}
-                            onChange={(value) => update("confirmedPublicContribution", value)}
-                          />
-                        </Field>
-                      </>
-                    )}
-                    <Field label="Taxa nominal confirmada (% a.a.)">
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.0001"
-                        value={form.nominalRate}
-                        onChange={(event) => update("nominalRate", event.target.value)}
-                      />
-                      <small>
-                        Se ausente no SBPE, a estimativa rápida usa a taxa pública por faixa de
-                        renda.
-                      </small>
-                    </Field>
-                    <Field label="Cota aprovada pela CAIXA (%)">
-                      <input
-                        type="number"
-                        min="0.01"
-                        max={String(maximumFinancingQuotaPercent)}
-                        step="0.01"
-                        value={form.approvedFinancingQuotaPercent}
-                        onChange={(event) =>
-                          update("approvedFinancingQuotaPercent", event.target.value)
-                        }
-                      />
-                      <small>
-                        Opcional. Teto aplicado: {maximumFinancingQuotaPercent}% neste cenário.
-                      </small>
-                    </Field>
-                    {form.inConstruction && (
-                      <Field label="Prazo previsto de construção (meses)">
-                        <input
-                          type="number"
-                          min="0"
-                          max="120"
-                          step="1"
-                          value={form.constructionMonths}
-                          onChange={(event) => {
-                            const constructionMonths = event.target.value;
-                            const constructionTerm = optionalNumber(constructionMonths);
-                            const allowedTerm = getMaximumTerm({
-                              birthDate: form.birthDate,
-                              inConstruction: true,
-                              ...(constructionTerm !== undefined
-                                ? { constructionMonths: constructionTerm }
-                                : {}),
-                              asOf: baseDate,
-                            });
-                            setForm((previous) => ({
-                              ...previous,
-                              constructionMonths,
-                              ...(allowedTerm > 0 ? { term: String(allowedTerm) } : {}),
-                            }));
-                            setConstruction((previous) => ({
-                              ...previous,
-                              months: constructionMonths || "36",
-                            }));
-                          }}
-                        />
-                        <small>Integra o prazo total para a conferência do limite de idade.</small>
-                      </Field>
-                    )}
-                    <Field label="Seguro MIP confirmado (R$/mês)">
-                      <MoneyInput
-                        value={form.mipMonthly}
-                        onChange={(value) => update("mipMonthly", value)}
-                      />
-                    </Field>
-                    <Field label="Seguro DFI confirmado (R$/mês)">
-                      <MoneyInput
-                        value={form.dfiMonthly}
-                        onChange={(value) => update("dfiMonthly", value)}
-                      />
-                    </Field>
-                    <Field label="Tarifa mensal confirmada (R$)">
-                      <MoneyInput
-                        value={form.operatingFee}
-                        onChange={(value) => update("operatingFee", value)}
-                      />
-                    </Field>
-                    <label className="caixa-middle-class-option">
-                      <input
-                        type="checkbox"
-                        checked={form.officialQuickEstimate}
-                        onChange={(event) => update("officialQuickEstimate", event.target.checked)}
-                      />
-                      Estimar taxa SBPE, MIP, DFI e tarifa ausentes com a calculadora rápida CAIXA
-                    </label>
-                  </div>
-                </details>
               </form>
               {result && (
                 <aside
@@ -1253,6 +1107,10 @@ export function CaixaClient({
                     <div className="caixa-result-content caixa-result-summary">
                       <div className="caixa-result-summary-heading">
                         <h2>Resumo financeiro</h2>
+                        <CaixaAvailableUnits
+                          input={housingInput(form, baseDate, participants)}
+                          result={result}
+                        />
                         <CaixaInstallments result={result} />
                         <button
                           type="button"
@@ -1273,6 +1131,13 @@ export function CaixaClient({
                             </strong>
                             <span>{money.format(result.firstPayment)}</span>
                           </p>
+                          <p className="caixa-result-rate">
+                            Perfil informado · Juros:{" "}
+                            <strong>{rate.format(result.rate)}% a.a.</strong>
+                            <span>
+                              {result.system.toUpperCase()} · {result.rateBand}
+                            </span>
+                          </p>
                           <p className="caixa-result-plan-caption">
                             1º encargo estimado
                             {result.insuranceEstimated
@@ -1280,7 +1145,6 @@ export function CaixaClient({
                               : result.insuranceKnown
                                 ? ""
                                 : " parcial; seguros não confirmados"}{" "}
-                            · {result.rateBand} · {result.system.toUpperCase()}
                           </p>
                           <div className="caixa-result-plan-total">
                             <span>Financiamento indicativo</span>
@@ -1331,15 +1195,15 @@ export function CaixaClient({
                           </dl>
                         </section>
                       </div>
-                      <p className="caixa-result-note">
-                        {result.rateBand} · {result.system.toUpperCase()} · taxa nominal de{" "}
-                        {rate.format(result.rate)}% a.a. · taxa efetiva de{" "}
-                        {rate.format(result.effectiveRate)}% a.a.
-                        {result.rateEstimated ? " (estimada)" : ""} · comprometimento estimado de{" "}
-                        {result.commitment.toFixed(1)}%.
-                      </p>
                       <details className="caixa-result-audit">
                         <summary>Auditoria do cálculo</summary>
+                        <p className="caixa-result-note">
+                          {result.rateBand} · {result.system.toUpperCase()} · taxa nominal de{" "}
+                          {rate.format(result.rate)}% a.a. · taxa efetiva de{" "}
+                          {rate.format(result.effectiveRate)}% a.a.
+                          {result.rateEstimated ? " (estimada)" : ""} · comprometimento estimado de{" "}
+                          {result.commitment.toFixed(1)}%.
+                        </p>
                         <div className="caixa-result-audit-grid">
                           <Metric
                             label="Parcela principal"
@@ -1373,52 +1237,71 @@ export function CaixaClient({
                           <Metric label="TR futura" value="Não projetada na amortização" />
                         </div>
                         <p>
+                          Perfil: {participants} proponente(s),{" "}
+                          {form.hasDependents === "yes"
+                            ? "com dependentes"
+                            : form.hasDependents === "no"
+                              ? "sem dependentes"
+                              : "dependentes não informados"}
+                          ; {form.hasFgts36 ? "36+ meses de FGTS" : "sem 36 meses de FGTS"};{" "}
+                          {form.propertyType === "apartment"
+                            ? "apartamento"
+                            : form.propertyType === "house"
+                              ? "casa"
+                              : "tipo não informado"}
+                          , {form.propertyArea ? `${form.propertyArea} m²` : "área não informada"}.{" "}
+                          Taxa nominal: {rate.format(result.rate)}% a.a.
+                        </p>
+                        {publicReference && (
+                          <section
+                            className="caixa-public-reference"
+                            aria-label="Comparação com a calculadora rápida oficial"
+                          >
+                            <h3>Calculadora rápida oficial</h3>
+                            <p>
+                              Usa parâmetros médios e não calcula subsídio. O resumo usa o perfil
+                              informado.
+                            </p>
+                            <div className="caixa-result-audit-grid">
+                              <Metric
+                                label="Financiamento"
+                                value={money.format(publicReference.financing)}
+                              />
+                              <Metric label="Entrada" value={money.format(publicReference.entry)} />
+                              <Metric
+                                label="Primeira parcela"
+                                value={money.format(publicReference.firstPayment)}
+                              />
+                              <Metric
+                                label="Taxa efetiva"
+                                value={`${rate.format(publicReference.effectiveRate)}% a.a.`}
+                              />
+                              <Metric
+                                label="Sistema"
+                                value={publicReference.system.toUpperCase()}
+                              />
+                              <Metric label="Prazo" value={`${publicReference.term} meses`} />
+                            </div>
+                            <p>
+                              Fonte:{" "}
+                              <a
+                                href="https://simuladorhabitacao.caixa.gov.br/calculadora"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                calculadora rápida CAIXA {publicReference.version}
+                              </a>
+                              . Subsídio do perfil: metodologia MFOM Habitação, conforme dados
+                              informados.
+                            </p>
+                          </section>
+                        )}
+                        <p>
                           PRICE: P × i ÷ (1 − (1 + i)⁻ⁿ). SAC inicial: P ÷ n + P × i. i = taxa
                           nominal anual ÷ 12. Crédito limitado pela renda, quota e recursos.
                           Aprovação, CET, avaliação bancária e seguros dependem da CAIXA.
                         </p>
                       </details>
-                      <div className="caixa-result-actions">
-                        <Actions text={simulationText} fileLabel="simulação" hidePrint />
-                        <button
-                          type="button"
-                          className="caixa-save"
-                          onClick={() =>
-                            setSaved((previous) =>
-                              [{ form: { ...form }, participants, result }, ...previous].slice(
-                                0,
-                                5,
-                              ),
-                            )
-                          }
-                        >
-                          Salvar na sessão
-                        </button>
-                      </div>
-                      {saved.length > 0 && (
-                        <details className="caixa-history">
-                          <summary>Simulações salvas ({saved.length})</summary>
-                          {saved.map((item, index) => (
-                            <button
-                              type="button"
-                              key={index}
-                              onClick={() => {
-                                setForm(item.form);
-                                setParticipants(item.participants);
-                                setConstruction((previous) => ({
-                                  ...previous,
-                                  months: item.form.constructionMonths || "36",
-                                }));
-                                lastProfileSyncSignature.current = "";
-                              }}
-                            >
-                              {item.form.city} · {money.format(item.result.propertyValue)}
-                              <span>{money.format(item.result.financing)}</span>
-                            </button>
-                          ))}
-                          <small>Disponíveis apenas enquanto esta página permanecer aberta.</small>
-                        </details>
-                      )}
                       {form.inConstruction && (
                         <details className="caixa-result-audit caixa-construction-details">
                           <summary>Estimativa de juros de obra</summary>
@@ -2130,6 +2013,137 @@ export function CaixaClient({
               </button>
             ))}
           </nav>
+          {tab === "simulador" && (
+            <form className="caixa-parameters-form" onSubmit={(event) => event.preventDefault()}>
+              <details className="caixa-confirmed-parameters">
+                <summary>Parâmetros confirmados e valores opcionais</summary>
+                <p>
+                  Preencha com os valores da simulação oficial. A base da cota é o menor entre valor
+                  de compra e avaliação da CAIXA. Ter 36 meses de FGTS não garante a elegibilidade
+                  para usar o saldo.
+                </p>
+                <div className="caixa-form-grid">
+                  {form.hasFgts36 && (
+                    <Field label="Saldo de FGTS disponível">
+                      <MoneyInput value={form.fgts} onChange={(value) => update("fgts", value)} />
+                    </Field>
+                  )}
+                  <Field label="Avaliação confirmada pela CAIXA">
+                    <MoneyInput
+                      value={form.appraisalValue}
+                      onChange={(value) => update("appraisalValue", value)}
+                    />
+                    <small>Se ficar vazio, o valor de compra será usado provisoriamente.</small>
+                  </Field>
+                  {form.product === "mcmv" && (
+                    <>
+                      {!automaticMiddleClass && (
+                        <Field label="Desconto complemento FGTS confirmado">
+                          <MoneyInput
+                            value={form.confirmedSubsidy}
+                            onChange={(value) => update("confirmedSubsidy", value)}
+                          />
+                        </Field>
+                      )}
+                      <Field label="Aporte MCMV Cidades confirmado">
+                        <MoneyInput
+                          value={form.confirmedPublicContribution}
+                          onChange={(value) => update("confirmedPublicContribution", value)}
+                        />
+                      </Field>
+                    </>
+                  )}
+                  <Field label="Taxa nominal confirmada (% a.a.)">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.0001"
+                      value={form.nominalRate}
+                      onChange={(event) => update("nominalRate", event.target.value)}
+                    />
+                    <small>
+                      Se ausente no SBPE, a estimativa rápida usa a taxa pública por faixa de renda.
+                    </small>
+                  </Field>
+                  <Field label="Cota aprovada pela CAIXA (%)">
+                    <input
+                      type="number"
+                      min="0.01"
+                      max={String(maximumFinancingQuotaPercent)}
+                      step="0.01"
+                      value={form.approvedFinancingQuotaPercent}
+                      onChange={(event) =>
+                        update("approvedFinancingQuotaPercent", event.target.value)
+                      }
+                    />
+                    <small>
+                      Opcional. Teto aplicado: {maximumFinancingQuotaPercent}% neste cenário.
+                    </small>
+                  </Field>
+                  {form.inConstruction && (
+                    <Field label="Prazo previsto de construção (meses)">
+                      <input
+                        type="number"
+                        min="0"
+                        max="120"
+                        step="1"
+                        value={form.constructionMonths}
+                        onChange={(event) => {
+                          const constructionMonths = event.target.value;
+                          const constructionTerm = optionalNumber(constructionMonths);
+                          const allowedTerm = getMaximumTerm({
+                            birthDate: form.birthDate,
+                            inConstruction: true,
+                            ...(constructionTerm !== undefined
+                              ? { constructionMonths: constructionTerm }
+                              : {}),
+                            asOf: baseDate,
+                          });
+                          setForm((previous) => ({
+                            ...previous,
+                            constructionMonths,
+                            ...(allowedTerm > 0 ? { term: String(allowedTerm) } : {}),
+                          }));
+                          setConstruction((previous) => ({
+                            ...previous,
+                            months: constructionMonths || "36",
+                          }));
+                        }}
+                      />
+                      <small>Integra o prazo total para a conferência do limite de idade.</small>
+                    </Field>
+                  )}
+                  <Field label="Seguro MIP confirmado (R$/mês)">
+                    <MoneyInput
+                      value={form.mipMonthly}
+                      onChange={(value) => update("mipMonthly", value)}
+                    />
+                  </Field>
+                  <Field label="Seguro DFI confirmado (R$/mês)">
+                    <MoneyInput
+                      value={form.dfiMonthly}
+                      onChange={(value) => update("dfiMonthly", value)}
+                    />
+                  </Field>
+                  <Field label="Tarifa mensal confirmada (R$)">
+                    <MoneyInput
+                      value={form.operatingFee}
+                      onChange={(value) => update("operatingFee", value)}
+                    />
+                  </Field>
+                  <label className="caixa-middle-class-option">
+                    <input
+                      type="checkbox"
+                      checked={form.officialQuickEstimate}
+                      onChange={(event) => update("officialQuickEstimate", event.target.checked)}
+                    />
+                    Estimar taxa SBPE, MIP, DFI e tarifa ausentes com a calculadora rápida CAIXA
+                  </label>
+                </div>
+              </details>
+            </form>
+          )}
         </div>
       </div>
     </section>

@@ -15,6 +15,90 @@
   Migration20261104201024 preparada para limitar somente a RPC a30s, com prova
   REST PostgreSQL17/pgTAP na CI. Ainda não aplicada; exige autorização específica.
 
+## 2026-11-04 — CAIXA: revisão visual, cálculo e unidades por ranking
+
+- Retomada às18:47UTC: main5da46964, CI41882885306 ainda em execução;
+  produção c97d5fd2, health HTTP200/ok. Fontes: origin/main, GitHub Actions e
+  https://crm.descomplicapro.com.br/api/health. Não confundir integrado/publicado.
+- Escopo solicitado: formulário CAIXA com todos os campos em duas linhas,
+  controles menores/bordas e opções legíveis, resumo/taxa, revisão oficial de
+  financiamento/subsídio e seleção de unidades elegíveis por ranking usando
+  regras existentes do Associativo. Nenhuma alteração da página Associativo.
+- Recursos próprios devem ser a entrada dessa avaliação, com mínimo150;
+  84 mensais e anuais válidas automáticas. Reutilizar motor/política versionados,
+  sem presumir aprovação bancária nem inventar fórmula de subsídio.
+- Implementado na CAIXA:19campos em2linhas/32px desktop, Sim/Não com bordas,
+  selects no tema, parâmetros ao final, juros junto parcela e ações removidas.
+  Prova navegador11/11, incluindo1200/1280/1440/1920×sidebar e três temas.
+- Revisão oficial04/11: quick1.16.0.2 não calcula subsídio, usa limites genéricos
+  e seguros/cota médios; seis cenários UI confrontados em centavos pelo helper
+  independente. Perfil detalhado mantém cotista/município/família. Reproduzido
+  subsídio3357,01 para apartamento39m², renda4000/cotista/São Paulo.
+- Correção comprovada MFOM034: piso1500 antes dos redutores, não depois;
+  desconto unipessoal1091,41 permanece na composição. PDF atual indisponível
+  por redirectloop; cópia anterior/hash/fontes e limite registrados em CAIXA.md.
+- Matriz interna508032 cenários:24 pontos de renda (oito limites±0,01),
+  idades inteiras18–80, pessoas1–3, áreas inteiras15–70 e social sim/não;
+  invariantes financeiros e monotonicidade da área aprovados em87,89s. Taxas
+  nominais0/4/4,25/4,5/4,75/5/5,25/5,5/6/6,5/7/7,66/8,16/10/11,49/13,4
+  testadas em SAC/Price, mais inválidas. Isso não esgota os números reais nem
+  comprova aprovação bancária de todos os perfis.
+- Unidades: ranking/qualificação prévios, estoque vivo com guard existente,
+  statusDisponível, dados próprios e capacidade original. Entrada=max150fundos,
+  84mensais, anuais canônicas; ambos fluxos precisam aprovar. Lista anterior
+  invalidada ao reabrir/mudar perfil, cálculo em lotes canceláveis. Revisão
+  independente identificou e fechou aporte transplantado/status indevido/stale.
+  Aplicação Associativo e seus motores permanecem intactos. CI/publicação pendentes.
+- Fechamento local do candidato:88 testes focados financeiros/unidades aprovados,
+  11 testes de navegador CAIXA e5 do novo diálogo; axe do diálogo com parcelas
+  abertas aprovado nos três temas. TypeScript e lint focado aprovados. Detalhe
+  selecionado mostra três regras/limites e84mensais/anuais/evolução canônicas,
+  calculadas sob demanda para não armazenar grades completas de todo o estoque.
+  Fronteiras decimais de área39/59 e46/66±0,01 aprovadas. O teste do perfil agora
+  exige239287,18 exatos; a antiga tolerância ampla não mascara diferença de modelo.
+- CI41895060765/head93b23921: validate/imagem/restore aprovados; funcionais,
+  49 responsivos,28 temas,77 axe e zoom aprovados. Onze deltas visuais só CAIXA.
+  Artefato13358507199, ZIPfd1b177f52f1cfbbf2c776a53ed521ebd98c573f05d84179f9c5e87a55d4853f;
+  captura8b7c51d0/árvore51dfe5c2 igual ao head, fingerprint2a0494bd7882609c500dec54ca0b4ff714dd77c705ccc9fb8fd4c0780cccdd29
+  reproduzido com19 outputs sintéticos. Imagens NÃO aprovadas como nova referência:
+  revisão detectou palavras Sim/Não partidas no celular e Proponentes no desktop.
+- Correção localizada posterior: padding/nowrap das escolhas e uma trilha de
+  data redistribuída ao rótulo Proponentes, preservando input56px e duas linhas.
+  Teste com tipografia do shell adicionada verifica palavra em uma linha e sem
+  corte em320/375/390/1200/1280/1440; três provas focadas passaram. Nova captura
+  do candidato corrigido é exigida antes de revisar as referências.
+- Prova adicional do diálogo dentro do resumo real passou em1440 e390px,
+  com ranking, estoque fictício,84parcelas abertas, centro da tela, axe e foco.
+  Acrescentadas âncoras MFOM de renda1750/3700 e centavos vizinhos. Sem alteração
+  adicional de fórmula nessa etapa. Testes existentes reaproveitados por impacto.
+- Captura corrigida: CI41904125837/heada231a042, merge531c7a0c e árvore
+  918f575bc8e674b96becbc91ad79d129590b19b8, igual ao head. Validate/imagem/restore,
+  funcionais,49 responsivos,28 temas,77 axe e zoom aprovados. Falha somente nos
+  11 deltas intencionais CAIXA; resultado original falho e deltas preservados.
+- Artefato13363550585, ZIP SHA256
+  d7c525e640274832b285e5c819907f69f02608c8b4fe5a13979217d11b9115aa conferido;
+  fingerprintb8a497a84621eab8ab96fc0a191cfff1507faa267f85b9f8a5ab03623785f4ea
+  reproduzido com19 outputs sintéticos e diff rastreado vazio. Onze imagens
+  corrigidas revisadas em desktop/tablet/celular e três temas: palavras inteiras,
+  bordas e controles legíveis. Atualizadas somente11 imagens/linhas CAIXA;
+  231 outras linhas semanticamente idênticas, limiar1% intacto. Contrato visual13/13.
+  Não houve mudança de aplicação após a captura aprovada; nova CI exata pendente.
+- Janela de integração/publicação comunicada, conforme autorização humana prévia,
+  ao chat Ajustar cards e sidebar. Esse chat registrou que aguardará a liberação
+  para integrar. Liberar a janela após a conferência do deploy; não há autorização
+  para modificar o escopo daquele chat ou suas alterações.
+- CI41913034337/f0cc3e33 aprovou validate/imagem/restore, mas a etapa CAIXA
+  falhou em uma medição logo após trocar viewport móvel→1200px: span com20px
+  enquanto ResizeObserver ainda atualizava o canvas, contra texto67px. A captura
+  aprovada a231a042 continua válida: nenhum código da aplicação foi alterado.
+- Harness agora espera a largura observável do canvas corresponder ao workspace
+  antes de medir. Asserções de uma linha, tamanho, corte e bordas mantidas, sem
+  aumento de timeout ou tolerância. Três repetições focadas passaram. A mesma
+  sincronização cobre as demais trocas de viewport do teste CAIXA. Nova CI exigida.
+- Reexecução local completa após a sincronização:13/13 testes da interface
+  aprovados em103,19s (11 de navegador e2SSR). Os5 testes de navegador do diálogo
+  são adicionais. Nenhuma fórmula, CSS ou captura foi alterada por essa correção.
+
 ## 2026-11-04 — Agendamentos: PR490 bloqueado por referência externa
 
 - Implementação concluída no candidato2bb866f4; não integrado nem publicado.

@@ -215,6 +215,25 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(page.getByRole("main")).toHaveCount(1);
       await browserExpect(page.locator('main[data-canvas-layout="caixa"]')).toHaveCount(1);
     }
+    async function resizeViewport(width: number, height: number) {
+      await page.setViewportSize({ width, height });
+      // ResizeObserver updates the responsive canvas in a later rendering turn.
+      // Measure only after the visible canvas matches the new workspace width.
+      await browserExpect
+        .poll(
+          async () =>
+            page.evaluate(() => {
+              const workspace = document.querySelector<HTMLElement>(".caixa-workspace")!;
+              const surface = document.querySelector<HTMLElement>(".caixa-content-surface")!;
+              const actual = parseFloat(
+                getComputedStyle(surface).getPropertyValue("--caixa-content-width"),
+              );
+              return Math.abs(actual - Math.max(1, workspace.clientWidth - 44)) < 1;
+            }),
+          { message: "Responsive canvas settles before measuring controls" },
+        )
+        .toBe(true);
+    }
     async function fillMain() {
       await page.getByLabel("Renda familiar bruta", { exact: false }).fill("600000");
       await page.getByLabel("Valor do imóvel *", { exact: false }).fill("30000000");
@@ -223,6 +242,239 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(page.locator(".caixa-city-picker.open")).toBeVisible();
       await page.getByRole("option", { name: "São Paulo SP", exact: true }).click();
     }
+    it("keeps all nineteen subsidy controls compact in two rows with visible choice borders", async () => {
+      await open();
+      await fillMain();
+      await page.getByLabel("Renda familiar bruta", { exact: false }).fill("400000");
+      await page.getByLabel("Valor do imóvel *", { exact: false }).fill("27500000");
+      await page.getByLabel("Tipo da unidade *", { exact: false }).selectOption("apartment");
+      await page.getByLabel("Área oficial da unidade", { exact: false }).fill("60.07");
+      await page.getByLabel("Possui dependentes?", { exact: false }).selectOption("yes");
+      const directory = resolve("private-data/caixa-qa");
+      await mkdir(directory, { recursive: true });
+      for (const width of [1200, 1280, 1440, 1920]) {
+        await resizeViewport(width, 900);
+        for (const expanded of [false, true]) {
+          if (expanded) await page.locator(".caixa-tool-sidebar").hover();
+          else await page.getByRole("heading", { name: "Simulador CAIXA", exact: true }).hover();
+          const layout = await page.evaluate(() => {
+            const fields = [...document.querySelectorAll(".caixa-full-form .caixa-field")].filter(
+              (element) => element.getBoundingClientRect().width > 0,
+            );
+            const zoom =
+              Number(getComputedStyle(document.querySelector(".caixa-content-surface")!).zoom) || 1;
+            return {
+              fields: fields.map((field) => {
+                const control = field.querySelector("input, select, button")!;
+                const bounds = control.getBoundingClientRect();
+                const style = getComputedStyle(control);
+                return {
+                  label: field.querySelector("span")?.textContent,
+                  top: Math.round(field.getBoundingClientRect().top),
+                  height: bounds.height / zoom,
+                  background: style.backgroundColor,
+                  select: control.tagName === "SELECT",
+                };
+              }),
+              buttons: [...document.querySelectorAll(".caixa-toggle button")].map((button) => {
+                const style = getComputedStyle(button);
+                return {
+                  pressed: button.getAttribute("aria-pressed"),
+                  borderWidth: parseFloat(style.borderTopWidth),
+                  borderStyle: style.borderTopStyle,
+                  borderColor: style.borderTopColor,
+                  height: button.getBoundingClientRect().height / zoom,
+                };
+              }),
+              rows: new Set(fields.map((field) => Math.round(field.getBoundingClientRect().top)))
+                .size,
+              overflow: document.documentElement.scrollWidth > innerWidth,
+              parametersAfterTools: !!(
+                document
+                  .querySelector(".caixa-tabs-bottom")!
+                  .compareDocumentPosition(document.querySelector(".caixa-confirmed-parameters")!) &
+                Node.DOCUMENT_POSITION_FOLLOWING
+              ),
+            };
+          });
+          await page.screenshot({
+            path: resolve(directory, `caixa-complete-${width}-${expanded}.png`),
+          });
+          await writeFile(
+            resolve(directory, `caixa-complete-${width}-${expanded}.json`),
+            JSON.stringify(layout, null, 2),
+          );
+          const context = `${width}/${expanded}`;
+          expect(layout.fields, `${context}: includes the three subsidy fields`).toHaveLength(19);
+          expect(layout.rows, `${context}: all controls use exactly two rows`).toBe(2);
+          expect(layout.overflow, `${context}: no horizontal overflow`).toBe(false);
+          expect(
+            layout.parametersAfterTools,
+            `${context}: optional parameters at the page end`,
+          ).toBe(true);
+          for (const field of layout.fields) {
+            expect(field.height, `${context}: compact ${field.label}`).toBeLessThanOrEqual(32.5);
+            expect(field.height, `${context}: readable ${field.label}`).toBeGreaterThanOrEqual(
+              29.5,
+            );
+            if (field.select)
+              expect(field.background, `${context}: transparent ${field.label}`).toBe(
+                "rgba(0, 0, 0, 0)",
+              );
+          }
+          expect(layout.buttons.filter((button) => button.pressed === "true")).toHaveLength(4);
+          expect(layout.buttons.filter((button) => button.pressed === "false")).toHaveLength(4);
+          for (const button of layout.buttons) {
+            expect(button.borderWidth, `${context}: visible border in both states`).toBeGreaterThan(
+              0,
+            );
+            expect(button.borderStyle).toBe("solid");
+            expect(button.borderColor).not.toBe("rgba(0, 0, 0, 0)");
+            expect(button.height, `${context}: compact choices`).toBeLessThanOrEqual(32.5);
+          }
+        }
+      }
+      await page.getByRole("heading", { name: "Simulador CAIXA", exact: true }).hover();
+      await browserExpect(page.locator(".caixa-workspace")).toHaveAttribute(
+        "data-sidebar-collapsed",
+        "true",
+      );
+      const result = page.locator("#caixa-simulation-result");
+      await browserExpect(result.getByRole("button", { name: "Copiar", exact: true })).toHaveCount(
+        0,
+      );
+      await browserExpect(result.getByRole("link", { name: "WhatsApp", exact: true })).toHaveCount(
+        0,
+      );
+      await browserExpect(
+        result.getByRole("button", { name: "Salvar na sessão", exact: true }),
+      ).toHaveCount(0);
+      await browserExpect(result.locator(".caixa-result-rate")).toContainText(
+        "Perfil informado · Juros:",
+      );
+      const audit = result.locator(".caixa-result-audit:not(.caixa-construction-details)");
+      await browserExpect(audit).not.toHaveAttribute("open", "");
+      await browserExpect(
+        audit.getByRole("heading", { name: "Calculadora rápida oficial", exact: true }),
+      ).not.toBeVisible();
+      await audit.getByText("Auditoria do cálculo", { exact: true }).click();
+      await browserExpect(audit).toHaveAttribute("open", "");
+      await browserExpect(
+        audit.getByRole("heading", { name: "Calculadora rápida oficial", exact: true }),
+      ).toBeVisible();
+      await browserExpect(audit).toContainText("não calcula subsídio");
+      await browserExpect(audit).toContainText("60.07 m²");
+      await page.getByLabel("Área oficial da unidade", { exact: false }).fill("50");
+      await page.getByLabel("Possui dependentes?", { exact: false }).selectOption("no");
+      await browserExpect(result.locator(".caixa-result-composition")).toContainText("1.091,41");
+      await browserExpect(result.getByRole("alert")).toHaveCount(0);
+      expect(errors).toEqual([]);
+    });
+    it("integrates ranked units inside the real financial summary without leaking modal layout", async () => {
+      await open();
+      await browserExpect(
+        page.getByRole("button", { name: "Unidades disponíveis", exact: true }),
+      ).toHaveCount(0);
+      await fillMain();
+      const unit = {
+        id: "synthetic-caixa-summary-unit",
+        businessUnit: "Incorporadora fictícia",
+        project: "Projeto fictício",
+        product: "Apartamento integrado",
+        status: "Disponível",
+        unitType: "Apartamento",
+        finalWithKit: 240000,
+        unitBonus: 10000,
+        tableSlack: 1000,
+        finalPrice: 229000,
+        appraisal: 240000,
+        city: "São Paulo",
+        state: "SP",
+        privateArea: 60,
+        completionDate: "2030-04-30",
+        progress: 0.2,
+        constructionStatus: "Em obras",
+        plant: "2Q",
+        parkingSpaces: 1,
+      };
+      await page.route("**/api/inventory**", (route) =>
+        route.fulfill({
+          contentType: "application/json",
+          body: JSON.stringify({ count: 1, items: [unit] }),
+        }),
+      );
+      await page.getByRole("button", { name: "Unidades disponíveis", exact: true }).click();
+      const dialog = page.getByRole("dialog", { name: "Unidades disponíveis", exact: true });
+      await browserExpect(dialog).toBeVisible();
+      await page.getByLabel("Ranking do cliente", { exact: true }).selectOption("diamond");
+      await page.getByLabel("Primeiro imóvel?", { exact: true }).selectOption("yes");
+      await browserExpect(dialog.getByRole("status")).toContainText("1 unidade dentro do ranking");
+      await page
+        .getByRole("button", { name: "Exibir fluxo de Apartamento integrado", exact: true })
+        .click();
+      await dialog.getByText("Exibir 84 parcelas e anuais", { exact: true }).click();
+      const bounds = await dialog.boundingBox();
+      expect(Math.abs(bounds!.x + bounds!.width / 2 - 720)).toBeLessThan(10);
+      expect(Math.abs(bounds!.y + bounds!.height / 2 - 450)).toBeLessThan(10);
+      await page.evaluate(() => (document.documentElement.dataset.theme = "dark"));
+      const audit = await new AxeBuilder({ page }).include("dialog").analyze();
+      expect(axeFailureDetails(audit.violations)).toEqual([]);
+      await resizeViewport(390, 844);
+      const mobileBounds = await dialog.boundingBox();
+      expect(mobileBounds!.width).toBeLessThanOrEqual(390);
+      expect(Math.abs(mobileBounds!.x + mobileBounds!.width / 2 - 195)).toBeLessThan(10);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+      await page.keyboard.press("Escape");
+      await browserExpect(dialog).not.toBeVisible();
+      await browserExpect(
+        page.getByRole("button", { name: "Unidades disponíveis", exact: true }),
+      ).toBeFocused();
+      expect(errors).toEqual([]);
+    });
+    it("keeps short choice labels unbroken with the protected-shell typography", async () => {
+      await open();
+      await page.addStyleTag({
+        content: ".caixa-page-shell{letter-spacing:.05em;font-weight:700}",
+      });
+      for (const width of [320, 375, 390, 1200, 1280, 1440]) {
+        await resizeViewport(width, 900);
+        const choices = await page
+          .locator(".caixa-full-form .caixa-toggle button")
+          .evaluateAll((buttons) =>
+            buttons.map((button) => {
+              const style = getComputedStyle(button);
+              const range = document.createRange();
+              range.selectNodeContents(button);
+              return {
+                text: button.textContent,
+                lines: range.getClientRects().length,
+                whiteSpace: style.whiteSpace,
+                fits: button.scrollWidth <= button.clientWidth,
+              };
+            }),
+          );
+        expect(choices).toHaveLength(8);
+        for (const choice of choices) {
+          expect(choice.lines, `${width}: ${choice.text}`).toBe(1);
+          expect(choice.whiteSpace).toBe("nowrap");
+          expect(choice.fits).toBe(true);
+        }
+        if (width >= 1200) {
+          const label = await page.locator(".caixa-participants-field>span").evaluate((span) => ({
+            nowrap: getComputedStyle(span).whiteSpace,
+            fits: span.scrollWidth <= span.clientWidth,
+            font: getComputedStyle(span).fontSize,
+            width: span.clientWidth,
+            scroll: span.scrollWidth,
+          }));
+          expect(label.nowrap).toBe("nowrap");
+          expect(label.fits, `${width}: ${JSON.stringify(label)}`).toBe(true);
+        }
+      }
+      expect(errors).toEqual([]);
+    });
     it("fits maximum currency values and compact controls in two desktop rows", async () => {
       await open();
       await fillMain();
@@ -235,7 +487,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         await browserExpect(input).toHaveValue("9.999.999,99");
       }
       for (const width of [1200, 1280, 1440, 1920]) {
-        await page.setViewportSize({ width, height: 900 });
+        await resizeViewport(width, 900);
         for (const expanded of [false, true]) {
           if (expanded) await page.locator(".caixa-tool-sidebar").hover();
           else await page.getByRole("heading", { name: "Simulador CAIXA", exact: true }).hover();
@@ -364,7 +616,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(dialog).toBeVisible();
       await browserExpect(dialog.locator("tbody tr")).toHaveCount(420);
       for (const width of [1440, 1024, 768, 390, 320]) {
-        await page.setViewportSize({ width, height: 900 });
+        await resizeViewport(width, 900);
         const bounds = await dialog.boundingBox();
         expect(bounds).not.toBeNull();
         expect(bounds!.x + bounds!.width / 2, `${width}: centered horizontally`).toBeCloseTo(
@@ -430,7 +682,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
     });
     it("keeps touch menu access without shrinking mobile form content", async () => {
       await open();
-      await page.setViewportSize({ width: 390, height: 844 });
+      await resizeViewport(390, 844);
       const workspace = page.locator(".caixa-workspace");
       const before = await page.locator(".caixa-workspace-content").boundingBox();
       await page.getByRole("button", { name: "Expandir menu de simulação", exact: true }).click();
@@ -455,7 +707,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       const directory = resolve("private-data/caixa-qa");
       await mkdir(directory, { recursive: true });
       for (const width of [1440, 390]) {
-        await page.setViewportSize({ width, height: width === 1440 ? 900 : 844 });
+        await resizeViewport(width, width === 1440 ? 900 : 844);
         for (const theme of ["light", "balanced", "dark"]) {
           await page.evaluate((selected) => {
             document.documentElement.dataset.theme = selected;
@@ -533,7 +785,13 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
                 elements.flatMap((element) => {
                   const text = element.textContent ?? "";
                   const box = element.getBoundingClientRect();
-                  if (!/R\$\s*\d/.test(text) || !box.width || !box.height) return [];
+                  if (
+                    !/R\$\s*\d/.test(text) ||
+                    !box.width ||
+                    !box.height ||
+                    !element.checkVisibility()
+                  )
+                    return [];
                   const range = document.createRange();
                   range.selectNodeContents(element);
                   const fragments = Array.from(range.getClientRects()).filter(
@@ -586,7 +844,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           }
         }
       }
-      await page.setViewportSize({ width: 1440, height: 900 });
+      await resizeViewport(1440, 900);
       await page.evaluate(() => {
         document.documentElement.dataset.theme = "light";
       });
@@ -601,13 +859,17 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         page.getByText("Não aplicável neste cenário", { exact: true }),
       ).toBeVisible();
       await browserExpect(page.getByText(/seguros de referência/).first()).toBeVisible();
-      await page.getByRole("button", { name: "Salvar na sessão", exact: true }).click();
+      await browserExpect(
+        page.getByRole("button", { name: "Salvar na sessão", exact: true }),
+      ).toHaveCount(0);
       await page.getByLabel("Quantidade de proponentes", { exact: true }).fill("2");
-      await page.locator(".caixa-history").getByText("Simulações salvas", { exact: false }).click();
-      await page.locator(".caixa-history button").first().click();
       await browserExpect(
         page.getByLabel("Quantidade de proponentes", { exact: true }),
-      ).toHaveValue("1");
+      ).toHaveValue("2");
+      await browserExpect(
+        page.getByRole("heading", { name: "Resumo financeiro", exact: true }),
+      ).toBeVisible();
+      await page.getByLabel("Quantidade de proponentes", { exact: true }).fill("1");
       await auditCurrentTab("resultado");
       await page.getByLabel("Valor do imóvel *", { exact: false }).fill("45000000");
       await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
@@ -750,10 +1012,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       const directory = resolve("private-data/caixa-qa");
       await mkdir(directory, { recursive: true });
       for (const width of [1440, 1024, 768, 390, 320]) {
-        await page.setViewportSize({
-          width,
-          height: width === 1440 ? 900 : width === 1024 ? 768 : 844,
-        });
+        await resizeViewport(width, width === 1440 ? 900 : width === 1024 ? 768 : 844);
         for (const theme of ["light", "balanced", "dark"]) {
           await page.evaluate((selected) => {
             document.documentElement.dataset.theme = selected;
