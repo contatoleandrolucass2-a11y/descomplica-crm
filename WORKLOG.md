@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-11-05 — Agendamentos: vínculo oficial das equipes
+
+- Continuação do aceite do PR502: o cadastro Corretores possui gerente oficial;
+  Regional Comercial significa SP CAPITAL, não o nome do regional. Conciliação
+  usa o próprio corretor em Agendamentos e seu gerente oficial, rejeitando
+  homônimos, ausência e conflitos. Nenhum relatório salvo foi alterado.
+- Se o gerente oficial vier explicitamente null, a leitura não usa o gerente de
+  uma atividade antiga como substituto; roster indisponível até fonte completa.
+  Novo caso de regressão incluído (26 testes do leitor aprovados).
+- Campos aditivos separados preservam manager_name e contagens legadas. Apenas
+  Agendamentos lê gerente oficial/regional; null explícito não usa inferência
+  histórica por gerente. O painel diário respeita o mesmo vínculo opt-in.
+- Migration20261105175738 mantém ACL/RLS, trava e transação. Requests enriquecidos
+  vinculam requestId ao hash do JSONB integral; replay alterado rejeita, replay
+  idêntico não regrava. Requests legados preservam seu contrato anterior.
+- Testes locais:43 casos de leitura/metas/equipe e26 de calendário/modelo
+  compartilhado aprovados; produtor7/7 e ingestão48/1skip. pgTAP obrigatório na
+  CI isolada; Docker local não disponível. Sem alteração remota nesta etapa.
+- CI42081900887:5079 testes passaram; quatro falhas de inventário causadas pela
+  nova migration. Atualizados somente manifesto obrigatório105/pgTAP2476 e
+  allowlist de homologação, preservando os gates e o trem Auth/MFA existente.
+- CI42083827635: validate e imagem passaram. Restore isolado encontrou duas
+  assinaturas has_column ambíguas e fixture de replay com disponibilidade/metas
+  incompatíveis. Corrigidos somente os testes, mantendo31asserts, SQL e ACL.
+- Ordem obrigatória: CI, autorização específica da migration, banco compatível,
+  aplicação e atualização controlada do coletor, carga reconciliada e prints.
+  Rollback conserva colunas e versão compatível; não apagar dados ou locks.
+
 - CI 42067764237 / 1cc71693: testes de código e navegador CAIXA aprovados; fonte ITBI indisponível (HTTP 403) na primeira tentativa, aprovada no reteste. Matriz completa:241 comparações aprovadas; única diferença esperada é CAIXA 320 px, altura de 2012 para 2355 px após correção de campos. Captura revisada e referência atualizada sem mudar outras páginas.
 
 - CI de893450: validação e imagem aprovadas; navegador encontrou duas expectativas de subsídio anteriores à correção (família unipessoal e renda R$4.000). Atualização restrita às fixtures CAIXA, com reteste completo do componente.

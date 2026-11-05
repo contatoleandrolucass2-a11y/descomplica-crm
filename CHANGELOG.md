@@ -1,5 +1,9 @@
 # Changelog
 
+- Corrige a coorte das metas em Agendamentos com o gerente oficial de Corretores
+  e o regional conciliado por corretor em Agendamentos. Vínculos desconhecidos
+  permanecem indisponíveis; outras páginas mantêm o gerente e contagens legados.
+
 - Atualiza somente a referência visual CAIXA 320 px após corrigir contenção dos campos; as outras241 comparações visuais permaneceram aprovadas.
 
 - Atualiza os cenários de navegador CAIXA para o subsídio oficialmente confrontado e o piso de famílias unipessoais.

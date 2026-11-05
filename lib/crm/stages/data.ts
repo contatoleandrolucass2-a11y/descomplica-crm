@@ -29,6 +29,8 @@ const rosterSchema = z.array(
         .regex(/^[a-z0-9]+([._-][a-z0-9]+)*$/),
       broker_name: z.string().trim().min(1).max(200),
       manager_name: z.string().trim().min(1).max(200),
+      roster_manager_name: z.string().trim().min(1).max(200).nullable().optional(),
+      regional_manager_name: z.string().trim().min(1).max(200).nullable().optional(),
     })
     .strict(),
 );
@@ -117,7 +119,9 @@ export async function loadAppointmentsReadModel(
       return null;
     const response = await supabase
       .from("crm_ranking_participants")
-      .select("broker_key,broker_name,manager_name", { count: "exact" })
+      .select("broker_key,broker_name,manager_name,roster_manager_name,regional_manager_name", {
+        count: "exact",
+      })
       .eq("snapshot_id", before.id)
       .eq("period_key", "month")
       .order("broker_name")
@@ -136,11 +140,24 @@ export async function loadAppointmentsReadModel(
     const brokerKeys = new Set<string>();
     const roster: AppointmentBrokerRosterEntry[] = [];
     for (const row of parsed.data) {
+      // Explicitly missing official hierarchy cannot borrow an activity-derived manager.
+      // Undefined is retained only for the legacy DTO contract.
+      if (row.roster_manager_name === null) return null;
       const owner = row.broker_name.normalize("NFKC").trim().replace(/\s+/g, " ");
-      const manager = row.manager_name.normalize("NFKC").trim().replace(/\s+/g, " ");
+      const manager = (row.roster_manager_name ?? row.manager_name)
+        .normalize("NFKC")
+        .trim()
+        .replace(/\s+/g, " ");
       if (brokerKeys.has(row.broker_key)) return null;
       brokerKeys.add(row.broker_key);
-      roster.push({ key: row.broker_key, owner, manager });
+      roster.push({
+        key: row.broker_key,
+        owner,
+        manager,
+        ...(row.regional_manager_name !== undefined
+          ? { regionalManager: row.regional_manager_name }
+          : {}),
+      });
     }
     return roster;
   }

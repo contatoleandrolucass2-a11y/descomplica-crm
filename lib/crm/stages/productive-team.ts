@@ -208,7 +208,10 @@ export function analyzeProductiveTeam(
         key: broker.key,
         owner: broker.owner,
         manager: broker.manager,
-        regionalManager: stableRegion(broker.manager),
+        regionalManager:
+          broker.regionalManager !== undefined
+            ? broker.regionalManager
+            : stableRegion(broker.manager),
       }))
       .sort(compareMembers);
     return members;

@@ -6,6 +6,37 @@ import { isSameOriginRequest, safeExternalUrl, secretsMatch } from "../lib/secur
 const views = ["all", "with_canal_imob", "without_canal_imob"] as const;
 const stages = ["opportunities", "appointments", "visits", "folders", "sales"] as const;
 
+it("accepts optional official hierarchy without changing the legacy participant", () => {
+  const payload = validPayload();
+  const legacy = payload.ranking.participants[0];
+  expect(salesforceIngestionSchema.safeParse(payload).success).toBe(true);
+  const participant = {
+    ...legacy,
+    rosterManagerName: "Gerente Oficial",
+    regionalManagerName: "Regional A",
+  };
+  const enriched = { ...payload, ranking: { ...payload.ranking, participants: [participant] } };
+  expect(salesforceIngestionSchema.parse(enriched).ranking?.participants[0]).toEqual(participant);
+  expect(
+    salesforceIngestionSchema.safeParse({
+      ...enriched,
+      ranking: {
+        ...enriched.ranking,
+        participants: [{ ...participant, rosterManagerName: null }],
+      },
+    }).success,
+  ).toBe(false);
+  expect(
+    salesforceIngestionSchema.safeParse({
+      ...enriched,
+      ranking: {
+        ...enriched.ranking,
+        participants: [{ ...participant, rosterManagerName: null, regionalManagerName: null }],
+      },
+    }).success,
+  ).toBe(true);
+});
+
 function validPayload() {
   return {
     schemaVersion: 2,

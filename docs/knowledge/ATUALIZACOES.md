@@ -3279,4 +3279,5 @@ PR463 publicado/0dab1578; persistência, margem e prints aprovados. Evidências 
 
 Escopo dos21prints, estado inicial e evidências desta entrega em
 [registro específico](ATUALIZACOES-ARQUIVO-2026-11-05-a-2026-11-05-AGENDAMENTOS-APRESENTACAO.md).
-Implementação e validação em andamento; outras páginas fora do escopo.
+Visual publicado28b4ac35/PR502 e validado nos três ambientes.
+Conciliação da hierarquia oficial em andamento; outras páginas fora do escopo.
