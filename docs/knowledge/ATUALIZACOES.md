@@ -166,6 +166,21 @@
   Evidências e critério de retomada no
   [registro específico](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-CI-490.md).
 
+## 2026-11-04 — PR #490 integrado, publicado e conferido
+
+- Após autorização explícita para corrigir `/app`, margem estabilizada sem
+  alterar baseline. PR #490 e main 5da46964 com quatro gates aprovados; publicação
+  15:57:29 BRT, health200/ok no SHA exato. Histórico do bloqueio abaixo preservado.
+- Persistência real dos32 cards aprovada no Chrome e integrado, em retrato e
+  paisagem móveis simulados; tamanhos/ordem restaurados e capturas locais finais.
+  Atualização 30 min comprovada sem reload manual; carga nova com34 corretores
+  recalculou outubro para 884. Sem migration ou mudança de permissões.
+- Recibos operacionais, falha inicial57014, recuperação e limites no
+  [encerramento da entrega](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md#encerramento-da-publicação-do-pr490--04112026).
+- A fonte voltou a falhar20:07Z com57014: não há dois sucessos consecutivos.
+  Migration20261104201024 preparada para limitar somente a RPC a30s, com prova
+  REST PostgreSQL17/pgTAP na CI. Ainda não aplicada; exige autorização específica.
+
 - Agendamentos04/11: [trimestre, meta e atualização](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md).
 
 ## 2026-11-04 — CAIXA compacta publicada e validada

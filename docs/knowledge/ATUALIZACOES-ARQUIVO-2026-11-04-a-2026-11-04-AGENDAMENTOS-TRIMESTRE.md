@@ -204,3 +204,163 @@ Sintaxe e11 asserts isolados aprovados, sem acesso ao sistema/serviços.
 Exige parâmetros do main/CI exatos e app já publicado, backup/CAS/installation.lock,
 preserva demais configurações e verifica precedência/WorkingDirectory efetivo.
 Operação Linux e dois ciclos posteriores continuam pendentes, não alegados.
+
+## Encerramento da publicação do PR #490 — 04/11/2026
+
+Estado histórico acima preservado. O usuário autorizou expressamente corrigir
+a diferença da página inicial. Causa comprovada: empate de especificidade entre
+`.filters p` e `.report p`; ordem dos módulos alternava margem10px/zero.
+Classe própria e seletor específico estabilizam os dois avisos, preservando
+valor e baseline. Componentes/CSS reais passaram 12/12 casos, três temas e
+320/390/768/1440px, nas duas ordens de CSS, sem overflow ou consultas externas.
+
+PR #490 integrado: candidato892ffb4ad101d68759e34815f4e019aad0da53b5,
+CI41875106244; main 5da469643c2ac12d5f0582e30348f9fda7c8733f,
+CI41882885306. Quatro gates aprovados em ambos os SHAs, incluindo matriz visual
+completa; nenhuma referência visual alterada. Fontes:
+https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/490 e
+https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/41882885306.
+
+Aplicação publicada pelo release:production em2026-11-04T18:57:29.099Z
+(15:57:29.099 America/Sao_Paulo), deployment302cbc32-6472-472d-9903-fb8ecf52042b,
+com consulta ao vivo, locks/CAS, backup e ledger sem pendência. Anteriorc97d5fd2
+preservado para rollback. Artefato13349114816, ZIP SHA256
+684aa8422fff962bfff347441087f6dd7b652358d184211bb9ead4f2dc08f6c5;
+arquivo de imagem3fd139175dbc64b8eeceda3cc5b5ab35dccf47f47e3433d42d64be30cb37bb12.
+Imagem/manifest local5e272fb363892d62482612354366432a908a7da7eba3054f92b9977a8824d40d,
+config3c48545b75aa32810d2de310bd95a37c6343a4ec1ea4769db07f910c64bf117b;
+14 camadas, plataforma e identidade OCI comprovadas, sem rebuild/retag.
+image:prove aprovado nos dois perfis. Health público18:58:10Z HTTP200/ok,
+versão5da46964; acesso anônimo Agendamentos307 para login. Sem migration.
+
+Coletor atualizado19:07:33Z pelo helper revisado de SHA256
+7d3c63fca78222404fc5fda53c3d9a94147dbd531dfa0ed558704a29f2691955,
+após CI main e app publicado. Árvore transitiva18 arquivos conferida, sandbox,
+flags, memória, credenciais e agenda preservados. Drop-in específico altera
+somente WorkingDirectory para a release5da46964. Backup operacional privado:
+/var/lib/descomplica-salesforce-collector-install/appointments-consistent-retry-20261104-Ot9XNx.
+Dependências da nova release precisaram de cópia com novos inodes: conteúdo e
+symlinks idênticos, cache compartilhado inalterado, acesso apenas root/grupo do
+serviço. Troca atômica e Git limpo; backup da árvore anterior em
+/srv/descomplica-crm-releases/.collector-deps-5da46964-20261104-2yysowyt/node_modules.
+
+Primeiro ciclo19:17 falhou com PostgreSQL57014/statement_timeout no validador
+base, preservando a última carga válida. Diagnóstico somente leitura confirmou
+limite8s do authenticator; não alterados SQL, funções, roles, ACL, timeouts ou
+n8n. Investigação sintética isolada não comprovou ganho na troca do predicado;
+otimização descartada, sem mudança no produto. Retentativa agendada19:30
+publicou comercial201 às19:39:27.883Z, requestIdedee4ab1-67ec-4c04-8e66-53c23fdc9104,
+e estoque3498itens às19:40:02.816Z. RPC origin7315ms, margem pequena ao limite:
+recorrência57014 exige reavaliar a evidência e preparar correção delimitada,
+com autorização específica antes de qualquer migration remota.
+
+Testes reais da versão publicada preservaram32 cards: Chrome→integrado,
+integrado estreito→Chrome, paisagem→retrato com reload, saída/retorno pelo
+Dashboard e atualização completa. Movimento/redimensionamento realizados pelos
+controles reais de teclado; editor restaurou cada tamanho com um único Salvar.
+Não alegado arraste nativo ou aparelho físico. Card194x194 e gráfico1205x500
+restaurados, ordem inteira igual à abertura. Limite das torres128 px medido128 px,
+persistiu nos dois navegadores sem mudar o card; restaurado automático e
+confirmado por reload completo em ambos. Nenhuma cópia temporária criada.
+
+Viewport390x844 e844x390 no Chrome e integrado: modelo persistido idêntico,
+sem overflow horizontal da página. Integrado também1280x900. Comparação com
+quatro séries, média inteira, trimestre julho/agosto/setembro, tooltip numérico22,
+dias com três letras e explicação do feriado12/10 conferidos. Popup diário
+tem foco/retorno/Escape corretos e cabe em390x844 com rolagem interna.
+Dados novos16:36:34 corretores, outubro 884=26 × 34; popup29/10 com7 + 27 pessoas.
+Contagens são retratos da carga, não constantes do cálculo. Tabelas de outubro
+com136 detalhes/84 vencidos, sem paginação; rankings e tabelas alcançam o último
+resultado pela rolagem interna. Capturas reais e modelos de comparação somente
+em test-results/appointments-trimestre-live, ignorado pelo Git, sem exportar
+dados pessoais ao registro ou Obsidian.
+
+Refresh automático comprovado na aba Equipe Produtiva montada desde18:59:38Z,
+sem reload, navegação ou mudança de filtros: aviso15:33 às19:01:23Z passou
+para16:36 às20:00:21Z, visibilidade visible. Primeiro intervalo precedeu a carga
+nova; intervalo seguinte a mostrou. Evidência local refresh-result.json e
+produtiva-atualizacao-automatica-final.jpg. Reload final Chrome/integrado:
+32 modelos de dimensões/ordem iguais à abertura, layouts-final-restaurados.json.
+Capturas finais reais: chrome-pagina-inicial-final.jpg,
+chrome-comparativo-final.jpg, integrado-comparativo-final.jpg,
+integrado-meta-calendario-final.jpg, celular-equipe-dia-final.jpg e
+celular-grafico-final.jpg. Teste móvel usa viewport simulado, não aparelho físico;
+gráfico mantém rolagem interna para dias adicionais. Overrides restaurados,
+duas abas intermediárias próprias fechadas, abas de Agendamentos preservadas.
+
+O ciclo seguinte iniciou20:00:11.064Z, coletou os sete relatórios até20:03:34Z
+e escreveu candidato20:06:52.301Z; publicação falhou20:07:12.793Z. Metadados
+PostgreSQL20:07:11.732Z confirmaram57014/statement_timeout, não user_cancel,
+agora emv3_base23→validator47→ingest21. RPC500/origin10637ms, CRM503 e n8n502.
+Mudança da posição da interrupção reforça orçamento total esgotado, sem provar
+um predicado isolado como causa. Último snapshot válido19:39 preservado; estoque
+deste ciclo não publicado. PID2485058/restarts0; pico799813632 de805306368bytes,
+semOOM e com margem pequena. Não houve alteração de memória ou limite global.
+Dependências isoladas: digestf87bb9a908fd4cb47c1d1ae95f2024d8f17f7c57da7a5faba3705e2ce828d84a.
+
+Resultado separado: aplicação publicada e interface/persistência aprovadas;
+regularidade da fonte ainda bloqueada pela recorrência do timeout. Preparação
+de correção restrita à RPC em andamento, com testes PostgreSQL17/PostgREST
+isolados. Nenhuma migration remota autorizada ou aplicada nesta retomada.
+Pendentes: CI/proposta concreta, autorização específica para aplicação remota,
+dois ciclos completos consecutivos após correção e sincronização final.
+
+### Proposta delimitada após recorrência
+
+Migration20261104201024_salesforce_ingest_bounded_timeout.sql contém somente
+ALTER FUNCTION para statement_timeout30s e recarga do schema PostgREST. Corpo
+produtivo confirmado por MCP somente leitura: md548bcdeb5d43781cc7499b0a20e42d2fd,
+ownerpostgres, SECURITY DEFINERtrue, search_path vazio e ACL somente postgres e
+service_role. Configuração anterior não tinha override. Estado não alterado.
+
+Três testes Node, lint, sintaxe e formatação aprovados no worktree isolado.
+CI executa nove asserts pgTAP e prova REST PostgreSQL17 após migrations:
+role artificial própria8s, sem alterar configurações de roles existentes;
+espera9s sem override cancela57014, com override30s conclui; espera31s cancela;
+cinco chamadas posteriores mostram8s; anon/auth sem execução, inclusive RPC
+real; catálogo e configurações preservados, limpeza finally. Tempos registrados,
+sem ceilings estreitos; cliente HTTP45s e redirects recusados. Não garante
+reutilizar a mesma conexão do pool. Docker local ausente: banco depende da CI.
+
+Helper operacional ignorado test-results/hold-ingest-migration-lock.mjs não
+executa SQL. Valida CI/main exatos e app atual, mantém as três travas existentes,
+exige snapshot compatível com CAS, grava backup privado com fsync/hash e compara
+metadados posteriores. Onze testes locais de guards aprovados; SHA256
+1b27ee802cef2be24975082831dda4be80c6574bd11563c4b8b4ed2e9aad0d25.
+Uso remoto, migration e comprovação de ciclos continuam pendentes de gates e
+autorização específica. Nenhum timeout global ou controle de acesso afrouxado.
+
+PR493, primeiro candidato83b27b40: CI41905313680 interrompida no validate pelos
+inventários dependentes da migration nova. Total passou103→104 migrations e
+2436→2445 asserts pgTAP em49arquivos; allowlist de homologação também exigiu
+entrada explícita. Correção delimitada desses inventários, preservando suas
+asserções e os gates. REST/banco ainda não haviam sido executados nessa rodada.
+
+### Retomada após publicação concorrente
+
+Usuário autorizou expressamente a migration20261104201024 do PR493 somente
+após todos os gates do PR e do main verdes. Não pedir essa autorização novamente
+para o mesmo arquivo e condições. Ainda não aplicada nesta conferência.
+
+Janela de integração da CAIXA respeitada, sem merges concorrentes ou mudanças
+nessa página. Liberação recebida; conferência05/11 às00:02:28–33UTC
+(04/11 às21:02 America/Sao_Paulo): origin/main e health HTTP200/ok em
+fa068c439eacdd70f0c6d8cfc9bcba5394e1ef43. PR492 integrado22:20:53Z;
+publicação informada23:55:41Z, deployment e349e769-a543-44ee-b60e-71196de356da,
+CI main41924476763. Health confrontado ao vivo, sem confundir com a aplicação
+anterior5da46964. AGENTS, contexto, ferramentas e regra de eficiência não mudaram.
+
+PR493/candidato4eab64ee: CI41906251839 concluiu os quatro gates com sucesso,
+incluindo prova REST delimitada e banco. Main avançou durante a espera;
+conflitos de registro exigem integrar a base atual e nova CI do candidato,
+preservando integralmente a CAIXA publicada. Helper operacional ainda não
+executado: precondições serão atualizadas para a publicação real e novamente
+conferidas sob trava, sem reutilizar identidade de deployment antiga.
+
+Registro documental CAIXA do PR494 avançou main para e594bf70 enquanto a CI
+316ca898 estava em andamento. Somente CHANGELOG, WORKLOG e índice de conhecimento
+mudaram; runtime continuoufa068c43. Dois conflitos documentais resolvidos sem
+alterar o registro financeiro da outra entrega. Novas entradas próprias foram
+posicionadas junto do histórico de Agendamentos, para evitar colisões com novas
+entradas de outras entregas no topo. Nova CI obrigatória; autorização da mesma
+migration permanece válida, condicionada aos gates. Sem aplicação remota ainda.
