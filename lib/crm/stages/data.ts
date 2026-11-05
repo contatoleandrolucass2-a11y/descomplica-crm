@@ -140,6 +140,9 @@ export async function loadAppointmentsReadModel(
     const brokerKeys = new Set<string>();
     const roster: AppointmentBrokerRosterEntry[] = [];
     for (const row of parsed.data) {
+      // Explicitly missing official hierarchy cannot borrow an activity-derived manager.
+      // Undefined is retained only for the legacy DTO contract.
+      if (row.roster_manager_name === null) return null;
       const owner = row.broker_name.normalize("NFKC").trim().replace(/\s+/g, " ");
       const manager = (row.roster_manager_name ?? row.manager_name)
         .normalize("NFKC")

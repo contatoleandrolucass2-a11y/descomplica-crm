@@ -95,6 +95,21 @@ beforeEach(() => {
 });
 
 describe("appointments snapshot read", () => {
+  it("does not borrow a historical activity manager when the official manager is unknown", async () => {
+    participantResponses = [
+      {
+        data: roster.map((row) => ({
+          ...row,
+          roster_manager_name: null,
+          regional_manager_name: null,
+        })),
+        count: 2,
+        error: null,
+      },
+    ];
+    expect((await loadAppointmentsReadModel("all")).brokerRoster).toBeNull();
+  });
+
   it("uses official roster managers and retains explicit regional uncertainty", async () => {
     participantResponses = [
       {
