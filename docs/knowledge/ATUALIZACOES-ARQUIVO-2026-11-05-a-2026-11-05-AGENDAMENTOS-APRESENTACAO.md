@@ -207,7 +207,6 @@ com metaszero;31asserts preservados, inclusive ACL/hash/rollback. Migration
 permanece byte-idêntica à aprovada. Gates remanescentes desse candidato foram
 cancelados pelo coordenador após falha confirmada, sem cancelar outra entrega.
 
-
 ### Base concorrente —05/11/2026,18:55UTC
 
 Consulta origin/main confirmou318b51fa, PR503 de outra demanda. Diff restrito à
