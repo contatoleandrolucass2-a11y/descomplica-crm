@@ -1,5 +1,7 @@
 # Worklog
 
+- CI de893450: validação e imagem aprovadas; navegador encontrou duas expectativas de subsídio anteriores à correção (família unipessoal e renda R$4.000). Atualização restrita às fixtures CAIXA, com reteste completo do componente.
+
 - CI d73adc4b: 5.104 testes passaram; o catálogo visual reteve tamanho/hash antigos de capturas CAIXA substituídas. Metadados corrigidos somente para essas imagens; gate preservado.
 
 ## 2026-11-05 — CAIXA: fronteiras, anuais e formulário

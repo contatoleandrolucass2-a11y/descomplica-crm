@@ -1,5 +1,7 @@
 # Changelog
 
+- Atualiza os cenários de navegador CAIXA para o subsídio oficialmente confrontado e o piso de famílias unipessoais.
+
 - Sincroniza tamanhos e hashes das referências visuais CAIXA já revisadas com o catálogo de QA.
 
 - Reorganiza somente o formulário CAIXA em grupos legíveis, com resultado abaixo

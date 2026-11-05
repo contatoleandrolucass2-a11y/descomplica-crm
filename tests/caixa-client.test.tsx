@@ -424,7 +424,12 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(audit).toContainText("60.07 m²");
       await page.getByLabel("Área oficial da unidade", { exact: false }).fill("50");
       await page.getByLabel("Possui dependentes?", { exact: false }).selectOption("no");
-      await browserExpect(result.locator(".caixa-result-composition")).toContainText("1.091,41");
+      // The reduced automatic complement is below 1500; the full CAIXA simulator
+      // suppresses it after the unipersonal reducer (observed on 2026-11-05).
+      const subsidyRow = result.locator(".caixa-result-composition dl > div").filter({
+        has: page.locator("dt", { hasText: /^Subsídio$/ }),
+      });
+      await browserExpect(subsidyRow.locator("dd")).toHaveText("R$ 0,00");
       await browserExpect(result.getByRole("alert")).toHaveCount(0);
       expect(errors).toEqual([]);
     });
@@ -1169,7 +1174,10 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await subsidyInputs.locator("select").nth(0).selectOption("apartment");
       await subsidyInputs.locator('input[type="number"]').fill("50");
       await subsidyInputs.locator("select").nth(1).selectOption("yes");
-      await browserExpect(page.getByText("R$ 3.927,65", { exact: true })).toBeVisible();
+      // Independent formula: Frenda=1900, FDr=2.07, FDfin=0.1503443004,
+      // FUH=5.5 (50m² apartment), Fpop=1.2, nominal rate=8.16 (no FGTS discount).
+      // Raw complement=2456.023850; the verified final truncation gives 2456.
+      await browserExpect(page.getByText("R$ 2.456,00", { exact: true })).toBeVisible();
       await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
         "MCMV Faixa 3 por valor do imóvel",
       );
@@ -1177,7 +1185,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         "taxa efetiva de 8,4722% a.a.",
       );
       await browserExpect(page.locator("#caixa-simulation-result")).toContainText("420 meses");
-      await browserExpect(page.locator("#caixa-simulation-result")).toContainText("R$ 3.927,65");
+      await browserExpect(page.locator("#caixa-simulation-result")).toContainText("R$ 2.456,00");
       expect(errors).toEqual([]);
     });
     it("applies the SBPE SAC ceiling and removes MCMV-only values", async () => {
