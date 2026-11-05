@@ -120,6 +120,9 @@ aplicável ficam nos grupos de renda e imóvel. Parâmetros e juros de obra fica
 o usuário solicitar. Os temas claro, médio e escuro compartilham a mesma
 estrutura e mantêm contraste, teclado, zoom e adaptação móvel.
 
+Legendas quebram dentro de cada grupo também nos tamanhos intermediários;
+texto e controles permanecem dentro da borda, enquanto Sim/Não não quebra.
+
 O cálculo é local ao navegador, não envia proposta e não persiste os dados do
 formulário. Ele está disponível a todos os papéis operacionais ativos que possuem
 `crm.simulators.view`. A rota continua protegida por sessão, catálogo, permissão,

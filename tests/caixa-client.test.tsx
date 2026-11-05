@@ -547,13 +547,16 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       }
       expect(errors).toEqual([]);
     });
-    it("wraps full mobile choice legends inside their outlined groups", async () => {
+    it("wraps full choice legends inside their outlined groups across breakpoints", async () => {
       await open();
-      await page.addStyleTag({ content: ".caixa-page-shell{letter-spacing:1px;font-weight:700}" });
+      await page.addStyleTag({
+        content:
+          ".caixa-page-shell{letter-spacing:1px;font-weight:700}.caixa-page-shell .caixa-full-form .caixa-field>span{letter-spacing:1px!important;font-weight:700}",
+      });
       await page.evaluate(() => document.fonts.ready);
       const directory = resolve("private-data/caixa-qa");
       await mkdir(directory, { recursive: true });
-      for (const width of [375, 390]) {
+      for (const width of [375, 390, 768, 1024, 1200]) {
         await resizeViewport(width, 1100);
         for (const theme of ["light", "dark"]) {
           await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme);
@@ -581,6 +584,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
                   wrap: getComputedStyle(label).whiteSpace,
                   font: getComputedStyle(label).fontSize,
                   letterSpacing: getComputedStyle(label).letterSpacing,
+                  overflowRight: Math.max(...texts.map((rect) => rect.right)) - group.right,
                   contained: texts.every(
                     (rect) =>
                       rect.left >= group.left &&

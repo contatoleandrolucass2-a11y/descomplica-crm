@@ -2,6 +2,17 @@
 
 ## 2026-11-04 — CAIXA: unidades na página e campos agrupados, abertura
 
+- Em05/11, CI41957639708 de3c631e5f aprovou validate/imagem/restore e todos
+  os49responsivos/28temas/77axe/zoom/funcionais; falha somente em11pixels CAIXA.
+  Artefato13386471554/ZIP62a06e7b54ec4eb33f4fe5483486dd8d41d54869f7bab1ed844ec45e86081fa5,
+  captura55dc13a5, árvore80f24305 idêntica ao head, fingerprint bcc8dec2
+  reproduzido com19arquivos gerados. As11imagens foram revisadas; mobile
+  corrigido, mas1024px ainda tinha legenda14,55px fora da borda. Não adotadas.
+- Causa: nowrap antigo permanecia entre761–1199px. Correção limitada às
+  legendas binárias/condição, sem redução de fonte ou corte. Teste de contenção
+  expandido para375/390/768/1024/1200, claro/escuro e tracking1px/700;3provas
+  dirigidas aprovadas, lint/formatação/diff-check verdes. Novo source CI será
+  obrigatório; não copiar referências com defeito para liberar o gate.
 - Consolidação para PR495: logs da aplicação, regressões e limites serão
   integrados juntos pelo squash; referências anteriores não foram adotadas.
 - Retomada em05/11/2026 01:16:46UTC (04/11 local): origin/main e GitHub

@@ -36,6 +36,12 @@
   tipos/lint verdes; fórmulas canônicas não alteradas. Nova captura/CI pendentes.
 - Evidências locais e limites consolidados no changelog; a entrega será
   integrada por squash com os registros no mesmo commit da aplicação.
+- CI41957639708 manteve três gates aprovados e falha apenas nos11pixels CAIXA.
+  Capturas/fingerprint/árvore foram conferidos, mas revisão de1024px encontrou
+  legenda14,55px fora da borda: nenhuma referência foi adotada. Wrap restrito
+  a761–1199px corrigido;3provas dirigidas375/390/768/1024/1200 em claro/escuro,
+  tracking1px/700, passaram, preservando botões e duas linhas desktop. Nova
+  captura obrigatória antes da aprovação das referências.
 
 ## 2026-11-04 — Prazo delimitado para gravação Salesforce
 

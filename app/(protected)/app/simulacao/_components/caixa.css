@@ -5186,3 +5186,15 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
     font-size: 11px;
   }
 }
+@media (min-width: 761px) and (max-width: 1199px) {
+  .goal-page-shell.caixa-page-shell
+    .caixa-full-form
+    :is(.caixa-binary-grid, .caixa-property-condition-group)
+    .caixa-field
+    > span {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}

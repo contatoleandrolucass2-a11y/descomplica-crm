@@ -1,5 +1,8 @@
 # Changelog
 
+- Mantém as legendas dentro das bordas também em telas intermediárias,
+  com quebra de texto e sem reduzir fonte ou quebrar Sim/Não.
+
 - Revalida financiamento e subsídio após desconto, impede abatimento duplicado
   de bônus/folga sobre preço final e bloqueia aprovação/impressão com bases
   bancária e comercial divergentes. Legendas mobile permanecem dentro da borda.
