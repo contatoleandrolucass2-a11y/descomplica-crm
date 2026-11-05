@@ -14,6 +14,9 @@
   Novas regressões cobrem troca de faixa do imóvel inicial, aprovação individual,
   cota, anuais e revogação de impressão após edição. CI/publicação
   ainda pendentes nesta etapa. Detalhes e limites em docs/simulators/CAIXA.md.
+- CI42010127829 identificou acesso potencialmente indefinido a duas linhas
+  nos novos testes; adicionada asserção de quantidade e tipagem correspondente.
+  Não alterou cálculo. Nova CI obrigatória no commit corrigido.
 
 ## 2026-11-05 — Publicação do refresh e prova real sem reload
 

@@ -76,7 +76,8 @@ describe("CAIXA credit and ranking belong to the unit being assessed", () => {
     expect(assessment.value.annuals).toEqual(
       [2026, 2027, 2028, 2029].map((year) => ({ date: `${year}-12-15`, amount: 2000 })),
     );
-    const commitment = assessment.value.details!.approvalRows[1];
+    expect(assessment.value.details!.approvalRows).toHaveLength(3);
+    const commitment = assessment.value.details!.approvalRows[1]!;
     expect(commitment.linear).toBeCloseTo(0.1608, 4);
     expect(commitment.decreasing).toBeCloseTo(0.1983, 4);
     expect(assessment.value.installments).toBe(84);
@@ -88,8 +89,9 @@ describe("CAIXA credit and ranking belong to the unit being assessed", () => {
     if (assessment.status !== "approved") return;
     expect(assessment.value.financing).toBe(208000);
     const rows = assessment.value.details!.approvalRows;
+    expect(rows).toHaveLength(3);
     expect(rows.every((row) => row.linear <= row.limit)).toBe(true);
-    expect(rows[1].decreasing).toBeGreaterThan(rows[1].limit);
+    expect(rows[1]!.decreasing).toBeGreaterThan(rows[1]!.limit);
   });
 
   it("still rejects a unit whose two flows exceed the ranking", () => {
