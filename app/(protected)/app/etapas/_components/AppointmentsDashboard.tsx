@@ -12,6 +12,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeftRight, CalendarDays, X } from "lucide-react";
 
 import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configurable";
@@ -154,35 +155,56 @@ type CardDetails = {
   className?: string | undefined;
 };
 
+const subscribePopupHost = () => () => undefined;
+function usePopupHost(enabled: boolean) {
+  return useSyncExternalStore(
+    subscribePopupHost,
+    () => (enabled ? document.body : null),
+    () => null,
+  );
+}
+function popup(node: ReactNode, host: HTMLElement | null) {
+  return host ? createPortal(node, host) : node;
+}
+
 function TiltCard({
   className,
   children,
   goalStatus = "neutral",
   statusLabel,
   details,
+  portalDialog = false,
 }: {
   className: string | undefined;
   children: ReactNode;
   goalStatus?: GoalStatus;
   statusLabel?: string | undefined;
   details?: CardDetails | undefined;
+  portalDialog?: boolean;
 }) {
+  const popupHost = usePopupHost(portalDialog);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const close = useRef<HTMLButtonElement>(null);
   const titleId = useId();
+  const tiltTarget = (element: HTMLElement) =>
+    element.closest<HTMLElement>("[data-dashboard-card-id]") ?? element;
   const move = (event: ReactPointerEvent<HTMLElement>) => {
     if (event.pointerType === "touch") return;
-    const bounds = event.currentTarget.getBoundingClientRect();
+    if (event.target instanceof Element && event.target.closest("dialog[open]")) return;
+    const target = tiltTarget(event.currentTarget);
+    const bounds = target.getBoundingClientRect();
     const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
     const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
-    event.currentTarget.style.setProperty("--card-tilt-x", `${vertical * -45}deg`);
-    event.currentTarget.style.setProperty("--card-tilt-y", `${horizontal * 45}deg`);
+    const amplitude = target === event.currentTarget ? 45 : 16;
+    target.style.setProperty("--card-tilt-x", `${vertical * -amplitude}deg`);
+    target.style.setProperty("--card-tilt-y", `${horizontal * amplitude}deg`);
   };
   const reset = (event: ReactPointerEvent<HTMLElement>) => {
-    event.currentTarget.style.setProperty("--card-tilt-x", "0deg");
-    event.currentTarget.style.setProperty("--card-tilt-y", "0deg");
+    const target = tiltTarget(event.currentTarget);
+    target.style.setProperty("--card-tilt-x", "0deg");
+    target.style.setProperty("--card-tilt-y", "0deg");
   };
   return (
     <article
@@ -201,41 +223,48 @@ function TiltCard({
         aria-label="Abrir detalhes deste indicador"
         aria-haspopup="dialog"
         onClick={() => {
+          const target = trigger.current?.closest<HTMLElement>("[data-dashboard-card-id]");
+          target?.style.setProperty("--card-tilt-x", "0deg");
+          target?.style.setProperty("--card-tilt-y", "0deg");
           if (details) setDetailsOpen(true);
           dialog.current?.showModal();
           requestAnimationFrame(() => close.current?.focus());
         }}
       />
-      <dialog
-        ref={dialog}
-        className={[styles.cardDialog, details?.className].filter(Boolean).join(" ")}
-        aria-labelledby={titleId}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) dialog.current?.close();
-        }}
-        onClose={() => {
-          if (details) setDetailsOpen(false);
-          trigger.current?.focus();
-        }}
-      >
-        <div className={styles.cardDialogPanel}>
-          <header>
-            <h2 id={titleId}>{details?.title ?? "Detalhes do indicador"}</h2>
-            <button
-              ref={close}
-              type="button"
-              aria-label="Fechar detalhes do indicador"
-              onClick={() => dialog.current?.close()}
-            >
-              <X aria-hidden="true" size={18} />
-            </button>
-          </header>
-          <div className={styles.cardDialogContent}>
-            {details ? (detailsOpen ? details.content : null) : children}
+      {popup(
+        <dialog
+          ref={dialog}
+          data-appointments-popup={portalDialog ? true : undefined}
+          className={[styles.cardDialog, details?.className].filter(Boolean).join(" ")}
+          aria-labelledby={titleId}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) dialog.current?.close();
+          }}
+          onClose={() => {
+            if (details) setDetailsOpen(false);
+            trigger.current?.focus();
+          }}
+        >
+          <div className={styles.cardDialogPanel}>
+            <header>
+              <h2 id={titleId}>{details?.title ?? "Detalhes do indicador"}</h2>
+              <button
+                ref={close}
+                type="button"
+                aria-label="Fechar detalhes do indicador"
+                onClick={() => dialog.current?.close()}
+              >
+                <X aria-hidden="true" size={18} />
+              </button>
+            </header>
+            <div className={styles.cardDialogContent}>
+              {details ? (detailsOpen ? details.content : null) : children}
+            </div>
+            {statusLabel ? <p className={styles.cardDialogStatus}>{statusLabel}</p> : null}
           </div>
-          {statusLabel ? <p className={styles.cardDialogStatus}>{statusLabel}</p> : null}
-        </div>
-      </dialog>
+        </dialog>,
+        popupHost,
+      )}
     </article>
   );
 }
@@ -248,7 +277,7 @@ function Ranking({
   onSelect,
   fullLabel = false,
 }: {
-  buckets: AppointmentBucket[] | null;
+  buckets: (AppointmentBucket & { goal?: number | null; goalLowerBound?: number })[] | null;
   total: number;
   unavailable?: string;
   selected?: string | undefined;
@@ -290,9 +319,29 @@ function Ranking({
               <div aria-hidden="true" className={styles.rankTrack}>
                 <div
                   className={styles.rankBar}
+                  data-goal-status={
+                    item.goal != null
+                      ? item.total >= item.goal
+                        ? "positive"
+                        : "negative"
+                      : item.goalLowerBound != null && item.total < item.goalLowerBound
+                        ? "negative"
+                        : "goal" in item
+                          ? "unavailable"
+                          : "neutral"
+                  }
                   style={{ "--rank-size": `${(item.total / max) * 100}%` } as CSSProperties}
                 />
               </div>
+              {"goal" in item ? (
+                <span className="sr-only">
+                  {item.goal != null
+                    ? `Meta de agendamentos: ${number.format(item.goal)}`
+                    : item.goalLowerBound != null
+                      ? `Meta mínima comprovada: ${number.format(item.goalLowerBound)}; meta total indisponível`
+                      : "Meta indisponível"}
+                </span>
+              ) : null}
             </button>
           </li>
         ))}
@@ -511,7 +560,12 @@ function Kpi({
   statusLabel?: string | undefined;
 }) {
   return (
-    <TiltCard className={styles.kpiCard} goalStatus={goalStatus} statusLabel={statusLabel}>
+    <TiltCard
+      portalDialog
+      className={styles.kpiCard}
+      goalStatus={goalStatus}
+      statusLabel={statusLabel}
+    >
       <h2>{label}</h2>
       <strong className={styles.metricValue}>{value ?? "Indisponível"}</strong>
       <p>{detail}</p>
@@ -527,6 +581,7 @@ export function ProductiveTeamCard({
   title = "Equipe Produtiva",
   activity = "agendamento",
   details,
+  portalDialog = false,
 }: {
   productive: number | null;
   brokers: number | null;
@@ -535,6 +590,7 @@ export function ProductiveTeamCard({
   title?: string;
   activity?: string;
   details?: CardDetails | undefined;
+  portalDialog?: boolean;
 }) {
   const progress = Math.min(Math.max(percent ?? 0, 0), 100);
   const goalStatus = atLeastStatus(percent, 100);
@@ -542,6 +598,7 @@ export function ProductiveTeamCard({
     <TiltCard
       className={`${styles.kpiCard} ${styles.productiveCard}`}
       details={details}
+      portalDialog={portalDialog}
       goalStatus={goalStatus}
       statusLabel={
         percent === null
@@ -600,7 +657,12 @@ function ConversionKpi({
         ? `Meta de conversão não configurada para ${goalContext}`
         : `${goalStatus === "positive" ? "Dentro da meta" : "Acima da meta"}: ${decimal.format(ratio)} para 1; limite ${decimal.format(goal)} para 1`;
   return (
-    <TiltCard className={styles.conversionCard} goalStatus={goalStatus} statusLabel={statusLabel}>
+    <TiltCard
+      portalDialog
+      className={styles.conversionCard}
+      goalStatus={goalStatus}
+      statusLabel={statusLabel}
+    >
       <h2>{title}</h2>
       {source === null || target === null ? (
         <strong className={styles.metricValue}>Indisponível</strong>
@@ -643,6 +705,7 @@ function CalendarFilter({
   onToggleDate,
   onSelectWholeMonth,
   onSelectRange,
+  portalDialog = false,
 }: {
   month: string;
   years: string[];
@@ -655,7 +718,9 @@ function CalendarFilter({
   onToggleDate: (date: string) => void;
   onSelectWholeMonth: () => void;
   onSelectRange: (start: string, end: string, label: string) => void;
+  portalDialog?: boolean;
 }) {
+  const popupHost = usePopupHost(portalDialog);
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const close = useRef<HTMLButtonElement>(null);
@@ -752,144 +817,148 @@ function CalendarFilter({
         <CalendarDays size={18} aria-hidden="true" />
         <span>{summary}</span>
       </button>
-      <dialog
-        ref={dialog}
-        className={styles.calendarDialog}
-        aria-labelledby={titleId}
-        aria-describedby={descriptionId}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) dialog.current?.close();
-        }}
-        onClose={() => trigger.current?.focus()}
-      >
-        <div className={styles.calendarPanel}>
-          <header className={styles.calendarHeader}>
-            <div>
-              <span>CALENDÁRIO</span>
-              <h2 id={titleId}>Selecione o período</h2>
+      {popup(
+        <dialog
+          ref={dialog}
+          data-appointments-popup={portalDialog ? true : undefined}
+          className={styles.calendarDialog}
+          aria-labelledby={titleId}
+          aria-describedby={descriptionId}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) dialog.current?.close();
+          }}
+          onClose={() => trigger.current?.focus()}
+        >
+          <div className={styles.calendarPanel}>
+            <header className={styles.calendarHeader}>
+              <div>
+                <span>CALENDÁRIO</span>
+                <h2 id={titleId}>Selecione o período</h2>
+              </div>
+              <button
+                ref={close}
+                type="button"
+                className={styles.calendarClose}
+                aria-label="Fechar calendário"
+                onClick={() => dialog.current?.close()}
+              >
+                <X size={20} aria-hidden="true" />
+              </button>
+            </header>
+            <p id={descriptionId} className={styles.calendarDescription}>
+              Use um atalho, escolha o mês inteiro ou selecione um ou vários dias.
+            </p>
+            <div className={styles.calendarPresets} aria-label="Atalhos de período">
+              {presets.map((preset) => {
+                const unavailable =
+                  preset.start > preset.end ||
+                  preset.end < coverageStart ||
+                  preset.start > referenceDate ||
+                  ("currentMonthOnly" in preset &&
+                    preset.currentMonthOnly &&
+                    preset.start.slice(0, 7) !== referenceMonth);
+                const start = preset.start < coverageStart ? coverageStart : preset.start;
+                const end = preset.end > referenceDate ? referenceDate : preset.end;
+                return (
+                  <button
+                    key={`${preset.label}-${year}`}
+                    type="button"
+                    disabled={unavailable}
+                    onClick={() => {
+                      onSelectRange(start, end, preset.label);
+                      dialog.current?.close();
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
             </div>
-            <button
-              ref={close}
-              type="button"
-              className={styles.calendarClose}
-              aria-label="Fechar calendário"
-              onClick={() => dialog.current?.close()}
-            >
-              <X size={20} aria-hidden="true" />
-            </button>
-          </header>
-          <p id={descriptionId} className={styles.calendarDescription}>
-            Use um atalho, escolha o mês inteiro ou selecione um ou vários dias.
-          </p>
-          <div className={styles.calendarPresets} aria-label="Atalhos de período">
-            {presets.map((preset) => {
-              const unavailable =
-                preset.start > preset.end ||
-                preset.end < coverageStart ||
-                preset.start > referenceDate ||
-                ("currentMonthOnly" in preset &&
-                  preset.currentMonthOnly &&
-                  preset.start.slice(0, 7) !== referenceMonth);
-              const start = preset.start < coverageStart ? coverageStart : preset.start;
-              const end = preset.end > referenceDate ? referenceDate : preset.end;
-              return (
-                <button
-                  key={`${preset.label}-${year}`}
-                  type="button"
-                  disabled={unavailable}
-                  onClick={() => {
-                    onSelectRange(start, end, preset.label);
-                    dialog.current?.close();
-                  }}
+            <div className={styles.calendarControls}>
+              <label>
+                <span>Mês</span>
+                <select
+                  aria-label="Mês do calendário"
+                  value={monthNumber}
+                  onChange={(event) => setMonthPart(year, Number(event.target.value))}
                 >
-                  {preset.label}
-                </button>
-              );
-            })}
-          </div>
-          <div className={styles.calendarControls}>
-            <label>
-              <span>Mês</span>
-              <select
-                aria-label="Mês do calendário"
-                value={monthNumber}
-                onChange={(event) => setMonthPart(year, Number(event.target.value))}
-              >
-                {monthNames.map((name, index) => {
-                  const value = `${year}-${String(index + 1).padStart(2, "0")}`;
-                  const unavailable =
-                    value < coverageStart.slice(0, 7) || value > calendarDate.slice(0, 7);
-                  return (
-                    <option key={name} value={index + 1} disabled={unavailable}>
-                      {name}
+                  {monthNames.map((name, index) => {
+                    const value = `${year}-${String(index + 1).padStart(2, "0")}`;
+                    const unavailable =
+                      value < coverageStart.slice(0, 7) || value > calendarDate.slice(0, 7);
+                    return (
+                      <option key={name} value={index + 1} disabled={unavailable}>
+                        {name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+              <label>
+                <span>Ano</span>
+                <select
+                  aria-label="Ano do calendário"
+                  value={year}
+                  onChange={(event) => setCalendarYear(Number(event.target.value))}
+                >
+                  {years.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
                     </option>
-                  );
-                })}
-              </select>
-            </label>
-            <label>
-              <span>Ano</span>
-              <select
-                aria-label="Ano do calendário"
-                value={year}
-                onChange={(event) => setCalendarYear(Number(event.target.value))}
-              >
-                {years.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className={styles.calendarGrid} role="grid" aria-label="Dias do mês">
+              <div className={styles.calendarGridRow} role="row">
+                {weekDays.map((day) => (
+                  <span key={day} role="columnheader" className={styles.calendarWeekday}>
+                    {day}
+                  </span>
                 ))}
-              </select>
-            </label>
-          </div>
-          <div className={styles.calendarGrid} role="grid" aria-label="Dias do mês">
-            <div className={styles.calendarGridRow} role="row">
-              {weekDays.map((day) => (
-                <span key={day} role="columnheader" className={styles.calendarWeekday}>
-                  {day}
-                </span>
+              </div>
+              {weeks.map((week, weekIndex) => (
+                <div className={styles.calendarGridRow} role="row" key={`week-${weekIndex}`}>
+                  {week.map((day, dayIndex) => {
+                    if (day === null)
+                      return <span key={`empty-${weekIndex}-${dayIndex}`} aria-hidden="true" />;
+                    const key = `${month}-${String(day).padStart(2, "0")}`;
+                    const unavailable = key < coverageStart || key > referenceDate;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        role="gridcell"
+                        aria-label={calendarDateFormatter.format(new Date(`${key}T12:00:00Z`))}
+                        aria-current={key === calendarDate ? "date" : undefined}
+                        aria-selected={selected.has(key)}
+                        disabled={unavailable}
+                        className={styles.calendarDay}
+                        onClick={() => onToggleDate(key)}
+                      >
+                        {day}
+                      </button>
+                    );
+                  })}
+                </div>
               ))}
             </div>
-            {weeks.map((week, weekIndex) => (
-              <div className={styles.calendarGridRow} role="row" key={`week-${weekIndex}`}>
-                {week.map((day, dayIndex) => {
-                  if (day === null)
-                    return <span key={`empty-${weekIndex}-${dayIndex}`} aria-hidden="true" />;
-                  const key = `${month}-${String(day).padStart(2, "0")}`;
-                  const unavailable = key < coverageStart || key > referenceDate;
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      role="gridcell"
-                      aria-label={calendarDateFormatter.format(new Date(`${key}T12:00:00Z`))}
-                      aria-current={key === calendarDate ? "date" : undefined}
-                      aria-selected={selected.has(key)}
-                      disabled={unavailable}
-                      className={styles.calendarDay}
-                      onClick={() => onToggleDate(key)}
-                    >
-                      {day}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
+            <footer className={styles.calendarFooter}>
+              <span aria-live="polite">{summary}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  onSelectWholeMonth();
+                  dialog.current?.close();
+                }}
+              >
+                Selecionar mês inteiro
+              </button>
+            </footer>
           </div>
-          <footer className={styles.calendarFooter}>
-            <span aria-live="polite">{summary}</span>
-            <button
-              type="button"
-              onClick={() => {
-                onSelectWholeMonth();
-                dialog.current?.close();
-              }}
-            >
-              Selecionar mês inteiro
-            </button>
-          </footer>
-        </div>
-      </dialog>
+        </dialog>,
+        popupHost,
+      )}
     </div>
   );
 }
@@ -910,6 +979,7 @@ export function DashboardFilters({
   onSelectWholeMonth,
   onSelectRange,
   label = "Filtros do painel de agendamentos",
+  compactOptions = false,
 }: {
   filters: AppointmentFilters;
   options: {
@@ -935,30 +1005,31 @@ export function DashboardFilters({
   onSelectWholeMonth: () => void;
   onSelectRange: (start: string, end: string, label: string) => void;
   label?: string;
+  compactOptions?: boolean;
 }) {
   const selects = [
     {
       key: "regionalManager" as const,
       label: "Gerente Regional",
-      empty: "Todos os gerentes regionais",
+      empty: compactOptions ? "Todos" : "Todos os gerentes regionais",
       values: options.regionalManagers,
     },
     {
       key: "manager" as const,
       label: "Gerente de Vendas",
-      empty: "Todos os gerentes",
+      empty: compactOptions ? "Todos" : "Todos os gerentes",
       values: options.managers,
     },
     {
       key: "owner" as const,
       label: "Responsável da conta",
-      empty: "Todos os responsáveis",
+      empty: compactOptions ? "Todos" : "Todos os responsáveis",
       values: options.owners,
     },
     {
       key: "company" as const,
       label: "Empresa",
-      empty: "Todas as empresas",
+      empty: compactOptions ? "Todas" : "Todas as empresas",
       values: options.companies,
     },
   ];
@@ -1009,6 +1080,7 @@ export function DashboardFilters({
         );
       })}
       <CalendarFilter
+        portalDialog={compactOptions}
         month={month}
         years={years}
         coverageStart={coverageStart}
@@ -1239,7 +1311,8 @@ function AppointmentTable({
     timeZone: timezone,
   });
   const value = (text: string) => text || "Não informado";
-  const overdue = overdueRows || detailQuery?.subset === "overdue";
+  const withoutVisit = detailQuery?.subset === "without_visit" || overdueRows;
+  const overdue = withoutVisit || detailQuery?.subset === "overdue";
   const attendanceColumn = overdue ? "Data prevista de comparecimento" : "Data de comparecimento";
   return (
     <section
@@ -1282,13 +1355,20 @@ function AppointmentTable({
       ) : null}
       {unavailable ? null : visibleRows.length === 0 ? (
         <Empty>
-          {overdue
-            ? "Nenhum agendamento vencido sem visita nos filtros selecionados."
-            : "Nenhum agendamento no período coberto."}
+          {withoutVisit
+            ? "Nenhum agendamento sem visita confirmada nos filtros selecionados."
+            : overdue
+              ? "Nenhum agendamento vencido sem visita nos filtros selecionados."
+              : "Nenhum agendamento no período coberto."}
         </Empty>
       ) : (
         <div className={styles.tableViewport} tabIndex={0} role="region" aria-label={title}>
           <table>
+            <colgroup>
+              {[8, 5, 6, 11, 7, 12, 11, 10, 22, 8].map((width, index) => (
+                <col key={index} style={{ width: `${width}%` }} />
+              ))}
+            </colgroup>
             <thead>
               <tr>
                 <th>Data de criação</th>
@@ -1750,6 +1830,7 @@ export function AppointmentsDashboard({
     "appointments.goal": {
       kpi: (
         <TiltCard
+          portalDialog
           className={styles.gaugeCard}
           goalStatus={atLeastStatus(monthUnavailable ? null : result.total, monthlyGoal)}
           statusLabel={
@@ -1779,6 +1860,7 @@ export function AppointmentsDashboard({
     "team.productive": {
       donut: (
         <ProductiveTeamCard
+          portalDialog
           productive={monthUnavailable ? null : result.productiveBrokers}
           brokers={result.brokerCount}
           percent={monthUnavailable ? null : result.productivePercent}
@@ -1980,7 +2062,8 @@ export function AppointmentsDashboard({
                 buckets={result.daily}
                 label="Agendamentos por dia do mês selecionado"
                 daily
-                reference={{ value: result.goalBrokerCount, label: "Corretores no recorte" }}
+                goalLabel="Meta diária"
+                showGoalSummary
                 isSelected={(bucket) =>
                   filters.createdDate === bucket.key || selectedDates.includes(bucket.key)
                 }
@@ -2028,7 +2111,8 @@ export function AppointmentsDashboard({
               <Columns
                 buckets={result.weekly}
                 label="Agendamentos por semana do mês selecionado"
-                reference={{ value: result.weeklyTarget, label: "Meta semanal", showSummary: true }}
+                goalLabel="Meta semanal"
+                showGoalSummary
                 selected={filters.week ? String(filters.week) : undefined}
                 onSelect={(bucket) => toggleFilter("week", Number(bucket.key))}
               />
@@ -2238,25 +2322,20 @@ export function AppointmentsDashboard({
       table:
         result.details === null && !detailSource ? (
           <section className={`${styles.card} ${styles.tableCard}`}>
-            <h2>Agendamentos vencidos sem visita realizada</h2>
+            <h2>Agendamentos sem visita confirmada</h2>
             <Empty>Detalhamento indisponível nesta atualização.</Empty>
           </section>
         ) : (
           <AppointmentTable
-            title="Agendamentos vencidos sem visita realizada"
+            title="Agendamentos sem visita confirmada"
             overdue
             rows={
               compactSummary
                 ? []
-                : (result.details ?? []).filter(
-                    (row) =>
-                      !row.visitPerformed &&
-                      row.scheduledAt !== null &&
-                      saoPauloDate(row.scheduledAt) < currentCalendarDate,
-                  )
+                : (result.details ?? []).filter((row) => row.visitPerformed !== true)
             }
             detailSource={detailSource}
-            detailQuery={detailQuery ? { ...detailQuery, subset: "overdue" } : undefined}
+            detailQuery={detailQuery ? { ...detailQuery, subset: "without_visit" } : undefined}
             detailController={detailController}
             timezone={timezone}
             selectedKey={selectedRow}
@@ -2317,7 +2396,7 @@ export function AppointmentsDashboard({
     .filter(Boolean)
     .join(" · ");
   return (
-    <div className={styles.dashboard}>
+    <div className={styles.dashboard} data-appointments-dashboard="true">
       <div className={styles.titleRow}>
         <div className={styles.titleGroup}>
           <h1 className={styles.title}>Agendamentos</h1>
@@ -2349,6 +2428,7 @@ export function AppointmentsDashboard({
       </p>
 
       <DashboardFilters
+        compactOptions
         filters={filters}
         options={result.filterOptions}
         onChange={setDimensionFilter}

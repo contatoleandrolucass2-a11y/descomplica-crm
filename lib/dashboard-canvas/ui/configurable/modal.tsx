@@ -1,9 +1,19 @@
 "use client";
 
-import { useEffect, useEffectEvent, useId, useRef, type ReactNode } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useId,
+  useRef,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 import styles from "./configurable-dashboard-canvas.module.css";
+
+const subscribeToHost = () => () => {};
 
 export function DashboardModal({
   title,
@@ -12,6 +22,7 @@ export function DashboardModal({
   footer,
   onClose,
   wide = false,
+  portalToBody = false,
 }: {
   title: string;
   description?: string;
@@ -19,11 +30,18 @@ export function DashboardModal({
   footer?: ReactNode;
   onClose: () => void;
   wide?: boolean;
+  /** Only fitted Appointment pages opt out of ancestor zoom/containing blocks. */
+  portalToBody?: boolean;
 }) {
   const titleId = useId();
   const descriptionId = useId();
   const modalRef = useRef<HTMLDivElement>(null);
   const close = useEffectEvent(onClose);
+  const portalHost = useSyncExternalStore(
+    subscribeToHost,
+    () => (portalToBody ? document.body : null),
+    () => null,
+  );
 
   useEffect(() => {
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -57,11 +75,12 @@ export function DashboardModal({
       document.removeEventListener("keydown", handleKeyDown);
       previous?.focus();
     };
-  }, []);
+  }, [portalHost]);
 
-  return (
+  const content = (
     <div
       className={styles.modalBackdrop}
+      data-appointments-popup={portalToBody ? "true" : undefined}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -88,4 +107,5 @@ export function DashboardModal({
       </div>
     </div>
   );
+  return portalToBody ? (portalHost ? createPortal(content, portalHost) : null) : content;
 }

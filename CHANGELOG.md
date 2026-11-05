@@ -18,6 +18,14 @@
   preservando renda real no fator
   de capacidade. Renda R$4.000 não unipessoal passa deR$3.357,01 paraR$2.099.
 
+- Preserva a leitura do aviso de dados indisponíveis em Agendamentos; a composição
+  proporcional só é aplicada quando os cards estão carregados.
+
+- Ajusta somente Agendamentos: composição proporcional estável por tela/zoom,
+  navegação por gráfico centralizado, cards e pop-ups, filtros e tabelas compactos.
+  Metas diárias/semanais e por equipe seguem o calendário útil de São Paulo;
+  a lista inclui todos os agendamentos sem visita confirmada.
+
 - Publica e valida o cálculo comercial CAIXA em `e407ecd9`, após os quatro gates
   obrigatórios. No perfil de renda R$ 4.000 e ranking Ouro, foram observadas
   383 opções no estoque atualizado; base, crédito, subsídio e anuais conferidos

@@ -2300,3 +2300,186 @@
     padding-top: 2.75rem;
   }
 }
+
+/* Presentation changes belong to Agendamentos, including its existing outer frame. */
+.configurableCanvas [data-dashboard-card-id]:has(.tiltCard) {
+  transform: perspective(1000px) rotateX(var(--card-tilt-x, 0deg)) rotateY(var(--card-tilt-y, 0deg));
+  transform-style: preserve-3d;
+  transition:
+    transform 120ms ease-out,
+    border-color 160ms ease-out;
+}
+
+.configurableCanvas .tiltCard {
+  transform: none;
+  transform-style: flat;
+  will-change: auto;
+}
+
+.cardDialog[data-appointments-popup],
+.calendarDialog[data-appointments-popup] {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+}
+
+.cardDialog[data-appointments-popup] .cardDialogContent {
+  min-height: 0;
+}
+
+.dashboard .clearFilters {
+  min-height: 34px;
+  padding: 0.2rem 0.65rem;
+  line-height: 1.35;
+}
+
+.configurableCanvas .rankBar[data-goal-status="negative"] {
+  background: var(--analytics-danger);
+}
+
+.configurableCanvas .rankBar[data-goal-status="unavailable"],
+.configurableCanvas .rankingButton:hover .rankBar[data-goal-status="unavailable"],
+.configurableCanvas .rankingButton:focus-visible .rankBar[data-goal-status="unavailable"] {
+  background: var(--analytics-muted);
+}
+
+.dashboard .columnValue[data-appointments-value-status="negative"],
+.dashboard .chartButton:hover .columnValue[data-appointments-value-status="negative"] {
+  color: var(--analytics-danger-ink, var(--analytics-danger));
+}
+
+.dashboard .chartButton:hover .column[data-goal-status="negative"],
+.dashboard .chartButton:focus-visible .column[data-goal-status="negative"] {
+  background: var(--analytics-danger);
+}
+
+.configurableCanvas .rankingButton:hover .rankBar[data-goal-status="negative"],
+.configurableCanvas .rankingButton:focus-visible .rankBar[data-goal-status="negative"] {
+  background: var(--analytics-danger);
+  filter: brightness(1.08);
+}
+
+.configurableCanvas .tableViewport table {
+  table-layout: fixed;
+  min-width: 0;
+  width: 100%;
+}
+
+.configurableCanvas .tableViewport th,
+.configurableCanvas .tableViewport td {
+  min-width: 0;
+  padding: 0.4rem 0.35rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+@media (max-width: 700px) {
+  .configurableCanvas .tableViewport colgroup {
+    display: none;
+  }
+  .configurableCanvas .tableViewport td {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+}
+
+@media (pointer: coarse) {
+  .dashboard .clearFilters {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .configurableCanvas [data-dashboard-card-id]:has(.tiltCard) {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* The opt-in shell fits a canonical composition; viewport media must not reflow it. */
+:global([data-appointments-composition]) .dashboard .filters {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+:global([data-appointments-composition]) .dashboard .title {
+  font-size: 2rem;
+}
+
+:global([data-appointments-composition]) .dashboard .funnelComparison {
+  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+}
+
+:global([data-appointments-composition]) .dashboard .funnelDivider {
+  width: 1px;
+  min-height: 100%;
+}
+
+:global([data-appointments-composition]) .dashboard :is(.funnelPanel, .funnelPanelReversed) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+:global([data-appointments-composition]) .dashboard .funnelHeading {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+:global([data-appointments-composition]) .dashboard :is(.recencyLabels, .recencyHeading) {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) auto;
+}
+
+:global([data-appointments-composition]) .dashboard .recencyLabels > :nth-child(2) {
+  display: block;
+}
+
+:global([data-appointments-composition]) .dashboard .recencyList .recencyManager {
+  grid-column: auto;
+  grid-row: auto;
+}
+
+:global([data-appointments-composition]) .dashboard .daily {
+  gap: 0.35rem;
+}
+
+:global([data-appointments-composition]) .dashboard .daily :is(.columnValue, .columnLabel) {
+  font-size: calc(0.6875rem * var(--dashboard-font-scale, 1));
+}
+
+:global([data-appointments-composition]) .dashboard .tableViewport table {
+  display: table;
+}
+
+:global([data-appointments-composition]) .dashboard .tableViewport colgroup {
+  display: table-column-group;
+}
+
+:global([data-appointments-composition]) .dashboard .tableViewport thead {
+  display: table-header-group;
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+}
+
+:global([data-appointments-composition]) .dashboard .tableViewport tbody {
+  display: table-row-group;
+}
+
+:global([data-appointments-composition]) .dashboard .tableViewport tbody tr {
+  display: table-row;
+  border: 0;
+  border-radius: 0;
+}
+
+:global([data-appointments-composition]) .dashboard .tableViewport td {
+  display: table-cell;
+  padding: 0.4rem 0.35rem;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+:global([data-appointments-composition]) .dashboard .tableViewport td::before {
+  display: none;
+}

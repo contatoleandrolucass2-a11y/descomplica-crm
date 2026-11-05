@@ -35,6 +35,43 @@
   por corte real da data. Nenhuma referência de outra página foi alterada.
 - Implementado; CI, merge e publicação ainda pendentes nesta etapa.
 
+## 2026-11-05 — Agendamentos: apresentação, metas e visitas
+
+- Escopo comportamental exclusivo de /app/etapas/agendamentos. Shell e modal
+  compartilhados recebem opt-in dessa página; outras páginas preservam a
+  navegação, composição e portal anteriores. Sem nova rota, pacote ou migration.
+- Referência lógica de1236px preserva a composição ao mudar tela/zoom ou abrir
+  sidebar. Guia passa a mostrar um único gráfico, iniciando pelo funil,
+  centralizado em largura/altura e sem clonar nós ou gravar o perfil. Escape
+  e Visão geral restauram a composição; ordenação e estado ficam preservados.
+- Card inclina incluindo sua borda existente; clique abre resumo. Resumos,
+  calendário, equipe, tooltips e editor ficam centralizados fora da escala do
+  canvas. Equipe diária abre pelo número acima da torre. Valores abaixo da
+  meta ficam vermelhos, inclusive o rótulo de um resultado zero, sem inventar
+  altura ou trocar a escala dos dados.
+- Meta semanal deriva de dias úteis, com quinta valendo2, feriados nacionais
+  e de São Paulo sem meta. Ranking usa coortes cadastradas deduplicadas;
+  hierarquia regional incompleta mantém meta exata indisponível. Um mínimo
+  separado e comprovado pode marcar déficit, nunca afirmar meta atingida.
+- Nova consulta without_visit inclui visitPerformed diferente de true,
+  independentemente de data prevista ausente/futura. Filtra no servidor antes
+  da paginação/CSV e reaproveita apenas cache-base completo autorizado do mesmo
+  snapshot/filtros. Subset legado overdue e todas as validações foram mantidos.
+  A causa operacional da antiga mensagem genérica não foi comprovada.
+- Tabelas mantêm as dez colunas e todos os registros, com quebra de textos
+  extensos e rolagem vertical. Opções vazias usam Todos/Todas e botão Limpar
+  mais compacto. Defaults dos12 indicadores usam duas linhas de seis;
+  layouts existentes não são reescritos por esta apresentação.
+- CI42042131572: 5077 testes aprovados; uma asserção do título antigo foi
+  atualizada para a lista sem visita confirmada solicitada nesta demanda.
+- CI42042828495 aprovou código, imagem, restore, autorização e cenários funcionais.
+  A matriz visual divergiu apenas em10 capturas de Agendamentos sem dados.
+  A escala canônica agora exige o dashboard carregado: indisponibilidade mantém
+  texto legível e largura responsiva. Dois testes browser e29unitários passaram.
+- Validações locais por domínio e revisão independente registradas no arquivo
+  específico. CI do candidato/main e prova pós-publicação ainda pendentes;
+  não confundir preview sintético, implementação, integração e produção.
+
 ## 2026-11-05 — CAIXA: capacidade por unidade e aprovação por fluxo
 
 - Escopo restrito ao cálculo das unidades disponíveis e aos guards de proposta

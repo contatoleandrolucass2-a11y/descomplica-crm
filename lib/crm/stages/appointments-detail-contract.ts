@@ -8,8 +8,8 @@ export interface AppointmentDetailQuery {
   year: string;
   calendarDate: string;
   filters: AppointmentFilters;
-  /** Comparecimento explicitamente informado, anterior ao dia civil, sem visita. */
-  subset?: "overdue" | undefined;
+  /** Legacy overdue reads remain distinct from every appointment without a confirmed visit. */
+  subset?: "overdue" | "without_visit" | undefined;
 }
 export interface AppointmentDetailPage {
   status: "ready";
@@ -46,6 +46,11 @@ export interface AppointmentDetailRequest {
 export interface AppointmentDetailActions {
   loadDetails: (input: AppointmentDetailRequest) => Promise<AppointmentDetailResult>;
   exportDetails: (input: AppointmentDetailRequest) => Promise<AppointmentExportResult>;
+}
+
+/** Only an explicit confirmed visit removes an appointment from this follow-up list. */
+export function isAppointmentWithoutConfirmedVisit(row: AppointmentDetailRow): boolean {
+  return row.visitPerformed !== true;
 }
 
 /** Partial bootstrap pages must never be presented as the complete table. */

@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useMemo, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
 import type { AppointmentComparison } from "./appointments-comparison";
 import styles from "./AppointmentsComparison.module.css";
@@ -151,27 +152,20 @@ export function AppointmentsComparison({
                             onMouseLeave={() => setTooltip(null)}
                             onFocus={() => setTooltip({ comparison, value, index: day })}
                             onBlur={() => setTooltip(null)}
-                          >
-                            <title>{number.format(value)}</title>
-                          </circle>
+                          />
                         ),
                       )}
                     </g>
                   ))}
                 </svg>
-                {tooltip && (
-                  <output
-                    role="tooltip"
-                    className={styles.pointTooltip}
-                    style={{
-                      left: `calc(1.8rem + (100% - 2.3rem) * ${x(tooltip.index) / 720})`,
-                      top: `${(y(tooltip.value) / 300) * 100}%`,
-                      transform: y(tooltip.value) < 60 ? "translate(-50%, 0.5rem)" : undefined,
-                    }}
-                  >
-                    {number.format(tooltip.value)}
-                  </output>
-                )}
+                {tooltip &&
+                  typeof document !== "undefined" &&
+                  createPortal(
+                    <output role="tooltip" className={styles.pointTooltip}>
+                      {number.format(tooltip.value)}
+                    </output>,
+                    document.body,
+                  )}
               </div>
               <div className={styles.days} aria-label="Dias do mês de referência">
                 {comparison.days.map((day, index) => {
