@@ -6,6 +6,9 @@
   Regional Comercial significa SP CAPITAL, não o nome do regional. Conciliação
   usa o próprio corretor em Agendamentos e seu gerente oficial, rejeitando
   homônimos, ausência e conflitos. Nenhum relatório salvo foi alterado.
+- Se o gerente oficial vier explicitamente null, a leitura não usa o gerente de
+  uma atividade antiga como substituto; roster indisponível até fonte completa.
+  Novo caso de regressão incluído (26 testes do leitor aprovados).
 - Campos aditivos separados preservam manager_name e contagens legadas. Apenas
   Agendamentos lê gerente oficial/regional; null explícito não usa inferência
   histórica por gerente. O painel diário respeita o mesmo vínculo opt-in.

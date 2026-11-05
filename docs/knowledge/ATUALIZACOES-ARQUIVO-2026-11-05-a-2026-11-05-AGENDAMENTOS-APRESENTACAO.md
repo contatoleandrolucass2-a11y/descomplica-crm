@@ -176,3 +176,25 @@ Hash integral aplica apenas a requests enriquecidos; legado requestId-only
 preservado. Banco/serviço coletor não alterados; autorização remota específica,
 CI e ativação controlada permanecem pendentes. Sync de abertura corrigido após
 normalizar LF do registro (CRLF ultrapassava limite);16documentos sincronizados.
+
+### Autorização e CI da continuação —05/11/2026,18:18UTC
+
+PR504 preparado emfd0cfa43; CI42081900887 encontrou4falhas no inventário
+obrigatório da nova migration (5079testes passaram). Dependências comprovadas
+corrigidas:105migrations,50arquivos/2476asserts pgTAP e allowlist de homologação;
+34testes focados do controle passaram. Novo candidatoafd0fd14, CI42082726355.
+
+Usuário autorizou especificamente migration20261105175738 e atualização somente
+do coletor Salesforce, condicionadas aos quatro gates do PR/main verdes. Inclui
+backup/CAS, preservar layouts/permissões e duas cargas completas conciliadas;
+rollback mantém os novos campos. Esta aprovação não autoriza apagar locks,
+alterar outros serviços, relatórios Salesforce salvos ou contornar gates.
+Helper local de migration33guards e helper de coletor/self-test preparados;
+nenhuma ação remota de escrita executada. Observação18:13UTC: coletor ativo5da46964,
+MemoryMax1610612736, sem daemon-reload pendente. RPC pública atual mantém ACL
+postgres/service_role, body48bcdeb5...,timeout30s e definição4d61face....
+
+Revisão final14f7f2a3: gerente oficial explicitamente null torna roster
+indisponível, sem substituir por gerente de atividade antiga. DTO legado sem
+campo preservado;26 testes do leitor passaram. CIafd0fd14 havia passado validate
+e iniciado3gates isolados; o novo candidato repetirá gates obrigatórios.
