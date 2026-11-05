@@ -52,6 +52,39 @@ function capacity(input = profile) {
 }
 
 describe("CAIXA available units: canonical associative rules", () => {
+  it("uses the same commercial purchase basis with gross or finalPrice-only reports", () => {
+    const fallback = { ...unit };
+    delete fallback.finalWithKit;
+    const gross = assessCaixaAvailableUnit(
+      unit,
+      profile,
+      capacity(),
+      "diamond",
+      "2026-11-04",
+      true,
+      { includeDetails: true },
+    );
+    const net = assessCaixaAvailableUnit(
+      fallback,
+      profile,
+      capacity(),
+      "diamond",
+      "2026-11-04",
+      true,
+      { includeDetails: true },
+    );
+    expect(gross.status).toBe("approved");
+    expect(net.status).toBe("approved");
+    if (gross.status !== "approved" || net.status !== "approved") return;
+    expect(gross.value.details?.purchaseValue).toBe(229000);
+    expect(net.value.details?.purchaseValue).toBe(net.value.price);
+    expect(net.value.price).toBe(229000);
+    expect(net.value.financing).toBe(183200);
+    expect(net.value.financing).toBeLessThanOrEqual(net.value.details!.purchaseValue * 0.8);
+    expect(net.value.proSoluto).toBe(gross.value.proSoluto);
+    expect(net.value.linearPayment).toBe(gross.value.linearPayment);
+    expect(net.value.decreasingPayment).toBe(gross.value.decreasingPayment);
+  });
   it.each([
     [0, 150],
     [149.99, 150],

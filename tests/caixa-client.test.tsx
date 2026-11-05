@@ -547,6 +547,84 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       }
       expect(errors).toEqual([]);
     });
+    it("wraps full mobile choice legends inside their outlined groups", async () => {
+      await open();
+      await page.addStyleTag({ content: ".caixa-page-shell{letter-spacing:1px;font-weight:700}" });
+      await page.evaluate(() => document.fonts.ready);
+      const directory = resolve("private-data/caixa-qa");
+      await mkdir(directory, { recursive: true });
+      for (const width of [375, 390]) {
+        await resizeViewport(width, 1100);
+        for (const theme of ["light", "dark"]) {
+          await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme);
+          const groups = await page
+            .locator(".caixa-full-form .caixa-fgts-choice")
+            .evaluateAll((fields) =>
+              fields.map((field) => {
+                const group = field.getBoundingClientRect();
+                const label = field.querySelector(":scope > span")!;
+                const range = document.createRange();
+                range.selectNodeContents(label);
+                const texts = [...range.getClientRects()];
+                const controls = [...field.querySelectorAll("button")].map((button) => {
+                  const text = document.createRange();
+                  text.selectNodeContents(button);
+                  return {
+                    rect: button.getBoundingClientRect().toJSON(),
+                    lines: text.getClientRects().length,
+                    whiteSpace: getComputedStyle(button).whiteSpace,
+                  };
+                });
+                return {
+                  label: label.textContent,
+                  border: parseFloat(getComputedStyle(field).borderTopWidth),
+                  wrap: getComputedStyle(label).whiteSpace,
+                  font: getComputedStyle(label).fontSize,
+                  letterSpacing: getComputedStyle(label).letterSpacing,
+                  contained: texts.every(
+                    (rect) =>
+                      rect.left >= group.left &&
+                      rect.right <= group.right &&
+                      rect.top >= group.top &&
+                      rect.bottom <= group.bottom,
+                  ),
+                  controlsInside: controls.every(
+                    ({ rect }) =>
+                      rect.x >= group.x &&
+                      rect.right <= group.right &&
+                      rect.y >= group.y &&
+                      rect.bottom <= group.bottom,
+                  ),
+                  controls,
+                };
+              }),
+            );
+          await page.screenshot({
+            animations: "disabled",
+            fullPage: true,
+            path: resolve(directory, `caixa-mobile-groups-${width}-${theme}.png`),
+          });
+          await writeFile(
+            resolve(directory, `caixa-mobile-groups-${width}-${theme}.json`),
+            JSON.stringify(groups, null, 2),
+          );
+          expect(groups).toHaveLength(4);
+          for (const group of groups) {
+            expect(group.border).toBeGreaterThan(0);
+            expect(group.wrap, `${width}/${theme}: ${group.label}`).toBe("normal");
+            expect(group.font).toBe("11px");
+            expect(group.letterSpacing).toBe("1px");
+            expect(group.contained, `${width}/${theme}: full label ${group.label}`).toBe(true);
+            expect(group.controlsInside, `${width}/${theme}: controls ${group.label}`).toBe(true);
+            for (const control of group.controls) {
+              expect(control.lines).toBe(1);
+              expect(control.whiteSpace).toBe("nowrap");
+            }
+          }
+        }
+      }
+      expect(errors).toEqual([]);
+    });
     it("fits maximum currency values and compact controls in two desktop rows", async () => {
       await open();
       await fillMain();

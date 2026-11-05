@@ -28,6 +28,26 @@
   anuais; motores permanecem intactos. Impressão escopada por portal CSSModule,
   sem escrita remota ou vazamento para outras páginas. CI/publicação pendentes;
   não reutilizar a versão pública fa068c43 como prova desta nova interface.
+- Base concorrente b6dc189a/PR493 integrada preservando registros; nosso diff
+  permanece restrito à CAIXA. Responsável confirmou CI principal verde e aplicação
+  da migration20261104201024. Falha separada do coletor por memória continua
+  na demanda responsável; não foi corrigida nem autorizada por este chat.
+- CI41950662926 de d32b8085: validate/imagem/restore aprovados; release falhou
+  apenas nos11pixels CAIXA intencionais, com49responsivos/28temas/77axe/zoom
+  e testes funcionais aprovados. Artefato13383013121, ZIP0a0ef4e24d1274e4d62ffee7cf5a0a876542d068fcbfa13fe8b38ebefbeca718,
+  captura94507346, árvore9cfa8d4b igual ao head e fingerprint cf587e34 reproduzido
+  com19arquivos gerados. Revisão humana encontrou texto social ultrapassando
+  a borda mobile: imagens não aprovadas/adotadas. Regra de wrap corrigida,
+  regressão375/390 com tracking1px/700 reproduz falha anterior e passa após fix.
+- QA adicional comprovou P1 de financiamento mantido acima da cota após
+  desconto e P1 de bônus/folga abatidos duas vezes quando só havia preço final.
+  Corrigidos nos adaptadores CAIXA, sem alterar motores: compra efetiva recalcula
+  financiamento/subsídio/recursos, capacidade original é teto, desconto entra
+  uma vez e bases bancária/comercial devem coincidir em centavos. Ledger,
+  documentação e impressão recebem fundos revalidados; falha bloqueia aprovação.
+  29testes normais (21unidades+8apresentação) e3browser dirigidos aprovados,
+  tipos/lint/diff-check verdes. Revisão independente fechou ambos. Nova CI e
+  capturas serão exigidas; nenhuma referência defeituosa será usada para liberar.
 
 ## 2026-11-04 — CAIXA: publicada e validada, unidades por ranking
 

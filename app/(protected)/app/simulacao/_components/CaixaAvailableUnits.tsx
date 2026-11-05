@@ -476,6 +476,7 @@ export function CaixaAvailableUnits({
                 key={`${key}-${selected.unit.id}`}
                 selected={selected}
                 input={input}
+                capacity={result.maximumFinancingByIncome}
                 ranking={ranking}
                 firstProperty={firstProperty}
                 baseDate={today}

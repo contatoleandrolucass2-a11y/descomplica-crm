@@ -5163,6 +5163,16 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
     min-height: 24px;
     font-size: 11px;
   }
+  .goal-page-shell.caixa-page-shell
+    .caixa-full-form
+    :is(.caixa-binary-grid, .caixa-property-condition-group)
+    .caixa-field
+    > span {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
   .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle button {
     flex-basis: 44px;
     width: 44px;

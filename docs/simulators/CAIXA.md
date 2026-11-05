@@ -82,6 +82,14 @@ o cenário. Documentação usa o adaptador existente e identifica bases fiscais
 a confirmar; primeiro imóvel pode ser informado também no SBPE sem bloquear
 a consulta das unidades desse produto. Impressões e documentos são locais.
 
+Desconto autorizado refaz o cálculo CAIXA da unidade usando a compra efetiva,
+mantendo a capacidade original como teto. Financiamento, subsídio e recursos
+revalidados alimentam ledger, documentação e impressão. O preço comercial já
+resolvido não recebe bônus/folga novamente quando o estoque traz somente preço
+final. As bases bancária e comercial precisam coincidir em centavos; ausência
+de autorização, dados ou revalidação impede exibir aprovação e imprimir valores
+anteriores. Exemplo sintético de compra219000: cotas175200PRICE/197100SAC.
+
 Consultas: 25, 26 e 27/10/2026, America/Sao_Paulo. Escopo exclusivo:
 `/app/simulacao/caixa`.
 A origem `https://descomplicapro.com.br/simulacao/caixa` foi consultada somente

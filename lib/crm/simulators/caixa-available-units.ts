@@ -50,7 +50,7 @@ type FlowAssessment = {
   approved: boolean;
   comparison: { highestLinearPayment: number; highestDecreasingPayment: number } | null;
   result: {
-    context: { monthlyDates: string[]; income: number };
+    context: { monthlyDates: string[]; income: number; valueReal: number };
     custom: {
       correctedProSoluto: number;
       installmentNominalBalance: number;
@@ -81,6 +81,7 @@ type FlowAssessment = {
   } | null;
 };
 export type CaixaUnitFlowDetails = {
+  purchaseValue: number;
   approvalRows: { label: string; linear: number; decreasing: number; limit: number }[];
   schedule: {
     kind: string;
@@ -297,9 +298,10 @@ export function assessCaixaAvailableUnit(
     entryDate: baseDate,
     completionDate: unit.completionDate,
     salePrice: price,
-    propertyValue: unit.finalWithKit ?? price,
-    unitBonus: unit.unitBonus ?? 0,
-    tableSlack: unit.tableSlack ?? 0,
+    // price already resolves kit, bonus and table slack, including finalPrice-only reports.
+    propertyValue: price,
+    unitBonus: 0,
+    tableSlack: 0,
     discountAuthorized: false,
     financing,
     subsidy: housing.subsidy,
@@ -319,6 +321,14 @@ export function assessCaixaAvailableUnit(
     progress,
     "decreasing",
   ) as FlowAssessment;
+  if (
+    Math.round(linear.result.context.valueReal * 100) !== Math.round(price * 100) ||
+    Math.round(decreasing.result.context.valueReal * 100) !== Math.round(price * 100)
+  )
+    return {
+      status: "unavailable",
+      reason: "A base comercial diverge do valor de compra usado na CAIXA.",
+    };
   if (!linear.valid || !decreasing.valid)
     return { status: "unavailable", reason: "Calendário ou fluxo comercial incompleto." };
   if (!linear.approved || !decreasing.approved || !linear.comparison || !decreasing.comparison)
@@ -355,6 +365,7 @@ export function assessCaixaAvailableUnit(
         })),
     }) as { rows: CaixaUnitFlowDetails["schedule"] };
     details = {
+      purchaseValue: canonical.context.valueReal,
       approvalRows: [
         {
           label: "Pró-soluto",

@@ -7,7 +7,10 @@ import type {
   CaixaUnitFlowDetails,
 } from "@/lib/crm/simulators/caixa-available-units";
 import { CAIXA_UNIT_RANKINGS } from "@/lib/crm/simulators/caixa-available-units";
-import { buildCaixaProposalAnnuals } from "@/lib/crm/simulators/caixa-unit-proposal-view";
+import {
+  buildCaixaProposalAnnuals,
+  reassessCaixaProposalDiscount,
+} from "@/lib/crm/simulators/caixa-unit-proposal-view";
 import type { HousingInput } from "@/lib/crm/simulators/caixa";
 // @ts-expect-error -- Canonical archive module has no TypeScript declaration.
 import { assessAssociativeCandidate } from "@/lib/archive-investor/associative-approval-suggestion.mjs";
@@ -137,12 +140,14 @@ function Amount({
 export function CaixaUnitProposal({
   selected,
   input,
+  capacity,
   ranking,
   firstProperty,
   baseDate,
 }: {
   selected: CaixaAvailableUnit;
   input: HousingInput;
+  capacity: number;
   ranking: string;
   firstProperty: string;
   baseDate: string;
@@ -172,6 +177,23 @@ export function CaixaUnitProposal({
       ? unit.product.slice(0, -` - ${unit.project}`.length).trim()
       : unit.product;
   const facts = unit as typeof unit & UnitFacts;
+  const bank = useMemo(
+    () =>
+      reassessCaixaProposalDiscount({
+        selected,
+        input,
+        capacity,
+        ranking,
+        baseDate,
+        firstProperty: input.product === "sbpe" || firstProperty === "yes",
+        discount,
+        authorized: discountAuthorized,
+      }),
+    [selected, input, capacity, ranking, baseDate, firstProperty, discount, discountAuthorized],
+  );
+  // A previous bank result is only a private editing preview while revalidation is blocked.
+  const funding = bank.status === "ready" ? bank.value : selected;
+  const bankReady = bank.status === "ready";
   const flow = useMemo(() => {
     const flowInput = {
       selectedUnitId: unit.id,
@@ -179,15 +201,15 @@ export function CaixaUnitProposal({
       entryDate: baseDate,
       completionDate: unit.completionDate,
       salePrice: selected.price,
-      propertyValue: unit.finalWithKit ?? selected.price,
-      unitBonus: unit.unitBonus ?? 0,
-      tableSlack: unit.tableSlack ?? 0,
-      discountAuthorized,
-      discount,
-      financing: selected.financing,
-      subsidy: selected.subsidy,
-      fgts: selected.fgts,
-      housingCheck: selected.publicContribution,
+      propertyValue: selected.price,
+      unitBonus: 0,
+      tableSlack: 0,
+      discountAuthorized: bankReady && discountAuthorized,
+      discount: bank.status === "ready" ? bank.discount : 0,
+      financing: funding.financing,
+      subsidy: funding.subsidy,
+      fgts: funding.fgts,
+      housingCheck: funding.publicContribution,
       entryValue: selected.entry,
       installments: 84,
       annualMode: true,
@@ -251,17 +273,32 @@ export function CaixaUnitProposal({
   }, [
     annuals,
     baseDate,
-    discount,
     discountAuthorized,
     input.income,
     ranking,
     selected,
     signals,
     unit,
+    funding,
+    bankReady,
+    bank,
   ]);
   const { canonical } = flow;
+  const quoteReady =
+    bankReady && Math.round(canonical.context.valueReal * 100) === Math.round(funding.price * 100);
+  const bankReason =
+    bank.status === "blocked"
+      ? bank.reason
+      : !quoteReady
+        ? "A compra do fluxo comercial diverge da base validada pela CAIXA. Revise o desconto."
+        : "";
   const approved =
-    flow.linear.valid && flow.decreasing.valid && flow.linear.approved && flow.decreasing.approved;
+    quoteReady &&
+    flow.linear.valid &&
+    flow.decreasing.valid &&
+    flow.linear.approved &&
+    flow.decreasing.approved;
+  if (printMode && !approved) setPrintMode(null);
   const release = calculateAssociativeReleaseStatus({
     vgv: canonical.context.valueReal,
     entryValue: selected.entry,
@@ -278,7 +315,7 @@ export function CaixaUnitProposal({
         firstProperty: firstProperty === "yes" ? "SIM" : firstProperty === "no" ? "NAO" : "",
         salePrice: canonical.context.valueReal,
         reportedAppraisal: unit.appraisal ?? null,
-        financing: selected.financing,
+        financing: funding.financing,
         income: input.income,
         baseDate,
         municipality:
@@ -296,18 +333,18 @@ export function CaixaUnitProposal({
       firstProperty,
       input.income,
       input.product,
-      selected.financing,
+      funding.financing,
       unit,
     ],
   );
   const doc = documentation.result;
-  const docSchedule = doc.ok ? buildDocumentationInstallmentSchedule(doc) : [];
+  const docSchedule = quoteReady && doc.ok ? buildDocumentationInstallmentSchedule(doc) : [];
   const rowData = [
     ["Valor real da venda", "=", canonical.context.valueReal],
-    ["Financiamento", "−", selected.financing],
-    ["Subsídio", "−", selected.subsidy],
-    ["FGTS", "−", selected.fgts],
-    ["Cheque Moradia", "−", selected.publicContribution],
+    ["Financiamento", "−", funding.financing],
+    ["Subsídio", "−", funding.subsidy],
+    ["FGTS", "−", funding.fgts],
+    ["Cheque Moradia", "−", funding.publicContribution],
     ["Saldo após recursos", "=", canonical.context.balanceAfterResources],
     ["Entrada", "−", selected.entry],
   ] as const;
@@ -442,6 +479,11 @@ export function CaixaUnitProposal({
             </button>
           }
         />
+        {bankReason && (
+          <p className={styles.error} role="alert">
+            {bankReason}
+          </p>
+        )}
         {guideOpen && (
           <ol className={styles.guide}>
             <li>Confira a unidade e os valores trazidos da CAIXA.</li>
@@ -490,8 +532,10 @@ export function CaixaUnitProposal({
                       {label === "Entrada" && <small>{date(baseDate)}</small>}
                     </th>
                     <td className={styles.operator}>{operator}</td>
-                    <td className={styles.currency}>R$</td>
-                    <td>{money.format(value).replace(/^R\$\s*/, "")}</td>
+                    <td className={styles.currency}>{quoteReady ? "R$" : ""}</td>
+                    <td>
+                      {quoteReady ? money.format(value).replace(/^R\$\s*/, "") : "A recalcular"}
+                    </td>
                   </tr>
                 ))}
                 {signals.slice(0, signalCount).map((value, index) => (
@@ -566,8 +610,12 @@ export function CaixaUnitProposal({
                 <tr className={styles.totalRow}>
                   <th>Saldo parcelado</th>
                   <td>=</td>
-                  <td>R$</td>
-                  <td>{money.format(canonical.custom.balance).replace(/^R\$\s*/, "")}</td>
+                  <td>{quoteReady ? "R$" : ""}</td>
+                  <td>
+                    {quoteReady
+                      ? money.format(canonical.custom.balance).replace(/^R\$\s*/, "")
+                      : "A recalcular"}
+                  </td>
                 </tr>
                 <tr>
                   <th>Qtd. de parcelas</th>
@@ -623,8 +671,8 @@ export function CaixaUnitProposal({
                     ].map(([label, a, b, limit]) => (
                       <tr key={String(label)}>
                         <th>{label}</th>
-                        <td>{percent.format(Number(a))}</td>
-                        <td>{percent.format(Number(b))}</td>
+                        <td>{quoteReady ? percent.format(Number(a)) : "—"}</td>
+                        <td>{quoteReady ? percent.format(Number(b)) : "—"}</td>
                         <td>≤{percent.format(Number(limit))}</td>
                       </tr>
                     ))}
@@ -632,12 +680,12 @@ export function CaixaUnitProposal({
                     <th>Status da proposta</th>
                     <td>
                       <span className={styles.badge}>
-                        {flow.linear.approved ? "APROVADO" : "REVISAR"}
+                        {quoteReady && flow.linear.approved ? "APROVADO" : "REVISAR"}
                       </span>
                     </td>
                     <td>
                       <span className={styles.badge}>
-                        {flow.decreasing.approved ? "APROVADO" : "REVISAR"}
+                        {quoteReady && flow.decreasing.approved ? "APROVADO" : "REVISAR"}
                       </span>
                     </td>
                     <td>—</td>
@@ -647,16 +695,18 @@ export function CaixaUnitProposal({
               <div className={styles.release}>
                 <strong>Repasse</strong>
                 <span className={styles.badge}>
-                  {release.repasse.status === "released" ? "LIBERADO" : "PENDENTE"}
+                  {quoteReady && release.repasse.status === "released" ? "LIBERADO" : "PENDENTE"}
                 </span>
-                <span>{release.repasse.reason}</span>
+                <span>{bankReason || release.repasse.reason}</span>
               </div>
               <div className={styles.approvedBanner}>
                 <strong>{approved ? "APROVADO" : "REVISE A PROPOSTA"}</strong>
                 <span>
                   {approved
                     ? "Linear e Decrescente estão dentro da regra selecionada."
-                    : canonical.errors?.join(" ") || "Confira pagamentos e limites do ranking."}
+                    : bankReason ||
+                      canonical.errors?.join(" ") ||
+                      "Confira pagamentos e limites do ranking."}
                 </span>
               </div>
             </section>
@@ -698,16 +748,17 @@ export function CaixaUnitProposal({
                     </tr>
                   </thead>
                   <tbody>
-                    {summary.map((row) => (
-                      <tr key={row.label}>
-                        <th>{row.label}</th>
-                        <td>{row.count}</td>
-                        <td>{money.format(row.uncorrectedInstallment)}</td>
-                        <td>{money.format(row.correctedInstallment)}</td>
-                        <td>{date(row.firstInstallmentDate)}</td>
-                        <td>{date(row.lastInstallmentDate)}</td>
-                      </tr>
-                    ))}
+                    {quoteReady &&
+                      summary.map((row) => (
+                        <tr key={row.label}>
+                          <th>{row.label}</th>
+                          <td>{row.count}</td>
+                          <td>{money.format(row.uncorrectedInstallment)}</td>
+                          <td>{money.format(row.correctedInstallment)}</td>
+                          <td>{date(row.firstInstallmentDate)}</td>
+                          <td>{date(row.lastInstallmentDate)}</td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -761,7 +812,7 @@ export function CaixaUnitProposal({
               <button
                 type="button"
                 aria-label="Exibir parcelas da documentação"
-                disabled={!doc.ok}
+                disabled={!doc.ok || !approved}
                 aria-expanded={documentationScheduleOpen}
                 onClick={() => setDocumentationScheduleOpen((v) => !v)}
               >
@@ -769,7 +820,7 @@ export function CaixaUnitProposal({
               </button>
               <button
                 type="button"
-                disabled={!doc.ok}
+                disabled={!doc.ok || !approved}
                 onClick={() => setPrintMode("documentation")}
               >
                 Imprimir
@@ -777,10 +828,10 @@ export function CaixaUnitProposal({
             </div>
           }
         />
-        {doc.ok && (
+        {quoteReady && doc.ok && (
           <p className={styles.note}>Estimativa automática · bases fiscais a confirmar.</p>
         )}
-        {doc.ok ? (
+        {quoteReady && doc.ok ? (
           <div className={styles.documentationGrid}>
             <section className={styles.documentationPlan}>
               <small>Plano sugerido</small>
@@ -818,13 +869,21 @@ export function CaixaUnitProposal({
           <div className={styles.documentationPending} role="status">
             <strong>Documentação aguardando dados</strong>
             <ul>
-              {[...new Set([...documentation.missingItems, ...doc.errors])].map((error) => (
+              {[
+                ...new Set(
+                  bankReason
+                    ? [bankReason]
+                    : !doc.ok
+                      ? [...documentation.missingItems, ...doc.errors]
+                      : [],
+                ),
+              ].map((error) => (
                 <li key={error}>{error}</li>
               ))}
             </ul>
           </div>
         )}
-        {doc.ok && documentationScheduleOpen && (
+        {approved && doc.ok && documentationScheduleOpen && (
           <div className={styles.tableScroll} tabIndex={0}>
             <table aria-label="Cronograma mensal da documentação">
               <thead>
@@ -885,6 +944,8 @@ export function CaixaUnitProposal({
       </section>
       {documentsOpen && <CaixaUnitDocuments className={styles.readyProposal ?? ""} />}
       {printMode &&
+        approved &&
+        quoteReady &&
         createPortal(
           <article className={styles.printSheet}>
             <h1>

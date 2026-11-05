@@ -24,6 +24,16 @@
   rótulos/logos e1captura final após compactação aprovadas. Filtros36px e filas
   até40px no desktop medidos;44px no celular. Tipos, lint dirigido e diff-check
   aprovados. Captura do formulário em tema balanced corrigida e aprovada1/1.
+- Revisão das capturas CI41950662926 encontrou legenda mobile fora da borda,
+  apesar de49responsivos/28temas/77axe/zoom aprovados. Não adotamos as referências
+  daquele candidato. Wrap pontual corrigido com regressão375/390, tracking1px,
+  claro/escuro; teste falhou antes e passou após o ajuste, sem cortar texto.
+- Revisão financeira adicional fechou dois P1 do detalhe: desconto agora refaz
+  banco/subsídio pela compra efetiva e capacidade original; preço final sem bruto
+  não desconta bônus/folga novamente. Guardas conferem bases em centavos antes
+  de aprovar/imprimir. Caso219000 resulta em175200PRICE/197100SAC; MCMV reavalia
+  taxa e MFOM ao cruzar o limite.29testes normais e3browser dirigidos aprovados,
+  tipos/lint verdes; fórmulas canônicas não alteradas. Nova captura/CI pendentes.
 
 ## 2026-11-04 — Prazo delimitado para gravação Salesforce
 

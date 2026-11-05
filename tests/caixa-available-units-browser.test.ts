@@ -97,6 +97,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       width = 1440,
       detailed = false,
       asOf = "2026-11-04",
+      withoutGross = false,
     } = {}) {
       const context = await browser.newContext({ viewport: { width, height: 900 } });
       page = await context.newPage();
@@ -116,6 +117,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           return route.fulfill({ contentType: "text/javascript", body: script });
         if (path === "/fixture.css") return route.fulfill({ contentType: "text/css", body: css });
         if (path.startsWith("/api/inventory")) {
+          const fallbackUnit = { ...unit, finalWithKit: undefined };
           requests.push(path);
           if (path === "/api/inventory" && fail) {
             fail = false;
@@ -123,7 +125,11 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           }
           return route.fulfill({
             contentType: "application/json",
-            body: JSON.stringify({ count: 1, items: [unit], generatedAt: "2026-11-04T15:00:00Z" }),
+            body: JSON.stringify({
+              count: 1,
+              items: [withoutGross ? fallbackUnit : unit],
+              generatedAt: "2026-11-04T15:00:00Z",
+            }),
           });
         }
         return route.fulfill({
@@ -335,6 +341,76 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
       expect(errors).toEqual([]);
     });
+    it.each([false, true])(
+      "recalculates bank quota after discount and invalidates stale quote, schedule and print (finalPrice-only=%s)",
+      async (withoutGross) => {
+        const { errors } = await open({ withoutGross });
+        await page.getByLabel("Ranking do cliente", { exact: true }).selectOption("diamond");
+        await browserExpect(page.getByRole("status")).toContainText("1 unidade dentro do ranking");
+        await page.getByLabel("Primeiro imóvel?", { exact: true }).selectOption("yes");
+        await browserExpect(page.getByRole("status")).toContainText("1 unidade dentro do ranking");
+        await page
+          .getByRole("button", { name: "Exibir fluxo de Apartamento teste", exact: true })
+          .click();
+        const ledger = page.getByRole("region", { name: "Composição da proposta", exact: true });
+        const approval = page.getByRole("region", { name: "Parâmetros de aprovação", exact: true });
+        const fundingRow = ledger
+          .getByRole("row")
+          .filter({ has: page.getByRole("rowheader", { name: "Financiamento", exact: true }) });
+        await browserExpect(fundingRow).toContainText("183.200,00");
+        await page.getByRole("button", { name: "Exibir parcelas", exact: true }).click();
+        await page
+          .getByRole("button", { name: "Proposta pronta - Bora Vender", exact: true })
+          .click();
+        await page.getByRole("button", { name: "Inserir Desconto", exact: true }).click();
+        await page
+          .getByRole("spinbutton", { name: "Valor do desconto", exact: true })
+          .fill("10000");
+        await browserExpect(approval).toContainText("REVISE A PROPOSTA");
+        await browserExpect(fundingRow).toContainText("A recalcular");
+        await browserExpect(
+          page.getByRole("table", { name: "84 mensais e anuais do fluxo aprovado", exact: true }),
+        ).toHaveCount(0);
+        await browserExpect(
+          page.getByRole("region", { name: "Proposta pronta", exact: true }),
+        ).toHaveCount(0);
+        await browserExpect(
+          page.getByRole("button", { name: "Imprimir linear", exact: true }),
+        ).toBeDisabled();
+        await page.getByRole("checkbox", { name: "Desconto autorizado", exact: true }).check();
+        await browserExpect(fundingRow).toContainText("175.200,00");
+        await browserExpect(
+          ledger.getByRole("row").filter({
+            has: page.getByRole("rowheader", { name: "Valor real da venda", exact: true }),
+          }),
+        ).toContainText("219.000,00");
+        await browserExpect(approval).toContainText("APROVADO");
+        await browserExpect(
+          page.getByRole("region", { name: "Proposta pronta", exact: true }),
+        ).toContainText("175.200,00");
+        await browserExpect(page.locator('[data-payment-kind="monthly"]')).toHaveCount(84);
+        await page.evaluate(() => {
+          window.print = () => {};
+        });
+        await page.getByRole("button", { name: "Imprimir linear", exact: true }).click();
+        const printed = page.locator("body > article").filter({ hasText: "Proposta Associativo" });
+        await browserExpect(printed).toContainText("175.200,00");
+        await browserExpect(printed).not.toContainText("183.200,00");
+        await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
+        await page
+          .getByRole("spinbutton", { name: "Valor do desconto", exact: true })
+          .fill("229000");
+        await browserExpect(page.getByRole("alert")).toContainText("menor que o valor da venda");
+        await browserExpect(fundingRow).toContainText("A recalcular");
+        await browserExpect(
+          page.getByRole("button", { name: "Imprimir", exact: true }),
+        ).toBeDisabled();
+        await browserExpect(
+          page.getByRole("button", { name: "Exibir parcelas da documentação", exact: true }),
+        ).toBeDisabled();
+        expect(errors).toEqual([]);
+      },
+    );
     it("captures the inline stock, property, commercial flow and documentation with synthetic data", async () => {
       await mkdir(resolve("private-data/caixa-inline-review"), { recursive: true });
       for (const width of [1280, 1920]) {
