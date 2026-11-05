@@ -86,12 +86,14 @@
         "app/(protected)/app/ranking/page.tsx",
         "app/(protected)/app/canal-de-parcerias/page.tsx",
         "app/api/dashboard/status/route.ts",
+        "app/api/appointments/status/route.ts",
         "app/api/dashboard-profiles/route.ts",
         "app/api/dashboard-profiles/[id]/route.ts",
         "app/api/dashboard-profiles/[id]/set-default/route.ts"
       ],
       "evidence": [
         "tests/dashboard.test.ts",
+        "tests/appointments-status-api.test.ts",
         "tests/meta-ads-dashboard.test.tsx",
         "docs/audits/meta-ads-dashboard-local-2026-10-20.md",
         "tests/repasse.test.ts",

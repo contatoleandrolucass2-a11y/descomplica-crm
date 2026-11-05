@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-11-05 — Atualização automática do painel próprio de Agendamentos
+
+- Prova real sem reload: Chrome1280, integrado1280 e celular simulado390
+  montados04:06UTC com horário00:35, todos visíveis. Após publicação comercial
+  HTTP201 às04:06:32UTC, as três telas continuaram00:35 em04:07:35UTC; uma aba
+  de controle nova exibiu01:03 em04:08:14UTC. O componente de refresh existia
+  somente no relatório geral; o ramo próprio de Agendamentos não o montava.
+- Reutiliza DashboardAutoRefresh com endpoint configurável e default preservado.
+  A página passa o par exato generatedAt/updatedAt e o dia de São Paulo. Reader
+  retorna updatedAt da mesma leitura confirmada por CAS, inclusive análise vazia
+  ou RPC ausente, sem consultas adicionais nem normalização de microssegundos.
+- Novo GET /api/appointments/status exige crm.stage.appointments.view antes de
+  consultar a origem e devolve somente o par de versão, sem cache. Não exige
+  crm.dashboard.view, não amplia essa permissão e não executa RPC de ingestão.
+  Falhas e versões parciais/inválidas retornam503. RLS/grants/esquema preservados.
+  Usa authorizePageRoute para aplicar também o catálogo persistido e os gates
+  da página, como SSR/actions; página revogada não continua consultando metadados
+  apenas porque a permissão ainda consta no contexto da conta.
+- Validação local:26 testes de cliente/SSR e35 de API/reader aprovados; lint
+  focado, formatação e resources:check aprovados (93rotas/11áreas). Registro da
+  nova API incluído. CI do candidato, publicação protegida e repetição da prova
+  automática real continuam pendentes; o teste anterior foi falha, não aprovação.
+- Dependência SSR adicional conferida:12 testes de acesso aprovados; o teste
+  de período descoberto passou após receber o AppRouterContext real de fixture,
+  necessário pelo listener novo. A falha anterior foi ausência de provider no
+  teste isolado; todas as asserções de indisponibilidade/contagem preservadas.
+  Total focado:74 testes distintos aprovados, sem repetir os61 já válidos.
+- Após alinhar a API ao guard do catálogo persistido,11 testes da API foram
+  repetidos por invalidação dessa evidência e passaram; outros9 testes do
+  guard passaram. Total final focado:83 testes distintos aprovados.
+
 ## 2026-11-05 — Recuperação do coletor e aceite final de Agendamentos
 
 - Após autorização específica, trava do PID morto preservada em quarentena e

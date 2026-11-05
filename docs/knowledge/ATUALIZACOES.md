@@ -163,6 +163,17 @@
 
 - Agendamentos04/11: [trimestre, meta e atualização](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md).
 
+## 2026-11-05 — Prova de atualização automática encontra ramo sem listener
+
+- Carga nova01:03 disponível, mas Chrome/integrado/celular simulado mantiveram
+  00:35 sem reload, mesmo visíveis. O ramo próprio de Agendamentos não montava
+  DashboardAutoRefresh; a prova anterior em Equipe Produtiva não cobria esse ramo.
+  Persistência dos32 cards e cargas da origem já aprovadas não foram invalidadas.
+- Correção local liga somente Agendamentos ao mecanismo existente, com status
+  dedicado autorizado pelo catálogo da página e par exato do snapshot.83 testes
+  focados aprovados; CI/publicação e prova real pós-correção ainda pendentes.
+  [Evidência e critérios](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md).
+
 ## 2026-11-04 — CAIXA compacta publicada e validada
 
 - PR #487 integrado em c97d5fd212d2bd62bd4bd435f19d96d0e9b2bc6f. CI do PR

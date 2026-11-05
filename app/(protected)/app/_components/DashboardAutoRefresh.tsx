@@ -18,10 +18,12 @@ export function DashboardAutoRefresh({
   generatedAt,
   updatedAt,
   referenceDay,
+  statusEndpoint = "/api/dashboard/status",
 }: {
   generatedAt: string | null;
   updatedAt: string | null;
   referenceDay?: string | undefined;
+  statusEndpoint?: "/api/dashboard/status" | "/api/appointments/status";
 }) {
   const router = useRouter();
 
@@ -40,7 +42,7 @@ export function DashboardAutoRefresh({
       controller = request;
       timeoutTimer = setTimeout(() => request.abort(), REQUEST_TIMEOUT_MS);
       try {
-        const response = await fetch("/api/dashboard/status", {
+        const response = await fetch(statusEndpoint, {
           cache: "no-store",
           credentials: "same-origin",
           headers: { accept: "application/json" },
@@ -109,7 +111,7 @@ export function DashboardAutoRefresh({
       window.removeEventListener("focus", resume);
       window.removeEventListener("online", resume);
     };
-  }, [generatedAt, updatedAt, referenceDay, router]);
+  }, [generatedAt, updatedAt, referenceDay, statusEndpoint, router]);
 
   return null;
 }
