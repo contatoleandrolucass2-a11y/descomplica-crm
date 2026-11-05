@@ -168,6 +168,8 @@ describe("appointments snapshot read", () => {
     headers = [snapshot, next, next, next].map((data) => ({ data, error: null }));
     const actual = await loadAppointmentsReadModel("all");
     expect(actual.analysis).toEqual(slice);
+    expect(actual.generatedAt).toBe(next.generated_at);
+    expect(actual.updatedAt).toBe(next.updated_at);
     expect(
       mocks.rpc.mock.calls.filter(([name]) => name === "read_crm_appointments_analysis"),
     ).toHaveLength(2);
@@ -285,6 +287,7 @@ describe("appointments snapshot read", () => {
         { key: "broker-b", owner: "Responsável B", manager: "Gerente B" },
       ],
       generatedAt: snapshot.generated_at,
+      updatedAt: snapshot.updated_at,
       individualGoal: 24,
       goalsByMonth: Object.fromEntries(
         Array.from({ length: 10 }, (_, index) => [
@@ -335,6 +338,8 @@ describe("appointments snapshot read", () => {
     expect(await loadAppointmentsReadModel("all")).toEqual({
       analysis: null,
       brokerRoster: null,
+      generatedAt: snapshot.generated_at,
+      updatedAt: snapshot.updated_at,
       individualGoal: null,
       goalsByMonth: {},
       conversionGoals: null,
@@ -349,6 +354,8 @@ describe("appointments snapshot read", () => {
       expect(await loadAppointmentsReadModel("all")).toEqual({
         analysis: null,
         brokerRoster: null,
+        generatedAt: snapshot.generated_at,
+        updatedAt: snapshot.updated_at,
         individualGoal: null,
         goalsByMonth: {},
         conversionGoals: null,
@@ -360,6 +367,25 @@ describe("appointments snapshot read", () => {
   it("fails closed on database errors", async () => {
     mocks.rpc.mockResolvedValue({ data: null, error: { code: "42501" } });
     await expect(loadAppointmentsReadModel("all")).rejects.toThrow("gráficos");
+  });
+
+  it("returns the retried version pair even when the authorized analysis is empty", async () => {
+    const next = {
+      ...snapshot,
+      generated_at: "2026-10-19T00:30:00.123456Z",
+      updated_at: "2026-10-19T00:30:01.123457Z",
+    };
+    headers = [snapshot, next, next, next].map((data) => ({ data, error: null }));
+    mocks.rpc.mockResolvedValue({ data: [], error: null });
+
+    const actual = await loadAppointmentsReadModel("all");
+
+    expect(actual.analysis).toBeNull();
+    expect(actual.generatedAt).toBe(next.generated_at);
+    expect(actual.updatedAt).toBe(next.updated_at);
+    expect(
+      mocks.rpc.mock.calls.filter(([name]) => name === "read_crm_appointments_analysis"),
+    ).toHaveLength(2);
   });
 
   it("rejects foreign views, stages, dates and duplicate responses", async () => {

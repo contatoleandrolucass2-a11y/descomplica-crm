@@ -40,6 +40,7 @@ import {
 } from "../_components/appointments-actions";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 import { AppointmentsDashboard } from "../_components/AppointmentsDashboard";
+import { DashboardAutoRefresh } from "../../_components/DashboardAutoRefresh";
 
 import {
   AnalyticsCanvas,
@@ -564,6 +565,12 @@ export default async function StagePage({
     return (
       <main className={styles.canvasMain}>
         <AnalyticsCanvas kind="stage">
+          <DashboardAutoRefresh
+            statusEndpoint="/api/appointments/status"
+            generatedAt={appointments.generatedAt ?? null}
+            updatedAt={appointments.updatedAt ?? null}
+            referenceDay={calendarDate}
+          />
           <AppointmentsDashboard
             initialProfileState={initialProfileState}
             calendarDate={calendarDate}

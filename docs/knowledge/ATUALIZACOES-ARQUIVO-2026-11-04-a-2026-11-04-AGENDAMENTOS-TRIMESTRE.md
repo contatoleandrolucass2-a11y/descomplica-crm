@@ -531,3 +531,76 @@ Fontes verificadas:
   anteriores: teclado acessível; não alegar arraste nativo por ponteiro nem
   aparelho físico. Demais evidências pertinentes da mesma versão foram
   reaproveitadas, sem novo teste global ou mudança de baseline.
+
+### 05/11/2026 01:06 BRT — Abertura da prova de atualização automática nas três visualizações
+
+Pedido adicional: observar Agendamentos no Chrome, integrado e celular simulado,
+sem reload ou atualização manual, e registrar antes/depois em prints reais.
+Git comum correto, HEAD/main e05846e965bb1e8744ae279ab73420f8bba62b8c, árvore limpa
+na abertura. Health04:04:39UTC HTTP200/ok emfa068c43. CI main41963408120 já
+aprovada na entrega anterior, reconferida em leitura; nenhum código será alterado
+apenas para executar o teste.
+
+Contrato atual conferido no DashboardAutoRefresh.tsx: consulta autenticada de
+versão a cada30segundos enquanto a página está visível, atualização automática
+quando o snapshot persistido muda e verificação ao voltar a foco/visibilidade.
+A origem produz cargas nos slots00/30; esse contrato não significa reload do
+documento a cada30min. Não alterar temporizadores, cookies, estado interno,
+perfis, contas ou dados para simular aprovação. Critério: versões/horários novos
+renderizados nas três visualizações após duas cargas reais consecutivas, com
+zero comando de reload depois da montagem inicial; registrar quando uma aba
+estiver oculta e a atualização ocorrer automaticamente ao voltar à visualização.
+Celular é viewport simulado, não aparelho físico. Evidência e resultado pendentes.
+
+### 05/11/2026 01:13 BRT — Regressão reproduzida e correção delimitada preparada
+
+Primeiro ciclo observado nesta prova: startup agendado04:00:03.960UTC;
+comercial HTTP20104:06:32.965UTC, requestIdbaf855fa-e62d-4b91-9af6-2606c4e3ee07;
+estoque3494 confirmado04:06:59.833UTC, generatedAt04:06:59.544UTC. PID3564057,
+zero reinícios; a fonte continuou funcional.
+
+Três abas próprias de Agendamentos foram montadas04:06UTC com Atualizado em
+05/11/26,00:35: Chrome1280x551, integrado1280x900 e celular simulado390x844.
+Todas document.visibilityState=visible,32cards, sem reload/navegação/filtro após
+montagem. Em04:07:35.952UTC, mais de60s após a publicação comercial, todas ainda
+mostravam00:35. Uma quarta aba de controle, aberta apenas para confrontar a
+versão persistida, mostrou01:03 às04:08:14.981UTC. Ela não integra a prova de
+atualização das três abas antigas. Essa comparação comprova falha de atualização
+na tela, não falha da origem nem sucesso por abertura de página nova.
+
+Causa confirmada: DashboardAutoRefresh era montado apenas por DashboardReport;
+a página dinâmica de etapas retorna um AppointmentsDashboard próprio antes desse
+relatório. Portanto a validação anterior de30min em Equipe Produtiva não cobria
+Agendamentos. Persistência de layouts e recebimento de duas cargas da origem
+continuam comprovados, mas não substituem esta prova de tela aberta.
+
+Correção preparada: endpoint opcional de DashboardAutoRefresh, com default
+Dashboard preservado; montagem explícita no ramo próprio de Agendamentos;
+par generatedAt/updatedAt obtido do mesmo header confirmado por CAS, sem query
+adicional ou conversão de precisão; GET /api/appointments/status somente de
+metadados, autorizado por crm.stage.appointments.view antes de acesso ao banco.
+Não apontar usuários somente Agendamentos ao endpoint geral, que exige
+crm.dashboard.view. RLS existente já permite o header à etapa autorizada;
+sem migration, alteração de grant ou autorização remota adicional.
+
+Retornos de análise vazia/RPC ausente preservam o par conhecido para evitar
+refresh recorrente provocado por null/null contra snapshot existente. Snapshot
+realmente ausente continua null/null. Erro de leitura não anuncia versão nova;
+endpoint retorna503 e no-store. Permissões, metas, roster, CAS, layout e filtros
+permanecem na camada existente. Guia Next instalado confirma que router.refresh
+mescla a resposta RSC preservando estado de cliente e posição de rolagem; não
+usar reload completo nem temporizador artificial para simular aprovação.
+
+61 testes focados aprovados:26 cliente/SSR e35 API/reader; lint focado,
+formatação e resources:check aprovados. Inventário:93rotas/11áreas. Revisão
+independente em andamento; CI completa do candidato e do main continuam
+obrigatórias antes de publicação. Prova pós-publicação deve começar em páginas
+novas carregando a versão corrigida e permanecer sem reload manual nas três
+visualizações. Não reutilizar as abas da regressão como se contivessem código
+novo, nem apresentar capturas da aba de controle como aprovação automática.
+
+Evidências locais ignoradas: auto-refresh-observacoes.json e prints
+auto-refresh-chrome-antes.jpg, auto-refresh-integrado-antes.jpg,
+auto-refresh-celular-antes.jpg, auto-refresh-controle-fonte-nova.jpg em
+test-results/appointments-trimestre-live; recibos da origem em
+test-results/collector-auto-refresh-three-views-20261105.ndjson.

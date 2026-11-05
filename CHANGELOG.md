@@ -1,5 +1,9 @@
 # Changelog
 
+- Liga o painel próprio de Agendamentos à atualização automática da versão
+  publicada, preservando filtros e layout. Consulta somente metadados por uma
+  rota autorizada pela permissão de Agendamentos, sem exigir acesso ao Dashboard.
+
 - Publica e valida a entrega CAIXA do PR492 emfa068c43, com CI main verde,
   imagem imutável conferida, cálculo/subsídio/prazo automáticos, unidades por
   ranking e fluxo84mensais/anuais; smoke desktop/mobile e acesso preservados.

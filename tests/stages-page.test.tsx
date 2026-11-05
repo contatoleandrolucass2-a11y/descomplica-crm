@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   appointments: vi.fn(),
   profiles: vi.fn(),
   authorize: vi.fn(),
+  autoRefresh: vi.fn(),
 }));
 vi.mock("@/lib/authorization/enforce", () => ({ enforcePageAccess: mocks.authorize }));
 vi.mock("@/lib/authorization/dashboard-views", () => ({
@@ -18,6 +19,12 @@ vi.mock("@/lib/crm/dashboard/data", () => ({ loadStageReadModel: mocks.stage }))
 vi.mock("@/lib/crm/stages/data", () => ({ loadAppointmentsReadModel: mocks.appointments }));
 vi.mock("@/lib/dashboard-canvas/persistence/server", () => ({
   listDashboardProfiles: mocks.profiles,
+}));
+vi.mock("@/app/(protected)/app/_components/DashboardAutoRefresh", () => ({
+  DashboardAutoRefresh: (props: unknown) => {
+    mocks.autoRefresh(props);
+    return null;
+  },
 }));
 
 import StagePage, { generateMetadata } from "@/app/(protected)/app/etapas/[stage]/page";
@@ -65,6 +72,42 @@ beforeEach(() => {
 });
 
 describe("stage source states and initial authorized profile", () => {
+  it("wires the custom appointments canvas to its authorized published snapshot version", async () => {
+    mocks.appointments.mockResolvedValue({
+      analysis: null,
+      brokerRoster: null,
+      generatedAt: "2026-11-05T03:35:00.123456+00:00",
+      updatedAt: "2026-11-05T03:38:57.123457+00:00",
+    });
+    renderToStaticMarkup(
+      await StagePage({
+        params: Promise.resolve({ stage: "agendamentos" }),
+        searchParams: Promise.resolve({}),
+      }),
+    );
+    expect(mocks.autoRefresh).toHaveBeenCalledExactlyOnceWith({
+      statusEndpoint: "/api/appointments/status",
+      generatedAt: "2026-11-05T03:35:00.123456+00:00",
+      updatedAt: "2026-11-05T03:38:57.123457+00:00",
+      referenceDay: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/u),
+    });
+  });
+
+  it("keeps watching for the first appointments snapshot without fabricating a version", async () => {
+    renderToStaticMarkup(
+      await StagePage({
+        params: Promise.resolve({ stage: "agendamentos" }),
+        searchParams: Promise.resolve({}),
+      }),
+    );
+    expect(mocks.autoRefresh).toHaveBeenCalledExactlyOnceWith({
+      statusEndpoint: "/api/appointments/status",
+      generatedAt: null,
+      updatedAt: null,
+      referenceDay: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/u),
+    });
+  });
+
   it("shows a configured zero target and zero gap while keeping the percentage undefined", async () => {
     const html = await renderStage();
     expect(html).toContain("Meta oficial: 0");
