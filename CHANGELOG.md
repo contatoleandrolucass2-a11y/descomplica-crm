@@ -1,5 +1,25 @@
 # Changelog
 
+- Padroniza a formatação do registro visual CAIXA, sem mudar imagens ou dados
+  das referências aprovadas.
+
+- Atualiza somente as11referências visuais CAIXA após revisão da interface
+  corrigida em três temas e tamanhos, preservando as231referências de outras páginas.
+
+- Mantém as legendas dentro das bordas também em telas intermediárias,
+  com quebra de texto e sem reduzir fonte ou quebrar Sim/Não.
+
+- Revalida financiamento e subsídio após desconto, impede abatimento duplicado
+  de bônus/folga sobre preço final e bloqueia aprovação/impressão com bases
+  bancária e comercial divergentes. Legendas mobile permanecem dentro da borda.
+
+- Exibe unidades disponíveis na própria CAIXA após o clique, com estoque,
+  descrição, fluxo editável e documentação no padrão visual do Associativo.
+- Agrupa legenda, valor e ajuda de cada opção em borda completa, com menos
+  espaços e duas linhas de preenchimento no desktop.
+- Preserva posições anuais por data ao editar a proposta, revalida os dois
+  fluxos e mantém documentação/cronogramas coerentes com os dados informados.
+
 - Liga o painel próprio de Agendamentos à atualização automática da versão
   publicada, preservando filtros e layout. Consulta somente metadados por uma
   rota autorizada pela permissão e configuração da página de Agendamentos,

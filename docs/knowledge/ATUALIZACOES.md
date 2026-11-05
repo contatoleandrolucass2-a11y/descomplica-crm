@@ -1,5 +1,90 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-04/05 — CAIXA: unidades na página e campos agrupados, revisão final
+
+- CI41970350868 do candidato55ee6ebe aprovada nos quatro jobs obrigatórios.
+  Main avançou externamente para02fcbc06 durante a execução; integração dessa
+  base preservada integralmente, com conciliação somente de CHANGELOG/WORKLOG.
+  Diff próprio continua restrito à CAIXA, suas evidências e documentação.
+  Nova CI do candidato integrado obrigatória; nenhuma publicação realizada.
+- CI41969852534 de4bc44456 parou no Formatting do registro JSON de imagens.
+  Ajuste restrito à serialização com Prettier, sem alteração semântica ou de
+  imagem; conferência estrutural integral antes/depois. Aplicação/testes
+  permanecem idênticos à fonte visual aprovada01710196. CI final será repetida.
+- Fonte corrigida01710196, CI41963993796:49responsivos/28temas/77axe/zoom
+  e funcionais aprovados; falha somente nos11pixels CAIXA intencionais.
+  Artefato13389171411, ZIP120d229fde2a474ef655d1ee155a5863510530861842094d4d62a8ebb6873ce3,
+  captura e04686e3/árvore b727f8f5 idêntica ao head; fingerprint295f8877
+  reproduzido exatamente com19arquivos gerados e nenhum diff tracked.
+- Referências aprovadas somente após correções:11imagens CAIXA originais do
+  artefato copiadas sem edição. Revisão humana anterior reutilizada em10corpos
+  de página com identidade pixel a pixel; apenas o cabeçalho global foi excluído
+  dessa análise auxiliar, não das imagens nem da comparação CI. Em1024,2099pixels
+  mudaram só na legenda corrigida, revisada novamente; mobile também conferido.
+  Outras231linhas de imagens e todos os metadados não relacionados preservados
+  por deepEqual. Nenhum limiar alterado. Contrato visual13/13 aprovado.
+  Código da aplicação congelado; fonte antiga com defeitos não foi adotada.
+  CI final do PR/main exato e promoção/smoke ainda pendentes neste registro.
+- Em05/11, CI41957639708 de3c631e5f aprovou validate/imagem/restore e todos
+  os49responsivos/28temas/77axe/zoom/funcionais; falha somente em11pixels CAIXA.
+  Artefato13386471554/ZIP62a06e7b54ec4eb33f4fe5483486dd8d41d54869f7bab1ed844ec45e86081fa5,
+  captura55dc13a5, árvore80f24305 idêntica ao head, fingerprint bcc8dec2
+  reproduzido com19arquivos gerados. As11imagens foram revisadas; mobile
+  corrigido, mas1024px ainda tinha legenda14,55px fora da borda. Não adotadas.
+- Causa: nowrap antigo permanecia entre761–1199px. Correção limitada às
+  legendas binárias/condição, sem redução de fonte ou corte. Teste de contenção
+  expandido para375/390/768/1024/1200, claro/escuro e tracking1px/700;3provas
+  dirigidas aprovadas, lint/formatação/diff-check verdes. Novo source CI será
+  obrigatório; não copiar referências com defeito para liberar o gate.
+- Consolidação para PR495: logs da aplicação, regressões e limites serão
+  integrados juntos pelo squash; referências anteriores não foram adotadas.
+- Retomada em05/11/2026 01:16:46UTC (04/11 local): origin/main e GitHub
+  e594bf70937810162b8f5cc41abdf41f2a44633a; CI push41938824640 concluída
+  com sucesso para documentação. Runtime público fa068c43, HTTP200/ok.
+  Fontes: GitHub branch/main/Actions e /api/health com nonce/no-cache.
+- Pedido atual restrito à CAIXA: substituir o modal Unidades disponíveis por
+  expansão na própria página, reproduzir estoque/descrição/fluxo/resumo dos
+  prints do Associativo e agrupar cada campo com borda completa e menos vazios.
+  Associativo somente referência; preservar motores, taxas, ranking,84mensais,
+  anuais, entrada e autorização existentes. Não alterar outras páginas.
+- Branch codex/caixa-unidades-na-pagina em e594bf70; base limpa. Implementação,
+  evidências de layout, gates e nova publicação ainda pendentes nesta abertura.
+- Implementação local concluída: região inline após resumo, estoque/descrição,
+  fluxo editável e documentação por funções canônicas; formulário em grupos
+  com borda inteira e ajudas curtas. Não alterou motores ou outras páginas.
+- Provas Windows/Node24.19/pnpm11.20: cliente13/13; após último padding,
+  3layouts e1integração de invalidação aprovados. Unidades7/7browser;2cenários
+  afetados por rótulos/logos e1captura final de compactação aprovados.
+  Filtros36px/filaaté40px desktop, controles44px mobile;3regressões puras de
+  anuais aprovadas. TSC/ESLint/diff-check aprovados; capturas sintéticas de
+  formulário em3temas1280/1920 e390dark, e unidades1280/1920light/dark revisadas.
+- QA independente fechou P1 de slots anuais compactados em dezembro e P2 de
+  primeiro imóvel para documentação SBPE/fluxo aprovado visível após invalidação.
+  Helper CAIXA mantém cinco posições por data e sinais aprovados antes das
+  anuais; motores permanecem intactos. Impressão escopada por portal CSSModule,
+  sem escrita remota ou vazamento para outras páginas. CI/publicação pendentes;
+  não reutilizar a versão pública fa068c43 como prova desta nova interface.
+- Base concorrente b6dc189a/PR493 integrada preservando registros; nosso diff
+  permanece restrito à CAIXA. Responsável confirmou CI principal verde e aplicação
+  da migration20261104201024. Falha separada do coletor por memória continua
+  na demanda responsável; não foi corrigida nem autorizada por este chat.
+- CI41950662926 de d32b8085: validate/imagem/restore aprovados; release falhou
+  apenas nos11pixels CAIXA intencionais, com49responsivos/28temas/77axe/zoom
+  e testes funcionais aprovados. Artefato13383013121, ZIP0a0ef4e24d1274e4d62ffee7cf5a0a876542d068fcbfa13fe8b38ebefbeca718,
+  captura94507346, árvore9cfa8d4b igual ao head e fingerprint cf587e34 reproduzido
+  com19arquivos gerados. Revisão humana encontrou texto social ultrapassando
+  a borda mobile: imagens não aprovadas/adotadas. Regra de wrap corrigida,
+  regressão375/390 com tracking1px/700 reproduz falha anterior e passa após fix.
+- QA adicional comprovou P1 de financiamento mantido acima da cota após
+  desconto e P1 de bônus/folga abatidos duas vezes quando só havia preço final.
+  Corrigidos nos adaptadores CAIXA, sem alterar motores: compra efetiva recalcula
+  financiamento/subsídio/recursos, capacidade original é teto, desconto entra
+  uma vez e bases bancária/comercial devem coincidir em centavos. Ledger,
+  documentação e impressão recebem fundos revalidados; falha bloqueia aprovação.
+  29testes normais (21unidades+8apresentação) e3browser dirigidos aprovados,
+  tipos/lint/diff-check verdes. Revisão independente fechou ambos. Nova CI e
+  capturas serão exigidas; nenhuma referência defeituosa será usada para liberar.
+
 ## 2026-11-04 — CAIXA: publicada e validada, unidades por ranking
 
 - PR492 integrado em fa068c439eacdd70f0c6d8cfc9bcba5394e1ef43 após os quatro
