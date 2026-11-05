@@ -1,5 +1,7 @@
 # Worklog
 
+- CI d73adc4b: 5.104 testes passaram; o catálogo visual reteve tamanho/hash antigos de capturas CAIXA substituídas. Metadados corrigidos somente para essas imagens; gate preservado.
+
 ## 2026-11-05 — CAIXA: fronteiras, anuais e formulário
 
 - Escopo exclusivo CAIXA. Formulário em três grupos, sem imposição de duas

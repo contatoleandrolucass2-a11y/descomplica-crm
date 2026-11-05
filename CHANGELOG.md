@@ -1,5 +1,7 @@
 # Changelog
 
+- Sincroniza tamanhos e hashes das referências visuais CAIXA já revisadas com o catálogo de QA.
+
 - Reorganiza somente o formulário CAIXA em grupos legíveis, com resultado abaixo
   da primeira tela desktop. Compacta estoque/proposta, restaura efeitos, permite
   selecionar qualquer célula e atualiza contagens dos filtros. Anuais aplicadas
