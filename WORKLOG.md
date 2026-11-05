@@ -45,21 +45,32 @@
 - Anuais do exemplo seguem quatro de2000, limite nominal50% da renda.
   Saldo comercial quitado permanece elegível sem parcelas artificiais.
   Motores padrão CAIXA e Associativo e seus rankings não foram alterados.
-- Evidência anterior à regra comercial:39 testes financeiros e cinco cenários
-  de navegador aprovados. Candidato comercial:63 testes financeiros e oito
-  cenários browser aprovados, lint aprovado; correção de tipagem dos testes
-  e nova CI em andamento. Otimizador conferido em909 valores de centavos.
+- Validação final: 63 testes financeiros e nove cenários de navegador aprovados;
+  tipos, lint e formatação aprovados. Otimizador conferido em 909 valores de
+  centavos. PR500/CI42020300912 e main e407ecd9/CI42027654068 com os quatro
+  gates obrigatórios concluídos com sucesso.
 - Medição isolada3500cenários/NodeWindows: helper55,921s→11,830s; chamadas
   157500→38500. Não representa latência do navegador ou do fluxo completo.
   Novas regressões cobrem troca de faixa do imóvel inicial, aprovação individual,
-  cota, anuais e revogação de impressão após edição. CI/publicação
-  ainda pendentes nesta etapa. Detalhes e limites em docs/simulators/CAIXA.md.
+  cota, anuais e revogação de impressão após edição. Detalhes e limites em
+  docs/simulators/CAIXA.md.
 - CI42010127829 identificou acesso potencialmente indefinido a duas linhas
   nos novos testes; adicionada asserção de quantidade e tipagem correspondente.
-  Não alterou cálculo. Nova CI obrigatória no commit corrigido.
+  Não alterou cálculo. A CI final do commit corrigido passou.
 
 - Caso limite adicional: compra integralmente coberta por recursos próprios
   não gera tarifa/seguro nem parcela bancária fictícia; regressão específica.
+- Publicado em 05/11/2026 às 13:24:04.977 UTC, deployment
+  `57305658-c920-4d9e-81d2-99d7deed9fa0`, SHA `e407ecd9`. Imagem imutável,
+  dois perfis de runtime, backup, lock/CAS e health 200/ok confirmados.
+- Conferência no site: renda R$ 4.000, ranking Ouro, entrada R$ 150;
+  383 opções entre 3.495 unidades. Referência anterior: 35 entre 3.494;
+  snapshots do estoque distintos, sem promessa de quantidade permanente.
+  Compra R$ 253.790 e avaliação R$ 340.000 preservadas; base R$ 261.965,10,
+  crédito R$ 209.572,08, subsídio R$ 3.357,01, quatro anuais de R$ 2.000.
+  Linear e Decrescente aprovados pelo ranking; cenário comercial identificado
+  como sujeito à análise bancária. Calculadora principal permanece inalterada.
+- Registro final somente documental: não exige novo restart da aplicação.
 
 ## 2026-11-05 — Publicação do refresh e prova real sem reload
 

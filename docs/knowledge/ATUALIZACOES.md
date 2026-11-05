@@ -3,8 +3,9 @@
 ## 2026-11-05 — CAIXA: cálculo comercial
 
 - [Registro completo da abertura, diagnóstico e regra comercial](ATUALIZACOES-ARQUIVO-2026-11-05-a-2026-11-05-CAIXA-CALCULO.md).
-- Candidato7ff00729/PR500:63 testes financeiros e oito cenários browser aprovados;
-  lint, tipos e formatação aprovados. CI e publicação pendentes.
+- Publicado `e407ecd9`/PR500 em 05/11/2026, 13:24 UTC: quatro gates verdes,
+  63 testes financeiros e nove cenários browser; health 200/ok e cálculo no site
+  conferidos. Perfil R$ 4.000/Ouro: 383 opções no estoque de 3.495 unidades.
 - Histórico desta demanda movido integralmente para arquivo próprio para manter
   o limite de256000bytes da sincronização; nenhuma nota de outra área alterada.
 
