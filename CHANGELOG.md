@@ -14,9 +14,13 @@
   e tamanhos, com textos inteiros e bordas visíveis; demais referências preservadas.
 - Estabiliza a medição responsiva do teste CAIXA sem reduzir as exigências de layout.
 
-- Prepara prazo finito de30s apenas para a RPC Salesforce, após recorrência de
+- Aplica prazo finito de30s apenas para a RPC Salesforce, após recorrência de
   statement_timeout8s. Inclui prova REST PostgreSQL17 isolada e pgTAP de corpo,
-  configuração e permissões. Aplicação em produção exige autorização específica.
+  configuração e permissões. PR493 e main com CI verde; migration autorizada
+  e verificada em produção, sem mudança de corpo, ACL ou limites globais.
+- Registra a recuperação autorizada do coletor, com trava morta preservada e
+  limite de memória de1,5GiB. Confirma dois ciclos automáticos completos sem
+  reinícios e persistência dos32 cards no Chrome, integrado e celular simulado.
 
 - Publica PR #490 em 5da46964 após CI completa, com margem da página inicial
   corrigida sem mudar a referência visual. Confirma persistência dos32 cards

@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-11-05 — Recuperação do coletor e aceite final de Agendamentos
+
+- Após autorização específica, trava do PID morto preservada em quarentena e
+  somente MemoryMax elevado de768MiB para1,5GiB. Retomada sob quatro travas e
+  CAS em02:53:55UTC; mesmas dependências, arquivos, runtime, argv e credenciais.
+  Comparação de After corrigida apenas para aceitar outra ordem dos mesmos
+  tokens;44 testes do helper operacional, sintaxe e lint aprovados.
+- Dois ciclos automáticos consecutivos completos: comercial201 às03:00:36 e
+  03:38:57UTC; estoque3494 às03:01:07 e03:39:24UTC. PID3564057, zero reinícios,
+  lock livre e pico1215733760bytes, abaixo do limite1610612736bytes.
+- Chrome e integrado exibiram a carga nova23:57. Os32 IDs/ordem/tamanhos
+  coincidiram após reload;390x844 e844x390 sem overflow horizontal da página,
+  com rotação/reload e retorno ao retrato preservados. Capturas reais salvas;
+  abas temporárias fechadas e viewport restaurado. Sem novas gravações de perfil.
+- Saúde03:39:54UTC: HTTP200/ok, app fa068c43. Este encerramento altera somente
+  documentação; não requer novo deploy nem reinício. Recibos, backups e limites
+  no registro de conhecimento específico; comportamento futuro não é garantido
+  por dois ciclos e deve ser reavaliado diante de novo OOM ou crescimento de pico.
+
 ## 2026-11-04 — Prazo delimitado para gravação Salesforce
 
 - Dois ciclos da versão publicada falharam com57014/statement_timeout;
@@ -7,8 +26,9 @@
   dos validadores; não foi atribuída a uma expressão isolada sem evidência.
 - Migration20261104201024 propõe30s somente para a RPC de ingestão, preservando
   implementação, proprietário, ACL e search_path. Sem alteração de limites
-  globais, contas, dados existentes, workflow ou agenda. Aplicação remota pendente
-  de CI e autorização específica; não confundir proposta com produção.
+  globais, contas, dados existentes, workflow ou agenda. Após autorização e CI
+  verde do PR493 e main b6dc189a, aplicada às23:19 BRT como versão remota
+  20261105021909; corpo, ACL e limites globais conferidos sem alteração.
 - Testes Node3/3, lint, sintaxe e formatação aprovados. Nove asserts pgTAP e
   prova REST PostgreSQL17 obrigatórios na CI:8s herdados da role sintética,
   sucesso9s com override30s, cancelamento31s, cinco chamadas posteriores8s,
@@ -16,6 +36,7 @@
   Docker local indisponível; esses testes de banco não foram alegados localmente.
 - Operação proposta mantém travas compartilhadas, backup privado da definição
   e metadados, CAS e rollback restrito ao parâmetro. Não requer reinício do app.
+  Execução concluída sob essas guardas, sem reiniciar aplicação ou coletor.
 
 ## 2026-11-04 — PR #490 publicado e persistência conferida
 
