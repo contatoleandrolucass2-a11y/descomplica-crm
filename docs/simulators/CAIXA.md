@@ -1,5 +1,15 @@
 # Simulação CAIXA: referência, matemática e limites
 
+## Revisão de 05/11/2026: fronteiras e prazo
+
+O prazo agora usa idade em meses completos, conforme a calculadora pública,
+preservando o desconto do período de obra. O caso nascimento15/03/1956,
+referência05/11/2026, passa de118 para119meses. Comparações públicas, matriz
+interna e limites da comprovação estão no [relatório de fronteiras](CAIXA-FRONTEIRAS-2026-11-05.md).
+Anuais calculadas aparecem automaticamente na composição; a auditoria comercial
+fica recolhida fora da linha de financiamento. Aprovação continua por um dos
+fluxos válidos, sem flexibilizar o ranking ou declarar aprovação bancária.
+
 ## Revisão de 04/11/2026: perfil e comparação pública separados
 
 O resumo calcula o perfil informado, com tabela municipal, cotista, composição
@@ -23,22 +33,23 @@ configuração `main.848219c8ea107ec1.js`, SHA256
 b332a9ec0fc4bf075a0bc33395bd2ab602d666c2b12ff22a7ea637a4df98ac2a.
 MCID consultado confirma a diferenciação de cotista e limites municipais.
 
-Correção efetiva no desconto: o piso1500 é aplicado ao resultado da fórmula
-MFOM034 §3.1.1.8, antes dos redutores do §3.1.2. Desconto base3638,05 pode
-resultar1091,41 após redução unipessoal; não deve ser zerado ou rejeitado por
-reaplicar o piso. A parábola RD1750/3700 permanece conforme o texto consultado.
-Para pronto sem modalidade identificada, o tetoCCI49500 continua como hipótese
-conservadora explicitada na auditoria, sem presumir que todo pronto éCCI.
+A comparação autenticada de05/11 corrige a interpretação anterior do desconto:
+o cálculo automático limita Frenda após3700, aplica os redutores e verifica
+o piso1500 sobre o benefício reduzido, com truncamento final em reais. Valores
+confirmados manualmente continuam distintos da estimativa automática. Para
+pronto sem modalidade identificada, tetoCCI49500 permanece hipótese documentada.
 
 Limite de fonte: nova obtenção do PDF oficial MFOM034 retornou ciclo de
 redirecionamento. Conferidas pp131–133 da cópia anteriormente obtida, SHA256
 896f9f11aae2add4a9cd7f4e70301b08512b2606ca3b7e301e90f4511217e830.
-Não foi comprovada ausência de versão posterior. A simulação completa exige
-identificação/consentimento; não foi submetida nem se declara aprovação bancária.
+Não foi comprovada ausência de versão posterior. Em05/11, o usuário abriu
+a sessão completa autenticada para comparação de cenários; nenhuma proposta
+bancária foi enviada. Resultados e limitações constam no relatório de fronteiras.
 
-R$3357,01 do exemplo é reproduzível para renda4000, imóvel275000, São Paulo/SP,
-apartamento39m², novo/na planta, cotista e família não unipessoal. Área50m² dá
-3557,55. A auditoria conserva esses dados para comparação de cenários iguais.
+A revisão autenticada de05/11 substitui o resultado antigo3357,01 por2099
+para renda4000, imóvel275000, São Paulo/SP, cotista e família não unipessoal
+com FUH0. A curva de renda deixa de crescer após3700 e o desconto é truncado
+em reais. Consulte as amostras e limites no relatório de fronteiras.
 
 ### Unidades disponíveis por ranking
 
@@ -102,7 +113,8 @@ anteriores. Exemplo comercial com compra219000 e avaliação240000: cotas
 Conferência comercial em05/11/2026: renda4000, cotista, nascimento1987-01-22,
 São Paulo, compra253790, avaliação340000, área25,77m², dependentes,
 entrega2029-12-31, obra15%, Ouro, entrada150. Base otimizada261965,10,
-crédito209572,08, subsídio3357,01, juros5,5% e primeira prestação1200.
+crédito209572,08, subsídio2099 após a revisão autenticada, juros5,5% e
+primeira prestação1200 com seguros de referência rápida.
 A base sugerida261770,43 suporta209416,34 com parcela1199,13; o otimizador
 recalcula o seguro e aproveita a capacidade restante. Compra e avaliação reais
 não mudam. Quatro anuais nominais de2000 em15/12/2026–2029 são mantidas,
@@ -299,8 +311,8 @@ tarifa) / fator financeiro`. Quando a estimativa rápida está ativa e o MIP dep
   linha da Faixa 3: 8,16% nominal, ou 7,66% para cotista elegível. Acima de
   R$ 400 mil e até R$ 600 mil, aplica-se Classe Média a 10% nominal. O resultado
   identifica expressamente quando a taxa foi elevada pelo valor do imóvel.
-- O prazo máximo é o menor entre 420 meses e o intervalo, em meses-calendário,
-  até o proponente mais velho completar 80 anos e 6 meses, menos a obra somente
+- O prazo máximo é o menor entre 420 meses e `966 − idade em meses completos`
+  do proponente mais velho, menos a obra somente
   quando seu prazo foi informado. Prazo solicitado acima do máximo é reduzido e
   avisado, como na calculadora pública; limite igual a zero continua inválido.
 - Entrada adicional: `max(0, imóvel − financiamento − recursos − FGTS − desconto
@@ -335,7 +347,8 @@ presumido quando a fonte não possui correspondência.
 
 ```text
 D = Frenda × [1 + (FDr + FDfin + FUH)/100] × Fpop
-Frenda = a(R − RDmax)² + b(R − RDmax) + Dmax
+Rc = min(R, RDmin)
+Frenda = a(Rc − RDmax)² + b(Rc − RDmax) + Dmax
 a = −b / [2(RDmin − RDmax)]
 b = 2Dmax(Dmin/Dmax − 1) / (RDmin − RDmax)
 Dmax = 50000; Dmin = 1900; RDmax = 1750; RDmin = 3700
@@ -359,7 +372,7 @@ de áreas de padrão diferente, beirais e garagens. Não substituir por uma áre
 comercial sem conferir sua definição.
 
 Além da expressão, aplicam-se condições e redutores: renda até R$ 4 mil,
-resultado mínimo R$ 1.500, teto regional R$ 55 mil/R$ 65 mil e teto próprio de
+benefício reduzido mínimo R$ 1.500 na estimativa automática conferida, teto regional R$ 55 mil/R$ 65 mil e teto próprio de
 R$ 49.500 para pronto CCI. Terreno próprio reduz 20% (com exceção prevista para
 doação pública); família unipessoal reduz 70%, restando 30%; imóvel usado
 reduz 50%; retomado pode reduzir 30% somente nas condições do §3.1.2.4. Se o
@@ -368,12 +381,15 @@ com outros redutores. Não confundir um proponente com família unipessoal:
 esta definição exige indivíduo sem dependentes. A exceção histórica de usado
 com contratação/trâmite até 01/12/2023 não se aplica a uma operação nova em 2026.
 
+A sessão completa de05/11 confirmou saturação de Frenda em1900 após a renda
+3700, preservando renda real emDfin e truncamento final em reais após redutores.
 O ponto de renda RDmin=3700 da curva não substitui o limite de elegibilidade
 R$ 4000. Também não se deve substituir esse limite pelo de R$ 5000, referente
 ao conjunto de descontos. Esses detalhes e a falta de FUH/município explicam
 por que copiar a fórmula reduzida da referência não comprova o desconto real.
 
-A expressão de `Frenda` acima é a transcrição do MFOM034, p. 131, §3.1.1.1.
+A expressão de `Frenda` deriva do MFOM034, p.131, §3.1.1.1, com saturação
+superior e ordem de arredondamento conferidas no simulador completo em05/11.
 O PDF oficial consultado em 27/10/2026 tem SHA-256
 `896f9f11aae2add4a9cd7f4e70301b08512b2606ca3b7e301e90f4511217e830` e
 traz os anexos III e IV como planilhas embutidas. O Anexo III confirma, entre

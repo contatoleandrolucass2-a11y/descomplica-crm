@@ -206,3 +206,17 @@ inválido antes de alcançar replay. Corrigidos4args e payloads de replayválido
 com metaszero;31asserts preservados, inclusive ACL/hash/rollback. Migration
 permanece byte-idêntica à aprovada. Gates remanescentes desse candidato foram
 cancelados pelo coordenador após falha confirmada, sem cancelar outra entrega.
+
+
+### Base concorrente —05/11/2026,18:55UTC
+
+Consulta origin/main confirmou318b51fa, PR503 de outra demanda. Diff restrito à
+CAIXA e seus registros/referências; AGENTS/skills não mudaram. Health público
+continua200/ok/28b4ac35 às18:55:15UTC. PR504 tornou-seCONFLICTING somente em
+WORKLOG/CHANGELOG. Merge da base na branch preservou integralmente os dois
+registros, sem editar código ou referência da outra área. Não se publicou318b.
+
+CI42086063374/33007320 aprovou validate, promotable-image e isolated-restore
+(31novosasserts;2476total). Gate de release avançou ao banco isolado. A mudança
+de base exige novo candidato/CI antes de integrar Agendamentos; nenhum gate
+falho foi ignorado e nenhuma entrega alheia foi cancelada.

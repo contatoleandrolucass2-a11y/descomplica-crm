@@ -28,6 +28,41 @@
   aplicação e atualização controlada do coletor, carga reconciliada e prints.
   Rollback conserva colunas e versão compatível; não apagar dados ou locks.
 
+- CI 42067764237 / 1cc71693: testes de código e navegador CAIXA aprovados; fonte ITBI indisponível (HTTP 403) na primeira tentativa, aprovada no reteste. Matriz completa:241 comparações aprovadas; única diferença esperada é CAIXA 320 px, altura de 2012 para 2355 px após correção de campos. Captura revisada e referência atualizada sem mudar outras páginas.
+
+- CI de893450: validação e imagem aprovadas; navegador encontrou duas expectativas de subsídio anteriores à correção (família unipessoal e renda R$4.000). Atualização restrita às fixtures CAIXA, com reteste completo do componente.
+
+- CI d73adc4b: 5.104 testes passaram; o catálogo visual reteve tamanho/hash antigos de capturas CAIXA substituídas. Metadados corrigidos somente para essas imagens; gate preservado.
+
+## 2026-11-05 — CAIXA: fronteiras, anuais e formulário
+
+- Escopo exclusivo CAIXA. Formulário em três grupos, sem imposição de duas
+  linhas; 19 campos visíveis na tela desktop e resultado após rolagem. Estoque
+  com linhas compactas, efeitos, clique em qualquer célula e teclado; facetas
+  e totais refletem os filtros. Anuais positivas visíveis automaticamente.
+- Mantém aprovação Linear OU Decrescente e bloqueio do fluxo reprovado.
+  Identificação comercial preservada em auditoria recolhida e impressão,
+  sem aumentar a linha de financiamento. Outras páginas/motores inalterados.
+- Corrige prazo por meses completos de idade, confrontado no site oficial.
+  24 casos públicos ±R$1 em fronteiras e caso de idade conferidos na UI.
+  Matriz nova:326.592cenários;279.552válidos/47.040rejeições, sem violações
+  dos invariantes. Matriz física anterior508.032 também passou. Relatório:
+  docs/simulators/CAIXA-FRONTEIRAS-2026-11-05.md.
+- 105 testes financeiros,14cenários do formulário e15do estoque aprovados
+  em execuções focadas/retestes justificados; tipos/lint/formatação aprovados.
+  Screenshots sintéticas locais inspecionadas; matriz autenticada final na CI.
+- MFOM034 relido com hash conhecido. Sessão completa aberta pelo usuário
+  permitiu confrontar subsídios: corrigidos crescimento indevido da curva após
+  renda3700, piso após redutores e truncamento final em reais. Comparações familiares e seus limites
+  estão no relatório; nenhuma proposta bancária foi enviada.
+- Seguros da rápida e do produto completo diferem; não se inventou tabela de
+  apólices para prometer equivalência universal. Regra comercial customizada
+  permanece identificada e não equivale à regra oficial.
+- CI5056755a:validate/image/restore aprovados; matriz visual exige atualização
+  de11referências CAIXA após redesign. Dez capturas revisadas;320px corrigido
+  por corte real da data. Nenhuma referência de outra página foi alterada.
+- Implementado; CI, merge e publicação ainda pendentes nesta etapa.
+
 ## 2026-11-05 — Agendamentos: apresentação, metas e visitas
 
 - Escopo comportamental exclusivo de /app/etapas/agendamentos. Shell e modal

@@ -4,6 +4,24 @@
   e o regional conciliado por corretor em Agendamentos. Vínculos desconhecidos
   permanecem indisponíveis; outras páginas mantêm o gerente e contagens legados.
 
+- Atualiza somente a referência visual CAIXA 320 px após corrigir contenção dos campos; as outras241 comparações visuais permaneceram aprovadas.
+
+- Atualiza os cenários de navegador CAIXA para o subsídio oficialmente confrontado e o piso de famílias unipessoais.
+
+- Sincroniza tamanhos e hashes das referências visuais CAIXA já revisadas com o catálogo de QA.
+
+- Reorganiza somente o formulário CAIXA em grupos legíveis, com resultado abaixo
+  da primeira tela desktop. Compacta estoque/proposta, restaura efeitos, permite
+  selecionar qualquer célula e atualiza contagens dos filtros. Anuais aplicadas
+  ficam visíveis; auditoria comercial deixa a linha de financiamento.
+- Corrige prazo CAIXA pelo mês completo de idade: caso oficial de 15/03/1956
+  passa de 118 para 119 meses em 05/11/2026. Confere 24 fronteiras públicas e
+  326.592 combinações internas, preservando cotas e ranking por fluxo.
+- Corrige subsídio CAIXA após confronto autenticado: limita o fator renda em
+  R$3.700, aplica o piso após redutores e trunca o benefício final em reais,
+  preservando renda real no fator
+  de capacidade. Renda R$4.000 não unipessoal passa deR$3.357,01 paraR$2.099.
+
 - Preserva a leitura do aviso de dados indisponíveis em Agendamentos; a composição
   proporcional só é aplicada quando os cards estão carregados.
 

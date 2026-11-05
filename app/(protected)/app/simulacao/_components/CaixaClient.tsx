@@ -797,7 +797,7 @@ export function CaixaClient({
                   className="caixa-panel caixa-form-section caixa-qualification-section"
                   aria-labelledby="caixa-client-property-title"
                 >
-                  <h2 id="caixa-client-property-title" className="caixa-sr-only">
+                  <h2 id="caixa-client-property-title" className="caixa-form-section-title">
                     Dados do cliente e do imóvel
                   </h2>
                   <div className="caixa-form-section-content">
@@ -886,7 +886,7 @@ export function CaixaClient({
                   className="caixa-panel caixa-form-section caixa-financing-section"
                   aria-labelledby="caixa-financing-title"
                 >
-                  <h2 id="caixa-financing-title" className="caixa-sr-only">
+                  <h2 id="caixa-financing-title" className="caixa-form-section-title">
                     Condições do financiamento
                   </h2>
                   <div className="caixa-form-section-content">
@@ -1062,49 +1062,57 @@ export function CaixaClient({
                   </div>
                 </section>
                 {subsidyEligibility === "eligible-review" && (
-                  <div className="caixa-form-grid caixa-subsidy-inputs">
-                    <Field className="caixa-unit-type-field" label="Tipo da unidade *">
-                      <select
-                        required
-                        value={form.propertyType}
-                        onChange={(event) => update("propertyType", event.target.value)}
-                      >
-                        <option value="">Selecione…</option>
-                        <option value="apartment">Apartamento</option>
-                        <option value="house">Casa</option>
-                      </select>
-                    </Field>
-                    <Field className="caixa-unit-area-field" label="Área oficial da unidade (m²) *">
-                      <input
-                        required
-                        type="number"
-                        min="1"
-                        max="10000"
-                        step="0.01"
-                        value={form.propertyArea}
-                        onChange={(event) => update("propertyArea", event.target.value)}
-                      />
-                      <small title="Use a área coberta indicada no documento do imóvel">
-                        Área coberta no documento.
-                      </small>
-                    </Field>
-                    {participants === 1 && (
-                      <Field className="caixa-dependents-field" label="Possui dependentes? *">
+                  <section className="caixa-form-section" aria-labelledby="caixa-subsidy-title">
+                    <h2 id="caixa-subsidy-title" className="caixa-form-section-title">
+                      Dados para o subsídio
+                    </h2>
+                    <div className="caixa-form-grid caixa-subsidy-inputs">
+                      <Field className="caixa-unit-type-field" label="Tipo da unidade *">
                         <select
                           required
-                          value={form.hasDependents}
-                          onChange={(event) => update("hasDependents", event.target.value)}
+                          value={form.propertyType}
+                          onChange={(event) => update("propertyType", event.target.value)}
                         >
                           <option value="">Selecione…</option>
-                          <option value="yes">Sim</option>
-                          <option value="no">Não</option>
+                          <option value="apartment">Apartamento</option>
+                          <option value="house">Casa</option>
                         </select>
-                        <small title="Sem dependentes, aplica a regra de família unipessoal">
-                          Não: família unipessoal.
+                      </Field>
+                      <Field
+                        className="caixa-unit-area-field"
+                        label="Área oficial da unidade (m²) *"
+                      >
+                        <input
+                          required
+                          type="number"
+                          min="1"
+                          max="10000"
+                          step="0.01"
+                          value={form.propertyArea}
+                          onChange={(event) => update("propertyArea", event.target.value)}
+                        />
+                        <small title="Use a área coberta indicada no documento do imóvel">
+                          Área coberta no documento.
                         </small>
                       </Field>
-                    )}
-                  </div>
+                      {participants === 1 && (
+                        <Field className="caixa-dependents-field" label="Possui dependentes? *">
+                          <select
+                            required
+                            value={form.hasDependents}
+                            onChange={(event) => update("hasDependents", event.target.value)}
+                          >
+                            <option value="">Selecione…</option>
+                            <option value="yes">Sim</option>
+                            <option value="no">Não</option>
+                          </select>
+                          <small title="Sem dependentes, aplica a regra de família unipessoal">
+                            Não: família unipessoal.
+                          </small>
+                        </Field>
+                      )}
+                    </div>
+                  </section>
                 )}
               </form>
               {result && (

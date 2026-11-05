@@ -61,7 +61,7 @@ describe("CAIXA credit and ranking belong to the unit being assessed", () => {
       if (assessment.status !== "approved") return;
       expect(assessment.value.price).toBe(253790);
       expect(assessment.value.financing).toBe(209572.08);
-      expect(assessment.value.subsidy).toBe(3357.01);
+      expect(assessment.value.subsidy).toBe(2099);
       expect(assessment.value.commercialFunding).toEqual({
         baseValue: 261965.1,
         rate: 5.5,
@@ -84,7 +84,7 @@ describe("CAIXA credit and ranking belong to the unit being assessed", () => {
     );
     expect(assessment.value.details!.approvalRows).toHaveLength(3);
     const commitment = assessment.value.details!.approvalRows[1]!;
-    expect(commitment.linear).toBeCloseTo(0.1340315844, 9);
+    expect(commitment.linear).toBeCloseTo(0.1391862277, 9);
     expect(commitment.decreasing).toBeLessThan(0.1983);
     expect(assessment.value.installments).toBe(84);
   });
@@ -104,16 +104,15 @@ describe("CAIXA credit and ranking belong to the unit being assessed", () => {
     expect(assess(profile, { ...unit, finalPrice: 300000 }).assessment.status).toBe("rejected");
   });
 
-  it("offers the optimized 260000 unit in both flows without loosening the ranking", () => {
+  it("keeps the optimized 260000 unit available in Linear without loosening the ranking", () => {
     const { assessment } = assess(profile, { ...unit, finalPrice: 260000 });
     expect(assessment.status).toBe("approved");
     if (assessment.status !== "approved") return;
     expect(assessment.value.financing).toBe(209572.08);
-    expect(
-      assessment.value.details!.approvalRows.every(
-        (row) => row.linear <= row.limit && row.decreasing <= row.limit,
-      ),
-    ).toBe(true);
+    const rows = assessment.value.details!.approvalRows;
+    expect(rows.every((row) => row.linear <= row.limit)).toBe(true);
+    expect(rows.some((row) => row.decreasing > row.limit)).toBe(true);
+    expect(rows[1]!.limit).toBe(0.2);
   });
 
   it("keeps a fully covered purchase available without inventing commercial monthly or annual debts", () => {
@@ -121,9 +120,9 @@ describe("CAIXA credit and ranking belong to the unit being assessed", () => {
     expect(assessment.status).toBe("approved");
     if (assessment.status !== "approved") return;
     expect(assessment.value).toMatchObject({
-      financing: 205432.99,
+      financing: 206691,
       entry: 45000,
-      subsidy: 3357.01,
+      subsidy: 2099,
       settled: true,
       installments: 0,
       annuals: [],
