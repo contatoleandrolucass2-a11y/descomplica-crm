@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-11-05 — CAIXA publicada e validada: unidades na página
+
+- PR495 integrado em b1544dd13aacb12690fa75e60e43e9881e1627ff; árvore idêntica
+  ao candidato aprovado50993c01. CI PR41976197227 e main41981829345 com
+  validate, release-gates, isolated-restore e promotable-image aprovados.
+- Artefato13393699737, ZIP6c558f507788344e9cbeb0169f3e03b6f279645692de30d06b70f2e9e243478a;
+  checksum, manifesto/configuração,14camadas linux/amd64 e dois perfis de runtime
+  conferidos. Imagem local7f4ad9a8e701be07dcb9256296833aed910c1ded609f23f72cfce77a11a0d482.
+- Backup privado env/ledger comparado e imagem anterior preservada. Janela
+  concorrente liberada pelo responsável antes da troca, preservando sua prova.
+  Coordenador único publicou07:47:19.438UTC (04:47:19America/Sao_Paulo),
+  deploymentf834574b-d487-49fd-b7f8-b145be55fd4a, sem pendência.
+- Health público200/ok na versão b1544dd1 e acesso anônimo307/login.
+  Chrome autenticado1280/390: expansão inline sem diálogo,1516unidades
+  aprovadas de3494, descrição, fluxo84mensais, aprovação, documentação e6ações.
+  Desconto fictício10000: compra247790→237790 e financiamento198232→190232
+  (80%); sem autorização, aprovação/cronograma/proposta pronta bloqueados;
+  zerar desconto restaura o fluxo. Cenário4k/275k/50m²/1proponente sem dependentes
+  e sem36mesesFGTS calculou subsídio1091,41 automaticamente.
+- Formulário com19campos em duas linhas no desktop, borda integral e sem
+  overflow no celular. Capturas locais de viewport registradas; captura full-page
+  excedeu o timeout, sem afetar o smoke. Perfil limpo e viewport restaurado.
+  Nenhuma proposta salva/enviada, impressão física ou alteração em outra página.
+- Encerramento documental e sincronização Obsidian; não requer novo runtime.
+
 ## 2026-11-04 — CAIXA: unidades na página e campos com borda completa
 
 - Substitui o modal de unidades pela expansão abaixo do resultado bancário,
