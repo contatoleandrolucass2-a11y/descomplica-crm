@@ -60,7 +60,7 @@ test(
           function Content() {
             const sidebar = useDashboardSidebar();
             useEffect(() => { sidebar?.setUpdatedAt("31/10/26, 07:33"); }, [sidebar]);
-            return <main data-test-content tabIndex={-1} style={{minWidth:0}}><h1>Conteúdo sintético</h1><p>Dashboard autorizado</p><div data-test-grid style={{display:"flex",flexWrap:"wrap",gap:12,minWidth:0}}>{Array.from({length:4}, (_,index) => <article key={index} data-test-card={index} data-saved-width="320" data-saved-height="120" style={{flex:"0 0 auto",width:320,maxWidth:"100%",height:120,boxSizing:"border-box",border:"1px solid var(--analytics-line)",borderRadius:10,padding:12}}><h2 style={{margin:0,fontSize:18}}>Card sintético {index+1}</h2><p>Tamanho e ordem preservados</p></article>)}</div></main>;
+            return <main data-test-content data-appointments-dashboard tabIndex={-1} style={{minWidth:0}}><h1>Conteúdo sintético</h1><p>Dashboard autorizado</p><div data-test-grid style={{display:"flex",flexWrap:"wrap",gap:12,minWidth:0}}>{Array.from({length:4}, (_,index) => <article key={index} data-test-card={index} data-saved-width="320" data-saved-height="120" style={{flex:"0 0 auto",width:320,maxWidth:"100%",height:120,boxSizing:"border-box",border:"1px solid var(--analytics-line)",borderRadius:10,padding:12}}><h2 style={{margin:0,fontSize:18}}>Card sintético {index+1}</h2><p>Tamanho e ordem preservados</p></article>)}</div></main>;
           }
           createRoot(document.getElementById("root")).render(<><AuthorizedNavigation pages={pages} /><DashboardShell pages={pages}><Content /></DashboardShell></>);
         `;

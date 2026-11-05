@@ -101,11 +101,24 @@ function AppointmentsDashboardShell({
   const [updatedAt, setUpdatedAt] = useState("");
   const productiveTeam = activePageKey === "crm.productive_team";
   const appointments = activePageKey === "crm.stage.appointments";
+  const [appointmentsReady, setAppointmentsReady] = useState(false);
+  const appointmentsComposition = appointments && appointmentsReady;
   const [headerHeight, setHeaderHeight] = useState(58);
   const [appointmentsSidebarHeight, setAppointmentsSidebarHeight] = useState<number | null>(null);
   const contextValue = useMemo(() => ({ setUpdatedAt }), [setUpdatedAt]);
   const shellRef = useRef<HTMLDivElement>(null);
   const [shellSize, setShellSize] = useState({ width: 0, overlay: false });
+
+  useEffect(() => {
+    const shell = shellRef.current;
+    if (!appointments || !shell) return;
+    const update = () =>
+      setAppointmentsReady(Boolean(shell.querySelector("[data-appointments-dashboard]")));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(shell, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [appointments]);
 
   useEffect(() => {
     if (!productiveTeam && !appointments) return;
@@ -170,13 +183,13 @@ function AppointmentsDashboardShell({
       (!collapsed && !shellSize.overlay ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_RAIL_WIDTH),
   );
   const contentScale =
-    appointments && shellSize.width > 0
+    appointmentsComposition && shellSize.width > 0
       ? appointmentsAvailableWidth / APPOINTMENTS_REFERENCE_WIDTH
       : !collapsed && !shellSize.overlay && shellSize.width > 0
         ? Math.max(1, shellSize.width - SIDEBAR_EXPANDED_WIDTH) / baseWidth
         : 1;
   const surfaceStyle = {
-    "--dashboard-layout-width": appointments
+    "--dashboard-layout-width": appointmentsComposition
       ? `${APPOINTMENTS_REFERENCE_WIDTH}px`
       : shellSize.width > 0
         ? `${baseWidth}px`
@@ -184,7 +197,7 @@ function AppointmentsDashboardShell({
     "--dashboard-content-scale": contentScale,
   } as CSSProperties;
   const presentation = useAppointmentsPresentation({
-    enabled: appointments,
+    enabled: appointmentsComposition,
     root: shellRef,
     surfaceScale: contentScale,
   });
@@ -241,7 +254,7 @@ function AppointmentsDashboardShell({
           } as CSSProperties
         }
         data-dashboard-shell
-        data-appointments-composition={appointments ? "true" : undefined}
+        data-appointments-composition={appointmentsComposition ? "true" : undefined}
         data-collapsed={collapsed}
         data-presentation-active={
           appointments && presentation.activeCardId !== null ? "true" : undefined

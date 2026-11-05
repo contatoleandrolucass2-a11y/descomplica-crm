@@ -29,6 +29,10 @@
   layouts existentes não são reescritos por esta apresentação.
 - CI42042131572: 5077 testes aprovados; uma asserção do título antigo foi
   atualizada para a lista sem visita confirmada solicitada nesta demanda.
+- CI42042828495 aprovou código, imagem, restore, autorização e cenários funcionais.
+  A matriz visual divergiu apenas em10 capturas de Agendamentos sem dados.
+  A escala canônica agora exige o dashboard carregado: indisponibilidade mantém
+  texto legível e largura responsiva. Dois testes browser e29unitários passaram.
 - Validações locais por domínio e revisão independente registradas no arquivo
   específico. CI do candidato/main e prova pós-publicação ainda pendentes;
   não confundir preview sintético, implementação, integração e produção.

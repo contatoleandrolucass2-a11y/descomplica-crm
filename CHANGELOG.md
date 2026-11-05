@@ -1,5 +1,8 @@
 # Changelog
 
+- Preserva a leitura do aviso de dados indisponíveis em Agendamentos; a composição
+  proporcional só é aplicada quando os cards estão carregados.
+
 - Ajusta somente Agendamentos: composição proporcional estável por tela/zoom,
   navegação por gráfico centralizado, cards e pop-ups, filtros e tabelas compactos.
   Metas diárias/semanais e por equipe seguem o calendário útil de São Paulo;

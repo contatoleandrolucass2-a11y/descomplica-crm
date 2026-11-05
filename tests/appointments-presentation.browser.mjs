@@ -52,7 +52,7 @@ test(
           cards.push(...[{id:'funnel',metric:'appointments.funnel-comparison',title:'Funil comparativo',width:1205,height:500},{id:'ranking',metric:'ranking.owner',title:'Ranking por responsável',width:396,height:500},{id:'details',metric:'appointments.details',title:'Detalhamento',width:1205,height:484}].map((c,i)=>({...c,type:'bars',period:'month',groupBy:'entity',entityIds:null,layout:{order:i+12,columnSpan:12,width:c.width,height:c.height}})));
           window.__cards=JSON.stringify(cards); window.__commits=[];
           const pages=PAGE_REGISTRY.filter(page=>page.pageKey==='crm.dashboard'||page.parentKey==='crm.dashboard').map(page=>({...page,key:page.pageKey}));
-          function Fixture(){const[modal,setModal]=useState(false);const[layoutCards,setLayoutCards]=useState(cards);return <><header data-protected-topbar style={{height:48,position:'sticky',top:0,zIndex:20,background:'#102d48',color:'white'}}>Cabeçalho</header><DashboardShell pages={pages}><div data-protected-main-content><main><div data-appointments-dashboard><h1>Agendamentos</h1><section data-appointments-canvas><DashboardCanvas cards={layoutCards} layoutPolicy={APPOINTMENTS_CARD_LAYOUT_POLICY} gap={8} compactControls cornerResizeHandle onCommit={(next)=>{window.__commits.push(next);setLayoutCards(next)}} renderCard={card=><div><h2>{card.title}</h2>{card.id==='funnel'?<><input aria-label='Estado do funil' defaultValue='preservado'/><button onClick={()=>setModal(true)}>Abrir resumo</button><button onClick={()=>setLayoutCards(current=>current.map(item=>item.id==='funnel'?{...item,layout:{...item.layout,width:900,height:750}}:item))}>Alterar dimensões do funil</button></>:null}</div>}/></section><footer>Rodapé</footer></div></main></div></DashboardShell>{modal?<DashboardModal portalToBody title='Resumo centralizado' onClose={()=>setModal(false)}><p>Conteúdo sintético</p></DashboardModal>:null}</>}
+          function Fixture(){const[modal,setModal]=useState(false);const[layoutCards,setLayoutCards]=useState(cards);return <><header data-protected-topbar style={{height:48,position:'sticky',top:0,zIndex:20,background:'#102d48',color:'white'}}>Cabeçalho</header><DashboardShell pages={pages}><div data-protected-main-content><main>{window.location.search.includes("unavailable")?<section><h1>Agendamentos</h1><p data-unavailable>Dados indisponíveis. Tente novamente.</p></section>:<div data-appointments-dashboard><h1>Agendamentos</h1><section data-appointments-canvas><DashboardCanvas cards={layoutCards} layoutPolicy={APPOINTMENTS_CARD_LAYOUT_POLICY} gap={8} compactControls cornerResizeHandle onCommit={(next)=>{window.__commits.push(next);setLayoutCards(next)}} renderCard={card=><div><h2>{card.title}</h2>{card.id==='funnel'?<><input aria-label='Estado do funil' defaultValue='preservado'/><button onClick={()=>setModal(true)}>Abrir resumo</button><button onClick={()=>setLayoutCards(current=>current.map(item=>item.id==='funnel'?{...item,layout:{...item.layout,width:900,height:750}}:item))}>Alterar dimensões do funil</button></>:null}</div>}/></section><footer>Rodapé</footer></div>}</main></div></DashboardShell>{modal?<DashboardModal portalToBody title='Resumo centralizado' onClose={()=>setModal(false)}><p>Conteúdo sintético</p></DashboardModal>:null}</>}
           createRoot(document.getElementById('root')).render(<Fixture/>);
         `;
           },
@@ -262,6 +262,30 @@ test(
           [],
           "presentation does not write card geometry",
         );
+      }
+      for (const width of [390, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(
+          "http://appointments-presentation.local.invalid/app/etapas/agendamentos?unavailable=1",
+        );
+        await expect(page.locator("[data-unavailable]")).toBeVisible();
+        await expect(page.locator("[data-dashboard-shell]")).not.toHaveAttribute(
+          "data-appointments-composition",
+          "true",
+        );
+        const unavailable = await page.locator("[data-unavailable]").evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            fontSize: Number.parseFloat(getComputedStyle(element).fontSize),
+            width: rect.width,
+            scale: rect.width / element.offsetWidth,
+          };
+        });
+        assert.ok(
+          unavailable.fontSize >= 14 && Math.abs(unavailable.scale - 1) < 0.01,
+          "unavailable data stays readable without canonical scaling",
+        );
+        assert.ok(unavailable.width < width, "fallback fits the available viewport");
       }
       // Fitting the page must not change the logical dimensions saved by corner resize.
       await page.setViewportSize({ width: 1440, height: 900 });

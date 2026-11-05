@@ -85,3 +85,30 @@ continuam obrigatórias. Mudança opt-in no shell mantém o classificador visual
 conservador; não reduzir seu escopo nem atualizar referências de outras páginas.
 Prova autenticada após publicação deve confirmar apresentação, lista real,
 metas/cores, pop-ups, zoom/viewport e preservação de layouts sem gravação de teste.
+
+## CI do PR502 e aviso de indisponibilidade — 05/11/2026
+
+CI42042131572 encontrou uma asserção do título antigo da lista;5077casos
+passaram. Alinhada a expectativa para Agendamentos sem visita confirmada;
+três casos locais passaram. Novo candidato17e91f87.
+
+CI42042828495 aprovou validate, promotable-image e isolated-restore. Release-gates
+aprovou autorização, migrações/testes do banco e verificações funcionais;
+matriz final falhou somente por pixel_drift em10capturas de Agendamentos.
+Os231quadros de outras páginas permaneceram aprovados; todos os checks de
+rota, temas, teclado, zoom e acessibilidade passaram. Artefato13427211953,
+ZIP SHA2565caf2cafd4e8d1d98c7fa10a9554c658c622ea7871a72fbfca7fb92ddcaf64e0.
+Captura420f6ee0 é o merge sintético, árvore18849aef idêntica ao head17e91f87.
+Fingerprint8d98d83f foi reproduzido integralmente: diff vazio e19artefatos
+untracked de output/playwright/connected-systems, sem edição de código.
+
+Revisão dos originais mostrou que a escala também reduzia o aviso de dados
+indisponíveis, tornando o texto pequeno em celular. Nenhuma referência foi
+adotada. Agora a composição exige data-appointments-dashboard montado; o aviso
+mantém a largura responsiva e a escala original. Observer acompanha chegada
+ou retirada do dashboard sem reescrever perfil. Browser local revalidou cinco
+geometrias, navegação, estado, resize lógico e aviso sem escala em390/1440;
+segundo browser cobriu navegação em três temas/seis larguras. Ambos passaram;
+29testes unitários/SSR passaram. CI completa do novo SHA continua necessária.
+As capturas gerais dessa CI são do estado indisponível, não provam os cards
+com dados; estes têm cobertura sintética dedicada e exigem prova real no site.
