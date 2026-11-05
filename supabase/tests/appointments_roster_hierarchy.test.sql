@@ -82,8 +82,21 @@ $$;
 grant execute on function pg_temp.valid_ingestion_payload(text, text)
 to service_role;
 
-select has_column('public', 'crm_ranking_participants', 'roster_manager_name');
-select has_column('public', 'crm_ranking_participants', 'regional_manager_name');
+-- Source-availability validation precedes legacy replay handling. Keep the
+-- changed replay valid: unavailable goals must contain zero target values.
+create function pg_temp.with_unavailable_goals(p_payload jsonb)
+returns jsonb language sql as $$
+  select jsonb_set(
+    jsonb_set(p_payload, '{dashboard,goalsAvailable}', 'false'::jsonb),
+    '{dashboard,metrics}',
+    (select jsonb_agg(metric || jsonb_build_object(
+      'goalMonth', 0, 'goalWeek', 0, 'goalToday', 0
+    )) from jsonb_array_elements(p_payload#>'{dashboard,metrics}') metric)
+  );
+$$;
+
+select has_column('public', 'crm_ranking_participants', 'roster_manager_name', 'official roster manager column exists');
+select has_column('public', 'crm_ranking_participants', 'regional_manager_name', 'official regional manager column exists');
 select ok(not has_function_privilege('service_role', 'private.ingest_crm_salesforce_snapshot_roster_base(jsonb)', 'execute'), 'preserved primitive is private');
 select ok(not has_function_privilege('anon', 'public.ingest_crm_salesforce_snapshot(jsonb)', 'execute'), 'anonymous callers cannot execute the new wrapper');
 select ok(not has_function_privilege('authenticated', 'public.ingest_crm_salesforce_snapshot(jsonb)', 'execute'), 'browser users cannot execute the new wrapper');
@@ -104,7 +117,7 @@ select is((select manager_name from public.crm_ranking_participants where broker
 select is((select schedule from public.crm_ranking_participants where broker_key = 'ana-silva'), 10::bigint, 'legacy counts are unchanged');
 select is((public.ingest_crm_salesforce_snapshot((select payload from hierarchy_fixture))->>'idempotent'), 'true', 'identical enriched replay remains idempotent');
 select throws_ok($$select public.ingest_crm_salesforce_snapshot(jsonb_set((select payload from hierarchy_fixture), '{ranking,participants,0,regionalManagerName}', '"Regional Replay"'::jsonb))$$, '22023', 'enriched ingestion replay payload mismatch', 'changed regional is rejected on replay');
-select throws_ok($$select public.ingest_crm_salesforce_snapshot(jsonb_set((select payload from hierarchy_fixture), '{dashboard,goalsAvailable}', 'false'::jsonb))$$, '22023', 'enriched ingestion replay payload mismatch', 'full payload hash covers fields removed by the base wrapper');
+select throws_ok($$select public.ingest_crm_salesforce_snapshot(pg_temp.with_unavailable_goals((select payload from hierarchy_fixture)))$$, '22023', 'enriched ingestion replay payload mismatch', 'full payload hash covers fields removed by the base wrapper');
 select ok((select roster_payload_sha256 ~ '^[0-9a-f]{64}$' from public.crm_ingestion_runs where request_key = 'ingest:70000000-0000-4000-8000-000000000001'), 'successful enriched request stores SHA256');
 select is((select regional_manager_name from public.crm_ranking_participants where broker_key = 'ana-silva'), 'Regional A', 'replay cannot rewrite hierarchy');
 select throws_ok($$select public.ingest_crm_salesforce_snapshot(jsonb_set((select payload from hierarchy_fixture), '{ranking,participants,0,rosterManagerName}', 'null'::jsonb))$$, '22023', 'regional manager requires roster manager', 'invalid hierarchy rejected before mutation');
@@ -133,7 +146,7 @@ select is((select count(*) from public.crm_ingestion_runs where request_key = 'i
 drop trigger hierarchy_atomic_fixture on public.crm_ranking_participants;
 select is((public.ingest_crm_salesforce_snapshot(pg_temp.valid_ingestion_payload('70000000-0000-4000-8000-000000000002', '2026-08-04T07:00:00Z'))->>'ok'), 'true', 'legacy payload still succeeds');
 select ok((select roster_manager_name is null and regional_manager_name is null from public.crm_ranking_participants where broker_key = 'ana-silva'), 'legacy payload leaves hierarchy unknown');
-select is((public.ingest_crm_salesforce_snapshot(jsonb_set(pg_temp.valid_ingestion_payload('70000000-0000-4000-8000-000000000002', '2026-08-04T07:00:00Z'), '{dashboard,goalsAvailable}', 'false'::jsonb))->>'idempotent'), 'true', 'legacy replay keeps its request-ID-only contract');
+select is((public.ingest_crm_salesforce_snapshot(pg_temp.with_unavailable_goals(pg_temp.valid_ingestion_payload('70000000-0000-4000-8000-000000000002', '2026-08-04T07:00:00Z')))->>'idempotent'), 'true', 'legacy replay keeps its request-ID-only contract');
 select throws_ok($$select public.ingest_crm_salesforce_snapshot(jsonb_set(
   pg_temp.valid_ingestion_payload('70000000-0000-4000-8000-000000000002', '2026-08-04T07:00:00Z'),
   '{ranking,participants,0,rosterManagerName}', '"Gerente Oficial"'::jsonb))$$,

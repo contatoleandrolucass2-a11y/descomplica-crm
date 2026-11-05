@@ -21,6 +21,9 @@
 - CI42081900887:5079 testes passaram; quatro falhas de inventário causadas pela
   nova migration. Atualizados somente manifesto obrigatório105/pgTAP2476 e
   allowlist de homologação, preservando os gates e o trem Auth/MFA existente.
+- CI42083827635: validate e imagem passaram. Restore isolado encontrou duas
+  assinaturas has_column ambíguas e fixture de replay com disponibilidade/metas
+  incompatíveis. Corrigidos somente os testes, mantendo31asserts, SQL e ACL.
 - Ordem obrigatória: CI, autorização específica da migration, banco compatível,
   aplicação e atualização controlada do coletor, carga reconciliada e prints.
   Rollback conserva colunas e versão compatível; não apagar dados ou locks.

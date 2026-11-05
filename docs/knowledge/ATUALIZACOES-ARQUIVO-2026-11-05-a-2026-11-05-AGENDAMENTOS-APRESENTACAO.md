@@ -198,3 +198,11 @@ Revisão final14f7f2a3: gerente oficial explicitamente null torna roster
 indisponível, sem substituir por gerente de atividade antiga. DTO legado sem
 campo preservado;26 testes do leitor passaram. CIafd0fd14 havia passado validate
 e iniciado3gates isolados; o novo candidato repetirá gates obrigatórios.
+
+CI42083827635/3950800d: validate e promotable-image passaram. Jobisolated-restore
+127447624635 identificou falha de fixture pgTAP: has_column3args interpretava
+schema como tabela; replaylegado goalsAvailablefalse com metasnãozero era
+inválido antes de alcançar replay. Corrigidos4args e payloads de replayválidos
+com metaszero;31asserts preservados, inclusive ACL/hash/rollback. Migration
+permanece byte-idêntica à aprovada. Gates remanescentes desse candidato foram
+cancelados pelo coordenador após falha confirmada, sem cancelar outra entrega.
