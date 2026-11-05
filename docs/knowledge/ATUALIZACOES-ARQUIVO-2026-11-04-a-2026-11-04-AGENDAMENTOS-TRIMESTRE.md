@@ -604,3 +604,14 @@ auto-refresh-chrome-antes.jpg, auto-refresh-integrado-antes.jpg,
 auto-refresh-celular-antes.jpg, auto-refresh-controle-fonte-nova.jpg em
 test-results/appointments-trimestre-live; recibos da origem em
 test-results/collector-auto-refresh-three-views-20261105.ndjson.
+
+Dependência adicional comprovada do listener: o teste isolado
+appointments-initial-detail renderizava a página sem AppRouterContext. Falhou
+com invariant expected app router to be mounted após o componente real passar
+a montar useRouter. O teste recebeu o provider real com router de fixture;
+todas as asserções sobre mês fora da cobertura, detalhe indisponível e ausência
+de zeros fabricados foram preservadas e passaram. Não foi trocado por stub de
+DashboardAutoRefresh, skip ou baseline nova. Os12 testes de dashboard-access
+já possuíam ambiente de roteador e passaram sem mudança. Total local focado:
+74 testes distintos aprovados. Essa é uma dependência da correção, não alteração
+da página Dashboard ou de suas regras de acesso.

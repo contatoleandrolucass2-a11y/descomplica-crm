@@ -19,6 +19,11 @@
   focado, formatação e resources:check aprovados (93rotas/11áreas). Registro da
   nova API incluído. CI do candidato, publicação protegida e repetição da prova
   automática real continuam pendentes; o teste anterior foi falha, não aprovação.
+- Dependência SSR adicional conferida:12 testes de acesso aprovados; o teste
+  de período descoberto passou após receber o AppRouterContext real de fixture,
+  necessário pelo listener novo. A falha anterior foi ausência de provider no
+  teste isolado; todas as asserções de indisponibilidade/contagem preservadas.
+  Total focado:74 testes distintos aprovados, sem repetir os61 já válidos.
 
 ## 2026-11-05 — Recuperação do coletor e aceite final de Agendamentos
 
