@@ -504,7 +504,7 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
   ])("rejects invalid eligibility inputs %j", (input) =>
     expect(calculateHousingSimulation({ ...base, ...input }).ok).toBe(false),
   );
-  it("matches CAIXA calendar-month age limits and clamps excessive terms", () => {
+  it("matches CAIXA completed-age-month limits and clamps excessive terms", () => {
     expect(calculateAge("1990-10-26", "2026-10-25")).toBe(35);
     expect(calculateAge("1990-10-25", "2026-10-25")).toBe(36);
     expect(getMaximumTerm({ birthDate: "1946-04-25", asOf: "2026-10-25" })).toBe(0);

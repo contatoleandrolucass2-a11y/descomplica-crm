@@ -169,11 +169,6 @@ function monthsBetween(start: Date, end: Date) {
     (end.getUTCDate() < start.getUTCDate() ? 1 : 0)
   );
 }
-function calendarMonthsBetween(start: Date, end: Date) {
-  return (
-    (end.getUTCFullYear() - start.getUTCFullYear()) * 12 + end.getUTCMonth() - start.getUTCMonth()
-  );
-}
 export function calculateAge(birthDate: string, asOf?: string | Date): number {
   const birth = dateOnly(birthDate),
     reference = referenceDate(asOf);
@@ -204,16 +199,11 @@ export function getMaximumTerm({
     inConstruction && Number.isInteger(constructionMonths) && constructionMonths > 0
       ? constructionMonths
       : 0;
-  const expiry = new Date(Date.UTC(birth.getUTCFullYear() + 80, birth.getUTCMonth() + 6, 1));
-  const expiryDay = Math.min(
-    birth.getUTCDate(),
-    new Date(Date.UTC(expiry.getUTCFullYear(), expiry.getUTCMonth() + 1, 0)).getUTCDate(),
-  );
-  expiry.setUTCDate(expiryDay);
-  // A calculadora pública CAIXA v1.16.0.2 arredonda o prazo pelo mês de vencimento.
+  // Public CAIXA v1.16.0.2: 80 years and 6 months minus completed age months.
+  // Verified in the public UI on 2026-11-05 (birth 1956-03-15: 119 months).
   return Math.max(
     0,
-    Math.min(productLimit, calendarMonthsBetween(reference, expiry) - buildingPeriod),
+    Math.min(productLimit, 966 - monthsBetween(birth, reference) - buildingPeriod),
   );
 }
 export function getMcmvBand(income: number) {

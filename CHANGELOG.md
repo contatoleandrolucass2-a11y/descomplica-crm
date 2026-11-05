@@ -1,5 +1,13 @@
 # Changelog
 
+- Reorganiza somente o formulário CAIXA em grupos legíveis, com resultado abaixo
+  da primeira tela desktop. Compacta estoque/proposta, restaura efeitos, permite
+  selecionar qualquer célula e atualiza contagens dos filtros. Anuais aplicadas
+  ficam visíveis; auditoria comercial deixa a linha de financiamento.
+- Corrige prazo CAIXA pelo mês completo de idade: caso oficial de 15/03/1956
+  passa de 118 para 119 meses em 05/11/2026. Confere 24 fronteiras públicas e
+  326.592 combinações internas, preservando subsídio, cotas e ranking por fluxo.
+
 - Publica e valida o cálculo comercial CAIXA em `e407ecd9`, após os quatro gates
   obrigatórios. No perfil de renda R$ 4.000 e ranking Ouro, foram observadas
   383 opções no estoque atualizado; base, crédito, subsídio e anuais conferidos

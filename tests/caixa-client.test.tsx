@@ -242,7 +242,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(page.locator(".caixa-city-picker.open")).toBeVisible();
       await page.getByRole("option", { name: "São Paulo SP", exact: true }).click();
     }
-    it("keeps all nineteen subsidy controls compact in two rows with visible choice borders", async () => {
+    it("keeps all nineteen controls legible in a complete desktop input screen", async () => {
       await open();
       await fillMain();
       await page.getByLabel("Renda familiar bruta", { exact: false }).fill("400000");
@@ -323,7 +323,19 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           );
           const context = `${width}/${expanded}`;
           expect(layout.fields, `${context}: includes the three subsidy fields`).toHaveLength(19);
-          expect(layout.rows, `${context}: all controls use exactly two rows`).toBe(2);
+          expect(layout.rows, `${context}: four readable groups of controls`).toBe(4);
+          const screen = await page.evaluate(() => ({
+            lastField: Math.max(
+              ...[...document.querySelectorAll(".caixa-full-form .caixa-field")].map(
+                (el) => el.getBoundingClientRect().bottom,
+              ),
+            ),
+            resultTop: document.querySelector("#caixa-simulation-result")!.getBoundingClientRect()
+              .top,
+            height: innerHeight,
+          }));
+          expect(screen.lastField).toBeLessThan(screen.height);
+          expect(screen.resultTop).toBeGreaterThanOrEqual(screen.height - 5);
           expect(layout.overflow, `${context}: no horizontal overflow`).toBe(false);
           expect(
             layout.parametersAfterTools,
@@ -338,7 +350,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
               field.contained,
               `${context}: label, answer and context inside ${field.label}`,
             ).toBe(true);
-            expect(field.height, `${context}: compact ${field.label}`).toBeLessThanOrEqual(32.5);
+            expect(field.height, `${context}: compact ${field.label}`).toBeLessThanOrEqual(36.5);
             expect(field.height, `${context}: readable ${field.label}`).toBeGreaterThanOrEqual(
               29.5,
             );
@@ -355,7 +367,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             );
             expect(button.borderStyle).toBe("solid");
             expect(button.borderColor).not.toBe("rgba(0, 0, 0, 0)");
-            expect(button.height, `${context}: compact choices`).toBeLessThanOrEqual(32.5);
+            expect(button.height, `${context}: compact choices`).toBeLessThanOrEqual(36.5);
           }
         }
       }
@@ -616,7 +628,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           for (const group of groups) {
             expect(group.border).toBeGreaterThan(0);
             expect(group.wrap, `${width}/${theme}: ${group.label}`).toBe("normal");
-            expect(group.font).toBe("11px");
+            expect(parseFloat(group.font)).toBeGreaterThanOrEqual(11);
             expect(group.letterSpacing).toBe("1px");
             expect(group.contained, `${width}/${theme}: full label ${group.label}`).toBe(true);
             expect(group.controlsInside, `${width}/${theme}: controls ${group.label}`).toBe(true);
@@ -629,7 +641,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       }
       expect(errors).toEqual([]);
     });
-    it("fits maximum currency values and compact controls in two desktop rows", async () => {
+    it("fits maximum currency values in readable desktop groups", async () => {
       await open();
       await fillMain();
       const directory = resolve("private-data/caixa-qa");
@@ -698,12 +710,14 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             resolve(directory, `caixa-two-rows-${width}-${expanded}.json`),
             JSON.stringify(layout, null, 2),
           );
-          expect(layout.rows, `${width}/${expanded}: main controls use two rows`).toBe(2);
+          expect(layout.rows, `${width}/${expanded}: main controls use three readable rows`).toBe(
+            3,
+          );
           expect(layout.overflow).toBe(false);
           expect(layout.participantsWidth).toBeLessThanOrEqual(64);
           for (const value of layout.currency) expect(value.text).toBeLessThanOrEqual(value.space);
           for (const buttonWidth of layout.buttonWidths)
-            expect(buttonWidth).toBeLessThanOrEqual(56);
+            expect(buttonWidth).toBeLessThanOrEqual(64);
         }
       }
     });
@@ -1256,7 +1270,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
               48,
             );
           }
-          if (width >= 1024) {
+          if (width >= 1100) {
             const rows = await page
               .locator(
                 ".caixa-binary-grid > .caixa-field, .caixa-property-condition-group > .caixa-field",

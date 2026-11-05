@@ -217,20 +217,34 @@ export function CaixaAvailableUnits({
     );
     return assessed.status === "approved" ? assessed.value : null;
   }, [selectedPreview, input, result, ranking, today, firstProperty]);
-  const optionValues = (field: "businessUnit" | "project" | "plant" | "region" | "price") =>
+  type Facet = "businessUnit" | "project" | "plant" | "region" | "price";
+  const facetValue = (item: CaixaAvailableUnit, field: Facet) =>
+    field === "region"
+      ? item.region
+      : field === "price"
+        ? String(item.price)
+        : (item.unit[field] ?? "");
+  const facetItems = (field: Facet) =>
+    items.filter(
+      (item) =>
+        (["businessUnit", "project", "plant", "region", "price"] as const).every(
+          (other) =>
+            other === field || !filters[other] || facetValue(item, other) === filters[other],
+        ) &&
+        (!filters.query ||
+          normalize(
+            `${item.unit.product} ${item.unit.identifier ?? ""} ${item.unit.project}`,
+          ).includes(normalize(filters.query))),
+    );
+  const optionValues = (field: Facet) =>
     [
       ...new Set(
-        items
-          .map((item) =>
-            field === "region"
-              ? item.region
-              : field === "price"
-                ? String(item.price)
-                : (item.unit[field] ?? ""),
-          )
+        facetItems(field)
+          .map((item) => facetValue(item, field))
           .filter(Boolean),
       ),
     ].sort((a, b) => (field === "price" ? Number(a) - Number(b) : a.localeCompare(b, "pt-BR")));
+  const selectUnit = (id: string) => setSelectedId((previous) => (previous === id ? "" : id));
 
   if (!open) return null;
   return (
@@ -388,7 +402,7 @@ export function CaixaAvailableUnits({
                         {field === "businessUnit" || field === "region" || field === "plant"
                           ? "Todas"
                           : "Todos"}{" "}
-                        ({items.length.toLocaleString("pt-BR")})
+                        ({facetItems(field).length.toLocaleString("pt-BR")})
                       </option>
                       {optionValues(field).map((value) => (
                         <option key={value} value={value}>
@@ -415,7 +429,7 @@ export function CaixaAvailableUnits({
                 <div className={styles.tableScroll}>
                   <table>
                     <caption className={styles.srOnly}>
-                      Unidades aprovadas nos fluxos Linear e Decrescente para o ranking selecionado
+                      Unidades aprovadas em pelo menos um fluxo: Linear ou Decrescente
                     </caption>
                     <thead>
                       <tr>
@@ -437,18 +451,29 @@ export function CaixaAvailableUnits({
                       {visible.map((item) => (
                         <tr
                           key={item.unit.id}
-                          className={selectedId === item.unit.id ? styles.selectedRow : undefined}
+                          className={`${styles.selectableRow} ${selectedId === item.unit.id ? styles.selectedRow : ""}`}
+                          tabIndex={0}
+                          aria-selected={selectedId === item.unit.id}
+                          onClick={() => selectUnit(item.unit.id)}
+                          onKeyDown={(event) => {
+                            if (
+                              event.target === event.currentTarget &&
+                              (event.key === "Enter" || event.key === " ")
+                            ) {
+                              event.preventDefault();
+                              selectUnit(item.unit.id);
+                            }
+                          }}
                         >
                           <td>
                             <button
                               type="button"
                               aria-label={`Exibir fluxo de ${item.unit.product}`}
                               aria-expanded={selectedId === item.unit.id}
-                              onClick={() =>
-                                setSelectedId((previous) =>
-                                  previous === item.unit.id ? "" : item.unit.id,
-                                )
-                              }
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                selectUnit(item.unit.id);
+                              }}
                             >
                               ›
                             </button>

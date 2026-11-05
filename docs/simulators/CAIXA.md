@@ -1,5 +1,15 @@
 # Simulação CAIXA: referência, matemática e limites
 
+## Revisão de 05/11/2026: fronteiras e prazo
+
+O prazo agora usa idade em meses completos, conforme a calculadora pública,
+preservando o desconto do período de obra. O caso nascimento15/03/1956,
+referência05/11/2026, passa de118 para119meses. Comparações públicas, matriz
+interna e limites da comprovação estão no [relatório de fronteiras](CAIXA-FRONTEIRAS-2026-11-05.md).
+Anuais calculadas aparecem automaticamente na composição; a auditoria comercial
+fica recolhida fora da linha de financiamento. Aprovação continua por um dos
+fluxos válidos, sem flexibilizar o ranking ou declarar aprovação bancária.
+
 ## Revisão de 04/11/2026: perfil e comparação pública separados
 
 O resumo calcula o perfil informado, com tabela municipal, cotista, composição
@@ -299,8 +309,8 @@ tarifa) / fator financeiro`. Quando a estimativa rápida está ativa e o MIP dep
   linha da Faixa 3: 8,16% nominal, ou 7,66% para cotista elegível. Acima de
   R$ 400 mil e até R$ 600 mil, aplica-se Classe Média a 10% nominal. O resultado
   identifica expressamente quando a taxa foi elevada pelo valor do imóvel.
-- O prazo máximo é o menor entre 420 meses e o intervalo, em meses-calendário,
-  até o proponente mais velho completar 80 anos e 6 meses, menos a obra somente
+- O prazo máximo é o menor entre 420 meses e `966 − idade em meses completos`
+  do proponente mais velho, menos a obra somente
   quando seu prazo foi informado. Prazo solicitado acima do máximo é reduzido e
   avisado, como na calculadora pública; limite igual a zero continua inválido.
 - Entrada adicional: `max(0, imóvel − financiamento − recursos − FGTS − desconto

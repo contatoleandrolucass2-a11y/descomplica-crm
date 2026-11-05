@@ -100,6 +100,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       mcmvPrice = 0,
       mcmvAppraisal = mcmvPrice,
       ownFunds = 0,
+      multipleUnits = false,
     }: {
       failure?: boolean;
       width?: number;
@@ -109,6 +110,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       mcmvPrice?: number;
       mcmvAppraisal?: number;
       ownFunds?: number;
+      multipleUnits?: boolean;
     } = {}) {
       const context = await browser.newContext({ viewport: { width, height: 900 } });
       page = await context.newPage();
@@ -150,8 +152,19 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           return route.fulfill({
             contentType: "application/json",
             body: JSON.stringify({
-              count: 1,
-              items: [withoutGross ? fallbackUnit : fixtureUnit],
+              count: multipleUnits ? 2 : 1,
+              items: multipleUnits
+                ? [
+                    fixtureUnit,
+                    {
+                      ...fixtureUnit,
+                      id: "synthetic-caixa-2",
+                      businessUnit: "Construtora B",
+                      project: "Projeto B",
+                      product: "Apartamento segundo",
+                    },
+                  ]
+                : [withoutGross ? fallbackUnit : fixtureUnit],
               generatedAt: "2026-11-04T15:00:00Z",
             }),
           });
@@ -221,6 +234,33 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(
         page.getByRole("button", { name: "Unidades disponíveis", exact: true }),
       ).toBeFocused();
+      expect(errors).toEqual([]);
+    });
+    it("selects the entire row by mouse or keyboard and updates contextual filter totals", async () => {
+      const { errors } = await open({ multipleUnits: true });
+      await page.getByLabel("Ranking do cliente", { exact: true }).selectOption("diamond");
+      await browserExpect(page.getByRole("status")).toContainText("2 unidades dentro do ranking");
+      const stock = page.getByRole("region", { name: "Estoque SPC", exact: true });
+      await stock.getByRole("cell", { name: "Apartamento segundo", exact: true }).click();
+      const row = stock.getByRole("row").filter({ hasText: "Apartamento segundo" });
+      await browserExpect(row).toHaveAttribute("aria-selected", "true");
+      await row.focus();
+      await page.keyboard.press("Space");
+      await browserExpect(row).toHaveAttribute("aria-selected", "false");
+      await page.keyboard.press("Enter");
+      await browserExpect(row).toHaveAttribute("aria-selected", "true");
+      await stock.getByLabel("Incorporadora", { exact: true }).selectOption("Construtora B");
+      await browserExpect(stock.getByRole("status")).toContainText("1 unidade dentro do ranking");
+      await browserExpect(
+        stock.getByLabel("Nome do Empreendimento", { exact: true }),
+      ).toContainText("Todos (1)");
+      await browserExpect(
+        stock.getByLabel("Nome do Empreendimento", { exact: true }),
+      ).not.toContainText("Projeto fictício");
+      await stock.getByLabel("Buscar unidade", { exact: true }).fill("inexistente");
+      await browserExpect(
+        stock.getByLabel("Nome do Empreendimento", { exact: true }),
+      ).toContainText("Todos (0)");
       expect(errors).toEqual([]);
     });
     it("recovers from live inventory failure without snapshot availability, and fits mobile", async () => {
@@ -546,8 +586,10 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(ledger).toContainText("209.572,08");
       await browserExpect(ledger).toContainText("253.790,00");
       await browserExpect(ledger).toContainText("261.965,10");
-      await browserExpect(ledger).toContainText("Cenário comercial");
-      await page.getByRole("button", { name: "Inserir Anual", exact: true }).click();
+      await browserExpect(ledger.getByText(/Cenário comercial/)).not.toBeVisible();
+      await browserExpect(ledger.getByRole("row", { name: /^Financiamento/ })).not.toContainText(
+        "Cenário comercial",
+      );
       for (let index = 1; index <= 4; index++)
         await browserExpect(
           page.getByRole("spinbutton", { name: `Valor da anual ${index}`, exact: true }),
@@ -621,7 +663,15 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           .getByRole("button", { name: "Exibir fluxo de Apartamento teste", exact: true })
           .evaluate((el) => el.closest("tr")!.getBoundingClientRect().height);
         expect(filterHeight).toBe(36);
-        expect(rowHeight).toBeLessThanOrEqual(40);
+        expect(rowHeight).toBeLessThanOrEqual(28);
+        const selectedRow = page
+          .getByRole("region", { name: "Estoque SPC", exact: true })
+          .locator('tr[aria-selected="true"]');
+        expect(await selectedRow.evaluate((el) => getComputedStyle(el).animationName)).not.toBe(
+          "none",
+        );
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        expect(await selectedRow.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
         await page
           .locator("#caixa-available-units")
           .screenshot({ path: resolve(`private-data/caixa-inline-review/units-${width}.png`) });

@@ -626,16 +626,6 @@ export function CaixaUnitProposal({
                         <th aria-label={label}>
                           {label}
                           {label === "Entrada" && <small>{date(baseDate)}</small>}
-                          {label === "Financiamento" && quoteReady && funding.commercialFunding && (
-                            <small>
-                              Cenário comercial · base{" "}
-                              {money.format(funding.commercialFunding.baseValue)}
-                              {" · "}cota {percent.format(funding.commercialFunding.financingQuota)}
-                              {" · "}juros {percent.format(funding.commercialFunding.rate / 100)}{" "}
-                              a.a.
-                              {" · "}sujeito à aprovação bancária.
-                            </small>
-                          )}
                         </th>
                         <td className={styles.operator}>{operator}</td>
                         <td className={styles.currency}>{quoteReady ? "R$" : ""}</td>
@@ -667,28 +657,30 @@ export function CaixaUnitProposal({
                         </td>
                       </tr>
                     ))}
-                    {showAnnuals &&
-                      canonical.custom.intermediaries.map((annual, index) => (
-                        <tr key={`annual-${index}`}>
-                          <th>
-                            Anual {index + 1}
-                            <small>{date(annual.date)}</small>
-                          </th>
-                          <td>−</td>
-                          <td colSpan={2}>
-                            <Amount
-                              label={`Valor da anual ${index + 1}`}
-                              value={flow.annualValues[index] ?? 0}
-                              onChange={(next) =>
-                                setAnnuals((values) => ({ ...values, [annual.date]: next }))
-                              }
-                            />
-                            {annual.value > 0 && !annual.approved && (
-                              <small className={styles.error}>{annual.reason}</small>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                    {canonical.custom.intermediaries.map(
+                      (annual, index) =>
+                        (showAnnuals || (flow.annualValues[index] ?? 0) > 0) && (
+                          <tr key={`annual-${index}`}>
+                            <th>
+                              Anual {index + 1}
+                              <small>{date(annual.date)}</small>
+                            </th>
+                            <td>−</td>
+                            <td colSpan={2}>
+                              <Amount
+                                label={`Valor da anual ${index + 1}`}
+                                value={flow.annualValues[index] ?? 0}
+                                onChange={(next) =>
+                                  setAnnuals((values) => ({ ...values, [annual.date]: next }))
+                                }
+                              />
+                              {annual.value > 0 && !annual.approved && (
+                                <small className={styles.error}>{annual.reason}</small>
+                              )}
+                            </td>
+                          </tr>
+                        ),
+                    )}
                     {showDiscount && (
                       <tr>
                         <th>
@@ -735,6 +727,17 @@ export function CaixaUnitProposal({
                     </tr>
                   </tbody>
                 </table>
+                {quoteReady && funding.commercialFunding && (
+                  <details className={styles.commercialAudit}>
+                    <summary>Auditoria do financiamento</summary>
+                    <p>
+                      Cenário comercial · base {money.format(funding.commercialFunding.baseValue)} ·
+                      cota {percent.format(funding.commercialFunding.financingQuota)} · juros{" "}
+                      {percent.format(funding.commercialFunding.rate / 100)} a.a. · sujeito à
+                      aprovação bancária.
+                    </p>
+                  </details>
+                )}
               </section>
               <div className={styles.approvalColumn}>
                 <section className={styles.approval} aria-label="Parâmetros de aprovação">
