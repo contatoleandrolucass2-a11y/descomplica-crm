@@ -1,5 +1,7 @@
 # Changelog
 
+- Atualiza somente a referência visual CAIXA 320 px após corrigir contenção dos campos; as outras241 comparações visuais permaneceram aprovadas.
+
 - Atualiza os cenários de navegador CAIXA para o subsídio oficialmente confrontado e o piso de famílias unipessoais.
 
 - Sincroniza tamanhos e hashes das referências visuais CAIXA já revisadas com o catálogo de QA.

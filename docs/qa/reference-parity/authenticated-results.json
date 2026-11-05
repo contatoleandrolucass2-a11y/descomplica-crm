@@ -54600,37 +54600,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 643840,
+        "totalPixels": 753600,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-320x568.webp",
           "tracked": true,
-          "bytes": 31226,
-          "sha256": "5e29e3804e4e74217376b2d358d6d025c22f19c7ab8aa220758d967d1fddc6e7"
+          "bytes": 32104,
+          "sha256": "1aa9395000a2f67b037097e910ae94dcda6949f8729b87f70bac7e5ca735b09e"
         }
       },
       "path": "target-authenticated/simulacao-caixa-320x568.webp",
-      "bytes": 31226,
-      "sha256": "5e29e3804e4e74217376b2d358d6d025c22f19c7ab8aa220758d967d1fddc6e7",
+      "bytes": 32104,
+      "sha256": "1aa9395000a2f67b037097e910ae94dcda6949f8729b87f70bac7e5ca735b09e",
       "width": 320,
-      "height": 2012,
+      "height": 2355,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 320,
-          "height": 1793
+          "height": 2012
         },
         "actual": {
           "width": 320,
-          "height": 2012
+          "height": 2355
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-320x568.webp",
           "tracked": true,
-          "bytes": 32016,
-          "sha256": "af547eba19896150910ca4947c8d2e75cd3540c569c249b7325bba96d96edb69"
+          "bytes": 31226,
+          "sha256": "5e29e3804e4e74217376b2d358d6d025c22f19c7ab8aa220758d967d1fddc6e7"
         }
       }
     },
@@ -55601,8 +55601,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-320x568.webp",
         "tracked": true,
-        "bytes": 53262,
-        "sha256": "30ee2a08abc4a4867b47b59bb3da60f39742aade100554a32fd11d4a4af63a41"
+        "bytes": 32104,
+        "sha256": "1aa9395000a2f67b037097e910ae94dcda6949f8729b87f70bac7e5ca735b09e"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-375x812.webp",
@@ -56320,7 +56320,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "1e03e20e082481dc12a22c1328add4a84282442cc22886dc50b0ea5ce25f28be"
+    "manifestSha256": "ad86fafd74c58d99cc5c6ed15dabf369511ff936ef13bef817c0994bad8af6ac"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -56934,7 +56934,32 @@
       "limits": "CI42047991941 remains failed. New candidate/main CI required. Baseline320 retained pending corrected CI capture. These records do not claim a new full-system capture.",
       "previousBaselineManifestSha256": "2508d7a6edd6a7f26984747aa75fd57838244a46fd0c9d03e50f006399cc3edb",
       "previousBaselineResultSha256": "dd5b2511231cb0e82b93d2254900b5fb3a816465a9682399ff82ac95e5e58b15"
+    },
+    {
+      "reviewedAt": "2026-11-05T18:00:33.207074Z",
+      "scope": "CAIXA 320px only: one-column narrow-phone form keeps the full date and Sim/Não controls inside outlined fields. Other 241 images unchanged.",
+      "sourceRun": 42067764237,
+      "sourceAttempt": 2,
+      "sourceArtifact": 13439693204,
+      "sourceZipSha256": "4e1dbcf5dba269b6b98b5a6957d1d629f4ae3eff4d50bf8f99452f50d36834cc",
+      "sourceCaptureCommit": "1cc716934fc6b72cd97af0c67fd414f3589e5db5",
+      "sourceHead": "1cc716934fc6b72cd97af0c67fd414f3589e5db5",
+      "sourceCapturedAt": "2026-11-05T17:56:27.659Z",
+      "sourceWorktreeDirtyAtCapture": true,
+      "sourceWorktreeFingerprint": "aab36d8d46f18d1c460898ea9583b65a20e8cd7015d486c7d3ba9dcd8e0d69e1",
+      "candidateOverallPassed": false,
+      "candidateFailure": "Only the expected CAIXA320 dimension change (320x2012 to 320x2355). Other 241 visual comparisons passed. Route, theme, accessibility, canvas, keyboard and zoom checks passed.",
+      "reviewedPaths": [
+        "docs/qa/reference-parity/target-authenticated/simulacao-caixa-320x568.webp"
+      ],
+      "updatedImages": 1,
+      "preservedImages": 241,
+      "method": "Verified artifact-byte copy, CAIXA320 screenshot row and corresponding manifest entry updated.",
+      "manualReview": "Reviewed the complete unmodified capture: full date placeholder and calendar target visible; every Sim/Não pair and label fits its outlined field; no horizontal clipping. Longer vertical flow is intentional for narrow phones.",
+      "limits": "Source CI remains failed until this reviewed reference is committed and final CI passes. No thresholds, workflow or other-page baseline changed.",
+      "previousBaselineManifestSha256": "1e03e20e082481dc12a22c1328add4a84282442cc22886dc50b0ea5ce25f28be",
+      "previousBaselineResultSha256": "a758a2ffd46c079bf0caa14e8c5961f8314946d8924da712b8bd81d34377e56c"
     }
   ],
-  "baselineRevision": 5
+  "baselineRevision": 6
 }

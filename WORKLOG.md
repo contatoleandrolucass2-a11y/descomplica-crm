@@ -1,5 +1,7 @@
 # Worklog
 
+- CI 42067764237 / 1cc71693: testes de código e navegador CAIXA aprovados; fonte ITBI indisponível (HTTP 403) na primeira tentativa, aprovada no reteste. Matriz completa:241 comparações aprovadas; única diferença esperada é CAIXA 320 px, altura de 2012 para 2355 px após correção de campos. Captura revisada e referência atualizada sem mudar outras páginas.
+
 - CI de893450: validação e imagem aprovadas; navegador encontrou duas expectativas de subsídio anteriores à correção (família unipessoal e renda R$4.000). Atualização restrita às fixtures CAIXA, com reteste completo do componente.
 
 - CI d73adc4b: 5.104 testes passaram; o catálogo visual reteve tamanho/hash antigos de capturas CAIXA substituídas. Metadados corrigidos somente para essas imagens; gate preservado.

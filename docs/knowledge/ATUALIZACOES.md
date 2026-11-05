@@ -2,6 +2,7 @@
 
 ## 2026-11-05 — CAIXA: nova revisão de fronteiras e interface
 
+- Reconsulta 05/11 às 17:43 UTC: origin/main e health público HTTP 200/ok em 28b4ac35; publicação concorrente preservada. CAIXA segue na PR #503, ainda não publicada.
 - Abertura: Git comum confirmado, main `5906ca79`, CI42036862400 aprovada;
   health público HTTP200/ok em `e407ecd9`. Fonte Git/GitHub/site em05/11/2026.
 - Pedido restrito à CAIXA: confrontar São Paulo nas fronteiras de renda/imóvel,
