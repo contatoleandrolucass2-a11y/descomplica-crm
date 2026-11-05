@@ -268,12 +268,29 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
                 const control = field.querySelector("input, select, button")!;
                 const bounds = control.getBoundingClientRect();
                 const style = getComputedStyle(control);
+                const group = field.getBoundingClientRect();
+                const contained = [
+                  ...field.querySelectorAll(
+                    ":scope > span, :scope > small, input, select, .caixa-toggle",
+                  ),
+                ].every((element) => {
+                  const rect = element.getBoundingClientRect();
+                  return (
+                    rect.left >= group.left - 0.5 &&
+                    rect.right <= group.right + 0.5 &&
+                    rect.top >= group.top - 0.5 &&
+                    rect.bottom <= group.bottom + 0.5
+                  );
+                });
                 return {
                   label: field.querySelector("span")?.textContent,
                   top: Math.round(field.getBoundingClientRect().top),
                   height: bounds.height / zoom,
+                  groupHeight: group.height / zoom,
                   background: style.backgroundColor,
                   select: control.tagName === "SELECT",
+                  border: parseFloat(getComputedStyle(field).borderTopWidth),
+                  contained,
                 };
               }),
               buttons: [...document.querySelectorAll(".caixa-toggle button")].map((button) => {
@@ -313,6 +330,14 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             `${context}: optional parameters at the page end`,
           ).toBe(true);
           for (const field of layout.fields) {
+            expect(
+              field.border,
+              `${context}: complete group border ${field.label}`,
+            ).toBeGreaterThan(0);
+            expect(
+              field.contained,
+              `${context}: label, answer and context inside ${field.label}`,
+            ).toBe(true);
             expect(field.height, `${context}: compact ${field.label}`).toBeLessThanOrEqual(32.5);
             expect(field.height, `${context}: readable ${field.label}`).toBeGreaterThanOrEqual(
               29.5,
@@ -334,6 +359,27 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           }
         }
       }
+      for (const width of [1280, 1920]) {
+        await resizeViewport(width, 900);
+        await page.getByRole("heading", { name: "Simulador CAIXA", exact: true }).hover();
+        for (const theme of ["light", "balanced", "dark"]) {
+          await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme);
+          await page.screenshot({
+            animations: "disabled",
+            path: resolve(directory, `caixa-grouped-${width}-${theme}.png`),
+          });
+        }
+      }
+      await resizeViewport(390, 844);
+      await page.screenshot({
+        animations: "disabled",
+        path: resolve(directory, "caixa-grouped-390-dark.png"),
+      });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+      await resizeViewport(1440, 900);
+      await page.evaluate(() => (document.documentElement.dataset.theme = "light"));
       await page.getByRole("heading", { name: "Simulador CAIXA", exact: true }).hover();
       await browserExpect(page.locator(".caixa-workspace")).toHaveAttribute(
         "data-sidebar-collapsed",
@@ -370,7 +416,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(result.getByRole("alert")).toHaveCount(0);
       expect(errors).toEqual([]);
     });
-    it("integrates ranked units inside the real financial summary without leaking modal layout", async () => {
+    it("expands ranked units below the financial summary in the page flow", async () => {
       await open();
       await browserExpect(
         page.getByRole("button", { name: "Unidades disponíveis", exact: true }),
@@ -404,33 +450,59 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         }),
       );
       await page.getByRole("button", { name: "Unidades disponíveis", exact: true }).click();
-      const dialog = page.getByRole("dialog", { name: "Unidades disponíveis", exact: true });
-      await browserExpect(dialog).toBeVisible();
+      const region = page.getByRole("region", { name: "Unidades disponíveis", exact: true });
+      await browserExpect(region).toBeVisible();
+      await browserExpect(page.getByRole("dialog")).toHaveCount(0);
+      await browserExpect(
+        page.getByRole("button", { name: "Unidades disponíveis", exact: true }),
+      ).toHaveAttribute("aria-expanded", "true");
+      expect(
+        await region.evaluate(
+          (element) =>
+            !!(
+              document.querySelector("#caixa-simulation-result")!.compareDocumentPosition(element) &
+              Node.DOCUMENT_POSITION_FOLLOWING
+            ),
+        ),
+      ).toBe(true);
+      expect(await region.evaluate((element) => getComputedStyle(element).position)).not.toBe(
+        "fixed",
+      );
       await page.getByLabel("Ranking do cliente", { exact: true }).selectOption("diamond");
       await page.getByLabel("Primeiro imóvel?", { exact: true }).selectOption("yes");
-      await browserExpect(dialog.getByRole("status")).toContainText("1 unidade dentro do ranking");
+      await browserExpect(region).toContainText("1 unidade dentro do ranking");
       await page
         .getByRole("button", { name: "Exibir fluxo de Apartamento integrado", exact: true })
         .click();
-      await dialog.getByText("Exibir 84 parcelas e anuais", { exact: true }).click();
-      const bounds = await dialog.boundingBox();
-      expect(Math.abs(bounds!.x + bounds!.width / 2 - 720)).toBeLessThan(10);
-      expect(Math.abs(bounds!.y + bounds!.height / 2 - 450)).toBeLessThan(10);
+      await region.getByRole("button", { name: "Exibir parcelas", exact: true }).click();
+      await browserExpect(
+        region
+          .getByRole("table", { name: "84 mensais e anuais do fluxo aprovado", exact: true })
+          .locator("tbody tr"),
+      ).toHaveCount(84);
       await page.evaluate(() => (document.documentElement.dataset.theme = "dark"));
-      const audit = await new AxeBuilder({ page }).include("dialog").analyze();
+      const audit = await new AxeBuilder({ page }).include("#caixa-available-units").analyze();
       expect(axeFailureDetails(audit.violations)).toEqual([]);
       await resizeViewport(390, 844);
-      const mobileBounds = await dialog.boundingBox();
+      const mobileBounds = await region.boundingBox();
       expect(mobileBounds!.width).toBeLessThanOrEqual(390);
-      expect(Math.abs(mobileBounds!.x + mobileBounds!.width / 2 - 195)).toBeLessThan(10);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
-      await page.keyboard.press("Escape");
-      await browserExpect(dialog).not.toBeVisible();
+      await page.getByRole("button", { name: "Unidades disponíveis", exact: true }).click();
+      await browserExpect(region).not.toBeVisible();
       await browserExpect(
         page.getByRole("button", { name: "Unidades disponíveis", exact: true }),
       ).toBeFocused();
+      await page.getByRole("button", { name: "Unidades disponíveis", exact: true }).click();
+      await browserExpect(region).toBeVisible();
+      await page.getByLabel("Renda familiar bruta", { exact: false }).fill("");
+      await browserExpect(region).toHaveCount(0);
+      await page.getByLabel("Renda familiar bruta", { exact: false }).fill("600000");
+      await browserExpect(
+        page.getByRole("button", { name: "Unidades disponíveis", exact: true }),
+      ).toHaveAttribute("aria-expanded", "false");
+      await browserExpect(region).toHaveCount(0);
       expect(errors).toEqual([]);
     });
     it("keeps short choice labels unbroken with the protected-shell typography", async () => {

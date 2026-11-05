@@ -1,5 +1,12 @@
 # Changelog
 
+- Exibe unidades disponíveis na própria CAIXA após o clique, com estoque,
+  descrição, fluxo editável e documentação no padrão visual do Associativo.
+- Agrupa legenda, valor e ajuda de cada opção em borda completa, com menos
+  espaços e duas linhas de preenchimento no desktop.
+- Preserva posições anuais por data ao editar a proposta, revalida os dois
+  fluxos e mantém documentação/cronogramas coerentes com os dados informados.
+
 - Publica e valida a entrega CAIXA do PR492 emfa068c43, com CI main verde,
   imagem imutável conferida, cálculo/subsídio/prazo automáticos, unidades por
   ranking e fluxo84mensais/anuais; smoke desktop/mobile e acesso preservados.

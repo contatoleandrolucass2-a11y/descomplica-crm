@@ -1,5 +1,34 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-04 — CAIXA: unidades na página e campos agrupados, abertura
+
+- Retomada em05/11/2026 01:16:46UTC (04/11 local): origin/main e GitHub
+  e594bf70937810162b8f5cc41abdf41f2a44633a; CI push41938824640 concluída
+  com sucesso para documentação. Runtime público fa068c43, HTTP200/ok.
+  Fontes: GitHub branch/main/Actions e /api/health com nonce/no-cache.
+- Pedido atual restrito à CAIXA: substituir o modal Unidades disponíveis por
+  expansão na própria página, reproduzir estoque/descrição/fluxo/resumo dos
+  prints do Associativo e agrupar cada campo com borda completa e menos vazios.
+  Associativo somente referência; preservar motores, taxas, ranking,84mensais,
+  anuais, entrada e autorização existentes. Não alterar outras páginas.
+- Branch codex/caixa-unidades-na-pagina em e594bf70; base limpa. Implementação,
+  evidências de layout, gates e nova publicação ainda pendentes nesta abertura.
+- Implementação local concluída: região inline após resumo, estoque/descrição,
+  fluxo editável e documentação por funções canônicas; formulário em grupos
+  com borda inteira e ajudas curtas. Não alterou motores ou outras páginas.
+- Provas Windows/Node24.19/pnpm11.20: cliente13/13; após último padding,
+  3layouts e1integração de invalidação aprovados. Unidades7/7browser;2cenários
+  afetados por rótulos/logos e1captura final de compactação aprovados.
+  Filtros36px/filaaté40px desktop, controles44px mobile;3regressões puras de
+  anuais aprovadas. TSC/ESLint/diff-check aprovados; capturas sintéticas de
+  formulário em3temas1280/1920 e390dark, e unidades1280/1920light/dark revisadas.
+- QA independente fechou P1 de slots anuais compactados em dezembro e P2 de
+  primeiro imóvel para documentação SBPE/fluxo aprovado visível após invalidação.
+  Helper CAIXA mantém cinco posições por data e sinais aprovados antes das
+  anuais; motores permanecem intactos. Impressão escopada por portal CSSModule,
+  sem escrita remota ou vazamento para outras páginas. CI/publicação pendentes;
+  não reutilizar a versão pública fa068c43 como prova desta nova interface.
+
 ## 2026-11-04 — CAIXA: publicada e validada, unidades por ranking
 
 - PR492 integrado em fa068c439eacdd70f0c6d8cfc9bcba5394e1ef43 após os quatro

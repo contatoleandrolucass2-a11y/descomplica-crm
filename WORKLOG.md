@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-11-04 — CAIXA: unidades na página e campos com borda completa
+
+- Substitui o modal de unidades pela expansão abaixo do resultado bancário,
+  acionada somente pelo botão. Mantém ranking, estoque vivo e aprovação prévia.
+  Reproduz estoque SPC, descrição do imóvel, ledger editável, aprovação/repasse,
+  resumo dos fluxos e documentação com ações locais no padrão do Associativo.
+- Cada opção do formulário reúne legenda, controle e ajuda na mesma borda,
+  sem fundo extra e com menos espaços.19campos em duas linhas desktop; controles
+  de32px e44px no celular. Limpar ou invalidar a renda fecha a expansão.
+- Motores e páginas do Associativo permanecem intactos. Novo adaptador de
+  apresentação CAIXA preserva os cinco slots anuais por data, inclusive zeros,
+  e desconta sinais aprovados antes de preencher anuais. Regressões cobrem
+  dezembro, mudança de elegibilidade e saldo/centavos. Edições comerciais são
+  reavaliadas nos dois fluxos; documentação mantém a indicação de estimativa.
+- QA independente encontrou e fechou o desalinhamento anual, a pergunta de
+  primeiro imóvel no SBPE para documentação e a exibição de fluxo aprovado
+  após invalidação. Sem escrita remota, mudança de permissão ou HTML injetado.
+- Cliente13/13 antes do último padding;3testes de layout e1de invalidação após
+  ajuste aprovados.3regressões puras aprovadas. Capturas sintéticas em três
+  temas,1280/1920 e390px revisadas. CI e publicação pendentes neste registro.
+- Unidades:7/7testes de navegador aprovados;2ações/capturas após ajustes de
+  rótulos/logos e1captura final após compactação aprovadas. Filtros36px e filas
+  até40px no desktop medidos;44px no celular. Tipos, lint dirigido e diff-check
+  aprovados. Captura do formulário em tema balanced corrigida e aprovada1/1.
+
 ## 2026-11-04 — CAIXA: formulário completo e unidades por ranking
 
 - 19 controles, incluindo área/tipo/dependentes, em duas linhas desktop; 32px,

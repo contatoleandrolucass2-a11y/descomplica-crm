@@ -256,7 +256,7 @@ function Field({
 }) {
   return (
     <label className={`caixa-field ${className}`}>
-      <span>{label}</span>
+      <span>{typeof label === "string" ? label.replace(/ \*$/, "\u00a0*") : label}</span>
       {children}
     </label>
   );
@@ -507,6 +507,8 @@ export function CaixaClient({
     "--caixa-content-scale": contentScale,
   } as CSSProperties;
   const [form, setForm] = useState(initialForm);
+  const [unitsOpen, setUnitsOpen] = useState(false);
+  const unitsTrigger = useRef<HTMLButtonElement>(null);
   const [participants, setParticipants] = useState(1);
   const lastProfileSyncSignature = useRef("");
   const [construction, setConstruction] = useState({ months: "36", progress: "0", tr: "0" });
@@ -595,6 +597,7 @@ export function CaixaClient({
     });
   }
   function clear() {
+    setUnitsOpen(false);
     setForm(initialForm);
     setParticipants(1);
     setProfiles([createApplicant(0)]);
@@ -616,6 +619,17 @@ export function CaixaClient({
       complete ? calculateHousingSimulation(housingInput(form, baseDate, participants)) : null,
     [baseDate, complete, form, participants],
   );
+  if (unitsOpen && !result?.ok) setUnitsOpen(false);
+  useEffect(() => {
+    if (!unitsOpen) return;
+    const frame = requestAnimationFrame(() => {
+      document.getElementById("caixa-available-units")?.scrollIntoView({
+        block: "start",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [unitsOpen]);
   const constructionResult = useMemo(
     () =>
       result?.ok
@@ -895,7 +909,7 @@ export function CaixaClient({
                             });
                           }}
                         />
-                        <small>Data do proponente mais velho.</small>
+                        <small>Proponente mais velho.</small>
                       </Field>
                       <CityPicker
                         value={form.city}
@@ -943,9 +957,8 @@ export function CaixaClient({
                             );
                           }}
                         />
-                        <small>
-                          Máximo pela idade:{" "}
-                          {maximumTerm > 0 ? `${maximumTerm} meses` : "não disponível"}.
+                        <small title="Prazo máximo permitido pela idade do proponente mais velho">
+                          Máx.: {maximumTerm > 0 ? `${maximumTerm} meses` : "não disponível"}.
                         </small>
                       </Field>
                       <div className="caixa-field-pair caixa-product-system-field">
@@ -1040,7 +1053,7 @@ export function CaixaClient({
                           </select>
                           <small>
                             {form.inConstruction
-                              ? "Novo para imóvel na planta."
+                              ? "Novo na planta."
                               : "Escolha Novo ou Usado para continuar."}
                           </small>
                         </Field>
@@ -1071,7 +1084,9 @@ export function CaixaClient({
                         value={form.propertyArea}
                         onChange={(event) => update("propertyArea", event.target.value)}
                       />
-                      <small>Área coberta no documento do imóvel.</small>
+                      <small title="Use a área coberta indicada no documento do imóvel">
+                        Área coberta no documento.
+                      </small>
                     </Field>
                     {participants === 1 && (
                       <Field className="caixa-dependents-field" label="Possui dependentes? *">
@@ -1084,7 +1099,9 @@ export function CaixaClient({
                           <option value="yes">Sim</option>
                           <option value="no">Não</option>
                         </select>
-                        <small>Sem dependentes: família unipessoal.</small>
+                        <small title="Sem dependentes, aplica a regra de família unipessoal">
+                          Não: família unipessoal.
+                        </small>
                       </Field>
                     )}
                   </div>
@@ -1107,10 +1124,16 @@ export function CaixaClient({
                     <div className="caixa-result-content caixa-result-summary">
                       <div className="caixa-result-summary-heading">
                         <h2>Resumo financeiro</h2>
-                        <CaixaAvailableUnits
-                          input={housingInput(form, baseDate, participants)}
-                          result={result}
-                        />
+                        <button
+                          ref={unitsTrigger}
+                          type="button"
+                          className="caixa-result-print"
+                          aria-expanded={unitsOpen}
+                          aria-controls={unitsOpen ? "caixa-available-units" : undefined}
+                          onClick={() => setUnitsOpen((previous) => !previous)}
+                        >
+                          Unidades disponíveis
+                        </button>
                         <CaixaInstallments result={result} />
                         <button
                           type="button"
@@ -1368,6 +1391,17 @@ export function CaixaClient({
                     </div>
                   )}
                 </aside>
+              )}
+              {result?.ok && (
+                <CaixaAvailableUnits
+                  input={housingInput(form, baseDate, participants)}
+                  result={result}
+                  open={unitsOpen}
+                  onClose={() => {
+                    setUnitsOpen(false);
+                    unitsTrigger.current?.focus();
+                  }}
+                />
               )}
             </div>
           )}

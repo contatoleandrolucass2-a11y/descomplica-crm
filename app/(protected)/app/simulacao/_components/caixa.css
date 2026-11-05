@@ -5076,3 +5076,103 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
 .goal-page-shell.caixa-page-shell .caixa-result-summary-heading h2 {
   flex: 1 1 180px;
 }
+
+/* Each answer is a single outlined group: label, control and context stay together. */
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(28px, auto) 32px auto;
+  align-content: start;
+  align-self: stretch;
+  min-width: 0;
+  margin: 0;
+  padding: 4px 6px;
+  gap: 2px;
+  border: 1px solid var(--caixa-layout-line);
+  border-radius: 8px;
+  background: transparent;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field:focus-within {
+  border-color: var(--caixa-layout-accent);
+  box-shadow: 0 0 0 1px var(--caixa-layout-accent);
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field > span {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 28px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field > small {
+  margin: 0;
+  padding-top: 1px;
+  font-size: 10px;
+  line-height: 1.25;
+}
+.goal-page-shell.caixa-page-shell
+  .caixa-full-form
+  :is(.caixa-money-input, .caixa-participant-control, .caixa-city-picker, input, select) {
+  border-color: transparent;
+  box-shadow: none;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form :is(input, select) {
+  padding-inline: 3px;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-money-input {
+  padding-inline: 0;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-money-input input {
+  padding-inline: 4px 0;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle {
+  max-width: 100%;
+  gap: 3px;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle button {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  max-width: 56px;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-participant-control {
+  width: min(100%, 48px);
+}
+@media (min-width: 1200px) {
+  .goal-page-shell.caixa-page-shell .caixa-workspace-content .caixa-full-form {
+    gap: 6px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-date-field input {
+    font-size: 12px;
+    padding-inline: 0;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-participants-field > span {
+    font-size: 10px;
+  }
+}
+@media (max-width: 760px) {
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field {
+    grid-template-rows: minmax(24px, auto) 44px auto;
+    padding: 7px;
+    gap: 3px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field > span {
+    min-height: 24px;
+    font-size: 11px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle button {
+    flex-basis: 44px;
+    width: 44px;
+  }
+}
+@media (min-width: 1400px) {
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field > span {
+    font-size: 12px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-participants-field > span {
+    font-size: 11px;
+  }
+}

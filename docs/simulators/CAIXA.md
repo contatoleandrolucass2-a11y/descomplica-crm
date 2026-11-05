@@ -42,7 +42,8 @@ apartamento39m², novo/na planta, cotista e família não unipessoal. Área50m²
 
 ### Unidades disponíveis por ranking
 
-O botão existe apenas no resultado válido. O diálogo solicita ranking antes da
+O botão existe apenas no resultado válido. Após o clique, a página se expande
+para baixo, sem modal, backdrop ou bloqueio do formulário. A área solicita ranking antes da
 consulta; para MCMV, primeiro imóvel é uma qualificação independente e não é
 deduzido de subsídio anterior. Renda/modalidade/recursos permanecem do perfil.
 Usa `/api/inventory` autorizado por `crm.simulators.view`, com recorte de marca
@@ -64,9 +65,22 @@ avaliações Linear/Decrescente precisam aprovar. Isso é enquadramento comercia
 simulado, não concessão bancária. Saldo totalmente quitado não recebe um fluxo
 fictício de84 prestações: a validade continua sendo decidida pelo motor canônico.
 
-A avaliação usa lotes canceláveis; mudança do perfil/ranking ou reabertura do
-diálogo invalida a lista anterior imediatamente. Filtros e detalhes exibem apenas
-unidades já aprovadas. Sem gravação de proposta ou alteração da página Associativo.
+A avaliação usa lotes canceláveis; mudança do perfil/ranking ou reabertura da
+área invalida a lista anterior imediatamente. Filtros e detalhes exibem apenas
+unidades já aprovadas. A lista usa o padrão Estoque SPC do Associativo: cabeçalho
+compacto com pesquisa/atualização, filtros e tabela. A seleção expande abaixo a
+descrição do imóvel, composição da proposta, parâmetros de aprovação, resumo
+das parcelas e documentação. Não substitui a página nem abre um segundo fluxo
+de renda e financiamento. Sem gravação de proposta ou alteração da página Associativo.
+
+O detalhe permite editar sinais, anuais e desconto com revalidação canônica
+dos fluxos Linear e Decrescente. O calendário conserva cinco posições anuais
+por data, incluindo zeros inelegíveis; não compacta a lista de anos. Sinais
+aprovados reduzem o saldo antes do preenchimento automático. Cronograma e
+proposta pronta deixam de ser exibidos como aprovados se a edição invalidar
+o cenário. Documentação usa o adaptador existente e identifica bases fiscais
+a confirmar; primeiro imóvel pode ser informado também no SBPE sem bloquear
+a consulta das unidades desse produto. Impressões e documentos são locais.
 
 Consultas: 25, 26 e 27/10/2026, America/Sao_Paulo. Escopo exclusivo:
 `/app/simulacao/caixa`.
@@ -91,9 +105,10 @@ O motor novo é isolado em `lib/crm/simulators/caixa.ts`. O motor legado órfão
 ## Interface e acesso
 
 Desde 28/10/2026, a página usa a mesma linguagem visual compacta dos simuladores
-Associativo e Tabela Direta e os tokens de Agendamentos. Os campos ficam em grade
-sem cartões de fundo redundantes; limite de parcela e limite aplicável aparecem
-diretamente sob renda e imóvel. Parâmetros e juros de obra ficam recolhidos até
+Associativo e Tabela Direta e os tokens de Agendamentos. Cada campo principal
+agrupa legenda, controle e ajuda em uma borda completa, sem fundo adicional,
+com espaços reduzidos e duas linhas no desktop. Limite de parcela e limite
+aplicável ficam nos grupos de renda e imóvel. Parâmetros e juros de obra ficam recolhidos até
 o usuário solicitar. Os temas claro, médio e escuro compartilham a mesma
 estrutura e mantêm contraste, teclado, zoom e adaptação móvel.
 

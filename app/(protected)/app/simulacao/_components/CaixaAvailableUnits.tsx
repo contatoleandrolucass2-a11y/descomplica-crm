@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { loadInvestorInventory } from "@/lib/archive-investor/load-inventory";
 import {
   CAIXA_UNIT_RANKINGS,
@@ -11,13 +11,9 @@ import {
 } from "@/lib/crm/simulators/caixa-available-units";
 import type { HousingInput, HousingResult } from "@/lib/crm/simulators/caixa";
 import styles from "./CaixaAvailableUnits.module.css";
+import { CaixaUnitProposal } from "./CaixaUnitProposal";
 
 const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
-const percent = new Intl.NumberFormat("pt-BR", {
-  style: "percent",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
 const normalize = (s: string) =>
   s
     .normalize("NFD")
@@ -47,19 +43,27 @@ const EMPTY_UNITS: CaixaAvailableUnit[] = [];
 export function CaixaAvailableUnits({
   input,
   result,
+  open,
+  onClose,
 }: {
+  open: boolean;
+  onClose: () => void;
   input: HousingInput;
   result: Extract<HousingResult, { ok: true }>;
 }) {
-  const [open, setOpen] = useState(false);
   const [ranking, setRanking] = useState("");
   const [firstProperty, setFirstProperty] = useState("");
   const [attempt, setAttempt] = useState(0);
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
   const [filters, setFilters] = useState(initialFilters);
   const [selectedId, setSelectedId] = useState("");
-  const dialog = useRef<HTMLDialogElement>(null);
-  const trigger = useRef<HTMLButtonElement>(null);
+  const [previousOpen, setPreviousOpen] = useState(open);
+  if (previousOpen !== open) {
+    setPreviousOpen(open);
+    setEvaluation(null);
+    setSelectedId("");
+  }
+
   const title = useId();
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
@@ -78,11 +82,6 @@ export function CaixaAvailableUnits({
     attempt,
   });
   const current = evaluation?.key === key ? evaluation : null;
-
-  useEffect(() => {
-    if (open && !dialog.current?.open) dialog.current?.showModal();
-    else if (!open && dialog.current?.open) dialog.current.close();
-  }, [open]);
 
   useEffect(() => {
     if (
@@ -204,7 +203,7 @@ export function CaixaAvailableUnits({
         ),
     [items, filters],
   );
-  const selectedPreview = visible.find((item) => item.unit.id === selectedId);
+  const selectedPreview = items.find((item) => item.unit.id === selectedId);
   const selected = useMemo(() => {
     if (!selectedPreview) return null;
     const assessed = assessCaixaAvailableUnit(
@@ -218,10 +217,6 @@ export function CaixaAvailableUnits({
     );
     return assessed.status === "approved" ? assessed.value : null;
   }, [selectedPreview, input, result, ranking, today, firstProperty]);
-  const close = () => {
-    setOpen(false);
-    trigger.current?.focus();
-  };
   const optionValues = (field: "businessUnit" | "project" | "plant" | "region" | "price") =>
     [
       ...new Set(
@@ -237,117 +232,124 @@ export function CaixaAvailableUnits({
       ),
     ].sort((a, b) => (field === "price" ? Number(a) - Number(b) : a.localeCompare(b, "pt-BR")));
 
+  if (!open) return null;
   return (
-    <>
-      <button
-        ref={trigger}
-        type="button"
-        className="caixa-result-print"
-        onClick={() => {
-          setEvaluation(null);
-          setAttempt((value) => value + 1);
-          setOpen(true);
-        }}
-      >
-        Unidades disponíveis
-      </button>
-      <dialog
-        ref={dialog}
-        className={styles.dialog}
-        aria-labelledby={title}
-        onCancel={close}
-        onClose={close}
-      >
-        <header className={styles.header}>
-          <div>
-            <h2 id={title}>Unidades disponíveis</h2>
-            <p>Seu perfil CAIXA aplicado ao fluxo Associativo.</p>
-          </div>
-          <button type="button" onClick={close}>
-            Fechar
-          </button>
-        </header>
-        <div className={styles.body}>
-          <div className={styles.profile}>
+    <section
+      id="caixa-available-units"
+      className={styles.workspace}
+      aria-label="Unidades disponíveis"
+    >
+      <header className={styles.profileHeader}>
+        <div>
+          <p>Unidades disponíveis</p>
+          <h2 id={title}>Seu perfil aplicado ao estoque</h2>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setEvaluation(null);
+            onClose();
+          }}
+        >
+          Ocultar unidades
+        </button>
+      </header>
+      <div className={styles.body}>
+        <div className={styles.profile}>
+          <label>
+            Ranking do cliente
+            <select
+              aria-label="Ranking do cliente"
+              value={ranking}
+              onChange={(event) => {
+                setRanking(event.target.value);
+                setSelectedId("");
+              }}
+            >
+              <option value="">Selecione…</option>
+              {CAIXA_UNIT_RANKINGS.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          {
             <label>
-              Ranking do cliente
+              Primeiro imóvel?
               <select
-                aria-label="Ranking do cliente"
-                value={ranking}
-                onChange={(event) => {
-                  setRanking(event.target.value);
-                  setSelectedId("");
-                }}
+                aria-label="Primeiro imóvel?"
+                value={firstProperty}
+                onChange={(event) => setFirstProperty(event.target.value)}
               >
                 <option value="">Selecione…</option>
-                {CAIXA_UNIT_RANKINGS.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.label}
-                  </option>
-                ))}
+                <option value="yes">Sim</option>
+                <option value="no">Não</option>
               </select>
             </label>
-            {input.product !== "sbpe" && (
-              <label>
-                Primeiro imóvel?
-                <select
-                  aria-label="Primeiro imóvel?"
-                  value={firstProperty}
-                  onChange={(event) => setFirstProperty(event.target.value)}
-                >
-                  <option value="">Selecione…</option>
-                  <option value="yes">Sim</option>
-                  <option value="no">Não</option>
-                </select>
-              </label>
-            )}
+          }
+          <p>
+            Renda <strong>{money.format(input.income)}</strong> · Entrada{" "}
+            <strong>{money.format(caixaUnitEntry(input.ownFunds))}</strong> · 84 mensais e anuais
+            válidas automáticas.
+          </p>
+        </div>
+        {!input.officialQuickEstimate ? (
+          <p role="status">
+            A comparação de unidades precisa de seguros específicos de cada imóvel ou da estimativa
+            com seguros de referência. Os seguros da proposta atual não são transferidos para outras
+            unidades.
+          </p>
+        ) : !ranking || !firstPropertyReady ? (
+          <p role="status">
+            Informe o ranking{input.product !== "sbpe" ? " e se é o primeiro imóvel" : ""} para
+            conferir as unidades.
+          </p>
+        ) : ranking === "not-eligible" ? (
+          <p role="status">Nenhuma unidade elegível para esta classificação.</p>
+        ) : input.product !== "sbpe" && firstProperty === "no" ? (
+          <p role="status">
+            Confirme o enquadramento do cliente na CAIXA antes de buscar unidades MCMV.
+          </p>
+        ) : !current || current.phase === "loading" ? (
+          <p role="status">
+            Conferindo unidades
+            {current?.total ? `: ${current.checked} de ${current.total}` : " no estoque atualizado"}
+            …
+          </p>
+        ) : current.phase === "error" ? (
+          <div role="alert">
             <p>
-              Renda <strong>{money.format(input.income)}</strong> · Entrada{" "}
-              <strong>{money.format(caixaUnitEntry(input.ownFunds))}</strong> · 84 mensais e anuais
-              válidas automáticas.
+              Não foi possível conferir o estoque atualizado. Nenhuma disponibilidade anterior foi
+              utilizada.
             </p>
+            <button type="button" onClick={() => setAttempt((value) => value + 1)}>
+              Tentar novamente
+            </button>
           </div>
-          {!input.officialQuickEstimate ? (
-            <p role="status">
-              A comparação de unidades precisa de seguros específicos de cada imóvel ou da
-              estimativa com seguros de referência. Os seguros da proposta atual não são
-              transferidos para outras unidades.
-            </p>
-          ) : !ranking || !firstPropertyReady ? (
-            <p role="status">
-              Informe o ranking{input.product !== "sbpe" ? " e se é o primeiro imóvel" : ""} para
-              conferir as unidades.
-            </p>
-          ) : ranking === "not-eligible" ? (
-            <p role="status">Nenhuma unidade elegível para esta classificação.</p>
-          ) : input.product !== "sbpe" && firstProperty === "no" ? (
-            <p role="status">
-              Confirme o enquadramento do cliente na CAIXA antes de buscar unidades MCMV.
-            </p>
-          ) : !current || current.phase === "loading" ? (
-            <p role="status">
-              Conferindo unidades
-              {current?.total
-                ? `: ${current.checked} de ${current.total}`
-                : " no estoque atualizado"}
-              …
-            </p>
-          ) : current.phase === "error" ? (
-            <div role="alert">
-              <p>
-                Não foi possível conferir o estoque atualizado. Nenhuma disponibilidade anterior foi
-                utilizada.
-              </p>
-              <button type="button" onClick={() => setAttempt((value) => value + 1)}>
-                Tentar novamente
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className={styles.filterHeader}>
-                <p role="status">
-                  {visible.length} unidade{visible.length === 1 ? "" : "s"} dentro do ranking
-                </p>
+        ) : (
+          <>
+            <section className={styles.stock} aria-label="Estoque SPC">
+              <div className={styles.stockHeader}>
+                <span className={styles.step}>01</span>
+                <div className={styles.stockTitle}>
+                  <strong>ESTOQUE SPC</strong>
+                  <h3>Escolha a unidade</h3>
+                </div>
+                <div className={styles.sync} role="status">
+                  <strong>
+                    {visible.length.toLocaleString("pt-BR")} unidade
+                    {visible.length === 1 ? "" : "s"} dentro do ranking
+                  </strong>
+                  {current.generatedAt && (
+                    <small>
+                      Atualizado{" "}
+                      {new Date(current.generatedAt).toLocaleString("pt-BR", {
+                        timeZone: "America/Sao_Paulo",
+                      })}
+                    </small>
+                  )}
+                </div>
                 <label className={styles.search}>
                   Buscar unidade
                   <input
@@ -367,7 +369,7 @@ export function CaixaAvailableUnits({
                 {(
                   [
                     ["businessUnit", "Incorporadora"],
-                    ["project", "Empreendimento"],
+                    ["project", "Nome do Empreendimento"],
                     ["region", "Região"],
                     ["plant", "Planta"],
                     ["price", "Valor do imóvel"],
@@ -382,7 +384,12 @@ export function CaixaAvailableUnits({
                         setFilters((previous) => ({ ...previous, [field]: event.target.value }))
                       }
                     >
-                      <option value="">Todos</option>
+                      <option value="">
+                        {field === "businessUnit" || field === "region" || field === "plant"
+                          ? "Todas"
+                          : "Todos"}{" "}
+                        ({items.length.toLocaleString("pt-BR")})
+                      </option>
                       {optionValues(field).map((value) => (
                         <option key={value} value={value}>
                           {field === "price" ? money.format(Number(value)) : value}
@@ -417,14 +424,21 @@ export function CaixaAvailableUnits({
                         <th>Produto</th>
                         <th>Vaga</th>
                         <th>Metragem</th>
-                        <th>Entrega</th>
+                        <th>
+                          Data de término
+                          <br />
+                          da obra
+                        </th>
                         <th>Planta</th>
                         <th>Valor do imóvel</th>
                       </tr>
                     </thead>
                     <tbody>
                       {visible.map((item) => (
-                        <tr key={item.unit.id}>
+                        <tr
+                          key={item.unit.id}
+                          className={selectedId === item.unit.id ? styles.selectedRow : undefined}
+                        >
                           <td>
                             <button
                               type="button"
@@ -440,9 +454,7 @@ export function CaixaAvailableUnits({
                             </button>
                           </td>
                           <td>{item.unit.businessUnit}</td>
-                          <td>
-                            {item.unit.product} · {item.unit.project}
-                          </td>
+                          <td>{item.unit.product}</td>
                           <td>{item.unit.parkingSpaces ?? "—"}</td>
                           <td>{item.unit.privateArea?.toLocaleString("pt-BR")} m²</td>
                           <td>{item.unit.completionDate?.split("-").reverse().join("/")}</td>
@@ -458,164 +470,30 @@ export function CaixaAvailableUnits({
                   Nenhuma unidade atende a este perfil e aos filtros selecionados.
                 </p>
               )}
-              {selected && (
-                <section
-                  className={styles.details}
-                  aria-label={`Fluxo de ${selected.unit.product}`}
-                >
-                  <h3>
-                    {selected.unit.product} · {selected.unit.project}
-                  </h3>
-                  <dl>
-                    <div>
-                      <dt>Valor da venda</dt>
-                      <dd>{money.format(selected.price)}</dd>
-                    </div>
-                    <div>
-                      <dt>Financiamento CAIXA indicativo</dt>
-                      <dd>{money.format(selected.financing)}</dd>
-                    </div>
-                    <div>
-                      <dt>Subsídio calculado da unidade</dt>
-                      <dd>{money.format(selected.subsidy)}</dd>
-                    </div>
-                    <div>
-                      <dt>FGTS</dt>
-                      <dd>{money.format(selected.fgts)}</dd>
-                    </div>
-                    <div>
-                      <dt>Entrada</dt>
-                      <dd>{money.format(selected.entry)}</dd>
-                    </div>
-                    <div>
-                      <dt>84 mensais · maior Linear</dt>
-                      <dd>{money.format(selected.linearPayment)}</dd>
-                    </div>
-                    <div>
-                      <dt>84 mensais · maior Decrescente</dt>
-                      <dd>{money.format(selected.decreasingPayment)}</dd>
-                    </div>
-                  </dl>
-                  <p>
-                    <strong>Dentro do ranking: Linear e Decrescente.</strong>
-                  </p>
-                  {selected.details && (
-                    <>
-                      <h4>Parâmetros de aprovação</h4>
-                      <div
-                        className={styles.tableScroll}
-                        tabIndex={0}
-                        role="region"
-                        aria-label="Parâmetros do ranking"
-                      >
-                        <table>
-                          <caption className={styles.srOnly}>
-                            Resultados dos dois fluxos comparados aos limites do ranking
-                          </caption>
-                          <thead>
-                            <tr>
-                              <th>Regra</th>
-                              <th>Linear</th>
-                              <th>Decrescente</th>
-                              <th>Limite do ranking</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {selected.details.approvalRows.map((row) => (
-                              <tr key={row.label}>
-                                <th>{row.label}</th>
-                                <td>{percent.format(row.linear)}</td>
-                                <td>{percent.format(row.decreasing)}</td>
-                                <td>≤ {percent.format(row.limit)}</td>
-                              </tr>
-                            ))}
-                            <tr>
-                              <th>Status</th>
-                              <td>APROVADO</td>
-                              <td>APROVADO</td>
-                              <td>—</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <details className={styles.schedule}>
-                        <summary>Exibir 84 parcelas e anuais</summary>
-                        <div
-                          className={styles.tableScroll}
-                          tabIndex={0}
-                          role="region"
-                          aria-label="Parcelas do fluxo aprovado"
-                        >
-                          <table aria-label="84 mensais e anuais do fluxo aprovado">
-                            <thead>
-                              <tr>
-                                <th>Parcela</th>
-                                <th>Vencimento</th>
-                                <th>Linear</th>
-                                <th>Decrescente</th>
-                                <th>Evolução de obra</th>
-                                <th>Anual corrigida</th>
-                                <th>Total Linear</th>
-                                <th>Total Decrescente</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {selected.details.schedule
-                                .filter((row) => row.kind !== "entry")
-                                .map((row, index) => (
-                                  <tr
-                                    key={`${row.kind}-${row.paymentDate}-${index}`}
-                                    data-payment-kind={row.kind}
-                                  >
-                                    <th>{row.label}</th>
-                                    <td>{row.paymentDate.split("-").reverse().join("/")}</td>
-                                    <td>{money.format(row.linearPayment)}</td>
-                                    <td>{money.format(row.decreasingPayment)}</td>
-                                    <td>
-                                      {row.workEvolution == null
-                                        ? "—"
-                                        : money.format(row.workEvolution)}
-                                    </td>
-                                    <td>{money.format(row.annualPayment ?? 0)}</td>
-                                    <td>{money.format(row.linearTotal)}</td>
-                                    <td>{money.format(row.decreasingTotal)}</td>
-                                  </tr>
-                                ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </details>
-                    </>
-                  )}
-                  <h4>Anuais automáticas</h4>
-                  {selected.annuals.length ? (
-                    <ul>
-                      {selected.annuals.map((annual) => (
-                        <li key={annual.date}>
-                          {annual.date.split("-").reverse().join("/")} ·{" "}
-                          {money.format(annual.amount)}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>Nenhuma anual válida até a entrega.</p>
-                  )}
-                </section>
-              )}
-              <p className={styles.note}>
-                Aprovação comercial simulada, sujeita à análise bancária. Financiamento e subsídio
-                são recalculados por unidade.{" "}
-                {(input.confirmedPublicContribution ?? 0) > 0 &&
-                  "O aporte confirmado do imóvel anterior não foi transferido. "}
-                {current.unavailable > 0 &&
-                  `${current.unavailable} unidades sem dados suficientes não foram exibidas.`}
-                {current.generatedAt &&
-                  ` Estoque de ${new Date(current.generatedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}.`}
-              </p>
-            </>
-          )}
-        </div>
-      </dialog>
-    </>
+            </section>
+            {selected && (
+              <CaixaUnitProposal
+                key={`${key}-${selected.unit.id}`}
+                selected={selected}
+                input={input}
+                ranking={ranking}
+                firstProperty={firstProperty}
+                baseDate={today}
+              />
+            )}
+            <p className={styles.note}>
+              Aprovação comercial simulada, sujeita à análise bancária. Financiamento e subsídio são
+              recalculados por unidade.{" "}
+              {(input.confirmedPublicContribution ?? 0) > 0 &&
+                "O aporte confirmado do imóvel anterior não foi transferido. "}
+              {current.unavailable > 0 &&
+                `${current.unavailable} unidades sem dados suficientes não foram exibidas.`}
+              {current.generatedAt &&
+                ` Estoque de ${new Date(current.generatedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}.`}
+            </p>
+          </>
+        )}
+      </div>
+    </section>
   );
 }
