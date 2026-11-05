@@ -5143,3 +5143,12 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
 .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-participants-field > span {
   white-space: nowrap;
 }
+
+/* Narrow phones retain complete dates and both choice targets inside each field. */
+@media (max-width: 360px) {
+  .goal-page-shell.caixa-page-shell
+    .caixa-full-form
+    :is(.caixa-primary-grid, .caixa-secondary-grid, .caixa-binary-grid, .caixa-subsidy-inputs) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

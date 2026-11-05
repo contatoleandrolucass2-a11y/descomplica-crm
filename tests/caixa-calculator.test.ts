@@ -309,8 +309,8 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
       singlePersonFamily: false,
     });
     expect(automatic).toMatchObject({
-      amount: 3638.05,
-      incomeFactor: 3038.46,
+      amount: 2274,
+      incomeFactor: 1900,
       regionalFactor: 2.07,
       financingFactor: -7.79,
       housingFactor: 5.5,
@@ -328,12 +328,12 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
         inConstruction: true,
       }),
     ).toMatchObject({
-      subsidy: 3638.05,
+      subsidy: 2274,
       subsidyConfirmed: false,
       subsidyEligibility: "automatic",
     });
   });
-  it("applies used-property and unipersonal reductions after the official ceiling", () => {
+  it("applies the automatic minimum after used-property and unipersonal reductions", () => {
     const profile = {
       income: 4000,
       propertyValue: 275000,
@@ -350,14 +350,14 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
         propertyCondition: "used",
         singlePersonFamily: false,
       })?.amount,
-    ).toBe(1819.02);
+    ).toBe(0);
     expect(
       calculateMcmvSubsidy({
         ...profile,
         propertyCondition: "new",
         singlePersonFamily: true,
       })?.amount,
-    ).toBe(1091.41);
+    ).toBe(0);
   });
   it("keeps public contribution separate and enforces the minimum FGTS complement", () => {
     const subsidyProfile = {
@@ -379,7 +379,7 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
       }).publicContribution,
     ).toBe(30000);
   });
-  it("keeps the lawful reduced subsidy below 1500 in the final financing composition", () => {
+  it("suppresses automatic subsidy below 1500 without overwriting confirmed amounts", () => {
     const result = success({
       income: 4000,
       propertyValue: 275000,
@@ -391,7 +391,7 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
       propertyCondition: "new",
       inConstruction: false,
     });
-    expect(result.subsidy).toBe(1091.41);
+    expect(result.subsidy).toBe(0);
     expect(result.subsidyEligibility).toBe("automatic");
     expect(result.entryNeeded + result.financing + result.subsidy + result.fgts).toBeCloseTo(
       275000,

@@ -300,7 +300,9 @@ export function calculateMcmvSubsidy(
     (2 * maximumDiscount * (minimumDiscount / maximumDiscount - 1)) /
     (minimumDiscountIncome - maximumDiscountIncome);
   const a = -b / (2 * (minimumDiscountIncome - maximumDiscountIncome));
-  const incomeDelta = income - maximumDiscountIncome;
+  // Full CAIXA simulations observed on 2026-11-05 keep Frenda at Dmin above RDmin.
+  // Dfin below must still use the actual income, not this capped formula input.
+  const incomeDelta = Math.min(income, minimumDiscountIncome) - maximumDiscountIncome;
   const incomeFactor = a * incomeDelta ** 2 + b * incomeDelta + maximumDiscount;
 
   const monthlyRate = nominalRate / 1200;
@@ -330,12 +332,13 @@ export function calculateMcmvSubsidy(
     ),
     operationCeiling,
   );
-  // MFOM v034 3.1.1.8 checks the formula minimum before 3.1.2 reducers.
-  // Applying the minimum again afterwards incorrectly erases legal reduced discounts.
-  if (amount < 1500) amount = 0;
   if (input.propertyCondition === "used") amount *= 0.5;
   if (input.singlePersonFamily) amount *= 0.3;
-  amount = cents(amount);
+  // Full CAIXA observations (2026-11-05) suppress the automatic complement
+  // below 1500 after reducers: single-person income 3250 qualifies, 3300 does not.
+  if (amount < 1500) amount = 0;
+  // Full simulator quotes this complement in whole reais, after applicable reducers.
+  amount = Math.floor(amount);
   return {
     amount,
     incomeFactor: cents(incomeFactor),

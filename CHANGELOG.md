@@ -6,7 +6,11 @@
   ficam visíveis; auditoria comercial deixa a linha de financiamento.
 - Corrige prazo CAIXA pelo mês completo de idade: caso oficial de 15/03/1956
   passa de 118 para 119 meses em 05/11/2026. Confere 24 fronteiras públicas e
-  326.592 combinações internas, preservando subsídio, cotas e ranking por fluxo.
+  326.592 combinações internas, preservando cotas e ranking por fluxo.
+- Corrige subsídio CAIXA após confronto autenticado: limita o fator renda em
+  R$3.700, aplica o piso após redutores e trunca o benefício final em reais,
+  preservando renda real no fator
+  de capacidade. Renda R$4.000 não unipessoal passa deR$3.357,01 paraR$2.099.
 
 - Publica e valida o cálculo comercial CAIXA em `e407ecd9`, após os quatro gates
   obrigatórios. No perfil de renda R$ 4.000 e ranking Ouro, foram observadas

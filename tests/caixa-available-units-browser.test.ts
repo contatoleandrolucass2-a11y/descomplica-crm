@@ -539,7 +539,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       expect(errors).toEqual([]);
     });
     it("invalidates a stale Decrescente print when annual edits leave only Linear approved", async () => {
-      const { errors } = await open({ asOf: "2026-11-05", mcmvPrice: 255000 });
+      const { errors } = await open({ asOf: "2026-11-05", mcmvPrice: 249000 });
       await page.getByLabel("Ranking do cliente", { exact: true }).selectOption("gold");
       await page.getByLabel("Primeiro imóvel?", { exact: true }).selectOption("yes");
       await browserExpect(page.getByRole("status")).toContainText("1 unidade dentro do ranking");
@@ -614,7 +614,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         exact: true,
       });
       await browserExpect(proposal).toContainText("Saldo comercial quitado");
-      await browserExpect(proposal).toContainText("205.432,99");
+      await browserExpect(proposal).toContainText("206.691,00");
       await browserExpect(
         page.getByRole("button", { name: "Imprimir linear", exact: true }),
       ).toBeDisabled();

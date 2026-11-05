@@ -540,6 +540,25 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             }),
           );
         expect(choices).toHaveLength(8);
+        if (width === 320) {
+          const date = await page.locator('.caixa-full-form input[type="date"]').boundingBox();
+          expect(date!.width, "complete date including the calendar target").toBeGreaterThan(190);
+          const choicesContained = await page
+            .locator(".caixa-full-form .caixa-toggle button")
+            .evaluateAll((buttons) =>
+              buttons.every((button) => {
+                const control = button.getBoundingClientRect();
+                const field = button.closest(".caixa-field")!.getBoundingClientRect();
+                return control.left >= field.left && control.right <= field.right;
+              }),
+            );
+          expect(choicesContained).toBe(true);
+          await page.screenshot({
+            fullPage: true,
+            animations: "disabled",
+            path: resolve("private-data/caixa-qa/caixa-320-contained.png"),
+          });
+        }
         for (const choice of choices) {
           expect(choice.lines, `${width}: ${choice.text}`).toBe(1);
           expect(choice.whiteSpace).toBe("nowrap");

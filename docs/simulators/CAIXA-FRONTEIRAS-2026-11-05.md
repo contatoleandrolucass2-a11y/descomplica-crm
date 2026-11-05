@@ -22,9 +22,8 @@ versão 1.16.0.2, em 05/11/2026, usando dados fictícios:
 
 O comparador independente reproduz esses resultados. A calculadora rápida não
 coleta município, área, FGTS, dependentes ou composição familiar e não calcula
-subsídio. A simulação completa exige CPF, telefone, verificação SMS e autorização
-de contato. Nenhum telefone/CPF fictício foi submetido para contornar esse fluxo;
-igualdade do subsídio com uma proposta bancária completa não foi demonstrada.
+subsídio. Posteriormente, o coordenador conseguiu consultar a simulação completa
+em sessão autenticada; as amostras e seus limites estão separados abaixo.
 
 Outras **24 capturas reais da interface**, todas com nascimento 22/01/1987 e
 referência 05/11/2026, estão preservadas como fixtures independentes em
@@ -108,14 +107,113 @@ de versão posterior. Seções verificadas:
 
 - §2.2: desconto de equilíbrio relativo a juros, com linhas de renda até R$ 5.000.
 - §3.1.1.1: fator renda com Dmax 50.000, Dmin 1.900, RDmax 1.750 e RDmin 3.700.
-  O texto consultado não manda limitar a renda da parábola a 3.700; não foi
-  introduzido um limitador especulativo para tornar a curva monotônica.
+  O trecho consultado não explicita o limitador superior. A aplicação desse
+  limitador foi comprovada posteriormente por cinco amostras independentes
+  da simulação completa, documentadas abaixo; não é atribuída somente ao PDF.
 - §3.1.1.8: **desconto complemento limitado à renda R$ 4.000** e resultado da
   fórmula a partir de R$ 1.500. Assim, a frase genérica de descontos até R$ 5.000
   no portal MCID não comprova erro no corte de R$ 4.000 do complemento.
 - §3.1.2: redutores posteriores de 70% para família unipessoal e 50% para usado;
   §3.1.2.3: unipessoal é um indivíduo sem dependentes. O código preserva essa
   distinção; dois ou três proponentes não recebem o redutor unipessoal.
+
+### Subsídio: confronto posterior com a simulação completa
+
+Em 05/11/2026, o coordenador observou a interface autenticada
+[Simulador Habitacional CAIXA](https://simuladorhabitacao.caixa.gov.br/simulacao).
+Cenário: São Paulo/SP; imóvel novo de R$ 275.000; nascimento 22/01/1987;
+FGTS por pelo menos três anos; mais de um comprador e/ou dependente; sem
+subsídio anterior; MCMV Recursos FGTS, imóvel vinculado a empreendimento
+financiado pela CAIXA. A interface não solicitou área ou tipo casa/apartamento.
+
+|    Renda |     Subsídio oficial | Financiamento SAC observado |
+| -------: | -------------------: | --------------------------: |
+| R$ 3.700 |             R$ 2.164 |               R$ 147.418,22 |
+| R$ 3.750 |             R$ 2.153 |               R$ 149.528,43 |
+| R$ 3.900 |             R$ 2.119 |               R$ 155.859,08 |
+| R$ 3.999 |             R$ 2.099 |               R$ 160.037,30 |
+| R$ 4.000 |             R$ 2.099 |               R$ 160.079,51 |
+| R$ 4.001 | Sem subsídio exibido |               R$ 143.319,80 |
+
+Prazo de 420 meses, taxa nominal de 5,5% e cota de 80% nessa modalidade
+específica. Para renda de R$ 4.000, a primeira prestação SAC foi R$ 1.200; no
+PRICE, financiamento de R$ 206.357,81 e mesmo subsídio de R$ 2.099. Essas cifras
+de financiamento são evidências observadas, ainda não assertivas de igualdade
+do motor: produto de seguro e demais encargos precisam ser confrontados. A cota
+observada não redefine automaticamente outros produtos. A renda de R$ 4.001 já
+não apresentou subsídio, preservando o corte de elegibilidade do complemento.
+
+O defeito identificado era extrapolar a parábola do Fator Renda além do seu
+mínimo em R$ 3.700, fazendo o fator voltar a crescer até R$ 3.038,46 na renda de
+R$ 4.000. Agora somente a renda aplicada a esse fator é limitada a R$ 3.700,
+mantendo Dmin = R$ 1.900; a renda real permanece no Dfin e altera FDfin. Com
+FUH = 0, os resultados antes do truncamento para as rendas de R$ 3.700, R$ 3.750,
+R$ 3.900 e R$ 4.000 são R$ 2.164,918775, R$ 2.153,482596, R$ 2.119,174060 e
+R$ 2.099,196, respectivamente. O truncamento final em reais reproduz as cinco
+observações com subsídio. Não foi alterada a base VVI de 67,5% do limite
+municipal, nem o teto de renda de R$ 4.000 do complemento.
+
+`tests/caixa-official-complete.test.ts` preserva as cinco amostras com subsídio.
+Área de 32 m² foi usada no contrato local por produzir FUH = 0; a interface
+completa não fornece evidência para provar equivalência nas áreas com FUH
+positivo. A fórmula MFOM por área é preservada, mas sua validade matemática não
+representa confronto oficial de todas as áreas. Tampouco se infere um limitador
+inferior em R$ 1.750: em São Paulo, esses resultados saturam o teto regional e
+não permitem identificar esse efeito.
+
+A confirmação posterior com apenas um comprador sem dependentes trouxe:
+
+|    Renda | Taxa nominal |     Subsídio oficial | Financiamento SAC observado |
+| -------: | -----------: | -------------------: | --------------------------: |
+| R$ 3.200 |        4,75% |             R$ 1.764 |               R$ 138.493,17 |
+| R$ 3.250 |        5,00% |             R$ 1.564 |               R$ 136.423,07 |
+| R$ 3.265 |        5,00% |             R$ 1.502 |               R$ 137.095,55 |
+| R$ 3.266 |        5,00% | Sem subsídio exibido |               R$ 137.140,38 |
+
+A renda de R$ 3.250 distingue a ordem de operações: o resultado antes do redutor
+é R$ 5.213,490297. Reduzir 70% e truncar no final produz R$ 1.564; truncar antes
+do redutor produziria R$ 1.563. A observação confirmou o truncamento final após
+o redutor. Essas duas amostras foram adicionadas às fixtures independentes.
+
+Para renda de R$ 3.300, apenas um comprador sem dependentes, a interface
+completa não apresentou subsídio; financiamento SAC de R$ 138.664,68 e entrada
+de R$ 136.335,32. Com renda de R$ 4.000 e a mesma composição unipessoal, também
+não apresentou subsídio; financiamento de R$ 160.079,51 e entrada de
+R$ 114.920,49. A interpretação anterior aplicava o piso de R$ 1.500 antes dos
+redutores e produziria R$ 1.368 e R$ 629, respectivamente.
+
+A fronteira com diferença de R$ 1 também foi observada: renda de R$ 3.265
+recebeu R$ 1.502; renda de R$ 3.266 não recebeu subsídio, com entrada de
+R$ 137.859,62. O valor matemático reduzido deste último caso seria
+R$ 1.498,692909, abaixo do piso. Essa comparação confirma o corte sem criar um
+limite de renda unipessoal arbitrário.
+
+O comportamento observado comprova que o complemento automático precisa passar
+pelo piso de R$ 1.500 **depois dos redutores**. A implementação foi corrigida
+nesse ponto. A amostra positiva de R$ 3.250 evita confundir esse corte com a
+supressão de qualquer subsídio unipessoal. O MFOM consultado fornece a fórmula,
+o piso e os redutores; a ordem operacional foi confrontada na interface oficial,
+sem atribuir ao texto uma instrução que ele não explicita. Subsídios confirmados
+manualmente permanecem com os centavos informados, sem alteração de contrato.
+
+### Limite da comparação do financiamento: seguros
+
+O financiamento PRICE de R$ 206.357,81 na simulação completa com Seguro
+Habitacional Mais difere dos R$ 209.416,34 da estimativa rápida do perfil. Essa
+diferença, isoladamente, não demonstra erro na fórmula PRICE. O agente de
+pesquisa conferiu as [condições do Seguro Habitacional Mais](https://cdn.caixaseguradora.com.br/AreaAberta/Habitacional/CondicoesGerais/Seguro-Habitacional-Mais.pdf),
+cláusula 14 na página 9, cláusulas 8–9 na página 20 e cláusulas 9–10 na página
+31: os coeficientes dependem da apólice, sem uma tabela universal estabelecida
+nessa fonte. MIP e DFI precisam ser comparados com os mesmos dados de seguro.
+Não foram inferidos novos coeficientes a partir de uma única amostra, nem
+alterados seguros para forçar igualdade entre produtos diferentes.
+
+As expectativas antigas de R$ 3.357,01 (área de 32 m² e taxa de 5,5%) e
+R$ 3.638,05 (área de 50 m² e taxa de 6%) eram produtos da extrapolação incorreta;
+foram substituídas por R$ 2.099 e R$ 2.274. Subsídios confirmados manualmente
+permanecem com os centavos fornecidos. A correção reduz o abatimento e pode
+retirar aprovações que dependiam do subsídio superestimado; nenhum limite do
+ranking foi relaxado para preservar a contagem anterior.
 
 As anuais já eram geradas automaticamente pelo calendário canônico: renda/2,
 limitadas pelo saldo e por datas válidas anteriores à entrega. Com renda R$ 4.000
@@ -134,3 +232,34 @@ adicionadas depois passaram no arquivo público (31 testes aprovados). São
 **105 testes distintos aprovados** no conjunto final. Não foram executadas transações,
 propostas reais, gravações de clientes nem alterações de outros simuladores.
 CI e publicação são verificadas e registradas pelo coordenador no SHA final.
+
+### Revalidação após correção do subsídio
+
+Após limitar o Fator Renda, aplicar o piso após redutores e truncar o resultado
+final, passaram **149 testes em oito arquivos**: `caixa-calculator`,
+`caixa-commercial-funding`, `caixa-available-units`, `caixa-unit-proposal-view`,
+`caixa-boundary-matrix`, `caixa-physical-domain`, `caixa-unit-capacity` e
+`caixa-official-complete`. A execução incluiu novamente as matrizes de 326.592 e
+508.032 cenários, pois a alteração do piso invalidava as evidências anteriores
+para famílias unipessoais. Os casos completos independentes incluídos nessa
+rodada somam 12 testes, entre amostras observadas e invariantes locais.
+
+A correção do subsídio invalidou dois asserts antigos de capacidade, relativos
+ao comprometimento e à aprovação simultânea dos dois fluxos. A unidade de
+R$ 260.000 permanece disponível pelo Linear, sem exigir aprovação do
+Decrescente. O limite Ouro permaneceu intacto.
+
+Na suíte de navegador, 14 casos passaram na primeira execução; o caso restante
+usava imóvel de R$ 255.000 que, com o subsídio corrigido, já reprovava o
+Decrescente (20,59%). A fixture foi ajustada para R$ 249.000 para continuar
+testando a transição de aprovação e impressão; o reteste passou. São 15 casos
+de navegador cobertos, com ranking e regras preservados. A alteração posterior
+do piso unipessoal não afeta o perfil familiar desse teste. Evidências anteriores
+da calculadora pública permanecem válidas para o comparador independente, que
+não calcula subsídio.
+
+As últimas duas fronteiras oficiais unipessoais, rendas de R$ 3.265 e R$ 3.266,
+foram acrescentadas depois da rodada de 149 testes. Apenas o arquivo
+`caixa-official-complete` foi reexecutado: **14 testes aprovados**. O motor não
+mudou depois da rodada anterior; as matrizes não foram repetidas. O conjunto
+financeiro final contém **151 testes distintos aprovados** nesses oito arquivos.

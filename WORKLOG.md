@@ -9,7 +9,7 @@
 - Mantém aprovação Linear OU Decrescente e bloqueio do fluxo reprovado.
   Identificação comercial preservada em auditoria recolhida e impressão,
   sem aumentar a linha de financiamento. Outras páginas/motores inalterados.
-- Corrige apenas prazo por meses completos de idade, confrontado no site oficial.
+- Corrige prazo por meses completos de idade, confrontado no site oficial.
   24 casos públicos ±R$1 em fronteiras e caso de idade conferidos na UI.
   Matriz nova:326.592cenários;279.552válidos/47.040rejeições, sem violações
   dos invariantes. Matriz física anterior508.032 também passou. Relatório:
@@ -17,10 +17,16 @@
 - 105 testes financeiros,14cenários do formulário e15do estoque aprovados
   em execuções focadas/retestes justificados; tipos/lint/formatação aprovados.
   Screenshots sintéticas locais inspecionadas; matriz autenticada final na CI.
-- MFOM034 relido com hash conhecido: complemento até4000; equilíbrio até5000.
-  Não foi alterada fórmula por inferência. Comparação de subsídio com simulação
-  completa continua limitada por CPF/telefone/SMS; nenhum dado fictício enviado
-  a telefone de terceiro. Regra comercial customizada não equivale à regra oficial.
+- MFOM034 relido com hash conhecido. Sessão completa aberta pelo usuário
+  permitiu confrontar subsídios: corrigidos crescimento indevido da curva após
+  renda3700, piso após redutores e truncamento final em reais. Comparações familiares e seus limites
+  estão no relatório; nenhuma proposta bancária foi enviada.
+- Seguros da rápida e do produto completo diferem; não se inventou tabela de
+  apólices para prometer equivalência universal. Regra comercial customizada
+  permanece identificada e não equivale à regra oficial.
+- CI5056755a:validate/image/restore aprovados; matriz visual exige atualização
+  de11referências CAIXA após redesign. Dez capturas revisadas;320px corrigido
+  por corte real da data. Nenhuma referência de outra página foi alterada.
 - Implementado; CI, merge e publicação ainda pendentes nesta etapa.
 
 ## 2026-11-05 — CAIXA: capacidade por unidade e aprovação por fluxo

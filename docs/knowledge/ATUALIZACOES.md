@@ -11,8 +11,10 @@
 - Implementado:formulário em grupos,facetas/seleção/efeitos e anuais visíveis;
   prazo corrigido por prova oficial119meses.105testesfinanceiros,14form/15estoque
   aprovados. [Fontes, matriz e limites](../simulators/CAIXA-FRONTEIRAS-2026-11-05.md).
-- CPF/telefone/SMS impedem confronto integral de subsídio; não se declara
-  igualdade com proposta bancária. CI/merge/deploy pendentes nesta etapa.
+- Sessão completa aberta pelo usuário confirmou diferença real de subsídio:
+  corrigidos fator renda, piso após redutores e truncamento; amostras no relatório.
+  Seguro completo difere da referência rápida; não se declara igualdade
+  universal nem aprovação bancária. CI/merge/deploy pendentes nesta etapa.
 
 ## 2026-11-05 — CAIXA: cálculo comercial
 
