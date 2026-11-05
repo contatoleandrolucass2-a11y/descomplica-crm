@@ -48,6 +48,9 @@
   adotadas. Outras231linhas e demais metadados preservados; nenhum limiar
   alterado. Contrato de integridade visual13/13 aprovado. Aplicação congelada;
   CI final do PR e do main exato e publicação ainda pendentes.
+- CI41969852534 interrompida apenas no Formatting do JSON de referências.
+  Serialização padronizada com Prettier, preservando integralmente os dados
+  aprovados por comparação estrutural; aplicação/testes continuam congelados.
 
 ## 2026-11-05 — Recuperação do coletor e aceite final de Agendamentos
 

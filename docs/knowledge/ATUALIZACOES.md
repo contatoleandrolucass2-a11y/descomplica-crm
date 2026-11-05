@@ -2,6 +2,10 @@
 
 ## 2026-11-04/05 — CAIXA: unidades na página e campos agrupados, revisão final
 
+- CI41969852534 de4bc44456 parou no Formatting do registro JSON de imagens.
+  Ajuste restrito à serialização com Prettier, sem alteração semântica ou de
+  imagem; conferência estrutural integral antes/depois. Aplicação/testes
+  permanecem idênticos à fonte visual aprovada01710196. CI final será repetida.
 - Fonte corrigida01710196, CI41963993796:49responsivos/28temas/77axe/zoom
   e funcionais aprovados; falha somente nos11pixels CAIXA intencionais.
   Artefato13389171411, ZIP120d229fde2a474ef655d1ee155a5863510530861842094d4d62a8ebb6873ce3,

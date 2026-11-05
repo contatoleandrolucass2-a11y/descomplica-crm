@@ -1,5 +1,8 @@
 # Changelog
 
+- Padroniza a formatação do registro visual CAIXA, sem mudar imagens ou dados
+  das referências aprovadas.
+
 - Atualiza somente as11referências visuais CAIXA após revisão da interface
   corrigida em três temas e tamanhos, preservando as231referências de outras páginas.
 
