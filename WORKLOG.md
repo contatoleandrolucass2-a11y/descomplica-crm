@@ -27,6 +27,9 @@
   nos novos testes; adicionada asserção de quantidade e tipagem correspondente.
   Não alterou cálculo. Nova CI obrigatória no commit corrigido.
 
+- Caso limite adicional: compra integralmente coberta por recursos próprios
+  não gera tarifa/seguro nem parcela bancária fictícia; regressão específica.
+
 ## 2026-11-05 — Publicação do refresh e prova real sem reload
 
 - PR497 integrado em02fcbc06466dea47bb832c067233eef2e67eb546. Os quatro gates

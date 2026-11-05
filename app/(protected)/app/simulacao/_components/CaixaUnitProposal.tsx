@@ -542,7 +542,7 @@ export function CaixaUnitProposal({
                       {" · "}cota {percent.format(funding.commercialFunding.financingQuota)}
                       {" · "}juros {percent.format(funding.commercialFunding.rate / 100)} a.a.
                     </p>
-                    {funding.commercialFunding.firstPayment !== undefined && (
+                    {funding.financing > 0 && (
                       <p>
                         Parcela bancária inicial estimada:{" "}
                         {money.format(funding.commercialFunding.firstPayment)}.
@@ -551,7 +551,9 @@ export function CaixaUnitProposal({
                   </>
                 )}
                 <p>
-                  O financiamento bancário permanece a pagar e está sujeito à aprovação bancária.
+                  {funding.financing > 0
+                    ? "O financiamento bancário permanece a pagar e está sujeito à aprovação bancária."
+                    : "Compra coberta pelos recursos informados, sem financiamento bancário."}
                 </p>
               </section>
             </div>

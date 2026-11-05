@@ -55,3 +55,10 @@
   Evidência anterior/CI de9bb2944a não valida esta nova regra.
   Revisar a exceção apenas mediante instrução
   comercial explícita ou evidência oficial; nunca transportar para outras páginas.
+
+### Caso limite de compra sem financiamento
+
+- Revisão da nova quitação identificou tarifa/seguro residual do motor quando
+  principal era zero. Adaptador comercial passa encargo zero nesse caso e
+  a apresentação informa compra coberta por recursos, sem financiamento.
+  O motor bancário compartilhado não foi alterado.

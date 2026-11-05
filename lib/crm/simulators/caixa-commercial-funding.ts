@@ -42,7 +42,7 @@ export function optimizeCaixaCommercialFunding(
       rate: housing.rate,
       financingQuota: housing.financingQuota,
       subsidy: housing.subsidy,
-      firstPayment: housing.firstPayment,
+      firstPayment: housing.financing > 0 ? housing.firstPayment : 0,
     };
 
   const upperCents = Math.min(
@@ -239,6 +239,6 @@ export function optimizeCaixaCommercialFunding(
     rate: chosen.rate,
     financingQuota: chosen.financingQuota,
     subsidy: chosen.subsidy,
-    firstPayment: quote.firstPayment,
+    firstPayment: chosen.financing > 0 ? quote.firstPayment : 0,
   };
 }

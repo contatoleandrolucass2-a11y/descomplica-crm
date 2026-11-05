@@ -331,6 +331,7 @@ describe("CAIXA available units: canonical associative rules", () => {
         installments: 0,
         annuals: [],
         financing: 0,
+        commercialFunding: { firstPayment: 0 },
       });
   });
   it("only builds the full canonical schedule for a selected unit", () => {

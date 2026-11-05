@@ -584,6 +584,19 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       ).toHaveCount(0);
       expect(errors).toEqual([]);
     });
+    it("does not display a bank charge for a purchase entirely covered by own funds", async () => {
+      const { errors } = await open({ ownFunds: 229000 });
+      await page.getByLabel("Ranking do cliente", { exact: true }).selectOption("gold");
+      await page.getByLabel("Primeiro imóvel?", { exact: true }).selectOption("yes");
+      await browserExpect(page.getByRole("status")).toContainText("1 unidade dentro do ranking");
+      await page
+        .getByRole("button", { name: "Exibir fluxo de Apartamento teste", exact: true })
+        .click();
+      const summary = page.getByRole("region", { name: "Saldo comercial quitado", exact: true });
+      await browserExpect(summary).toContainText("sem financiamento bancário");
+      await browserExpect(summary).not.toContainText("Parcela bancária inicial estimada");
+      expect(errors).toEqual([]);
+    });
     it("captures the inline stock, property, commercial flow and documentation with synthetic data", async () => {
       await mkdir(resolve("private-data/caixa-inline-review"), { recursive: true });
       for (const width of [1280, 1920]) {
