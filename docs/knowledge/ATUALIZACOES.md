@@ -1,5 +1,22 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-05 — CAIXA: nova revisão de fronteiras e interface
+
+- Reconsulta 05/11 às 17:43 UTC: origin/main e health público HTTP 200/ok em 28b4ac35; publicação concorrente preservada. CAIXA segue na PR #503, ainda não publicada.
+- Abertura: Git comum confirmado, main `5906ca79`, CI42036862400 aprovada;
+  health público HTTP200/ok em `e407ecd9`. Fonte Git/GitHub/site em05/11/2026.
+- Pedido restrito à CAIXA: confrontar São Paulo nas fronteiras de renda/imóvel,
+  idades,1–3 proponentes,15–70m² e dependentes; anuais e aprovação por um fluxo;
+  corrigir seleção/filtros, efeitos e formulário. Regra comercial anterior
+  permanece distinta da regra oficial; equivalência depende de evidência.
+- Implementado:formulário em grupos,facetas/seleção/efeitos e anuais visíveis;
+  prazo corrigido por prova oficial119meses.105testesfinanceiros,14form/15estoque
+  aprovados. [Fontes, matriz e limites](../simulators/CAIXA-FRONTEIRAS-2026-11-05.md).
+- Sessão completa aberta pelo usuário confirmou diferença real de subsídio:
+  corrigidos fator renda, piso após redutores e truncamento; amostras no relatório.
+  Seguro completo difere da referência rápida; não se declara igualdade
+  universal nem aprovação bancária. CI/merge/deploy pendentes nesta etapa.
+
 ## 2026-11-05 — CAIXA: cálculo comercial
 
 - [Registro completo da abertura, diagnóstico e regra comercial](ATUALIZACOES-ARQUIVO-2026-11-05-a-2026-11-05-CAIXA-CALCULO.md).

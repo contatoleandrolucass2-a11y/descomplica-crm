@@ -46,7 +46,7 @@ describe("CAIXA commercial-only base optimization", () => {
       financing: 209572.08,
       rate: 5.5,
       financingQuota: 0.8,
-      subsidy: 3357.01,
+      subsidy: 2099,
       firstPayment: 1200,
     });
     expect(input.propertyValue).toBe(253790);

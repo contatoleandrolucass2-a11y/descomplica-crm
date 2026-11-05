@@ -169,11 +169,6 @@ function monthsBetween(start: Date, end: Date) {
     (end.getUTCDate() < start.getUTCDate() ? 1 : 0)
   );
 }
-function calendarMonthsBetween(start: Date, end: Date) {
-  return (
-    (end.getUTCFullYear() - start.getUTCFullYear()) * 12 + end.getUTCMonth() - start.getUTCMonth()
-  );
-}
 export function calculateAge(birthDate: string, asOf?: string | Date): number {
   const birth = dateOnly(birthDate),
     reference = referenceDate(asOf);
@@ -204,16 +199,11 @@ export function getMaximumTerm({
     inConstruction && Number.isInteger(constructionMonths) && constructionMonths > 0
       ? constructionMonths
       : 0;
-  const expiry = new Date(Date.UTC(birth.getUTCFullYear() + 80, birth.getUTCMonth() + 6, 1));
-  const expiryDay = Math.min(
-    birth.getUTCDate(),
-    new Date(Date.UTC(expiry.getUTCFullYear(), expiry.getUTCMonth() + 1, 0)).getUTCDate(),
-  );
-  expiry.setUTCDate(expiryDay);
-  // A calculadora pública CAIXA v1.16.0.2 arredonda o prazo pelo mês de vencimento.
+  // Public CAIXA v1.16.0.2: 80 years and 6 months minus completed age months.
+  // Verified in the public UI on 2026-11-05 (birth 1956-03-15: 119 months).
   return Math.max(
     0,
-    Math.min(productLimit, calendarMonthsBetween(reference, expiry) - buildingPeriod),
+    Math.min(productLimit, 966 - monthsBetween(birth, reference) - buildingPeriod),
   );
 }
 export function getMcmvBand(income: number) {
@@ -310,7 +300,9 @@ export function calculateMcmvSubsidy(
     (2 * maximumDiscount * (minimumDiscount / maximumDiscount - 1)) /
     (minimumDiscountIncome - maximumDiscountIncome);
   const a = -b / (2 * (minimumDiscountIncome - maximumDiscountIncome));
-  const incomeDelta = income - maximumDiscountIncome;
+  // Full CAIXA simulations observed on 2026-11-05 keep Frenda at Dmin above RDmin.
+  // Dfin below must still use the actual income, not this capped formula input.
+  const incomeDelta = Math.min(income, minimumDiscountIncome) - maximumDiscountIncome;
   const incomeFactor = a * incomeDelta ** 2 + b * incomeDelta + maximumDiscount;
 
   const monthlyRate = nominalRate / 1200;
@@ -340,12 +332,13 @@ export function calculateMcmvSubsidy(
     ),
     operationCeiling,
   );
-  // MFOM v034 3.1.1.8 checks the formula minimum before 3.1.2 reducers.
-  // Applying the minimum again afterwards incorrectly erases legal reduced discounts.
-  if (amount < 1500) amount = 0;
   if (input.propertyCondition === "used") amount *= 0.5;
   if (input.singlePersonFamily) amount *= 0.3;
-  amount = cents(amount);
+  // Full CAIXA observations (2026-11-05) suppress the automatic complement
+  // below 1500 after reducers: single-person income 3250 qualifies, 3300 does not.
+  if (amount < 1500) amount = 0;
+  // Full simulator quotes this complement in whole reais, after applicable reducers.
+  amount = Math.floor(amount);
   return {
     amount,
     incomeFactor: cents(incomeFactor),
