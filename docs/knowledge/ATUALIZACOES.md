@@ -1,5 +1,13 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-05 — CAIXA: cálculo comercial
+
+- [Registro completo da abertura, diagnóstico e regra comercial](ATUALIZACOES-ARQUIVO-2026-11-05-a-2026-11-05-CAIXA-CALCULO.md).
+- Candidato7ff00729/PR500:63 testes financeiros e oito cenários browser aprovados;
+  lint, tipos e formatação aprovados. CI e publicação pendentes.
+- Histórico desta demanda movido integralmente para arquivo próprio para manter
+  o limite de256000bytes da sincronização; nenhuma nota de outra área alterada.
+
 ## 2026-11-05 — Refresh de Agendamentos publicado e comprovado nos três ambientes
 
 - PR497/main02fcbc06 com quatro gates verdes e publicação protegida06:38UTC.

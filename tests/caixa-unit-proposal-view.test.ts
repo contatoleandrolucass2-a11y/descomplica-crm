@@ -114,25 +114,25 @@ function scenario(input: HousingInput = profile, property: CaixaUnit = unit) {
     firstProperty: true,
   };
 }
-describe("CAIXA commercial discount must recalculate the bank purchase basis", () => {
+describe("CAIXA commercial discount must recalculate the commercial funding and real purchase balance", () => {
   it("does not deduct kit reductions again when the report only provides the final commercial price", () => {
     const fallback = { ...unit };
     delete fallback.finalWithKit;
     const initial = scenario(profile, fallback);
     expect(initial.selected.price).toBe(229000);
-    expect(initial.selected.financing).toBe(183200);
+    expect(initial.selected.financing).toBe(192000);
     const result = reassessCaixaProposalDiscount({ ...initial, discount: 10000, authorized: true });
     expect(result.status).toBe("ready");
     if (result.status !== "ready") return;
     expect(result.value.price).toBe(219000);
-    expect(result.value.financing).toBe(175200);
-    expect(result.value.financing).toBeLessThanOrEqual(result.value.price * 0.8);
+    expect(result.value.financing).toBe(192000);
+    expect(result.value.financing).toBeLessThanOrEqual(unit.appraisal! * 0.8);
   });
   it.each([
-    ["price", 175200],
-    ["sac", 197100],
+    ["price", 192000],
+    ["sac", 216000],
   ] as const)(
-    "recalculates %s quota on219000 without applying discount twice",
+    "recalculates %s quota with appraisal240000 and purchase219000 without applying discount twice",
     (system, financing) => {
       const initial = scenario({ ...profile, system });
       const result = reassessCaixaProposalDiscount({
@@ -177,7 +177,7 @@ describe("CAIXA commercial discount must recalculate the bank purchase basis", (
       product: "mcmv",
       income: 4000,
       propertyValue: 300000,
-      ownFunds: 65000,
+      ownFunds: 55000,
       hasFgts36: true,
       singlePersonFamily: false,
       propertyType: "apartment",
@@ -214,10 +214,7 @@ describe("CAIXA commercial discount must recalculate the bank purchase basis", (
     expect(oldBank.rate).toBe(7.66);
     expect(newBank.rate).toBe(5.5);
     expect(discounted.value.price).toBe(274000);
-    expect(discounted.value.financing).toBeCloseTo(
-      Math.floor(Math.min(newBank.financing, initial.capacity) * 100) / 100,
-      2,
-    );
+    expect(discounted.value.financing).toBeCloseTo(newBank.financing, 2);
     expect(discounted.value.subsidy).toBe(newBank.subsidy);
     expect(discounted.value.subsidy).toBeGreaterThan(0);
   });

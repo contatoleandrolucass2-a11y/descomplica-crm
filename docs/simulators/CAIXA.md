@@ -51,8 +51,14 @@ no servidor. Snapshot somente enriquece fatos; falha do estoque vivo não gera
 lista disponível. Aceita apenas status comercial explícito Disponível.
 
 Cada unidade é recalculada com preço comercial, avaliação, município/UF, área,
-tipo, condição, entrega e progresso próprios. Financiamento respeita cota e
-capacidade original; não transplanta subsídio, aporte público, avaliação ou
+tipo, condição, entrega e progresso próprios. Nas unidades disponíveis, a regra
+comercial autorizada em05/11/2026 otimiza uma base separada entre compra real e
+avaliação, preservando ambos os fatos. Se a avaliação for menor, mantém essa
+base inferior. Compara faixas de juros e o cruzamento em centavos entre cota,
+renda e saldo real após recursos; empates escolhem a menor base. Financiamento respeita cota e
+capacidade de renda recalculada para a unidade, preservando prestação aprovada
+e demais dados do cliente. A capacidade do imóvel inicial não é teto de outro
+imóvel com taxa/seguros diferentes. Não transplanta subsídio, aporte público, avaliação ou
 seguros específicos do imóvel anterior. Dados indispensáveis ausentes ficam
 não avaliáveis, com contagem explícita, nunca aprovados por presunção.
 
@@ -60,10 +66,12 @@ A entrada é `max(150, recursos próprios)` e abate uma única vez. Mantém84
 mensais; anuais de15/12 elegíveis são preenchidas por renda/2 truncada em
 centavos, limitadas pelo saldo disponível. Datas seguem o calendário canônico
 do Associativo, inclusive exclusão do mês da entrada e vencimentos após entrega.
-Os motores e rankings existentes são importados sem alterações; ambas as
-avaliações Linear/Decrescente precisam aprovar. Isso é enquadramento comercial
+Os motores e rankings existentes são importados sem alterações; basta uma das
+avaliações Linear/Decrescente aprovar para oferecer a unidade. Cada opção mantém
+seu status, e proposta/impressão só liberam o fluxo aprovado. Isso é enquadramento comercial
 simulado, não concessão bancária. Saldo totalmente quitado não recebe um fluxo
-fictício de84 prestações: a validade continua sendo decidida pelo motor canônico.
+fictício de84 prestações: é exibido como saldo comercial quitado, sem anuais ou
+mensais da construtora. O encargo bancário continua explícito e limitado pela renda.
 
 A avaliação usa lotes canceláveis; mudança do perfil/ranking ou reabertura da
 área invalida a lista anterior imediatamente. Filtros e detalhes exibem apenas
@@ -83,12 +91,39 @@ a confirmar; primeiro imóvel pode ser informado também no SBPE sem bloquear
 a consulta das unidades desse produto. Impressões e documentos são locais.
 
 Desconto autorizado refaz o cálculo CAIXA da unidade usando a compra efetiva,
-mantendo a capacidade original como teto. Financiamento, subsídio e recursos
+recalculando a capacidade com a taxa e os seguros dessa compra. Financiamento, subsídio e recursos
 revalidados alimentam ledger, documentação e impressão. O preço comercial já
 resolvido não recebe bônus/folga novamente quando o estoque traz somente preço
-final. As bases bancária e comercial precisam coincidir em centavos; ausência
+final. A compra real do estoque e a compra do fluxo precisam coincidir em centavos; ausência
 de autorização, dados ou revalidação impede exibir aprovação e imprimir valores
-anteriores. Exemplo sintético de compra219000: cotas175200PRICE/197100SAC.
+anteriores. Exemplo comercial com compra219000 e avaliação240000: cotas
+192000PRICE/216000SAC, limitadas também pela renda e saldo real.
+
+Conferência comercial em05/11/2026: renda4000, cotista, nascimento1987-01-22,
+São Paulo, compra253790, avaliação340000, área25,77m², dependentes,
+entrega2029-12-31, obra15%, Ouro, entrada150. Base otimizada261965,10,
+crédito209572,08, subsídio3357,01, juros5,5% e primeira prestação1200.
+A base sugerida261770,43 suporta209416,34 com parcela1199,13; o otimizador
+recalcula o seguro e aproveita a capacidade restante. Compra e avaliação reais
+não mudam. Quatro anuais nominais de2000 em15/12/2026–2029 são mantidas,
+conforme limite50% da renda e calendário canônico; não há relaxamento do ranking.
+Modificar somente o imóvel inicial275000→276000 não pode excluir a mesma unidade
+por herdar a taxa da Faixa3. Basta um dos fluxos passar; a opção reprovada continua
+bloqueada para proposta e impressão. Se os recursos quitarem a parte comercial,
+a unidade permanece disponível sem gerar dívida fictícia.
+
+Esta regra comercial é uma exceção solicitada explicitamente pelo usuário,
+restrita ao adaptador de unidades da CAIXA. Não altera o motor habitacional
+padrão nem o Associativo. A interface e a impressão identificam base comercial
+e dependência de aprovação bancária. O subsídio usa a compra real e a taxa da
+faixa candidata, não uma compra fictícia. Não representa aprovação oficial.
+
+A [FAQ pública CAIXA](https://www.caixa.gov.br/voce/habitacao/perguntas-frequentes-novos-financiamentos/Paginas/default.aspx)
+usa o menor entre compra e avaliação. Conferida via índice público em05/11/2026;
+abertura direta apresentou loop de redirecionamento, assim como o PDF MFOM034.
+Não foi comprovada nova exceção bancária. A regra comercial acima diverge dessa
+referência por decisão expressa do usuário; não deve ser descrita como regra
+oficial nem reutilizada em outras páginas automaticamente.
 
 Consultas: 25, 26 e 27/10/2026, America/Sao_Paulo. Escopo exclusivo:
 `/app/simulacao/caixa`.

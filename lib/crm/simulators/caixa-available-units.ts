@@ -1,4 +1,5 @@
 import { calculateHousingSimulation, type HousingInput, type HousingResult } from "./caixa";
+import { optimizeCaixaCommercialFunding } from "./caixa-commercial-funding";
 import {
   getAssociativeAnnualEligibility,
   getAssociativeAnnualLimit,
@@ -17,6 +18,9 @@ import * as associativeMemory from "../../archive-investor/associative-installme
 export const CAIXA_UNIT_RANKINGS = ASSOCIATIVE_APPROVAL_TIERS as readonly {
   id: string;
   label: string;
+  proSolutoRate: number;
+  commitmentRate: number;
+  annualIncomeLimitRate: number;
 }[];
 export type CaixaUnit = {
   id: string;
@@ -105,11 +109,18 @@ export type CaixaAvailableUnit = {
   fgts: number;
   publicContribution: number;
   entry: number;
-  installments: 84;
+  installments: 0 | 84;
+  settled?: true;
   annuals: { date: string; amount: number }[];
   linearPayment: number;
   decreasingPayment: number;
   proSoluto: number;
+  commercialFunding?: {
+    baseValue: number;
+    rate: number;
+    financingQuota: number;
+    firstPayment: number;
+  };
   details?: CaixaUnitFlowDetails;
 };
 export type CaixaUnitAssessment =
@@ -188,6 +199,8 @@ export function assessCaixaAvailableUnit(
   firstProperty: boolean,
   options: { includeDetails?: boolean } = {},
 ): CaixaUnitAssessment {
+  if (!positive(capacity.maximumFinancingByIncome))
+    return { status: "unavailable", reason: "Simulação inicial de renda indisponível." };
   if (!CAIXA_UNIT_RANKINGS.some((t) => t.id === ranking) || ranking === "not-eligible")
     return { status: "rejected", reason: "Ranking não elegível." };
   if (!isInvestorEligibleUnit(unit))
@@ -268,7 +281,7 @@ export function assessCaixaAvailableUnit(
     "confirmedPublicContribution",
   ] as const)
     delete profile[field];
-  const housing = calculateHousingSimulation({
+  const unitInput: HousingInput = {
     ...profile,
     ...(input.product === "sbpe" && originalRate !== undefined
       ? { nominalRate: originalRate }
@@ -284,13 +297,50 @@ export function assessCaixaAvailableUnit(
     constructionMonths: constructionMonths(baseDate, unit.completionDate),
     ownFunds: entry,
     asOf: baseDate,
-  });
+  };
+  const housing = calculateHousingSimulation(unitInput);
   if (!housing.ok || housing.subsidyEligibility === "eligible-review")
     return { status: "unavailable", reason: "Enquadramento CAIXA da unidade não calculável." };
-  const financing =
-    Math.floor(Math.min(housing.financing, capacity.maximumFinancingByIncome) * 100) / 100;
-  const remaining =
-    price - financing - housing.subsidy - housing.fgts - housing.publicContribution - entry;
+  // User-authorized commercial scenario: never overwrite the real purchase or appraisal.
+  // The original simulation confirms readiness, not the credit ceiling for another rate band.
+  const commercial = optimizeCaixaCommercialFunding(unitInput, housing);
+  if (!commercial)
+    return { status: "unavailable", reason: "Base comercial de financiamento não calculável." };
+  const financing = commercial.financing;
+  const subsidy = commercial.subsidy;
+  const remaining = price - financing - subsidy - housing.fgts - housing.publicContribution - entry;
+  const commercialFunding = {
+    baseValue: commercial.baseValue,
+    rate: commercial.rate,
+    financingQuota: commercial.financingQuota,
+    firstPayment: commercial.firstPayment,
+  };
+  // Fully covered purchases remain available without manufacturing a commercial installment debt.
+  if (Math.round(remaining * 100) === 0) {
+    const tier = CAIXA_UNIT_RANKINGS.find((item) => item.id === ranking)!;
+    if (commercial.firstPayment / input.income > tier.annualIncomeLimitRate)
+      return { status: "rejected", reason: "Encargo bancário acima do limite do ranking." };
+    return {
+      status: "approved",
+      value: {
+        unit,
+        region: resolveInvestorRegion(unit),
+        price,
+        financing,
+        subsidy,
+        fgts: housing.fgts,
+        publicContribution: housing.publicContribution,
+        entry,
+        installments: 0,
+        settled: true,
+        annuals: [],
+        linearPayment: 0,
+        decreasingPayment: 0,
+        proSoluto: 0,
+        commercialFunding,
+      },
+    };
+  }
   const annuals = caixaAutomaticAnnuals(input.income, baseDate, unit.completionDate, remaining);
   const flowInput = {
     selectedUnitId: unit.id,
@@ -304,7 +354,7 @@ export function assessCaixaAvailableUnit(
     tableSlack: 0,
     discountAuthorized: false,
     financing,
-    subsidy: housing.subsidy,
+    subsidy,
     fgts: housing.fgts,
     housingCheck: housing.publicContribution,
     entryValue: entry,
@@ -331,7 +381,7 @@ export function assessCaixaAvailableUnit(
     };
   if (!linear.valid || !decreasing.valid)
     return { status: "unavailable", reason: "Calendário ou fluxo comercial incompleto." };
-  if (!linear.approved || !decreasing.approved || !linear.comparison || !decreasing.comparison)
+  if ((!linear.approved && !decreasing.approved) || !linear.comparison || !decreasing.comparison)
     return { status: "rejected", reason: "Fora dos limites do ranking." };
   let details: CaixaUnitFlowDetails | undefined;
   if (options.includeDetails && linear.approval && decreasing.approval) {
@@ -396,7 +446,7 @@ export function assessCaixaAvailableUnit(
       region: resolveInvestorRegion(unit),
       price,
       financing,
-      subsidy: housing.subsidy,
+      subsidy,
       fgts: housing.fgts,
       publicContribution: housing.publicContribution,
       entry,
@@ -405,6 +455,7 @@ export function assessCaixaAvailableUnit(
       linearPayment: linear.comparison.highestLinearPayment,
       decreasingPayment: decreasing.comparison.highestDecreasingPayment,
       proSoluto: linear.result.custom.correctedProSoluto,
+      commercialFunding,
       ...(details ? { details } : {}),
     },
   };
