@@ -1,5 +1,10 @@
 # Changelog
 
+- Publica e valida o cálculo comercial CAIXA em `e407ecd9`, após os quatro gates
+  obrigatórios. No perfil de renda R$ 4.000 e ranking Ouro, foram observadas
+  383 opções no estoque atualizado; base, crédito, subsídio e anuais conferidos
+  na página publicada. Outras páginas e motores compartilhados preservados.
+
 - Corrige o cálculo das unidades CAIXA: capacidade de crédito própria de cada
   imóvel e elegibilidade por fluxo Linear ou Decrescente aprovado. Preserva
   anuais, preço real, cota e ranking; bloqueia proposta/impressão do fluxo reprovado.
