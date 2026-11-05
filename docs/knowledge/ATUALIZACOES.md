@@ -170,7 +170,7 @@
   DashboardAutoRefresh; a prova anterior em Equipe Produtiva não cobria esse ramo.
   Persistência dos32 cards e cargas da origem já aprovadas não foram invalidadas.
 - Correção local liga somente Agendamentos ao mecanismo existente, com status
-  dedicado autorizado pela permissão da página e par exato do snapshot.61 testes
+  dedicado autorizado pelo catálogo da página e par exato do snapshot.83 testes
   focados aprovados; CI/publicação e prova real pós-correção ainda pendentes.
   [Evidência e critérios](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md).
 

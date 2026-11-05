@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   eq: vi.fn(),
   maybeSingle: vi.fn(),
 }));
-vi.mock("@/lib/security/route-auth", () => ({ authorizeRoute: mocks.authorize }));
+vi.mock("@/lib/security/route-auth", () => ({ authorizePageRoute: mocks.authorize }));
 vi.mock("@/lib/auth/supabase/server", () => ({ createClient: mocks.createClient }));
 
 import { GET } from "@/app/api/appointments/status/route";
@@ -44,7 +44,7 @@ describe("appointments persisted snapshot status", () => {
       generatedAt: version.generated_at,
       updatedAt: version.updated_at,
     });
-    expect(mocks.authorize).toHaveBeenCalledExactlyOnceWith("crm.stage.appointments.view");
+    expect(mocks.authorize).toHaveBeenCalledExactlyOnceWith("/app/etapas/agendamentos");
     expect(mocks.from).toHaveBeenCalledExactlyOnceWith("crm_dashboard_snapshots");
     expect(mocks.select).toHaveBeenCalledExactlyOnceWith("generated_at,updated_at");
     expect(mocks.eq).toHaveBeenCalledExactlyOnceWith("snapshot_key", "global");

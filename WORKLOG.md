@@ -15,6 +15,9 @@
   consultar a origem e devolve somente o par de versão, sem cache. Não exige
   crm.dashboard.view, não amplia essa permissão e não executa RPC de ingestão.
   Falhas e versões parciais/inválidas retornam503. RLS/grants/esquema preservados.
+  Usa authorizePageRoute para aplicar também o catálogo persistido e os gates
+  da página, como SSR/actions; página revogada não continua consultando metadados
+  apenas porque a permissão ainda consta no contexto da conta.
 - Validação local:26 testes de cliente/SSR e35 de API/reader aprovados; lint
   focado, formatação e resources:check aprovados (93rotas/11áreas). Registro da
   nova API incluído. CI do candidato, publicação protegida e repetição da prova
@@ -24,6 +27,9 @@
   necessário pelo listener novo. A falha anterior foi ausência de provider no
   teste isolado; todas as asserções de indisponibilidade/contagem preservadas.
   Total focado:74 testes distintos aprovados, sem repetir os61 já válidos.
+- Após alinhar a API ao guard do catálogo persistido,11 testes da API foram
+  repetidos por invalidação dessa evidência e passaram; outros9 testes do
+  guard passaram. Total final focado:83 testes distintos aprovados.
 
 ## 2026-11-05 — Recuperação do coletor e aceite final de Agendamentos
 

@@ -615,3 +615,14 @@ DashboardAutoRefresh, skip ou baseline nova. Os12 testes de dashboard-access
 já possuíam ambiente de roteador e passaram sem mudança. Total local focado:
 74 testes distintos aprovados. Essa é uma dependência da correção, não alteração
 da página Dashboard ou de suas regras de acesso.
+
+A integração também alinhou o novo status ao mesmo guard de página usado pelo
+SSR e pelas actions existentes: authorizePageRoute(/app/etapas/agendamentos).
+Isso aplica o catálogo persistido/gates além da permissão, evitando manter uma
+sonda de metadados ativa quando a página foi revogada/desativada sem remoção da
+permissão do contexto. A rota continua independente de crm.dashboard.view.
+Onze testes de API foram repetidos devido a essa alteração e passaram; nove
+testes do guard de acesso persistido também passaram. Total focado:83 testes
+distintos aprovados. Não foram alterados o guard compartilhado, outras páginas,
+RLS, grants ou catálogo de permissões. O teste continua a negar401/403 antes da
+consulta de metadados e a reter todos os asserts de no-store/503/versão exata.

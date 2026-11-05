@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/auth/supabase/server";
 import { noStoreHeaders } from "@/lib/security/api";
-import { authorizeRoute } from "@/lib/security/route-auth";
+import { authorizePageRoute } from "@/lib/security/route-auth";
 
 const snapshotVersionSchema = z
   .object({
@@ -14,7 +14,7 @@ const snapshotVersionSchema = z
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const authorization = await authorizeRoute("crm.stage.appointments.view");
+  const authorization = await authorizePageRoute("/app/etapas/agendamentos");
   if (!authorization.ok) return authorization.response;
 
   try {
