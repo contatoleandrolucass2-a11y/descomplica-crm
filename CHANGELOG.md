@@ -1,5 +1,9 @@
 # Changelog
 
+- Publica a correção de atualização automática de Agendamentos do PR497.
+  Chrome, integrado e celular simulado recebem versões novas sem reload,
+  preservando os32 cards, filtros, tamanhos e posições.
+
 - Publica e valida CAIXA b1544dd1: unidades expandem na página com descrição,
   fluxo Associativo e documentação; campos agrupados em duas linhas no desktop.
   CI main aprovada e publicação protegida confirmadas em05/11/2026,07:47UTC.

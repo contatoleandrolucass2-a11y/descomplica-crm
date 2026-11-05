@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-05 — Refresh de Agendamentos publicado e comprovado nos três ambientes
+
+- PR497/main02fcbc06 com quatro gates verdes e publicação protegida06:38UTC.
+  Integrado1280 e celular simulado390 atualizaram03:33 →04:03 →04:33 sem
+  reload;32cards, filtros, dimensões, ordem e rolagem preservados.
+- A primeira mudança veio de bootstrap externo da origem; a segunda foi do
+  ciclo natural07:30, com o mesmoPID e sem nova reinicialização. Esse segundo
+  ciclo confirma recebimento automático da carga programada nas duas telas.
+- Chrome aprovado em nova prova:04:33 às07:51UTC →06:32 às09:40UTC sem
+  reload, com32cards/filtros/tamanhos/ordem/rolagem idênticos. Primeira aba
+  com controle interrompido não foi usada como aprovação. Espera da ferramenta
+  excedeu o solicitado; horários UI intermediários não foram observados.
+- Fonte mantevePID4134053 sem start/stop; ciclo08:00 e20109:36 documentados.
+  Runtime atual b1544dd1 preserva os mesmos arquivos de Agendamentos02fcbc06;
+  registro concorrente CAIXA36b8fbe6 preservado. Encerramento no PR498,
+  somente documental, sem novo restart da aplicação.
+  [Recibos, horários, limites e prints](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md).
+
 ## 2026-11-05 — CAIXA: PR495 publicado e validado
 
 - Status: implementado, integrado, CI aprovada e publicado; encerramento

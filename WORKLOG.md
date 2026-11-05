@@ -1,5 +1,41 @@
 # Worklog
 
+## 2026-11-05 — Publicação do refresh e prova real sem reload
+
+- PR497 integrado em02fcbc06466dea47bb832c067233eef2e67eb546. Os quatro gates
+  passaram no candidato e383adfc/CI41968063594 e no main/CI41974181366.
+  No primeiro ensaio do main, o banco isolado não iniciou; repetiu-se somente
+  o job falho no mesmo SHA. Nenhum gate, baseline ou código foi dispensado.
+- Publicação protegida327a3db2-a1b3-4126-bb73-f0acf8e21cf8 às06:38:07.830UTC,
+  imagem imutável e14camadas conferidas; dois perfis runtime aprovados.
+  Health200/ok no SHA exato; status anônimo401/no-store. Sem nova migration.
+- Três abas novas montadas após deploy: Chrome1280x551, integrado1280x900,
+  celular simulado390x844. Baseline06:39:25–28UTC, todas03:33,32cards,visíveis.
+  Integrado/celular receberam04:03 às07:07:04UTC e04:33 às07:38:04UTC,
+  sem reload, navegação ou mudança de filtros após baseline. IDs, ordem,
+  largura/altura inline, filtros e rolagem idênticos nas duas visualizações.
+- A carga07:06 veio de um stop/start externo do coletor às06:59:38–40UTC;
+  foi separada da prova de cadência. Ciclo natural07:30 iniciou07:30:04UTC,
+  comercial20107:36:48.976UTC, estoque3494às07:37:14UTC. MesmoPID4134053
+  desde07:07, sem start/stop no intervalo. Nenhuma coleta manual foi disparada.
+- Chrome perdeu controle às06:49UTC (Debugger unattached), após baseline;
+  primeira aba não aprovada. Nova aba própria9834, na versão b1544dd1 já
+  publicada por outra entrega, montada07:51:06UTC com04:33. Às09:40:48UTC
+  mostrava06:32 sem reload, navegação ou filtro.32cards/estilos/ordem/filtros/
+  rolagem idênticos ao baseline. A espera de60s excedeu6084s na ferramenta;
+  não alegar observações individuais dos horários intermediários.
+- Fonte: ciclo08:00 iniciou08:00:06UTC, comercial20108:06:44UTC; último201
+  09:36:08UTC, estoque3494às09:36:36UTC. MesmoPID4134053 e nenhum start/stop
+  desde07:51. Origem não foi executada manualmente. Três prints finais reais.
+- Todas as abas próprias foram encerradas após as capturas, preservando as
+  abas originais do usuário. Viewport temporário IAB restaurado. Sem novos
+  testes redundantes de IAB/celular após sua aprovação; sem nova publicação
+  da aplicação para esta documentação.
+- Registros paralelos CAIXA de main36b8fbe6 preservados integralmente na
+  conciliação. Health09:40:26UTC HTTP200/ok na versão publicada b1544dd1;
+  os quatro arquivos runtime do refresh são idênticos a02fcbc06. Registro
+  de encerramento segue no mesmo PR498, com CI documental e sync próprios.
+
 ## 2026-11-05 — CAIXA publicada e validada: unidades na página
 
 - PR495 integrado em b1544dd13aacb12690fa75e60e43e9881e1627ff; árvore idêntica
