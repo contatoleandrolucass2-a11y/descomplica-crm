@@ -60,8 +60,14 @@ describe("CAIXA credit and ranking belong to the unit being assessed", () => {
       expect(assessment.status).toBe("approved");
       if (assessment.status !== "approved") return;
       expect(assessment.value.price).toBe(253790);
-      expect(assessment.value.financing).toBe(203032);
+      expect(assessment.value.financing).toBe(209572.08);
       expect(assessment.value.subsidy).toBe(3357.01);
+      expect(assessment.value.commercialFunding).toEqual({
+        baseValue: 261965.1,
+        rate: 5.5,
+        financingQuota: 0.8,
+        firstPayment: 1200,
+      });
       expect(assessment.value.unit.appraisal).toBe(340000);
       expect(assessment.value.details?.purchaseValue).toBe(253790);
       if (propertyValue > 275000)
@@ -78,13 +84,13 @@ describe("CAIXA credit and ranking belong to the unit being assessed", () => {
     );
     expect(assessment.value.details!.approvalRows).toHaveLength(3);
     const commitment = assessment.value.details!.approvalRows[1]!;
-    expect(commitment.linear).toBeCloseTo(0.1608, 4);
-    expect(commitment.decreasing).toBeCloseTo(0.1983, 4);
+    expect(commitment.linear).toBeCloseTo(0.1340315844, 9);
+    expect(commitment.decreasing).toBeLessThan(0.1983);
     expect(assessment.value.installments).toBe(84);
   });
 
   it("offers a unit approved in Linear even when Decreasing exceeds the same ranking", () => {
-    const { assessment } = assess(profile, { ...unit, finalPrice: 260000 });
+    const { assessment } = assess(profile, { ...unit, finalPrice: 260000, appraisal: 260000 });
     expect(assessment.status).toBe("approved");
     if (assessment.status !== "approved") return;
     expect(assessment.value.financing).toBe(208000);
@@ -96,6 +102,39 @@ describe("CAIXA credit and ranking belong to the unit being assessed", () => {
 
   it("still rejects a unit whose two flows exceed the ranking", () => {
     expect(assess(profile, { ...unit, finalPrice: 300000 }).assessment.status).toBe("rejected");
+  });
+
+  it("offers the optimized 260000 unit in both flows without loosening the ranking", () => {
+    const { assessment } = assess(profile, { ...unit, finalPrice: 260000 });
+    expect(assessment.status).toBe("approved");
+    if (assessment.status !== "approved") return;
+    expect(assessment.value.financing).toBe(209572.08);
+    expect(
+      assessment.value.details!.approvalRows.every(
+        (row) => row.linear <= row.limit && row.decreasing <= row.limit,
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps a fully covered purchase available without inventing commercial monthly or annual debts", () => {
+    const { assessment } = assess({ ...profile, ownFunds: 45000 });
+    expect(assessment.status).toBe("approved");
+    if (assessment.status !== "approved") return;
+    expect(assessment.value).toMatchObject({
+      financing: 205432.99,
+      entry: 45000,
+      subsidy: 3357.01,
+      settled: true,
+      installments: 0,
+      annuals: [],
+      linearPayment: 0,
+      decreasingPayment: 0,
+      proSoluto: 0,
+    });
+    expect(assessment.value.financing + assessment.value.subsidy + assessment.value.entry).toBe(
+      253790,
+    );
+    expect(assessment.value.commercialFunding!.firstPayment).toBeGreaterThan(0);
   });
 
   it("keeps a lower real appraisal as the quota basis", () => {
@@ -123,7 +162,7 @@ describe("CAIXA credit and ranking belong to the unit being assessed", () => {
 
   it.each([
     [{ ownFunds: 70000, approvedPayment: 800 }, 137260.59],
-    [{ ownFunds: 60000, approvedFinancingQuotaPercent: 60 }, 152274],
+    [{ ownFunds: 60000, approvedFinancingQuotaPercent: 60 }, 165004.41],
   ])("retains individual client limits %j", (limits, financing) => {
     const { assessment } = assess({ ...profile, ...limits });
     expect(assessment.status).toBe("approved");

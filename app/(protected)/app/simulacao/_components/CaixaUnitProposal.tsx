@@ -194,6 +194,7 @@ export function CaixaUnitProposal({
   // A previous bank result is only a private editing preview while revalidation is blocked.
   const funding = bank.status === "ready" ? bank.value : selected;
   const bankReady = bank.status === "ready";
+  const settled = bankReady && funding.settled === true;
   const flow = useMemo(() => {
     const flowInput = {
       selectedUnitId: unit.id,
@@ -294,7 +295,7 @@ export function CaixaUnitProposal({
         : "";
   const linearApproved = quoteReady && flow.linear.valid && flow.linear.approved;
   const decreasingApproved = quoteReady && flow.decreasing.valid && flow.decreasing.approved;
-  const approved = linearApproved || decreasingApproved;
+  const approved = settled || linearApproved || decreasingApproved;
   const bothApproved = linearApproved && decreasingApproved;
   const preferredFlow = linearApproved ? "linear" : "decreasing";
   const release = calculateAssociativeReleaseStatus({
@@ -469,350 +470,465 @@ export function CaixaUnitProposal({
         </dl>
       </article>
       <section className={styles.flowPanel} aria-label="Fluxo editável">
-        <Heading
-          step="03"
-          eyebrow="Fluxo editável"
-          title="Monte a proposta"
-          action={
-            <button
-              type="button"
-              className={styles.guideButton}
-              aria-expanded={guideOpen}
-              onClick={() => setGuideOpen((v) => !v)}
-            >
-              Iniciar passo a passo
-            </button>
-          }
-        />
-        {bankReason && (
-          <p className={styles.error} role="alert">
-            {bankReason}
-          </p>
-        )}
-        {guideOpen && (
-          <ol className={styles.guide}>
-            <li>Confira a unidade e os valores trazidos da CAIXA.</li>
-            <li>
-              A entrada é o recurso próprio informado, com mínimo de R$150,00. O fluxo usa 84
-              mensais.
-            </li>
-            <li>
-              As anuais válidas já estão preenchidas. Ajustes em sinais, anuais ou desconto são
-              revalidados pelo motor Associativo.
-            </li>
-            <li>Confira os dois fluxos e a documentação antes de imprimir.</li>
-          </ol>
-        )}
-        <div className={styles.flowGrid}>
-          <section className={styles.ledger} aria-label="Composição da proposta">
-            <div className={styles.paymentActions}>
-              <button
-                type="button"
-                disabled={signalCount >= 3}
-                onClick={() => setSignalCount((c) => Math.min(3, c + 1))}
-              >
-                Inserir Sinal
-              </button>
-              <button
-                type="button"
-                aria-expanded={showAnnuals}
-                onClick={() => setShowAnnuals((v) => !v)}
-              >
-                Inserir Anual
-              </button>
-              <button
-                type="button"
-                aria-expanded={showDiscount}
-                onClick={() => setShowDiscount((v) => !v)}
-              >
-                Inserir Desconto
-              </button>
-            </div>
-            <table>
-              <tbody>
-                {rowData.map(([label, operator, value]) => (
-                  <tr key={label}>
-                    <th>
-                      {label}
-                      {label === "Entrada" && <small>{date(baseDate)}</small>}
-                    </th>
-                    <td className={styles.operator}>{operator}</td>
-                    <td className={styles.currency}>{quoteReady ? "R$" : ""}</td>
-                    <td>
-                      {quoteReady ? money.format(value).replace(/^R\$\s*/, "") : "A recalcular"}
-                    </td>
-                  </tr>
-                ))}
-                {signals.slice(0, signalCount).map((value, index) => (
-                  <tr key={`signal-${index}`}>
-                    <th>
-                      Sinal {index + 1}
-                      <small>{date(canonical.custom.signals[index]?.date)}</small>
-                    </th>
-                    <td>−</td>
-                    <td colSpan={2}>
-                      <Amount
-                        label={`Valor do sinal ${index + 1}`}
-                        value={value}
-                        onChange={(next) =>
-                          setSignals((values) => values.map((v, i) => (i === index ? next : v)))
-                        }
-                      />
-                      {value > 0 && !canonical.custom.signals[index]?.approved && (
-                        <small className={styles.error}>
-                          {canonical.custom.signals[index]?.reason}
-                        </small>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {showAnnuals &&
-                  canonical.custom.intermediaries.map((annual, index) => (
-                    <tr key={`annual-${index}`}>
-                      <th>
-                        Anual {index + 1}
-                        <small>{date(annual.date)}</small>
-                      </th>
-                      <td>−</td>
-                      <td colSpan={2}>
-                        <Amount
-                          label={`Valor da anual ${index + 1}`}
-                          value={flow.annualValues[index] ?? 0}
-                          onChange={(next) =>
-                            setAnnuals((values) => ({ ...values, [annual.date]: next }))
-                          }
-                        />
-                        {annual.value > 0 && !annual.approved && (
-                          <small className={styles.error}>{annual.reason}</small>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                {showDiscount && (
-                  <tr>
-                    <th>
-                      Desconto
-                      <small>
-                        <label>
-                          <input
-                            type="checkbox"
-                            checked={discountAuthorized}
-                            onChange={(e) => setDiscountAuthorized(e.target.checked)}
-                          />{" "}
-                          Desconto autorizado
-                        </label>
-                      </small>
-                    </th>
-                    <td>−</td>
-                    <td colSpan={2}>
-                      <Amount label="Valor do desconto" value={discount} onChange={setDiscount} />
-                      {!discountAuthorized && discount > 0 && (
-                        <small>Não aplicado sem autorização.</small>
-                      )}
-                    </td>
-                  </tr>
-                )}
-                <tr className={styles.totalRow}>
-                  <th>Saldo parcelado</th>
-                  <td>=</td>
-                  <td>{quoteReady ? "R$" : ""}</td>
-                  <td>
-                    {quoteReady
-                      ? money.format(canonical.custom.balance).replace(/^R\$\s*/, "")
-                      : "A recalcular"}
-                  </td>
-                </tr>
-                <tr>
-                  <th>Qtd. de parcelas</th>
-                  <td>÷</td>
-                  <td></td>
-                  <td>84</td>
-                </tr>
-              </tbody>
-            </table>
-          </section>
-          <div className={styles.approvalColumn}>
-            <section className={styles.approval} aria-label="Parâmetros de aprovação">
-              <header>
-                <div>
-                  <strong>Parâmetros de aprovação</strong>
-                  <p>Resultado × regra da classificação</p>
+        {settled ? (
+          <>
+            <Heading step="03" eyebrow="Saldo comercial quitado" title="Composição da compra" />
+            <div className={styles.flowGrid}>
+              <section className={styles.ledger} aria-label="Composição da proposta">
+                <div className={styles.paymentActions}>
+                  <button
+                    type="button"
+                    aria-expanded={showDiscount}
+                    onClick={() => setShowDiscount((value) => !value)}
+                  >
+                    Inserir Desconto
+                  </button>
                 </div>
-                <span className={styles.ranking}>
-                  {CAIXA_UNIT_RANKINGS.find((r) => r.id === ranking)?.label}
-                </span>
-              </header>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Regra de aprovação</th>
-                    <th>Resultado Linear</th>
-                    <th>Resultado Decrescente</th>
-                    <th>Limite</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {flow.linear.approval &&
-                    flow.decreasing.approval &&
-                    [
-                      [
-                        "% Pró-Soluto",
-                        flow.linear.approval.proSolutoRate,
-                        flow.decreasing.approval.proSolutoRate,
-                        flow.linear.approval.tier.proSolutoRate,
-                      ],
-                      [
-                        "% Comprometimento da Renda",
-                        flow.linear.approval.linearCommitmentRate,
-                        flow.decreasing.approval.linearCommitmentRate,
-                        flow.linear.approval.tier.commitmentRate,
-                      ],
-                      [
-                        "% Máximo da renda mensal",
-                        flow.linear.approval.linearMaximumIncomeRate,
-                        flow.decreasing.approval.linearMaximumIncomeRate,
-                        flow.linear.approval.tier.annualIncomeLimitRate,
-                      ],
-                    ].map(([label, a, b, limit]) => (
+                <table>
+                  <tbody>
+                    {[
+                      ["Valor real da venda", funding.price],
+                      ["Financiamento", funding.financing],
+                      ["Subsídio", funding.subsidy],
+                      ["FGTS", funding.fgts],
+                      ["Cheque Moradia", funding.publicContribution],
+                      ["Entrada", funding.entry],
+                      ["Saldo com a construtora", 0],
+                    ].map(([label, value]) => (
                       <tr key={String(label)}>
                         <th>{label}</th>
-                        <td>{quoteReady ? percent.format(Number(a)) : "—"}</td>
-                        <td>{quoteReady ? percent.format(Number(b)) : "—"}</td>
-                        <td>≤{percent.format(Number(limit))}</td>
+                        <td>{money.format(Number(value))}</td>
                       </tr>
                     ))}
-                  <tr>
-                    <th>Status da proposta</th>
-                    <td>
-                      <span className={styles.badge}>
-                        {linearApproved ? "APROVADO" : "REVISAR"}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={styles.badge}>
-                        {decreasingApproved ? "APROVADO" : "REVISAR"}
-                      </span>
-                    </td>
-                    <td>—</td>
-                  </tr>
-                </tbody>
-              </table>
-              <div className={styles.release}>
-                <strong>Repasse</strong>
-                <span className={styles.badge}>
-                  {quoteReady && release.repasse.status === "released" ? "LIBERADO" : "PENDENTE"}
-                </span>
-                <span>{bankReason || release.repasse.reason}</span>
-              </div>
-              <div className={styles.approvedBanner}>
-                <strong>
-                  {bothApproved ? "APROVADO" : approved ? "1 FLUXO APROVADO" : "REVISE A PROPOSTA"}
-                </strong>
-                <span>
-                  {bothApproved
-                    ? "Linear e Decrescente estão dentro da regra selecionada."
-                    : approved
-                      ? `${linearApproved ? "Linear" : "Decrescente"} está dentro da regra selecionada. Revise o outro fluxo.`
-                      : bankReason ||
-                        canonical.errors?.join(" ") ||
-                        "Confira pagamentos e limites do ranking."}
-                </span>
-              </div>
-            </section>
-            <section className={styles.paymentSummary} aria-label="Resumo das parcelas">
-              <header>
-                <div>
-                  <strong>Resumo das parcelas</strong>
-                  <small>Fluxo linear e quatro blocos decrescentes</small>
-                </div>
-                <div>
-                  <button
-                    type="button"
-                    disabled={!approved}
-                    aria-expanded={scheduleOpen}
-                    onClick={() => setScheduleOpen((v) => !v)}
-                  >
-                    Exibir parcelas
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!approved}
-                    aria-expanded={readyOpen}
-                    onClick={() => setReadyOpen((v) => !v)}
-                  >
-                    Proposta pronta - Bora Vender
-                  </button>
-                </div>
-              </header>
-              <div className={styles.compactTable}>
-                <table aria-label="Comparativo das parcelas lineares e decrescentes">
-                  <thead>
-                    <tr>
-                      <th>Resumo</th>
-                      <th>Qtd.</th>
-                      <th>Sem correção</th>
-                      <th>Com correção</th>
-                      <th>1ª mensal</th>
-                      <th>Última mensal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {quoteReady &&
-                      summary.map((row) => (
-                        <tr key={row.label}>
-                          <th>
-                            {row.label}
-                            {!(row.label === "Linear 100%" ? linearApproved : decreasingApproved) &&
-                              " · revisar"}
-                          </th>
-                          <td>{row.count}</td>
-                          <td>{money.format(row.uncorrectedInstallment)}</td>
-                          <td>{money.format(row.correctedInstallment)}</td>
-                          <td>{date(row.firstInstallmentDate)}</td>
-                          <td>{date(row.lastInstallmentDate)}</td>
-                        </tr>
-                      ))}
+                    {showDiscount && (
+                      <tr>
+                        <th>
+                          Desconto
+                          <small>
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={discountAuthorized}
+                                onChange={(event) => setDiscountAuthorized(event.target.checked)}
+                              />{" "}
+                              Desconto autorizado
+                            </label>
+                          </small>
+                        </th>
+                        <td>
+                          <Amount
+                            label="Valor do desconto"
+                            value={discount}
+                            onChange={setDiscount}
+                          />
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
-              </div>
-            </section>
-          </div>
-        </div>
-        {scheduleOpen && approved && (
-          <section className={styles.schedule} aria-label="Parcelas do fluxo aprovado">
-            <header>
-              <h4>84 mensais e anuais do fluxo aprovado</h4>
-              <button type="button" onClick={() => setScheduleOpen(false)}>
-                Ocultar parcelas
-              </button>
-            </header>
-            <div className={styles.tableScroll} tabIndex={0}>
-              {scheduleTable}
+              </section>
+              <section
+                className={styles.documentationBreakdown}
+                aria-label="Saldo comercial quitado"
+              >
+                <h4>Sem parcelas com a construtora</h4>
+                <p>
+                  Financiamento e recursos cobrem a compra. Não há mensais ou anuais comerciais.
+                </p>
+                {funding.commercialFunding && (
+                  <>
+                    <p>
+                      Cenário comercial · base {money.format(funding.commercialFunding.baseValue)}
+                      {" · "}cota {percent.format(funding.commercialFunding.financingQuota)}
+                      {" · "}juros {percent.format(funding.commercialFunding.rate / 100)} a.a.
+                    </p>
+                    {funding.commercialFunding.firstPayment !== undefined && (
+                      <p>
+                        Parcela bancária inicial estimada:{" "}
+                        {money.format(funding.commercialFunding.firstPayment)}.
+                      </p>
+                    )}
+                  </>
+                )}
+                <p>
+                  O financiamento bancário permanece a pagar e está sujeito à aprovação bancária.
+                </p>
+              </section>
             </div>
-          </section>
-        )}
-        {readyOpen && approved && (
-          <section className={styles.readyProposal} aria-label="Proposta pronta">
-            <h4>Proposta pronta - Bora Vender</h4>
-            <p>
-              {unit.project} · {unit.product}
-            </p>
-            <dl>
-              {rowData.map(([label, , value]) => (
-                <div key={label}>
-                  <dt>{label}</dt>
-                  <dd>{money.format(value)}</dd>
+          </>
+        ) : (
+          <>
+            <Heading
+              step="03"
+              eyebrow="Fluxo editável"
+              title="Monte a proposta"
+              action={
+                <button
+                  type="button"
+                  className={styles.guideButton}
+                  aria-expanded={guideOpen}
+                  onClick={() => setGuideOpen((v) => !v)}
+                >
+                  Iniciar passo a passo
+                </button>
+              }
+            />
+            {bankReason && (
+              <p className={styles.error} role="alert">
+                {bankReason}
+              </p>
+            )}
+            {guideOpen && (
+              <ol className={styles.guide}>
+                <li>Confira a unidade e os valores trazidos da CAIXA.</li>
+                <li>
+                  A entrada é o recurso próprio informado, com mínimo de R$150,00. O fluxo usa 84
+                  mensais.
+                </li>
+                <li>
+                  As anuais válidas já estão preenchidas. Ajustes em sinais, anuais ou desconto são
+                  revalidados pelo motor Associativo.
+                </li>
+                <li>Confira os dois fluxos e a documentação antes de imprimir.</li>
+              </ol>
+            )}
+            <div className={styles.flowGrid}>
+              <section className={styles.ledger} aria-label="Composição da proposta">
+                <div className={styles.paymentActions}>
+                  <button
+                    type="button"
+                    disabled={signalCount >= 3}
+                    onClick={() => setSignalCount((c) => Math.min(3, c + 1))}
+                  >
+                    Inserir Sinal
+                  </button>
+                  <button
+                    type="button"
+                    aria-expanded={showAnnuals}
+                    onClick={() => setShowAnnuals((v) => !v)}
+                  >
+                    Inserir Anual
+                  </button>
+                  <button
+                    type="button"
+                    aria-expanded={showDiscount}
+                    onClick={() => setShowDiscount((v) => !v)}
+                  >
+                    Inserir Desconto
+                  </button>
                 </div>
-              ))}
-            </dl>
-            <p>
-              84 mensais · {CAIXA_UNIT_RANKINGS.find((r) => r.id === ranking)?.label} ·{" "}
-              {preferredFlow === "linear" ? "Linear" : "Decrescente"} APROVADO
-            </p>
-            <button type="button" disabled={!approved} onClick={() => setPrintMode(preferredFlow)}>
-              Imprimir proposta
-            </button>
-          </section>
+                <table>
+                  <tbody>
+                    {rowData.map(([label, operator, value]) => (
+                      <tr key={label}>
+                        <th aria-label={label}>
+                          {label}
+                          {label === "Entrada" && <small>{date(baseDate)}</small>}
+                          {label === "Financiamento" && quoteReady && funding.commercialFunding && (
+                            <small>
+                              Cenário comercial · base{" "}
+                              {money.format(funding.commercialFunding.baseValue)}
+                              {" · "}cota {percent.format(funding.commercialFunding.financingQuota)}
+                              {" · "}juros {percent.format(funding.commercialFunding.rate / 100)}{" "}
+                              a.a.
+                              {" · "}sujeito à aprovação bancária.
+                            </small>
+                          )}
+                        </th>
+                        <td className={styles.operator}>{operator}</td>
+                        <td className={styles.currency}>{quoteReady ? "R$" : ""}</td>
+                        <td>
+                          {quoteReady ? money.format(value).replace(/^R\$\s*/, "") : "A recalcular"}
+                        </td>
+                      </tr>
+                    ))}
+                    {signals.slice(0, signalCount).map((value, index) => (
+                      <tr key={`signal-${index}`}>
+                        <th>
+                          Sinal {index + 1}
+                          <small>{date(canonical.custom.signals[index]?.date)}</small>
+                        </th>
+                        <td>−</td>
+                        <td colSpan={2}>
+                          <Amount
+                            label={`Valor do sinal ${index + 1}`}
+                            value={value}
+                            onChange={(next) =>
+                              setSignals((values) => values.map((v, i) => (i === index ? next : v)))
+                            }
+                          />
+                          {value > 0 && !canonical.custom.signals[index]?.approved && (
+                            <small className={styles.error}>
+                              {canonical.custom.signals[index]?.reason}
+                            </small>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {showAnnuals &&
+                      canonical.custom.intermediaries.map((annual, index) => (
+                        <tr key={`annual-${index}`}>
+                          <th>
+                            Anual {index + 1}
+                            <small>{date(annual.date)}</small>
+                          </th>
+                          <td>−</td>
+                          <td colSpan={2}>
+                            <Amount
+                              label={`Valor da anual ${index + 1}`}
+                              value={flow.annualValues[index] ?? 0}
+                              onChange={(next) =>
+                                setAnnuals((values) => ({ ...values, [annual.date]: next }))
+                              }
+                            />
+                            {annual.value > 0 && !annual.approved && (
+                              <small className={styles.error}>{annual.reason}</small>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    {showDiscount && (
+                      <tr>
+                        <th>
+                          Desconto
+                          <small>
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={discountAuthorized}
+                                onChange={(e) => setDiscountAuthorized(e.target.checked)}
+                              />{" "}
+                              Desconto autorizado
+                            </label>
+                          </small>
+                        </th>
+                        <td>−</td>
+                        <td colSpan={2}>
+                          <Amount
+                            label="Valor do desconto"
+                            value={discount}
+                            onChange={setDiscount}
+                          />
+                          {!discountAuthorized && discount > 0 && (
+                            <small>Não aplicado sem autorização.</small>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                    <tr className={styles.totalRow}>
+                      <th>Saldo parcelado</th>
+                      <td>=</td>
+                      <td>{quoteReady ? "R$" : ""}</td>
+                      <td>
+                        {quoteReady
+                          ? money.format(canonical.custom.balance).replace(/^R\$\s*/, "")
+                          : "A recalcular"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Qtd. de parcelas</th>
+                      <td>÷</td>
+                      <td></td>
+                      <td>84</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+              <div className={styles.approvalColumn}>
+                <section className={styles.approval} aria-label="Parâmetros de aprovação">
+                  <header>
+                    <div>
+                      <strong>Parâmetros de aprovação</strong>
+                      <p>Resultado × regra da classificação</p>
+                    </div>
+                    <span className={styles.ranking}>
+                      {CAIXA_UNIT_RANKINGS.find((r) => r.id === ranking)?.label}
+                    </span>
+                  </header>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Regra de aprovação</th>
+                        <th>Resultado Linear</th>
+                        <th>Resultado Decrescente</th>
+                        <th>Limite</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {flow.linear.approval &&
+                        flow.decreasing.approval &&
+                        [
+                          [
+                            "% Pró-Soluto",
+                            flow.linear.approval.proSolutoRate,
+                            flow.decreasing.approval.proSolutoRate,
+                            flow.linear.approval.tier.proSolutoRate,
+                          ],
+                          [
+                            "% Comprometimento da Renda",
+                            flow.linear.approval.linearCommitmentRate,
+                            flow.decreasing.approval.linearCommitmentRate,
+                            flow.linear.approval.tier.commitmentRate,
+                          ],
+                          [
+                            "% Máximo da renda mensal",
+                            flow.linear.approval.linearMaximumIncomeRate,
+                            flow.decreasing.approval.linearMaximumIncomeRate,
+                            flow.linear.approval.tier.annualIncomeLimitRate,
+                          ],
+                        ].map(([label, a, b, limit]) => (
+                          <tr key={String(label)}>
+                            <th>{label}</th>
+                            <td>{quoteReady ? percent.format(Number(a)) : "—"}</td>
+                            <td>{quoteReady ? percent.format(Number(b)) : "—"}</td>
+                            <td>≤{percent.format(Number(limit))}</td>
+                          </tr>
+                        ))}
+                      <tr>
+                        <th>Status da proposta</th>
+                        <td>
+                          <span className={styles.badge}>
+                            {linearApproved ? "APROVADO" : "REVISAR"}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={styles.badge}>
+                            {decreasingApproved ? "APROVADO" : "REVISAR"}
+                          </span>
+                        </td>
+                        <td>—</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div className={styles.release}>
+                    <strong>Repasse</strong>
+                    <span className={styles.badge}>
+                      {quoteReady && release.repasse.status === "released"
+                        ? "LIBERADO"
+                        : "PENDENTE"}
+                    </span>
+                    <span>{bankReason || release.repasse.reason}</span>
+                  </div>
+                  <div className={styles.approvedBanner}>
+                    <strong>
+                      {bothApproved
+                        ? "APROVADO"
+                        : approved
+                          ? "1 FLUXO APROVADO"
+                          : "REVISE A PROPOSTA"}
+                    </strong>
+                    <span>
+                      {bothApproved
+                        ? "Linear e Decrescente estão dentro da regra selecionada."
+                        : approved
+                          ? `${linearApproved ? "Linear" : "Decrescente"} está dentro da regra selecionada. Revise o outro fluxo.`
+                          : bankReason ||
+                            canonical.errors?.join(" ") ||
+                            "Confira pagamentos e limites do ranking."}
+                    </span>
+                  </div>
+                </section>
+                <section className={styles.paymentSummary} aria-label="Resumo das parcelas">
+                  <header>
+                    <div>
+                      <strong>Resumo das parcelas</strong>
+                      <small>Fluxo linear e quatro blocos decrescentes</small>
+                    </div>
+                    <div>
+                      <button
+                        type="button"
+                        disabled={!approved}
+                        aria-expanded={scheduleOpen}
+                        onClick={() => setScheduleOpen((v) => !v)}
+                      >
+                        Exibir parcelas
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!approved}
+                        aria-expanded={readyOpen}
+                        onClick={() => setReadyOpen((v) => !v)}
+                      >
+                        Proposta pronta - Bora Vender
+                      </button>
+                    </div>
+                  </header>
+                  <div className={styles.compactTable}>
+                    <table aria-label="Comparativo das parcelas lineares e decrescentes">
+                      <thead>
+                        <tr>
+                          <th>Resumo</th>
+                          <th>Qtd.</th>
+                          <th>Sem correção</th>
+                          <th>Com correção</th>
+                          <th>1ª mensal</th>
+                          <th>Última mensal</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {quoteReady &&
+                          summary.map((row) => (
+                            <tr key={row.label}>
+                              <th>
+                                {row.label}
+                                {!(row.label === "Linear 100%"
+                                  ? linearApproved
+                                  : decreasingApproved) && " · revisar"}
+                              </th>
+                              <td>{row.count}</td>
+                              <td>{money.format(row.uncorrectedInstallment)}</td>
+                              <td>{money.format(row.correctedInstallment)}</td>
+                              <td>{date(row.firstInstallmentDate)}</td>
+                              <td>{date(row.lastInstallmentDate)}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              </div>
+            </div>
+            {scheduleOpen && approved && (
+              <section className={styles.schedule} aria-label="Parcelas do fluxo aprovado">
+                <header>
+                  <h4>84 mensais e anuais do fluxo aprovado</h4>
+                  <button type="button" onClick={() => setScheduleOpen(false)}>
+                    Ocultar parcelas
+                  </button>
+                </header>
+                <div className={styles.tableScroll} tabIndex={0}>
+                  {scheduleTable}
+                </div>
+              </section>
+            )}
+            {readyOpen && approved && (
+              <section className={styles.readyProposal} aria-label="Proposta pronta">
+                <h4>Proposta pronta - Bora Vender</h4>
+                <p>
+                  {unit.project} · {unit.product}
+                </p>
+                <dl>
+                  {rowData.map(([label, , value]) => (
+                    <div key={label}>
+                      <dt>{label}</dt>
+                      <dd>{money.format(value)}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p>
+                  84 mensais · {CAIXA_UNIT_RANKINGS.find((r) => r.id === ranking)?.label} ·{" "}
+                  {preferredFlow === "linear" ? "Linear" : "Decrescente"} APROVADO
+                </p>
+                <button
+                  type="button"
+                  disabled={!approved}
+                  onClick={() => setPrintMode(preferredFlow)}
+                >
+                  Imprimir proposta
+                </button>
+              </section>
+            )}
+          </>
         )}
       </section>
       <aside className={styles.documentation} aria-label="Resumo financeiro da documentação">
@@ -975,6 +1091,16 @@ export function CaixaUnitProposal({
             <p>
               Data: {date(baseDate)} · Renda: {money.format(input.income)}
             </p>
+            {funding.commercialFunding && (
+              <p>
+                Cenário comercial · compra real {money.format(funding.price)} · avaliação{" "}
+                {money.format(unit.appraisal ?? 0)} · base de financiamento{" "}
+                {money.format(funding.commercialFunding.baseValue)} · cota{" "}
+                {percent.format(funding.commercialFunding.financingQuota)} · juros{" "}
+                {percent.format(funding.commercialFunding.rate / 100)} a.a. · sujeito à aprovação
+                bancária.
+              </p>
+            )}
             {printMode === "documentation" && doc.ok ? (
               <>
                 <p>

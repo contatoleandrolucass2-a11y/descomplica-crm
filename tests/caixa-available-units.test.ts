@@ -79,8 +79,9 @@ describe("CAIXA available units: canonical associative rules", () => {
     expect(gross.value.details?.purchaseValue).toBe(229000);
     expect(net.value.details?.purchaseValue).toBe(net.value.price);
     expect(net.value.price).toBe(229000);
-    expect(net.value.financing).toBe(183200);
-    expect(net.value.financing).toBeLessThanOrEqual(net.value.details!.purchaseValue * 0.8);
+    expect(net.value.financing).toBe(192000);
+    expect(net.value.commercialFunding?.baseValue).toBe(240000);
+    expect(net.value.financing).toBeLessThanOrEqual(unit.appraisal! * 0.8);
     expect(net.value.proSoluto).toBe(gross.value.proSoluto);
     expect(net.value.linearPayment).toBe(gross.value.linearPayment);
     expect(net.value.decreasingPayment).toBe(gross.value.decreasingPayment);
@@ -314,7 +315,7 @@ describe("CAIXA available units: canonical associative rules", () => {
       assessCaixaAvailableUnit(unit, older, capacity(), "diamond", "2026-11-04", true).status,
     ).toBe("unavailable");
   });
-  it("lets the canonical 84-month flow decide a fully covered unit", () => {
+  it("keeps a fully covered purchase without manufacturing an 84-month debt", () => {
     const funded = assessCaixaAvailableUnit(
       unit,
       { ...profile, ownFunds: 229000 },
@@ -323,8 +324,14 @@ describe("CAIXA available units: canonical associative rules", () => {
       "2026-11-04",
       true,
     );
-    // A zero balance is not falsely labelled approved if the canonical flow requires a positive principal.
-    expect(funded.status).toBe("unavailable");
+    expect(funded.status).toBe("approved");
+    if (funded.status === "approved")
+      expect(funded.value).toMatchObject({
+        settled: true,
+        installments: 0,
+        annuals: [],
+        financing: 0,
+      });
   });
   it("only builds the full canonical schedule for a selected unit", () => {
     const compact = assessCaixaAvailableUnit(

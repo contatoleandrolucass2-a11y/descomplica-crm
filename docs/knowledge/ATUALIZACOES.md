@@ -34,6 +34,28 @@
   Sem nova contagem do estoque vivo, promessa de crédito bancário ou teste
   exaustivo de todas as combinações. CI/merge/deploy pendentes nesta etapa.
 
+### Decisão posterior explícita: base comercial otimizada
+
+- Usuário determinou desconsiderar a base bancária menor compra/avaliação para
+  este cálculo comercial. Essa instrução supera a conclusão operacional anterior,
+  mas não altera a fonte oficial nem autoriza reescrever compra/avaliação reais.
+- Implementação restrita às unidades disponíveis CAIXA: busca em centavos entre
+  compra e avaliação, com taxa por faixa, teto de renda, cota e saldo real. Subsídio
+  calculado sobre compra real com taxa candidata; identificação comercial visível
+  e na impressão, sujeita à aprovação bancária. Não altera motores compartilhados.
+- Caso sintético253790/340000, renda4000: base261965,10, crédito209572,08,
+  subsídio3357,01, prestação1200, juros5,5%. Anuais seguem quatro de2000.
+- Revisão independente detectou que quitação do saldo comercial tornava o fluxo84
+  inválido. Novo estado explícito sem dívida comercial preserva essas unidades,
+  sem cortar crédito artificialmente nem inventar mensais ou anuais.
+- Nova validação:63 testes financeiros e oito cenários browser aprovados,
+  incluindo otimização, limites, quitação e impressão. Medição sintética3500
+  cenários/NodeWindows: helper55,921s→11,830s,157500→38500chamadas ao motor;
+  não representa latência de UI. Tipos/CI/publicação do candidato ainda pendentes.
+  Evidência anterior/CI de9bb2944a não valida esta nova regra.
+  Revisar a exceção apenas mediante instrução
+  comercial explícita ou evidência oficial; nunca transportar para outras páginas.
+
 ## 2026-11-05 — Refresh de Agendamentos publicado e comprovado nos três ambientes
 
 - PR497/main02fcbc06 com quatro gates verdes e publicação protegida06:38UTC.

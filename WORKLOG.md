@@ -5,12 +5,21 @@
 - Escopo restrito ao cálculo das unidades disponíveis e aos guards de proposta
   e impressão que dependem dele. Nenhuma mudança de layout ou em outra página.
 - Corrige teto herdado: crédito usa taxa, seguros, prazo e limites da unidade;
-  mantém prestação aprovada do cliente, preço real e menor compra/avaliação.
+  mantém prestação aprovada do cliente e os fatos reais de compra/avaliação.
 - Oferece unidades com pelo menos um fluxo aprovado pelo ranking canônico;
   o fluxo reprovado continua identificado e bloqueado para proposta/impressão.
-- Anuais do exemplo já eram quatro de2000, limite nominal50% da renda,
-  reduzindo compromisso16,08%/19,83%. Regras compartilhadas preservadas.
-- Testes financeiros focados:39 aprovados; cinco cenários de navegador aprovados.
+- Por instrução posterior explícita, aplica base comercial otimizada entre
+  compra e avaliação somente nas unidades CAIXA; identifica cenário comercial
+  sujeito à aprovação. Exemplo: base261965,10/crédito209572,08/parcela1200.
+- Anuais do exemplo seguem quatro de2000, limite nominal50% da renda.
+  Saldo comercial quitado permanece elegível sem parcelas artificiais.
+  Motores padrão CAIXA e Associativo e seus rankings não foram alterados.
+- Evidência anterior à regra comercial:39 testes financeiros e cinco cenários
+  de navegador aprovados. Candidato comercial:63 testes financeiros e oito
+  cenários browser aprovados, lint aprovado; correção de tipagem dos testes
+  e nova CI em andamento. Otimizador conferido em909 valores de centavos.
+- Medição isolada3500cenários/NodeWindows: helper55,921s→11,830s; chamadas
+  157500→38500. Não representa latência do navegador ou do fluxo completo.
   Novas regressões cobrem troca de faixa do imóvel inicial, aprovação individual,
   cota, anuais e revogação de impressão após edição. CI/publicação
   ainda pendentes nesta etapa. Detalhes e limites em docs/simulators/CAIXA.md.

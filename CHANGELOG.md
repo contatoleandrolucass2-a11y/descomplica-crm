@@ -3,6 +3,8 @@
 - Corrige o cálculo das unidades CAIXA: capacidade de crédito própria de cada
   imóvel e elegibilidade por fluxo Linear ou Decrescente aprovado. Preserva
   anuais, preço real, cota e ranking; bloqueia proposta/impressão do fluxo reprovado.
+  Base comercial otimizada entre compra e avaliação, conforme regra solicitada,
+  com identificação do cenário e sem excluir unidades com saldo comercial quitado.
 
 - Publica a correção de atualização automática de Agendamentos do PR497.
   Chrome, integrado e celular simulado recebem versões novas sem reload,
