@@ -1,7 +1,21 @@
 # Aprendizados e atualizacoes
 
-## 2026-11-04 — CAIXA: unidades na página e campos agrupados, abertura
+## 2026-11-04/05 — CAIXA: unidades na página e campos agrupados, revisão final
 
+- Fonte corrigida01710196, CI41963993796:49responsivos/28temas/77axe/zoom
+  e funcionais aprovados; falha somente nos11pixels CAIXA intencionais.
+  Artefato13389171411, ZIP120d229fde2a474ef655d1ee155a5863510530861842094d4d62a8ebb6873ce3,
+  captura e04686e3/árvore b727f8f5 idêntica ao head; fingerprint295f8877
+  reproduzido exatamente com19arquivos gerados e nenhum diff tracked.
+- Referências aprovadas somente após correções:11imagens CAIXA originais do
+  artefato copiadas sem edição. Revisão humana anterior reutilizada em10corpos
+  de página com identidade pixel a pixel; apenas o cabeçalho global foi excluído
+  dessa análise auxiliar, não das imagens nem da comparação CI. Em1024,2099pixels
+  mudaram só na legenda corrigida, revisada novamente; mobile também conferido.
+  Outras231linhas de imagens e todos os metadados não relacionados preservados
+  por deepEqual. Nenhum limiar alterado. Contrato visual13/13 aprovado.
+  Código da aplicação congelado; fonte antiga com defeitos não foi adotada.
+  CI final do PR/main exato e promoção/smoke ainda pendentes neste registro.
 - Em05/11, CI41957639708 de3c631e5f aprovou validate/imagem/restore e todos
   os49responsivos/28temas/77axe/zoom/funcionais; falha somente em11pixels CAIXA.
   Artefato13386471554/ZIP62a06e7b54ec4eb33f4fe5483486dd8d41d54869f7bab1ed844ec45e86081fa5,

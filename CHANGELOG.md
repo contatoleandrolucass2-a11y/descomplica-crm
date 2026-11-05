@@ -1,5 +1,8 @@
 # Changelog
 
+- Atualiza somente as11referências visuais CAIXA após revisão da interface
+  corrigida em três temas e tamanhos, preservando as231referências de outras páginas.
+
 - Mantém as legendas dentro das bordas também em telas intermediárias,
   com quebra de texto e sem reduzir fonte ou quebrar Sim/Não.
 

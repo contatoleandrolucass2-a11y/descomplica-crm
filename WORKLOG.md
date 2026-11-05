@@ -42,6 +42,12 @@
   a761–1199px corrigido;3provas dirigidas375/390/768/1024/1200 em claro/escuro,
   tracking1px/700, passaram, preservando botões e duas linhas desktop. Nova
   captura obrigatória antes da aprovação das referências.
+- Fonte final01710196/CI41963993796:49responsivos/28temas/77axe/zoom e
+  funcionais aprovados; somente11diferenças intencionais de pixels CAIXA.
+  Artefato13389171411 verificado, capturas corrigidas revisadas e11referências
+  adotadas. Outras231linhas e demais metadados preservados; nenhum limiar
+  alterado. Contrato de integridade visual13/13 aprovado. Aplicação congelada;
+  CI final do PR e do main exato e publicação ainda pendentes.
 
 ## 2026-11-05 — Recuperação do coletor e aceite final de Agendamentos
 
