@@ -27,6 +27,8 @@
   extensos e rolagem vertical. Opções vazias usam Todos/Todas e botão Limpar
   mais compacto. Defaults dos12 indicadores usam duas linhas de seis;
   layouts existentes não são reescritos por esta apresentação.
+- CI42042131572: 5077 testes aprovados; uma asserção do título antigo foi
+  atualizada para a lista sem visita confirmada solicitada nesta demanda.
 - Validações locais por domínio e revisão independente registradas no arquivo
   específico. CI do candidato/main e prova pós-publicação ainda pendentes;
   não confundir preview sintético, implementação, integração e produção.
