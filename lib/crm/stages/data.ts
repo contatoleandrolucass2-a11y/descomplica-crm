@@ -67,6 +67,7 @@ export interface AppointmentsReadModel {
   analysis: DashboardAnalysisSlice | null;
   brokerRoster: AppointmentBrokerRosterEntry[] | null;
   generatedAt?: string;
+  updatedAt?: string;
   individualGoal: number | null;
   goalsByMonth: AppointmentGoalsByMonth;
   conversionGoals: AppointmentConversionGoals | null;
@@ -175,6 +176,8 @@ export async function loadAppointmentsReadModel(
         return {
           analysis: null,
           brokerRoster: null,
+          generatedAt: before.generated_at,
+          updatedAt: before.updated_at,
           individualGoal: null,
           goalsByMonth: {},
           conversionGoals: null,
@@ -191,6 +194,8 @@ export async function loadAppointmentsReadModel(
       return {
         analysis: null,
         brokerRoster: null,
+        generatedAt: before.generated_at,
+        updatedAt: before.updated_at,
         individualGoal: null,
         goalsByMonth: {},
         conversionGoals: null,
@@ -318,6 +323,7 @@ export async function loadAppointmentsReadModel(
       analysis,
       brokerRoster: roster,
       generatedAt: before.generated_at,
+      updatedAt: before.updated_at,
       individualGoal,
       goalsByMonth,
       conversionGoals,

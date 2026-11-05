@@ -20,6 +20,12 @@
 - Preserva posições anuais por data ao editar a proposta, revalida os dois
   fluxos e mantém documentação/cronogramas coerentes com os dados informados.
 
+- Liga o painel próprio de Agendamentos à atualização automática da versão
+  publicada, preservando filtros e layout. Consulta somente metadados por uma
+  rota autorizada pela permissão e configuração da página de Agendamentos,
+  sem exigir acesso ao Dashboard.
+  Preserva a indicação de período fora da cobertura também na renderização SSR.
+
 - Publica e valida a entrega CAIXA do PR492 emfa068c43, com CI main verde,
   imagem imutável conferida, cálculo/subsídio/prazo automáticos, unidades por
   ranking e fluxo84mensais/anuais; smoke desktop/mobile e acesso preservados.

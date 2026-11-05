@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
+import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { expect, it, vi } from "vitest";
 import { appointmentModel } from "./fixtures/appointments-summary";
 vi.mock("@/lib/authorization/enforce", () => ({
@@ -23,11 +24,24 @@ it("renders an uncovered current month as unavailable without an SSR failure or 
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-11-02T12:00:00Z"));
   try {
+    const page = await StagePage({
+      params: Promise.resolve({ stage: "agendamentos" }),
+      searchParams: Promise.resolve({ view: "all" }),
+    });
     const html = renderToStaticMarkup(
-      await StagePage({
-        params: Promise.resolve({ stage: "agendamentos" }),
-        searchParams: Promise.resolve({ view: "all" }),
-      }),
+      <AppRouterContext.Provider
+        value={{
+          back: vi.fn(),
+          forward: vi.fn(),
+          refresh: vi.fn(),
+          push: vi.fn(),
+          replace: vi.fn(),
+          prefetch: vi.fn(),
+          bfcacheId: "appointments-ssr-fixture",
+        }}
+      >
+        {page}
+      </AppRouterContext.Provider>,
     );
     expect(html).toContain("Período fora da cobertura disponível");
     expect(html).toContain("Detalhamento indisponível");

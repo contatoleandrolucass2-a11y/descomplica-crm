@@ -2,6 +2,11 @@
 
 ## 2026-11-04/05 — CAIXA: unidades na página e campos agrupados, revisão final
 
+- CI41970350868 do candidato55ee6ebe aprovada nos quatro jobs obrigatórios.
+  Main avançou externamente para02fcbc06 durante a execução; integração dessa
+  base preservada integralmente, com conciliação somente de CHANGELOG/WORKLOG.
+  Diff próprio continua restrito à CAIXA, suas evidências e documentação.
+  Nova CI do candidato integrado obrigatória; nenhuma publicação realizada.
 - CI41969852534 de4bc44456 parou no Formatting do registro JSON de imagens.
   Ajuste restrito à serialização com Prettier, sem alteração semântica ou de
   imagem; conferência estrutural integral antes/depois. Aplicação/testes
@@ -242,6 +247,17 @@
   restaurado. Saúde HTTP200/ok emfa068c43; sem novo deploy por este registro.
 
 - Agendamentos04/11: [trimestre, meta e atualização](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md).
+
+## 2026-11-05 — Prova de atualização automática encontra ramo sem listener
+
+- Carga nova01:03 disponível, mas Chrome/integrado/celular simulado mantiveram
+  00:35 sem reload, mesmo visíveis. O ramo próprio de Agendamentos não montava
+  DashboardAutoRefresh; a prova anterior em Equipe Produtiva não cobria esse ramo.
+  Persistência dos32 cards e cargas da origem já aprovadas não foram invalidadas.
+- Correção local liga somente Agendamentos ao mecanismo existente, com status
+  dedicado autorizado pelo catálogo da página e par exato do snapshot.83 testes
+  focados aprovados; CI/publicação e prova real pós-correção ainda pendentes.
+  [Evidência e critérios](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md).
 
 ## 2026-11-04 — CAIXA compacta publicada e validada
 

@@ -18,9 +18,7 @@ let windowTarget: EventTarget;
 let cleanup: (() => void) | undefined;
 const fetchMock = vi.fn();
 
-function mount(
-  props: { generatedAt: string | null; updatedAt: string | null; referenceDay?: string } = version,
-) {
+function mount(props: Parameters<typeof DashboardAutoRefresh>[0] = version) {
   expect(DashboardAutoRefresh(props)).toBeNull();
   cleanup = mocks.effect.mock.lastCall![0]();
 }
@@ -43,6 +41,29 @@ afterEach(() => {
 });
 
 describe("dashboard published snapshot refresh", () => {
+  it("receives new appointments snapshots through the page-scoped status without looping", async () => {
+    mount({ ...version, statusEndpoint: "/api/appointments/status" });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fetchMock).toHaveBeenCalledExactlyOnceWith("/api/appointments/status", {
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { accept: "application/json" },
+      signal: expect.any(AbortSignal),
+    });
+    expect(mocks.refresh).not.toHaveBeenCalled();
+
+    const published = { ...version, updatedAt: "2026-10-14T13:03:00.123457+00:00" };
+    fetchMock.mockImplementation(async () => Response.json(published));
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+
+    cleanup?.();
+    mount({ ...published, statusEndpoint: "/api/appointments/status" });
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls.every(([url]) => url === "/api/appointments/status")).toBe(true);
+  });
+
   it("recalcula metas na virada do dia de Sao Paulo mesmo sem nova coleta", async () => {
     vi.setSystemTime(new Date("2026-10-15T02:59:50Z"));
     mount({ ...version, referenceDay: "2026-10-14" });
