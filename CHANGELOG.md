@@ -1,14 +1,8 @@
 # Changelog
 
-- Prepara prazo finito de30s apenas para a RPC Salesforce, após recorrência de
-  statement_timeout8s. Inclui prova REST PostgreSQL17 isolada e pgTAP de corpo,
-  configuração e permissões. Aplicação em produção exige autorização específica.
-
-- Publica PR #490 em 5da46964 após CI completa, com margem da página inicial
-  corrigida sem mudar a referência visual. Confirma persistência dos32 cards
-  no Chrome, integrado e telas móveis simuladas; restaura os ajustes de teste.
-  Refresh 30 min observado sem reload manual e nova carga refletida na meta
-  mensal e nas equipes diárias. Evidências finais registradas sem novo deploy.
+- Publica e valida a entrega CAIXA do PR492 emfa068c43, com CI main verde,
+  imagem imutável conferida, cálculo/subsídio/prazo automáticos, unidades por
+  ranking e fluxo84mensais/anuais; smoke desktop/mobile e acesso preservados.
 
 - Compacta todos os campos CAIXA em duas linhas, reduz controles e resumo,
   exibe juros junto da parcela e leva parâmetros opcionais ao final.
@@ -19,6 +13,16 @@
 - Atualiza somente as11 referências visuais CAIXA após revisão dos três temas
   e tamanhos, com textos inteiros e bordas visíveis; demais referências preservadas.
 - Estabiliza a medição responsiva do teste CAIXA sem reduzir as exigências de layout.
+
+- Prepara prazo finito de30s apenas para a RPC Salesforce, após recorrência de
+  statement_timeout8s. Inclui prova REST PostgreSQL17 isolada e pgTAP de corpo,
+  configuração e permissões. Aplicação em produção exige autorização específica.
+
+- Publica PR #490 em 5da46964 após CI completa, com margem da página inicial
+  corrigida sem mudar a referência visual. Confirma persistência dos32 cards
+  no Chrome, integrado e telas móveis simuladas; restaura os ajustes de teste.
+  Refresh 30 min observado sem reload manual e nova carga refletida na meta
+  mensal e nas equipes diárias. Evidências finais registradas sem novo deploy.
 
 - Estabiliza a margem do aviso dos filtros da página inicial em10px,
   independentemente da ordem dos módulos CSS, preservando a referência visual.

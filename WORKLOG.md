@@ -49,16 +49,24 @@
   entrada mínima150 sem duplicar recursos,84mensais e anuais válidas automáticas.
 - Local:65testes de cálculo/projeção/comparador aprovados;508032cenários de
   renda/idade/pessoas/área/fator social e juros adicionais passaram em87,89s.
-  UI CAIXA11/11 aprovada, incluindo19campos em oito estados de desktop/sidebar.
+  UI CAIXA13/13 aprovada, incluindo19campos em oito estados de desktop/sidebar.
   Revisão independente fechou status indevido e lista antiga na reabertura.
-  CI integrada, referências visuais e publicação ainda pendentes neste registro.
+  Com unidades,88testes financeiros focados aprovados; CI e publicação abaixo.
 - Captura corrigida a231a042/CI41904125837 revisada;11 referências CAIXA
   atualizadas com proveniência,231 outras preservadas. Contrato visual13/13;
   layout funcional/49responsivos/28temas/77axe/zoom aprovados, apenas pixels
-  intencionais falharam antes da atualização. Nenhum limiar alterado. Nova CI pendente.
+  intencionais falharam antes da atualização. Nenhum limiar alterado; CI final verde.
 - Corrige sincronização do harness de viewport CAIXA: aguarda ResizeObserver
   atualizar o canvas antes da medição, preservando todas as exigências visuais.
   Três repetições focadas aprovadas; código da aplicação/referências intactos.
+- PR492 integrado emfa068c43, CI main41924476763 com os quatro gates aprovados.
+  Imagem imutável13369391942 conferida por hashes/configuração/14camadas e dois
+  perfis. Backup privado, lock/CAS e coordenador preservados; publicação em
+  04/11/2026 23:55:41UTC, deployment e349e769-a543-44ee-b60e-71196de356da.
+  Health200/ok/fa068c43, anônimo307/login e smoke autenticado CAIXA aprovados:
+  subsídio1091,41, prazo automático/manual, ranking/estoque,84mensais/anuais,
+  modal420parcelas/Imprimir,19campos em duas linhas1280 e mobile390 sem overflow.
+  Janela concorrente liberada; encerramento documental e sync sem reinício.
 
 ## 2026-11-04 — Página inicial: margem estável para liberar PR490
 

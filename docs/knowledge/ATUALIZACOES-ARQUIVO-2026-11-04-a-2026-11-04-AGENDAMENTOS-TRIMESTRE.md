@@ -356,3 +356,11 @@ conflitos de registro exigem integrar a base atual e nova CI do candidato,
 preservando integralmente a CAIXA publicada. Helper operacional ainda não
 executado: precondições serão atualizadas para a publicação real e novamente
 conferidas sob trava, sem reutilizar identidade de deployment antiga.
+
+Registro documental CAIXA do PR494 avançou main para e594bf70 enquanto a CI
+316ca898 estava em andamento. Somente CHANGELOG, WORKLOG e índice de conhecimento
+mudaram; runtime continuoufa068c43. Dois conflitos documentais resolvidos sem
+alterar o registro financeiro da outra entrega. Novas entradas próprias foram
+posicionadas junto do histórico de Agendamentos, para evitar colisões com novas
+entradas de outras entregas no topo. Nova CI obrigatória; autorização da mesma
+migration permanece válida, condicionada aos gates. Sem aplicação remota ainda.
