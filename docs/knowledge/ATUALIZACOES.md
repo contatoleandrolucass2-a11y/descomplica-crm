@@ -1,5 +1,44 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-05 — CAIXA: PR495 publicado e validado
+
+- Status: implementado, integrado, CI aprovada e publicado; encerramento
+  exclusivamente documental, sem novo deploy. Fonte: PR495/GitHub,
+  CI41976197227 (PR50993c01) e CI41981829345 (push/mainb1544dd1), quatro jobs
+  obrigatórios aprovados. Main e candidato têm árvore272c37a5 idêntica.
+- Produção anterior02fcbc06/deployment327a3db2, publicada pelo responsável
+  concorrente06:38:07UTC. Sua entrega foi preservada; confirmou inexistência de
+  teste ativo bloqueando a janela e manteve o registro498 em rascunho.
+  A pergunta de prioridade ficou sem objeto após essa confirmação, sem interrupção
+  de teste ativo. Nenhuma mudança própria em Agendamentos ou infraestrutura.
+- Artefato13393699737, ZIPsha256:6c558f507788344e9cbeb0169f3e03b6f279645692de30d06b70f2e9e243478a.
+  Configuração CI29731726465fb911a259acc5d5ac7a8bac43102f0201e15c3f253aa445de7da8;
+  manifesto/ID carregado7f4ad9a8e701be07dcb9256296833aed910c1ded609f23f72cfce77a11a0d482.
+  14camadas linux/amd64 verificadas; image:prove confirmou a mesma imagem em dois
+  perfis sem imprimir segredos. Backup privado de env/ledger comparado; imagem
+  anterior mantida. Sem rebuild ou testes pesados na VPS.
+- Coordenador release:production, sob lock/CAS/consulta ao vivo, publicou
+  b1544dd13aacb12690fa75e60e43e9881e1627ff em2026-11-05T07:47:19.438Z
+  (04:47:19America/Sao_Paulo), deploymentf834574b-d487-49fd-b7f8-b145be55fd4a.
+  Ledger sem pendência; GET público /api/health com nonce/no-cache200/ok/versão
+  exata e GET anônimo da CAIXA307/login. Fontes conferidas após publicação.
+- Smoke Chrome4 autenticado com dados fictícios:1280 e390 sem overflow;
+  19campos/bordas completas em duas linhas desktop; botão expande a página sem
+  diálogo; ranking antes do estoque,1516aprovadas de3494; seleção apresenta
+  descrição, composição, aprovação,84mensais/anuais, documentação e6ações.
+  Desconto10000 recalculou compra247790→237790 e crédito198232→190232 (80%).
+  Revogar autorização bloqueou aprovação/cronograma/proposta; zerar restaurou.
+  Renda4000/imóvel275000/área50/apartamento/1pessoa/sem dependentes/sem36mesesFGTS
+  gerou subsídio1091,41 e prazo420 automaticamente. Não representa aprovação
+  bancária individual nem novo confronto exaustivo com proposta oficial.
+- Evidências locais: caixa-formulario-publicado-b1544dd1.png e
+  caixa-inline-publicado-b1544dd1.png no diretório de visualizações desta demanda.
+  Captura full-page teve timeout; capturas de viewport e leituras DOM confirmadas.
+  Perfil fictício limpo e viewport restaurado. Sem exportar estoque bruto,
+  dados de clientes, salvar/enviar proposta ou imprimir fisicamente.
+- Janela liberada ao responsável concorrente após smoke. Registro final no Git
+  e Obsidian não reinicia a aplicação e não exige ciclo recursivo de documentação.
+
 ## 2026-11-04/05 — CAIXA: unidades na página e campos agrupados, revisão final
 
 - CI41970350868 do candidato55ee6ebe aprovada nos quatro jobs obrigatórios.
