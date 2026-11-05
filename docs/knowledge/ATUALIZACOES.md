@@ -210,9 +210,18 @@
   recalculou outubro para 884. Sem migration ou mudança de permissões.
 - Recibos operacionais, falha inicial57014, recuperação e limites no
   [encerramento da entrega](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md#encerramento-da-publicação-do-pr490--04112026).
-- A fonte voltou a falhar20:07Z com57014: não há dois sucessos consecutivos.
+- A fonte voltou a falhar20:07Z com57014; naquela conferência não havia dois
+  sucessos consecutivos.
   Migration20261104201024 preparada para limitar somente a RPC a30s, com prova
-  REST PostgreSQL17/pgTAP na CI. Ainda não aplicada; exige autorização específica.
+  REST PostgreSQL17/pgTAP na CI. PR493 integrado em b6dc189a após quatro gates
+  verdes no PR e main; migration autorizada e aplicada23:19 BRT como versão
+  remota20261105021909, com corpo/ACL/limites globais preservados.
+- Encerramento05/11 às00:39BRT: recuperação do coletor especificamente autorizada,
+  com trava morta preservada e MemoryMax1,5GiB. Dois ciclos automáticos completos
+  comercial+estoque aprovados, sem reinícios; pico1,13GiB. Chrome/integrado/celular
+  simulado reconferidos com carga nova e32 IDs/ordem/tamanhos preservados após
+  reload e rotação. Prints locais finais, abas de teste fechadas e viewport
+  restaurado. Saúde HTTP200/ok emfa068c43; sem novo deploy por este registro.
 
 - Agendamentos04/11: [trimestre, meta e atualização](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md).
 

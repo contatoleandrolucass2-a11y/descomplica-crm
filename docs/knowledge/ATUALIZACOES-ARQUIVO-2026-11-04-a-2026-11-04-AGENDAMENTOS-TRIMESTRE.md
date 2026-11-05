@@ -364,3 +364,170 @@ alterar o registro financeiro da outra entrega. Novas entradas próprias foram
 posicionadas junto do histórico de Agendamentos, para evitar colisões com novas
 entradas de outras entregas no topo. Nova CI obrigatória; autorização da mesma
 migration permanece válida, condicionada aos gates. Sem aplicação remota ainda.
+
+### 04/11/2026 23:47 BRT — PR493 aplicado; recuperação do coletor aguarda autorização
+
+Conferência de encerramento parcial em 05/11/2026 02:47 UTC. PR493 integrado
+em b6dc189aba1d8070cbd7a8c7dc5d02fc6f6a80ef; CI do candidato41940957864 e do
+main41947685242 concluíram os quatro gates obrigatórios com sucesso. O run
+41947984319 pertence ao Dependabot dinâmico, não a esses gates; nenhuma
+atualização de dependência ou mudança da CAIXA foi incluída.
+
+A migration local20261104201024 foi aplicada uma vez via MCP, após a autorização
+do usuário e os gates, com backup privado e comparação de identidade sob trava.
+Histórico remoto:20261105021909, salesforce_ingest_bounded_timeout. Verificação
+às02:19:25UTC confirmou statement_timeout=30s somente na função de ingestão;
+corpo MD5 48bcdeb5d43781cc7499b0a20e42d2fd, owner, ACL, SECURITY DEFINER e
+limites de roles/banco preservados. Backup:
+/etc/descomplica-crm/config-backups/salesforce-ingest-timeout-59dlnk.
+Esta operação não reiniciou aplicação nem coletor.
+
+Os testes visuais e de persistência já registrados passaram; os 32 cards foram
+restaurados e conferidos nos dois navegadores. As edições normais do usuário
+foram liberadas: novas conferências devem ser somente leitura, sem sobrescrever
+seus ajustes. Prints reais permanecem em test-results/appointments-trimestre-live.
+Celular significa viewport simulado; não foi teste em aparelho físico.
+
+Bloqueio operacional independente: o Node do coletor foi encerrado por falta de
+memória às01:36:21UTC, sob limite768MiB, deixando uma trava pertencente ao PID
+morto3300874. O processo reiniciado3384957 não consegue exportar enquanto a
+trava existir. Não há prova de vazamento de memória; não atribuir autor ao
+reinício de serviços anterior sem auditoria. O runbook do coletor proíbe limpar
+locks automaticamente após encerramento forçado.
+
+Recuperação proposta e verificada somente em leitura às02:37:19.902UTC:
+backup protegido, parada apenas do coletor, quarentena atômica da trava morta
+com CAS e elevação somente de MemoryMax para1,5GiB, mantendo as demais337
+propriedades estáveis. Host disponível11.656.257.536bytes. Helper ignorado
+recover-salesforce-collector-oom-20261105.mjs SHA256
+f713e7592622a874d14da5f5adcc7e5f5a0796888e61e2cd836d651577bf733e:
+39 testes locais, sintaxe, lint e formatação aprovados; plano remoto não alterou
+serviços. A autorização específica foi solicitada e continua pendente nesta
+conferência. Não executar --apply, mover a trava ou mudar memória sem a resposta.
+
+Restam, após aprovação: aplicar o plano sob quatro travas e gates atuais,
+observar duas cargas automáticas completas, medir pico de memória/reinícios,
+conferir dados atuais em leitura, publicar um registro documental consolidado
+e sincronizar novamente. Reavaliar se houver novo OOM, aproximação do limite,
+crescimento entre ciclos, mudança de SHA/deployment ou falha de guarda; não
+prometer ausência permanente de vazamento. A entrega completa permanece aberta.
+Fontes: GitHub PR493/runs citados, catálogo do banco via MCP, health e ledger
+observacionais, diagnóstico systemd/kernel e plano somente leitura da VPS.
+
+### 04/11/2026 23:54 BRT — Recuperação autorizada e serviço retomado
+
+O usuário autorizou expressamente o plano de recuperação apresentado: parada
+somente do coletor, backup/quarentena da trava morta e MemoryMax de768MiB para
+1,5GiB. A autorização da migration não foi reutilizada para essa operação.
+
+Aplicação inicial preservou a trava e instalou somente o drop-in96 solicitado,
+mas bloqueou antes do start por ordem de serialização de After. Diagnóstico em
+leitura provou os mesmos11 itens, sem diferença em arquivos/credenciais ou
+configuração efetiva. Também bloqueou o rollback automático; o serviço ficou
+inativo até a retomada protegida. Corrigida somente a comparação da ordem dos
+tokens de After, preservando todos, inclusive duplicados. Helper final SHA256
+5f3985cf0fc0027872db254227bd15e3f3094279db4f663ad3b3a2aa75f7179d;
+44 testes, sintaxe e lint aprovados. Sem relaxar outras propriedades.
+
+Plano de retomada somente leitura aprovado02:53:32.907UTC. --resume-apply sob
+quatro travas, CI/main/app/health recentes e CAS concluiu às02:53:55.200UTC:
+PID3564057, NRestarts0, MemoryMax1610612736 confirmado no cgroup, estabilidade8s,
+mesmos argv/runtime/proteções e serviços preservados. Backup privado protegido:
+/var/lib/descomplica-salesforce-collector-install/collector-oom-20261105-rS4Z30.
+Trava antiga em quarentena; não restaurada. Sem restaurar dados, credenciais,
+candidate, snapshots ou ledger. Nenhuma exportação manual foi disparada.
+
+Ciclo automático de startup iniciou02:53:47.908UTC. Observação somente leitura
+em test-results/collector-after-oom-recovery-20261105.ndjson; aguarda dois ciclos
+completos distintos comercial+estoque, sem sobreposição ou reinício. O primeiro
+ciclo de startup é automático; o próximo será a fronteira00/30 posterior ao
+seu término. Não afirmar intervalo de30min entre startup e próximo slot.
+
+Chrome reconectado como browser4, na mesma aba do usuário. Comparação renderizada
+em leitura confirmou32 IDs/ordem/largura/altura iguais ao integrado; nenhuma
+personalização foi gravada. Integrado novo viewport1280x900: sem overflow de
+página e fonte anterior22:04. Capturas finais adicionais aguardam a carga nova.
+
+### 05/11/2026 00:06 BRT — Primeiro ciclo e reconferência real dos navegadores
+
+Primeiro ciclo automático completo após recuperação: comercial HTTP201 às
+03:00:36.137UTC, requestId c8db5e48-a4ed-4e05-bcf5-c175ad143e81;
+estoque confirmado03:01:07.760UTC, generatedAt03:01:07.335UTC,3494unidades.
+Agenda real calculou1733s para03:30UTC/00:30BRT. PID3564057/NRestarts0;
+pico1206206464bytes, aproximadamente1,12GiB, acima do antigo768MiB e abaixo
+do novo1,5GiB. Um ciclo não comprova estabilidade de longo prazo; segundo
+ciclo automático ainda aguardado, sem disparo manual.
+
+Após reload, Chrome e integrado exibiram Atualizado em04/11/26,23:57 e17
+agendamentos de novembro, antes11 na aba integrada antiga. Comparação em leitura
+confirmou os mesmos32 IDs, ordem e tamanhos nos dois navegadores e após reload.
+Integrado1280x900 e celular simulado390x844/844x390: sem overflow horizontal do
+documento; rotação, reload em paisagem e retorno ao retrato preservaram o modelo
+integral. Gráfico salvo1205x500 permaneceu1205x500 no modelo e ajustou largura
+visível para314,65625px no celular. Nenhum perfil/card foi gravado nesta retomada.
+Filtro mensal continuou editável; reload abriu novembro vigente. Outubro foi
+selecionado apenas nas abas temporárias para capturar quatro séries, incluindo
+trimestre calendário julho/agosto/setembro e feriado12/10.
+
+Prints reais adicionais inspecionados em test-results/appointments-trimestre-live:
+chrome-recuperacao-final.jpg, integrado-recuperacao-final.jpg,
+integrado-comparativo-recuperacao-final.jpg, celular-recuperacao-final.jpg e
+celular-grafico-recuperacao-final.jpg. Captura longa do Chrome excedeu5s;
+substituída por captura visível em aba própria, sem repetir a captura longa.
+Chrome reconectado por extensão identificada no inventário; sem nova conta ou
+mudança de permissões. Abas temporárias fechadas e override de viewport removido;
+abas originais Chrome/integrado mantidas. Não repetir logout nem restaurar layouts
+sobre edições normais do usuário. Fotografias anteriores dos testes completos
+continuam válidas; esta reconferência mede a fonte nova sem refazer toda a matriz.
+
+### 05/11/2026 00:39 BRT — Aceite final da fonte e da entrega
+
+O observador encerrou com exit0 às03:39:26UTC. Dois ciclos automáticos
+consecutivos completos, sem falhas desde a retomada02:53:
+
+| Ciclo                         | Publicação comercial                                                    | Publicação de estoque                                              |
+| ----------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Startup automático02:53:47UTC | HTTP201,03:00:36.137UTC; requestId c8db5e48-a4ed-4e05-bcf5-c175ad143e81 | Confirmada03:01:07.760UTC; generatedAt03:01:07.335UTC;3494unidades |
+| Agenda03:30:04.156UTC         | HTTP201,03:38:57.291UTC; requestId95d8c7ac-bede-4768-86e2-65c9aed06ede  | Confirmada03:39:24.278UTC; generatedAt03:39:23.967UTC;3494unidades |
+
+PID3564057, NRestarts0, active/running e runtime5da46964 preservados. Lock de
+exportação livre. Memória atual1205510144bytes; pico cumulativo1215733760bytes
+(aproximadamente1,13GiB); limite1610612736bytes, folga400878976bytes. A observação
+comprova esses dois ciclos, não ausência permanente de vazamento ou capacidade
+para todo crescimento futuro. Reavaliar diante de novo OOM, aproximação do
+limite ou aumento persistente dos picos; não elevar novamente sem nova análise
+e autorização. Atualização futura do coletor deve conferir os overrides
+90/95/96 existentes, preservar as proteções e respeitar os bloqueios do instalador.
+Não restaurar a trava do processo morto nem sobrescrever dados/ledgers no rollback.
+
+Fonte de evidência operacional: journal/systemd/lock, somente leitura, arquivo
+ignorado test-results/collector-after-oom-recovery-20261105.ndjson. Não houve
+exportação manual, carga sintética na VPS, mudança de n8n, permissão, credencial,
+conta ou outra página. O aplicativo e o Chrome não foram reiniciados na recuperação.
+A migration, a recuperação e o registro são operações distintas, cada uma com
+suas evidências e autorizações; o parâmetro SQL permanece30s somente na RPC.
+
+Conferência03:39:54UTC: origin/main b6dc189aba1d8070cbd7a8c7dc5d02fc6f6a80ef;
+GET público de health HTTP200/ok com versãofa068c439eacdd70f0c6d8cfc9bcba5394e1ef43.
+Main contém a migration e a aplicação servida contém a entrega490; não apresentar
+b6 como imagem publicada. O encerramento corrente é somente documental, sem
+novo deploy ou reinício. Os resultados funcionais solicitados e os dois ciclos
+estão concluídos; publicação do registro segue o próprio PR documental e sua CI,
+sem criar ciclos recursivos de documentação.
+
+Fontes verificadas:
+
+- [PR490 publicado](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/490).
+- [PR493 integrado](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/493),
+  [CI do candidato](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/41940957864)
+  e [CI do main exato](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/41947685242):
+  quatro gates aprovados em cada SHA, incluindo prova REST PostgreSQL17 e pgTAP.
+- Histórico de migrations e metadados da função via MCP; backup privado e CAS
+  antes/depois, sem copiar dados de clientes ou credenciais para este registro.
+- [Health público](https://crm.descomplicapro.com.br/api/health), consultado na
+  data acima; saúde não substitui identidade de versão nem provas funcionais.
+- Capturas reais e comparação de DOM renderizado no Chrome/integrado, com
+  viewport móvel simulado. Controle real usado para alterar layout nos testes
+  anteriores: teclado acessível; não alegar arraste nativo por ponteiro nem
+  aparelho físico. Demais evidências pertinentes da mesma versão foram
+  reaproveitadas, sem novo teste global ou mudança de baseline.
