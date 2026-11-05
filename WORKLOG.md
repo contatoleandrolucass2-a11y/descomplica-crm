@@ -34,6 +34,8 @@
   de aprovar/imprimir. Caso219000 resulta em175200PRICE/197100SAC; MCMV reavalia
   taxa e MFOM ao cruzar o limite.29testes normais e3browser dirigidos aprovados,
   tipos/lint verdes; fórmulas canônicas não alteradas. Nova captura/CI pendentes.
+- Evidências locais e limites consolidados no changelog; a entrega será
+  integrada por squash com os registros no mesmo commit da aplicação.
 
 ## 2026-11-04 — Prazo delimitado para gravação Salesforce
 

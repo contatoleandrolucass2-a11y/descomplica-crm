@@ -2,6 +2,8 @@
 
 ## 2026-11-04 — CAIXA: unidades na página e campos agrupados, abertura
 
+- Consolidação para PR495: logs da aplicação, regressões e limites serão
+  integrados juntos pelo squash; referências anteriores não foram adotadas.
 - Retomada em05/11/2026 01:16:46UTC (04/11 local): origin/main e GitHub
   e594bf70937810162b8f5cc41abdf41f2a44633a; CI push41938824640 concluída
   com sucesso para documentação. Runtime público fa068c43, HTTP200/ok.
