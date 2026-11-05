@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-11-05 — Publicação do refresh e prova real sem reload
+
+- PR497 integrado em02fcbc06466dea47bb832c067233eef2e67eb546. Os quatro gates
+  passaram no candidato e383adfc/CI41968063594 e no main/CI41974181366.
+  No primeiro ensaio do main, o banco isolado não iniciou; repetiu-se somente
+  o job falho no mesmo SHA. Nenhum gate, baseline ou código foi dispensado.
+- Publicação protegida327a3db2-a1b3-4126-bb73-f0acf8e21cf8 às06:38:07.830UTC,
+  imagem imutável e14camadas conferidas; dois perfis runtime aprovados.
+  Health200/ok no SHA exato; status anônimo401/no-store. Sem nova migration.
+- Três abas novas montadas após deploy: Chrome1280x551, integrado1280x900,
+  celular simulado390x844. Baseline06:39:25–28UTC, todas03:33,32cards,visíveis.
+  Integrado/celular receberam04:03 às07:07:04UTC e04:33 às07:38:04UTC,
+  sem reload, navegação ou mudança de filtros após baseline. IDs, ordem,
+  largura/altura inline, filtros e rolagem idênticos nas duas visualizações.
+- A carga07:06 veio de um stop/start externo do coletor às06:59:38–40UTC;
+  foi separada da prova de cadência. Ciclo natural07:30 iniciou07:30:04UTC,
+  comercial20107:36:48.976UTC, estoque3494às07:37:14UTC. MesmoPID4134053
+  desde07:07, sem start/stop no intervalo. Nenhuma coleta manual foi disparada.
+- Chrome perdeu controle às06:49UTC (Debugger unattached), após baseline;
+  releitura e captura documentadas indisponíveis. Solicitada reativação da
+  mesma aba sem reload; resposta pendente. Não aprovar Chrome por inferência.
+  Aba própria preservada para retomada; as duas abas IAB de teste foram
+  encerradas após os prints e o viewport temporário foi restaurado.
+- Registro somente documental preparado sobre mainb1544dd1, que contém
+  entrega CAIXA independente ainda não publicada na última consulta. Runtime
+  observado continua02fcbc06; não confundir main atual com app publicado.
+  Integração deste registro aguarda a janela de publicação concorrente.
+
 ## 2026-11-04 — CAIXA: unidades na página e campos com borda completa
 
 - Substitui o modal de unidades pela expansão abaixo do resultado bancário,

@@ -626,3 +626,78 @@ testes do guard de acesso persistido também passaram. Total focado:83 testes
 distintos aprovados. Não foram alterados o guard compartilhado, outras páginas,
 RLS, grants ou catálogo de permissões. O teste continua a negar401/403 antes da
 consulta de metadados e a reter todos os asserts de no-store/503/versão exata.
+
+### 05/11/2026 04:38 BRT — Publicação e recebimento do ciclo programado em duas telas
+
+PR497: candidato e383adfc95a1fdd500731931fc1d9de5ce3f77ff,
+CI41968063594 com validate/release-gates/promotable-image/isolated-restore
+aprovados. Merge02fcbc06466dea47bb832c067233eef2e67eb546; CI41974181366
+aprovada nos quatro gates. Primeira tentativa do main falhou ao iniciar o
+Supabase isolado, com saída bruta retida pelo workflow; repetiu-se somente
+o job falho, no mesmo SHA, sem alteração de código/pipeline ou baseline.
+
+Artefato13391351141, ZIP SHA256
+99fecc380700aeadd78b3f45785889372d37cdd5fa5ea4ac86761fa72f8da535,
+imagem CI/config90e97efce78d03abd08c6b74ba476a81dccf872605f6ddb0abe6e17d7d5cdad5,
+imagem local/manifest6f01f6466ef9358a8ddc2f253076e794a36f5f6ff1c55bafa90c06a933c1f1af.
+Identidade OCI, hashes e14camadas conferidos integralmente, sem rebuild/retag.
+image:prove aprovou os dois perfis isolados sobre a mesma imagem. O primeiro
+pnpm tentou instalar dependências por padrão e abortou antes de remover o
+diretório; o link foi preservado. Package/lock/nvm são idênticos ao checkout
+conhecido5da. A opção verify-deps-before-run=false foi usada só na invocação
+para impedir reinstalação de dependências compartilhadas; nenhuma configuração
+global/arquivo ou gate foi alterado.
+
+Coordenador release:production, com consulta viva/CAS/backup/travas:
+deployment327a3db2-a1b3-4126-bb73-f0acf8e21cf8,06:38:07.830UTC/03:38BRT,
+SHA02fcbc06. Health06:38:33UTC e07:07:49UTC HTTP200/ok no SHA exato;
+GET anônimo de /api/appointments/status retornou401/no-store. Sem nova
+migration, ingestão manual, mudança de n8n, grant ou permissão.
+
+Novas abas próprias carregando a versão publicada, baseline06:39:25–28UTC:
+Chrome1280x551, integrado1280x900, celular simulado390x844. Todas03:33,
+32cards e document.visibilityState=visible. Zero comandos de reload,
+navegação ou filtro após baseline. Nas duas visualizações IAB, leitura
+07:07:04UTC mostrou04:03; leitura07:38:04UTC mostrou04:33. Comparação DOM
+integral dos32 IDs/ordem/largura/altura inline, filtros e posição de rolagem
+permaneceu idêntica ao baseline. Valores comerciais não foram inventados
+ou modificados para criar uma diferença visual; o horário confirma nova
+versão persistida recebida pelo fluxo real.
+
+Retificação importante da origem: publicação20107:06:24.377UTC, recibo
+36faa7af-4bae-468e-8d30-2e00976634c3, veio de bootstrap após stop/start
+externo06:59:38.916–06:59:40.261UTC. O observador não realizou essa operação;
+o journal não identifica seu solicitante. Portanto essa atualização comprova
+recebimento pela tela, mas não foi usada para aprovar a cadência programada.
+
+Por isso a observação foi estendida ao ciclo natural07:30. Início real
+07:30:04.726UTC, comercial20107:36:48.976UTC, recibo
+25fd7cad-74e2-4c5a-aa63-05d2f2825651. Estoque3494 confirmado07:37:14.102UTC,
+generatedAt07:37:13.820UTC. MesmoPID4134053 desdebaseline07:07, sem start/stop
+ou OOM nesse intervalo; zero reinícios, lock livre. Pico1212547072B sob limite
+1610612736B. Observador próprio encerrouexit0 após esse recibo. Nenhuma
+coleta foi disparada, nenhum temporizador foi acelerado e nenhuma fonte foi
+alterada para o teste.
+
+Chrome: controle interrompido às06:49UTC com Debugger unattached. Inventário
+ainda encontrou a mesma aba1103439828; releitura e screenshot documentados
+permaneceram indisponíveis. Reativação solicitada ao usuário sem fechar ou
+recarregar a aba; resposta pendente. Não afirmar sucesso no Chrome nem
+substituir seu print final por captura anterior ou por IAB. Aba marcada para
+retomada. As abas IAB próprias foram encerradas e o viewport restaurado após
+capturar a prova concluída. Celular é simulado, não aparelho físico.
+
+Evidências locais ignoradas em test-results/appointments-trimestre-live:
+auto-refresh-corrigido-observacoes.json; auto-refresh-corrigido-{chrome,
+integrado,celular}-antes.jpg; auto-refresh-corrigido-{integrado,celular}-depois.jpg
+e -final.jpg. Origem: test-results/collector-natural-slot-0730-20261105.ndjson.
+Não versionar prints ou dados privados. Critério de retomada: reativar o
+controle da mesma aba Chrome, conferir versão nova sem reload, salvar print;
+se a aba tiver sido recarregada/fechada, iniciar nova prova nesse navegador.
+
+Registro preparado sobre mainb1544dd1, que contém uma entrega CAIXA
+independente; a última versão publicada observada permanece02fcbc06.
+O outro publicador pediu preservação da janela de main. Não houve mensagem
+de resposta entre chats sem autorização humana específica. Este registro
+documental pode ser sincronizado, mas integração Git permanece pendente
+até a janela permitir; não reiniciar aplicação para documentação.

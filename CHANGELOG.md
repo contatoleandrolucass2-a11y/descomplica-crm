@@ -1,5 +1,9 @@
 # Changelog
 
+- Publica a correção de atualização automática de Agendamentos do PR497.
+  Integrado e celular simulado recebem o ciclo programado sem reload e preservam
+  os32 cards; conferência final do Chrome aguarda reativação do controle visual.
+
 - Padroniza a formatação do registro visual CAIXA, sem mudar imagens ou dados
   das referências aprovadas.
 

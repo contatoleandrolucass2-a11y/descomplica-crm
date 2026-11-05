@@ -1,5 +1,18 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-05 — Refresh de Agendamentos publicado; prova parcial por navegador
+
+- PR497/main02fcbc06 com quatro gates verdes e publicação protegida06:38UTC.
+  Integrado1280 e celular simulado390 atualizaram03:33 →04:03 →04:33 sem
+  reload;32cards, filtros, dimensões, ordem e rolagem preservados.
+- A primeira mudança veio de bootstrap externo da origem; a segunda foi do
+  ciclo natural07:30, com o mesmoPID e sem nova reinicialização. Esse segundo
+  ciclo confirma recebimento automático da carga programada nas duas telas.
+- Chrome continua sem aprovação: controle visual interrompido após baseline,
+  reativação da mesma aba solicitada e pendente. Registro Git de encerramento
+  ainda aguarda integração coordenada; sincronização não equivale a merge.
+  [Recibos, horários, limites e prints](ATUALIZACOES-ARQUIVO-2026-11-04-a-2026-11-04-AGENDAMENTOS-TRIMESTRE.md).
+
 ## 2026-11-04/05 — CAIXA: unidades na página e campos agrupados, revisão final
 
 - CI41970350868 do candidato55ee6ebe aprovada nos quatro jobs obrigatórios.
