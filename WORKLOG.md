@@ -15,6 +15,9 @@
 - Testes locais:43 casos de leitura/metas/equipe e26 de calendário/modelo
   compartilhado aprovados; produtor7/7 e ingestão48/1skip. pgTAP obrigatório na
   CI isolada; Docker local não disponível. Sem alteração remota nesta etapa.
+- CI42081900887:5079 testes passaram; quatro falhas de inventário causadas pela
+  nova migration. Atualizados somente manifesto obrigatório105/pgTAP2476 e
+  allowlist de homologação, preservando os gates e o trem Auth/MFA existente.
 - Ordem obrigatória: CI, autorização específica da migration, banco compatível,
   aplicação e atualização controlada do coletor, carga reconciliada e prints.
   Rollback conserva colunas e versão compatível; não apagar dados ou locks.
