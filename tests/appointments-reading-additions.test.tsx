@@ -48,7 +48,7 @@ describe("rankings de PDV e empreendimento", () => {
     expect(html).toContain('data-dashboard-card-id="ranking-pdv"');
     expect(html).toContain('data-dashboard-card-id="ranking-development"');
     expect(html).toContain('data-dashboard-card-id="appointments-overdue"');
-    expect(html).toContain("Agendamentos vencidos sem visita realizada");
+    expect(html).toContain("Agendamentos sem visita confirmada");
   });
 });
 

@@ -52,6 +52,7 @@ function rowsFor(query) {
     goalsByMonth: model.goalsByMonth,
   });
   const rows = reading.details ?? [];
+  if (query.subset === "without_visit") return rows.filter((row) => row.visitPerformed !== true);
   return query.subset === "overdue"
     ? rows.filter(
         (row) =>
@@ -75,6 +76,7 @@ function pageFor(query, all) {
 }
 assert.equal(rowsFor(query).length, 136);
 assert.equal(rowsFor({ ...query, subset: "overdue" }).length, 84);
+assert.equal(rowsFor({ ...query, subset: "without_visit" }).length, 84);
 const compact = compactAppointmentSummary(model.analysis);
 const source = {
   snapshot,
@@ -87,12 +89,12 @@ const fixture = `import {createRoot} from 'react-dom/client';
 import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';
 import {APPOINTMENTS_CANVAS_DEFAULT_CARDS as defaults} from '@/app/(protected)/app/etapas/_components/appointments-canvas-config';
 import '@/app/globals.css';
-const metrics=['appointments.daily','appointments.weekly','appointments.monthly','appointments.details','appointments.overdue'];
+const metrics=['appointments.goal','appointments.daily','appointments.weekly','appointments.monthly','appointments.details','appointments.overdue'];
 const cards=metrics.map((metric,order)=>{const card=structuredClone(defaults.find(card=>card.metric===metric));card.layout={...card.layout,columnSpan:12,height:500,order};if(metric==='appointments.daily')card.type='line';return card});
 const profile={id:'synthetic-metas',userId:'synthetic-user',pageKey:'crm.stage.appointments',scopeKey:'channel.house',name:'QA sintético',isDefault:true,version:1,schemaVersion:2,cards,createdAt:'2026-10-31T12:00:00Z',updatedAt:'2026-10-31T12:00:00Z'};
 globalThis.__profile=profile;
 const actions={loadDetails:async input=>(await fetch('/details',{method:'POST',body:JSON.stringify(input)})).json(),exportDetails:async()=>{throw Error('Exportação não deve ser acionada pela UI')}};
-createRoot(document.getElementById('root')).render(<><p role='note'>Ambiente de QA — dados sintéticos, sem conexão com produção</p><main><AppointmentsDashboard canEditDashboard analysis={null} compactSummary={${JSON.stringify(compact)}} detailSource={${JSON.stringify(source)}} detailActions={actions} calendarDate='2026-10-31' brokerRoster={${JSON.stringify(model.brokerRoster)}} goalsByMonth={${JSON.stringify(model.goalsByMonth)}} initialProfileState={{pageKey:profile.pageKey,scopeKey:profile.scopeKey,profiles:[profile]}} /></main></>);`;
+createRoot(document.getElementById('root')).render(<><p role='note'>Ambiente de QA — dados sintéticos, sem conexão com produção</p><main style={{zoom:${Number(process.env.QA_DASHBOARD_ZOOM || 1)}}}><AppointmentsDashboard canEditDashboard analysis={null} compactSummary={${JSON.stringify(compact)}} detailSource={${JSON.stringify(source)}} detailActions={actions} calendarDate='2026-10-31' brokerRoster={${JSON.stringify(model.brokerRoster)}} goalsByMonth={${JSON.stringify(model.goalsByMonth)}} initialProfileState={{pageKey:profile.pageKey,scopeKey:profile.scopeKey,profiles:[profile]}} /></main></>);`;
 const built = await build({
   root,
   configFile: false,
@@ -211,23 +213,64 @@ try {
       });
       await page.goto(origin);
       await page.evaluate((theme) => (document.documentElement.dataset.theme = theme), theme);
+      const indicator = page.locator('[data-dashboard-card-id="appointments-goal"]');
+      await indicator.scrollIntoViewIfNeeded();
+      const indicatorBox = await indicator.boundingBox();
+      await page.mouse.move(
+        indicatorBox.x + indicatorBox.width * 0.3,
+        indicatorBox.y + indicatorBox.height * 0.3,
+      );
+      assert.notEqual(await indicator.evaluate((el) => getComputedStyle(el).transform), "none");
+      assert.equal(
+        await indicator.locator("article").evaluate((el) => getComputedStyle(el).transform),
+        "none",
+      );
+      await indicator
+        .getByRole("button", { name: "Abrir detalhes deste indicador", exact: true })
+        .click();
+      const indicatorDialog = page.getByRole("dialog", {
+        name: "Detalhes do indicador",
+        exact: true,
+      });
+      await expect(indicatorDialog).toBeVisible();
+      const centered = await indicatorDialog.boundingBox();
+      assert.ok(Math.abs(centered.x + centered.width / 2 - viewport.width / 2) <= 1);
+      assert.ok(Math.abs(centered.y + centered.height / 2 - viewport.height / 2) <= 1);
+      await page.mouse.move(0, 0);
+      assert.deepEqual(await indicatorDialog.boundingBox(), centered);
+      if (theme === "dark")
+        await page.screenshot({
+          path: path.join(out, `sintetico-resumo-card-${viewport.width}.png`),
+        });
+      await page.keyboard.press("Escape");
+      await expect(indicatorDialog).not.toBeVisible();
+      await page.getByRole("button", { name: "Outubro de 2026", exact: true }).click();
+      const calendarDialog = page.getByRole("dialog", { name: "Selecione o período", exact: true });
+      await expect(calendarDialog).toBeVisible();
+      const calendarBounds = await calendarDialog.boundingBox();
+      assert.ok(Math.abs(calendarBounds.x + calendarBounds.width / 2 - viewport.width / 2) <= 1);
+      assert.ok(Math.abs(calendarBounds.y + calendarBounds.height / 2 - viewport.height / 2) <= 1);
+      await page.mouse.move(0, 0);
+      assert.deepEqual(await calendarDialog.boundingBox(), calendarBounds);
+      await page.keyboard.press("Escape");
+      await expect(calendarDialog).not.toBeVisible();
       const weekly = page.locator('[data-dashboard-card-id="appointments-weekly"]');
       await weekly.scrollIntoViewIfNeeded();
       const weeklyLine = weekly.locator("[data-dashboard-goal-line]");
       await expect(weeklyLine).toHaveAttribute(
         "aria-label",
-        "Meta semanal: linha horizontal em 96 agendamentos",
+        "Meta semanal: referência dinâmica por período; valores nos detalhes de cada torre",
       );
       await expect(weekly.locator("[data-appointments-reference-summary]")).toHaveText(
-        "Meta semanal 96",
+        "Meta semanal 6–12",
       );
       const pathBefore = await weeklyLine.locator("path").getAttribute("d");
-      assert.match(pathBefore, /^M0,[\d.]+ H100$/);
-      assert.ok(!pathBefore.includes("V"));
+      assert.match(pathBefore, /^M0,/);
+      assert.ok(pathBefore.includes("V"));
       await weekly.getByRole("button", { name: /2ª semana: 40 agendamentos/ }).click();
       await expect(weeklyLine).toHaveAttribute(
         "aria-label",
-        "Meta semanal: linha horizontal em 96 agendamentos",
+        "Meta semanal: referência dinâmica por período; valores nos detalhes de cada torre",
       );
       await weekly.getByRole("button", { name: /2ª semana: 40 agendamentos/ }).click();
       const monthly = page.locator('[data-dashboard-card-id="appointments-monthly"]');
@@ -263,7 +306,10 @@ try {
       assert.ok(labels.every((label) => /: [\d.]+$/.test(label)));
       await expect(averagePoints.nth(4)).toHaveAttribute("aria-label", /dia 5: 5$/);
       await averagePoints.nth(4).focus();
-      await expect(comparison.getByRole("tooltip")).toHaveText("5");
+      await expect(page.getByRole("tooltip")).toHaveText("5");
+      const lineTooltip = await page.getByRole("tooltip").boundingBox();
+      assert.ok(Math.abs(lineTooltip.x + lineTooltip.width / 2 - viewport.width / 2) <= 1);
+      assert.ok(Math.abs(lineTooltip.y + lineTooltip.height / 2 - viewport.height / 2) <= 1);
       const quarterPoints = comparison
         .locator('[data-comparison-series="quarter-average"]')
         .locator("..")
@@ -271,7 +317,7 @@ try {
       await expect(quarterPoints).toHaveCount(31);
       await expect(quarterPoints.nth(4)).toHaveAttribute("aria-label", /dia 5: 3$/);
       await quarterPoints.nth(4).focus();
-      await expect(comparison.getByRole("tooltip")).toHaveText("3");
+      await expect(page.getByRole("tooltip")).toHaveText("3");
       await comparison.getByText("Ver valores e cobertura", { exact: true }).click();
       await expect(comparison.locator("tbody tr").nth(4).locator("td").nth(2)).toHaveText("5");
       await expect(comparison.locator("tbody tr").nth(4).locator("td").nth(3)).toHaveText("3");
@@ -284,12 +330,21 @@ try {
         comparison.locator('[data-appointments-day="2026-10-03"] [title="Sáb"]'),
       ).toHaveCount(1);
       const dayFive = comparison.locator('[data-appointments-day="2026-10-05"]');
+      await dayFive.scrollIntoViewIfNeeded();
+      await page.mouse.move(0, 0);
+      await page.keyboard.press("Escape");
       await dayFive.locator("[data-appointments-column-label]").hover();
       await expect(
         page.getByRole("dialog", { name: "Equipe — 05/10/2026", exact: true }),
       ).toHaveCount(0);
       await dayFive.locator("[data-appointments-track]").hover();
       const teamDialog = page.getByRole("dialog", { name: "Equipe — 05/10/2026", exact: true });
+      // Scrolling a narrow viewport can pass the numeric trigger under the mouse.
+      await page.keyboard.press("Escape");
+      await dayFive.locator("[data-appointments-track]").hover();
+      await expect(teamDialog).toHaveCount(0);
+      await page.mouse.move(0, 0);
+      await dayFive.locator("[data-appointments-value]").hover();
       await expect(teamDialog).toBeVisible();
       await expect(
         teamDialog.getByRole("table", { name: "Equipe com agendamento", exact: true }),
@@ -313,11 +368,20 @@ try {
         .getByRole("heading", { name: "Evolução de agendamentos por dia", exact: true })
         .hover();
       await dayFive.focus();
-      await expect(teamDialog).toBeVisible();
-      await dayFive.press("ArrowDown");
+      await expect(teamDialog).toHaveCount(0);
+      const keyboardTeam = comparison.getByRole("button", {
+        name: "Ver equipe por dia",
+        exact: true,
+      });
+      await keyboardTeam.focus();
+      await keyboardTeam.press("Enter");
+      const keyboardDialog = page.getByRole("dialog", { name: /^Equipe — /u });
+      await expect(keyboardDialog).toBeVisible();
       await expect(
-        teamDialog.getByRole("button", { name: "Fechar equipe do dia", exact: true }),
+        keyboardDialog.getByRole("button", { name: "Fechar equipe do dia", exact: true }),
       ).toBeFocused();
+      await keyboardDialog.getByLabel("Dia", { exact: true }).selectOption("2026-10-05");
+      await expect(teamDialog).toBeVisible();
       await page.keyboard.press("Escape");
       await expect(teamDialog).toHaveCount(0);
       if (touch) {
@@ -426,8 +490,14 @@ try {
           top: el.scrollTop,
           height: el.scrollHeight,
           client: el.clientHeight,
+          width: el.scrollWidth,
+          clientWidth: el.clientWidth,
         }));
         assert.ok(metrics.top > 0);
+        assert.ok(
+          metrics.width <= metrics.clientWidth + 1,
+          JSON.stringify({ id, viewport, metrics }),
+        );
         tables.push({
           id,
           count,
@@ -446,7 +516,7 @@ try {
       evidence.checks.push({
         theme,
         viewport,
-        weeklyTarget: 96,
+        weeklyGoals: [6, 12, 10, 12, 12],
         weeklyTargetStableAfterWeekSelection: true,
         weeklyPath: pathBefore,
         monthlyTarget: 52,

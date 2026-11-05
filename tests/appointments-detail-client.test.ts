@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createAppointmentDetailController } from "@/lib/crm/stages/appointments-detail-client";
 import {
   appointmentDetailQueryKey,
+  isAppointmentWithoutConfirmedVisit,
   isCompleteAppointmentDetailPage,
   type AppointmentDetailPage,
   type AppointmentDetailResult,
@@ -45,6 +46,65 @@ const complete = (count = 150): AppointmentDetailPage => ({
 });
 
 describe("per-dashboard operational page controller", () => {
+  it("derives unconfirmed visits from a complete authorized bootstrap without another late server read", async () => {
+    const all = complete(17);
+    all.rows![0]!.scheduledAt = null;
+    all.rows![2]!.scheduledAt = "2026-12-01T15:00:00Z";
+    const loadDetails = vi.fn();
+    const controller = createAppointmentDetailController(
+      { loadDetails, exportDetails: vi.fn() },
+      { ...source, initialPage: all },
+    );
+    const withoutVisit = { ...query, subset: "without_visit" as const };
+    const result = await controller.loadAllDetails({ query: withoutVisit, snapshot });
+    expect(result).toMatchObject({
+      status: "ready",
+      total: 9,
+      offset: 0,
+      nextCursor: null,
+      previousCursor: null,
+    });
+    expect(result.status === "ready" && result.rows).toHaveLength(9);
+    expect(controller.peek(appointmentDetailQueryKey(withoutVisit))).toEqual(result);
+    expect(loadDetails).not.toHaveBeenCalled();
+    expect(await controller.loadAllDetails({ query, snapshot })).toEqual(all);
+  });
+  it("never derives unconfirmed totals from a partial bootstrap or another query's complete rows", async () => {
+    const loadDetails = vi.fn(async () => complete(1));
+    const controller = createAppointmentDetailController(
+      { loadDetails, exportDetails: vi.fn() },
+      source,
+    );
+    const withoutVisit = { ...query, subset: "without_visit" as const };
+    await controller.loadAllDetails({ query: withoutVisit, snapshot });
+    expect(loadDetails).toHaveBeenCalledExactlyOnceWith({
+      query: withoutVisit,
+      snapshot,
+      cursor: null,
+      all: true,
+    });
+    const completeController = createAppointmentDetailController(
+      { loadDetails, exportDetails: vi.fn() },
+      { ...source, initialPage: complete(17) },
+    );
+    await completeController.loadAllDetails({
+      query: { ...withoutVisit, filters: { owner: "Corretor A" } },
+      snapshot,
+    });
+    expect(loadDetails).toHaveBeenCalledTimes(2);
+  });
+  it("recognizes only explicit confirmation, without using the attendance timestamp as a substitute", () => {
+    const row = complete(1).rows![0]!;
+    expect(isAppointmentWithoutConfirmedVisit({ ...row, visitPerformed: false })).toBe(true);
+    expect(isAppointmentWithoutConfirmedVisit({ ...row, visitPerformed: true })).toBe(false);
+    expect(
+      isAppointmentWithoutConfirmedVisit({
+        ...row,
+        attendedAt: "2026-10-20T15:30:00Z",
+        visitPerformed: null as unknown as boolean,
+      }),
+    ).toBe(true);
+  });
   it("distinguishes complete reads from partial bootstrap pages and shares all rows across copies", async () => {
     let resolve!: (result: AppointmentDetailResult) => void;
     const loadDetails = vi.fn(

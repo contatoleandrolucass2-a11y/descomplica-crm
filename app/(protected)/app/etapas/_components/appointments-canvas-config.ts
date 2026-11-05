@@ -37,7 +37,7 @@ const seeds: readonly AppointmentsSeed[] = [
     metric: "team.productive",
     title: "Equipe produtiva",
     type: "donut",
-    columnSpan: 3,
+    columnSpan: 2,
     height: 288,
     types: ["donut", "kpi"],
   },
@@ -275,7 +275,7 @@ const seeds: readonly AppointmentsSeed[] = [
   {
     id: "appointments-overdue",
     metric: "appointments.overdue",
-    title: "Agendamentos vencidos sem visita realizada",
+    title: "Agendamentos sem visita confirmada",
     type: "table",
     columnSpan: 12,
     height: 500,
@@ -318,7 +318,7 @@ export const APPOINTMENTS_CANVAS_DEFAULT_CARDS: DashboardCard[] = seeds.map((see
   layout: {
     order,
     columnSpan: seed.columnSpan,
-    height: chartMetrics.has(seed.metric) ? 500 : seed.height,
+    height: order < 12 ? 194 : chartMetrics.has(seed.metric) ? 500 : seed.height,
   },
 }));
 

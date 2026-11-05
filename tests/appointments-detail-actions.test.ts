@@ -125,6 +125,96 @@ describe("authorized appointment detail server functions", () => {
       ),
     ).toBe(true);
   });
+  it("returns every unconfirmed visit before pagination regardless of the planned attendance date", async () => {
+    const fixture = appointmentModel(127);
+    const model = {
+      ...fixture,
+      analysis: {
+        ...fixture.analysis,
+        appointments: fixture.analysis.appointments.map((row, index) => ({
+          ...row,
+          visitPerformed: index === 0,
+          scheduledAt:
+            index === 1 ? null : index === 2 ? "2026-11-15T15:00:00Z" : "2026-10-20T15:00:00Z",
+          attendedAt: index === 3 ? "2026-10-20T15:10:00Z" : null,
+        })),
+      },
+    };
+    mocks.load.mockResolvedValue(model);
+    const input = {
+      query: { ...query, subset: "without_visit" },
+      snapshot: appointmentSnapshotIdentity(model),
+    };
+    const first = await readAppointmentDetailsAction(input);
+    expect(first).toMatchObject({ status: "ready", total: 126 });
+    expect(first.status === "ready" && first.rows).toHaveLength(50);
+    const all = await readAppointmentDetailsAction({ ...input, all: true });
+    expect(all).toMatchObject({
+      status: "ready",
+      total: 126,
+      offset: 0,
+      nextCursor: null,
+      previousCursor: null,
+    });
+    if (all.status !== "ready") throw new Error("Expected every unconfirmed visit");
+    expect(all.rows).toHaveLength(126);
+    expect(all.rows!.every((row) => row.visitPerformed !== true)).toBe(true);
+    expect(all.rows!.some((row) => row.scheduledAt === null)).toBe(true);
+    expect(all.rows!.some((row) => row.scheduledAt === "2026-11-15T15:00:00Z")).toBe(true);
+    expect(all.rows!.some((row) => row.attendedAt !== null)).toBe(true);
+    expect(all.rows!.some((row) => row.accountName === "Conta sintética 00126")).toBe(true);
+    const exported = await exportAppointmentDetailsAction(input);
+    expect(exported).toMatchObject({ status: "ready", total: 126 });
+    expect(exported.status === "ready" && exported.csv.split("\r\n")).toHaveLength(127);
+  });
+  it("keeps the unconfirmed subset within the authorized period and team filters", async () => {
+    const fixture = appointmentModel(127);
+    const model = {
+      ...fixture,
+      analysis: {
+        ...fixture.analysis,
+        appointments: fixture.analysis.appointments.map((row, index) => ({
+          ...row,
+          visitPerformed: index === 0,
+          scheduledAt: null,
+          createdAt: index === 126 ? "2026-09-30T15:00:00Z" : row.createdAt,
+        })),
+      },
+    };
+    mocks.load.mockResolvedValue(model);
+    const all = await readAppointmentDetailsAction({
+      query: {
+        ...query,
+        subset: "without_visit",
+        filters: { owner: "Corretor A", manager: "Gerente A", channel: 0 },
+      },
+      snapshot: appointmentSnapshotIdentity(model),
+      all: true,
+    });
+    expect(all).toMatchObject({ status: "ready", total: 62 });
+    expect(
+      all.status === "ready" &&
+        all.rows!.every(
+          (row) =>
+            row.owner === "Corretor A" &&
+            row.salesManager === "Gerente A" &&
+            row.visitPerformed === false &&
+            row.createdAt === "2026-10-19T15:00:00Z",
+        ),
+    ).toBe(true);
+    const otherSubsetCursor = await readAppointmentDetailsAction({
+      query,
+      snapshot: appointmentSnapshotIdentity(model),
+    });
+    if (otherSubsetCursor.status !== "ready") throw new Error("Expected initial authorized page");
+    expect(
+      await readAppointmentDetailsAction({
+        query: { ...query, subset: "without_visit" },
+        snapshot: appointmentSnapshotIdentity(model),
+        cursor: otherSubsetCursor.nextCursor,
+      }),
+    ).toEqual({ status: "invalid_request" });
+  });
   it("rejects malformed complete modes and any combined cursor before reading a model", async () => {
     const input = { query, snapshot: appointmentSnapshotIdentity(appointmentModel()) };
     for (const malformed of [

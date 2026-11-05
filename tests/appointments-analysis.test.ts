@@ -504,7 +504,9 @@ describe("appointment chart analysis", () => {
     });
     expect(result.total).toBe(1);
     expect(result.details?.map((row) => row.accountName)).toEqual(["Conta A"]);
-    expect(result.managers).toEqual([{ key: "Gerente A", label: "Gerente A", total: 1 }]);
+    expect(result.managers).toEqual([
+      { key: "Gerente A", label: "Gerente A", total: 1, goal: null },
+    ]);
     expect(result.accountRankings).toEqual([{ key: "Ouro", label: "Ouro", total: 1 }]);
   });
 
@@ -1098,6 +1100,7 @@ describe("appointment chart analysis", () => {
       key: "Responsável não informado",
       label: "Responsável não informado",
       total: 40,
+      goal: null,
     });
     expect(result.stores.find((item) => item.label === "Loja não informada")?.total).toBe(40);
     expect(

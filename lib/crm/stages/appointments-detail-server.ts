@@ -7,6 +7,7 @@ import type { AppointmentsReadModel } from "./data";
 import {
   APPOINTMENT_DETAIL_PAGE_SIZE,
   appointmentDetailQueryKey,
+  isAppointmentWithoutConfirmedVisit,
   type AppointmentDetailPage,
   type AppointmentDetailQuery,
   type AppointmentDetailResult,
@@ -19,7 +20,7 @@ export const appointmentDetailQuerySchema = z
     month: z.string().regex(/^(?!0000)\d{4}-(0[1-9]|1[0-2])$/u),
     year: z.string().regex(/^(?!0000)\d{4}$/u),
     calendarDate: z.iso.date(),
-    subset: z.literal("overdue").optional(),
+    subset: z.enum(["overdue", "without_visit"]).optional(),
     filters: z
       .object({
         createdDate: z.iso.date().optional(),
@@ -89,6 +90,8 @@ export function fullAppointmentDetails(
     goalsByMonth: model.goalsByMonth,
   });
   if (reading.coverage === "unavailable" || reading.details === null) return null;
+  if (query.subset === "without_visit")
+    return reading.details.filter(isAppointmentWithoutConfirmedVisit);
   // Filter the complete authorized snapshot before pagination and CSV export.
   // scheduledAt is Salesforce ActivityDateTime: the planned appointment date/time.
   // attendedAt is the actual visit date and is normally null for an unvisited row.

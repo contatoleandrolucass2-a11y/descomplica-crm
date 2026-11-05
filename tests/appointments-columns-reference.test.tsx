@@ -7,6 +7,27 @@ import {
 } from "@/app/(protected)/app/etapas/_components/AppointmentsColumns";
 
 describe("appointments reference and calendar labels", () => {
+  it("uses each calendar bucket target and keeps a below-goal zero visibly classified", () => {
+    const html = renderToStaticMarkup(
+      <AppointmentsColumns
+        daily
+        goalLabel="Meta diária"
+        showGoalSummary
+        label="Dias úteis"
+        buckets={[
+          { key: "2026-11-02", label: "02", total: 0, goal: 0 },
+          { key: "2026-11-04", label: "04", total: 34, goal: 34 },
+          { key: "2026-11-05", label: "05", total: 0, goal: 68 },
+        ]}
+      />,
+    );
+    expect(html).toContain("Meta diária 0–68");
+    expect(html).toContain("05/11/2026: 0 agendamentos; meta 68; abaixo da referência");
+    expect(html).toMatch(/data-appointments-value-status="negative"[^>]*>0<\/span>/u);
+    expect(html).toContain('data-appointments-team-day="2026-11-05"');
+    expect(html.match(/data-goal-status="negative"/gu)).toHaveLength(1);
+    expect(html.match(/data-goal-status="positive"/gu)).toHaveLength(2);
+  });
   it("draws a single horizontal target from the start to the end without steps", () => {
     expect(appointmentsGoalPath([60, 60, 60, 60, 60], 300, 4)).toBe("M0,60 H100");
     expect(appointmentsGoalPath([0, 0], 300, 4)).toBe("M0,300 H100");

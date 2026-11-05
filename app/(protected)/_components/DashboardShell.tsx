@@ -27,6 +27,10 @@ import {
 import type { NavigationItem } from "@/lib/navigation/presentation";
 
 import { AppPageIcon } from "./AppPageIcon";
+import {
+  APPOINTMENTS_REFERENCE_WIDTH,
+  useAppointmentsPresentation,
+} from "./appointments-presentation";
 import styles from "./ProtectedShell.module.css";
 
 const icons = {
@@ -96,21 +100,50 @@ function AppointmentsDashboardShell({
   const collapsed = !hovered && !keyboardFocused;
   const [updatedAt, setUpdatedAt] = useState("");
   const productiveTeam = activePageKey === "crm.productive_team";
+  const appointments = activePageKey === "crm.stage.appointments";
+  const [appointmentsReady, setAppointmentsReady] = useState(false);
+  const appointmentsComposition = appointments && appointmentsReady;
   const [headerHeight, setHeaderHeight] = useState(58);
+  const [appointmentsSidebarHeight, setAppointmentsSidebarHeight] = useState<number | null>(null);
   const contextValue = useMemo(() => ({ setUpdatedAt }), [setUpdatedAt]);
   const shellRef = useRef<HTMLDivElement>(null);
   const [shellSize, setShellSize] = useState({ width: 0, overlay: false });
 
   useEffect(() => {
-    if (!productiveTeam) return;
+    const shell = shellRef.current;
+    if (!appointments || !shell) return;
+    const update = () =>
+      setAppointmentsReady(Boolean(shell.querySelector("[data-appointments-dashboard]")));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(shell, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [appointments]);
+
+  useEffect(() => {
+    if (!productiveTeam && !appointments) return;
     const header = document.querySelector<HTMLElement>("[data-protected-topbar]");
     if (!header) return;
-    const measure = () => setHeaderHeight(header.getBoundingClientRect().height);
+    const measure = () => {
+      const bounds = header.getBoundingClientRect();
+      const shell = shellRef.current;
+      const rootZoom =
+        appointments && shell && shell.offsetWidth > 0
+          ? shell.getBoundingClientRect().width / shell.offsetWidth
+          : 1;
+      setHeaderHeight(bounds.height / rootZoom);
+      if (appointments)
+        setAppointmentsSidebarHeight(Math.max(1, (window.innerHeight - bounds.bottom) / rootZoom));
+    };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(header);
-    return () => observer.disconnect();
-  }, [productiveTeam]);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [productiveTeam, appointments, shellSize.width]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -144,16 +177,36 @@ function AppointmentsDashboardShell({
   // document flow, so rows and proportions remain stable without a tall empty
   // transformed wrapper or rewriting the user's saved card dimensions.
   const baseWidth = Math.max(1, shellSize.width - SIDEBAR_RAIL_WIDTH);
+  const appointmentsAvailableWidth = Math.max(
+    1,
+    shellSize.width -
+      (!collapsed && !shellSize.overlay ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_RAIL_WIDTH),
+  );
   const contentScale =
-    !collapsed && !shellSize.overlay && shellSize.width > 0
-      ? Math.max(1, shellSize.width - SIDEBAR_EXPANDED_WIDTH) / baseWidth
-      : 1;
+    appointmentsComposition && shellSize.width > 0
+      ? appointmentsAvailableWidth / APPOINTMENTS_REFERENCE_WIDTH
+      : !collapsed && !shellSize.overlay && shellSize.width > 0
+        ? Math.max(1, shellSize.width - SIDEBAR_EXPANDED_WIDTH) / baseWidth
+        : 1;
   const surfaceStyle = {
-    "--dashboard-layout-width": shellSize.width > 0 ? `${baseWidth}px` : "100%",
+    "--dashboard-layout-width": appointmentsComposition
+      ? `${APPOINTMENTS_REFERENCE_WIDTH}px`
+      : shellSize.width > 0
+        ? `${baseWidth}px`
+        : "100%",
     "--dashboard-content-scale": contentScale,
   } as CSSProperties;
+  const presentation = useAppointmentsPresentation({
+    enabled: appointmentsComposition,
+    root: shellRef,
+    surfaceScale: contentScale,
+  });
 
   function guide(direction: "previous" | "next") {
+    if (appointments) {
+      presentation.guide(direction);
+      return;
+    }
     const sections = Array.from(
       document.querySelectorAll<HTMLElement>("[data-appointments-section]"),
     ).filter((section) => section.getClientRects().length > 0);
@@ -180,18 +233,32 @@ function AppointmentsDashboardShell({
     <DashboardSidebarContext.Provider value={contextValue}>
       <div
         ref={shellRef}
-        className={[styles.dashboardShell, productiveTeam && styles.productiveTeamShell]
+        className={[
+          styles.dashboardShell,
+          productiveTeam && styles.productiveTeamShell,
+          appointments && styles.appointmentsShell,
+        ]
           .filter(Boolean)
           .join(" ")}
         style={
           {
             "--dashboard-sidebar-rail": `${SIDEBAR_RAIL_WIDTH}px`,
             "--dashboard-sidebar-expanded": `${SIDEBAR_EXPANDED_WIDTH}px`,
-            ...(productiveTeam ? { "--dashboard-header-height": `${headerHeight}px` } : {}),
+            ...(productiveTeam || appointments
+              ? { "--dashboard-header-height": `${headerHeight}px` }
+              : {}),
+            ...(appointments ? { "--appointments-presentation-scale": contentScale } : {}),
+            ...(appointments && appointmentsSidebarHeight !== null
+              ? { "--appointments-sidebar-height": `${appointmentsSidebarHeight}px` }
+              : {}),
           } as CSSProperties
         }
         data-dashboard-shell
+        data-appointments-composition={appointmentsComposition ? "true" : undefined}
         data-collapsed={collapsed}
+        data-presentation-active={
+          appointments && presentation.activeCardId !== null ? "true" : undefined
+        }
       >
         <aside
           className={styles.dashboardSidebar}
@@ -260,6 +327,19 @@ function AppointmentsDashboardShell({
           </div>
         </aside>
         <div className={styles.dashboardContent} data-dashboard-content>
+          {appointments && presentation.activeCardId !== null ? (
+            <div
+              className={styles.appointmentsPresentationBar}
+              aria-label="Apresentação do gráfico"
+            >
+              <button type="button" onClick={presentation.exit}>
+                Visão geral
+              </button>
+              <p role="status" aria-live="polite">
+                {presentation.announcement}
+              </p>
+            </div>
+          ) : null}
           <div
             className={styles.dashboardSurface}
             style={surfaceStyle}

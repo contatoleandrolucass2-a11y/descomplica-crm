@@ -35,7 +35,7 @@ import {DailyAppointmentsTeamDetails} from '@/app/(protected)/app/etapas/_compon
 import '@/app/globals.css';
 const brokerRoster=[{key:'a',owner:'Ana Maria Silva',manager:'João Carlos Souza'},{key:'b',owner:'Bia Costa',manager:'João Carlos Souza'}];
 const analysis={version:4,viewKey:'without_canal_imob',brokerCount:2,brokerManagerCount:1,coverageStart:'2026-10-01',referenceDate:'2026-10-31',dimensions:{managers:['João Carlos Souza'],owners:brokerRoster.map(row=>row.owner),companies:['Empresa sintética'],developments:[],stores:[]},facts:[],appointments:[{createdAt:'2026-10-05T12:00:00Z',scheduledAt:null,attendedAt:null,visitPerformed:false,regionalManager:'Regional Carlos Santos',salesManager:'João Carlos Souza',owner:'Ana Maria Silva',accountName:'',accountRanking:'',channel:1,company:'Empresa sintética',registeredBroker:true}]};
-createRoot(document.getElementById('root')).render(<main style={{padding:16}}><p>QA sintético: foco de equipe por dia</p><DailyAppointmentsTeamDetails analysis={analysis} brokerRoster={brokerRoster} filters={{channel:1}} month='2026-10' buckets={[{key:'2026-10-05',label:'05',total:1},{key:'2026-10-06',label:'06',total:0}]}><button data-appointments-day='2026-10-05'><span data-appointments-track>05:1</span><span data-appointments-column-label>05</span></button><button data-appointments-day='2026-10-06'><span data-appointments-track>06:0</span><span data-appointments-column-label>06</span></button></DailyAppointmentsTeamDetails><button>Próximo card</button></main>);`;
+createRoot(document.getElementById('root')).render(<main style={{padding:16,zoom:0.6}}><p>QA sintético: foco de equipe por dia</p><DailyAppointmentsTeamDetails analysis={analysis} brokerRoster={brokerRoster} filters={{channel:1}} month='2026-10' buckets={[{key:'2026-10-05',label:'05',total:1},{key:'2026-10-06',label:'06',total:0}]}><button data-appointments-day='2026-10-05'><span data-appointments-track>Barra 05</span><span data-appointments-value data-appointments-team-day="2026-10-05">1</span><span data-appointments-column-label>05</span></button><button data-appointments-day='2026-10-06'><span data-appointments-track>Barra 06</span><span data-appointments-value data-appointments-team-day="2026-10-06">0</span><span data-appointments-column-label>06</span></button></DailyAppointmentsTeamDetails><button>Próximo card</button></main>);`;
       },
     },
   ],
@@ -131,7 +131,23 @@ try {
     await page.getByRole("button", { name: "Próximo card", exact: true }).focus();
     const day = page.locator('[data-appointments-day="2026-10-05"]');
     await day.locator("[data-appointments-track]").hover();
+    await expect(dialog).toHaveCount(0);
+    await day.locator("[data-appointments-value]").hover();
     await expect(dialog).toBeVisible();
+    const before = await dialog.boundingBox();
+    const viewport = page.viewportSize();
+    assert.ok(Math.abs(before.x + before.width / 2 - viewport.width / 2) <= 1);
+    assert.ok(Math.abs(before.y + before.height / 2 - viewport.height / 2) <= 1);
+    await page.mouse.move(0, 0);
+    await expect(dialog).toBeVisible();
+    const after = await dialog.boundingBox();
+    assert.deepEqual(after, before);
+    evidence.cases.push({
+      touch,
+      numericOnlyTrigger: true,
+      centeredWithAncestorZoom: true,
+      positionStableAfterMouseMove: true,
+    });
     await expect(page.getByRole("button", { name: "Próximo card", exact: true })).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toHaveCount(0);

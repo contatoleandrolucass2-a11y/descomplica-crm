@@ -1275,6 +1275,7 @@ export function ConfigurableDashboardCanvas({
 
       {actionsCard ? (
         <DashboardModal
+          portalToBody={pageKey === "crm.stage.appointments"}
           title="Ações do card"
           description={actionsCard.title || actionsCard.metric}
           onClose={() => setActionsCardId(null)}
@@ -1396,6 +1397,7 @@ export function ConfigurableDashboardCanvas({
 
       {expandedCard ? (
         <DashboardModal
+          portalToBody={pageKey === "crm.stage.appointments"}
           title={
             expandedCard.title ||
             catalog.metrics.find(({ key }) => key === expandedCard.metric)?.label ||
@@ -1423,6 +1425,7 @@ export function ConfigurableDashboardCanvas({
 
       {showProfiles ? (
         <DashboardModal
+          portalToBody={pageKey === "crm.stage.appointments"}
           title="Perfis do dashboard"
           description="Perfis são salvos no servidor. O cache local só é usado quando o servidor falha."
           onClose={() => setShowProfiles(false)}
@@ -1534,6 +1537,7 @@ export function ConfigurableDashboardCanvas({
 
       {showExport ? (
         <DashboardModal
+          portalToBody={pageKey === "crm.stage.appointments"}
           title="Baixar dashboard em PDF"
           description="Selecione os cards. O PDF preserva a ordem atual, o contexto e a visualização de cada gráfico."
           onClose={() => {
@@ -1733,6 +1737,7 @@ function CardEditor({
 
   return (
     <DashboardModal
+      portalToBody={appointmentsBarHeight}
       title={mode === "add" ? "Adicionar card" : "Editar card"}
       description={
         appointmentsBarHeight
