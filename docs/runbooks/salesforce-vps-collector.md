@@ -139,6 +139,38 @@ O scheduler registra somente `safeSalesforceError`, sem mensagem privada,
 resposta bruta ou linhas. Para incidentes, reter apenas códigos, horários,
 contagens, intervalos e requestId autorizado.
 
+### Cancelamento da gravação pelo banco
+
+`57014` com `statement_timeout` nos metadados PostgreSQL identifica o orçamento
+da gravação, não uma falha de login nem uma divergência entre partições.
+Oito segundos podem expirar em pontos diferentes da validação do lote completo.
+Não repetir manualmente cargas nem reduzir validações para contornar esse erro.
+
+Após aplicar a migration `20261104201024_salesforce_ingest_bounded_timeout.sql`,
+somente `public.ingest_crm_salesforce_snapshot(jsonb)` recebe prazo máximo de
+30 segundos. Corpo, proprietário, `SECURITY DEFINER`, `search_path` e execução
+exclusiva da máquina permanecem iguais. Não alterar limites globais, roles,
+outras funções, credenciais, cadência ou workflow n8n. A aplicação remota exige
+autorização específica, CI do main exato, backup privado dos metadados/definição,
+travas compartilhadas e comparação do estado esperado antes da alteração.
+
+A CI prova PostgreSQL 17/PostgREST em banco descartável: role sintética de
+8 segundos, cancelamento sem override, sucesso em 9 segundos com override de
+30 segundos, cancelamento de uma espera de 31 segundos e chamadas posteriores
+novamente em 8 segundos. Configurações de roles existentes e catálogo da RPC
+real são comparados antes/depois; fixtures são removidas em `finally`.
+Essas chamadas não garantem reutilizar a mesma conexão do pool. pgTAP confere
+corpo, configuração e permissões da RPC real; não substitui a prova HTTP.
+
+O publisher e o envio n8n possuem prazo nominal de 60 segundos, mas o orçamento
+global restante do coletor pode ser menor e continua prevalecendo. Não aumentar
+esse orçamento nem ignorar seu cancelamento. Após aplicação autorizada, conferir
+metadados e dois ciclos agendados completos, incluindo estoque. Não reiniciar a
+aplicação ou o coletor somente para essa mudança no banco. Rollback delimitado:
+`ALTER FUNCTION public.ingest_crm_salesforce_snapshot(jsonb) RESET statement_timeout`
+e recarga do schema PostgREST, após conferir o estado esperado. Isso restaura o
+limite herdado e pode reintroduzir a falha; preservar o último snapshot válido.
+
 Falha de coleta/publicacao marca o ciclo como falho e preserva o ultimo
 snapshot valido no banco. A rotina tenta novamente na proxima fronteira.
 Um SIGTERM cancela e aguarda limpeza; encerramento forcado pode deixar lock.

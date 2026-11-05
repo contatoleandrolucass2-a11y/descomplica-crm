@@ -253,6 +253,13 @@ jobs:
       - name: Database tests
         run: pnpm db:test
 
+      - name: Verify bounded Salesforce ingestion timeout through isolated PostgREST
+        run: |
+          node --test scripts/qa/salesforce-ingest-timeout.node-test.mjs
+          node scripts/qa/salesforce-ingest-timeout.mjs
+        env:
+          CRM_INGEST_TIMEOUT_ISOLATED: "true"
+
       - name: Record isolated appointments projection benchmark scope
         env:
           BENCHMARK_REQUIRED: ${{ needs.validate.outputs.appointments_projection_required }}
@@ -324,6 +331,7 @@ jobs:
             test-results/authenticated-visual
             test-results/authorization-matrix
             test-results/appointments-projection
+            test-results/salesforce-ingest-timeout
             test-results/lead-pagination-postgres.json
             test-results/lead-pagination-browser.json
             test-results/appointments-detail
