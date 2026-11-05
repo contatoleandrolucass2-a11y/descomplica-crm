@@ -1,5 +1,9 @@
 # Changelog
 
+- Publica e valida a entrega CAIXA do PR492 emfa068c43, com CI main verde,
+  imagem imutável conferida, cálculo/subsídio/prazo automáticos, unidades por
+  ranking e fluxo84mensais/anuais; smoke desktop/mobile e acesso preservados.
+
 - Compacta todos os campos CAIXA em duas linhas, reduz controles e resumo,
   exibe juros junto da parcela e leva parâmetros opcionais ao final.
 - Corrige o piso do subsídio antes dos redutores e separa a comparação da

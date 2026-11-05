@@ -1,5 +1,47 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-04 — CAIXA: publicada e validada, unidades por ranking
+
+- PR492 integrado em fa068c439eacdd70f0c6d8cfc9bcba5394e1ef43 após os quatro
+  gates aprovados na CI41915427352, headb558d005. Árvore main25e20001b02cbb441cceadb0fa45285281a2a7ca
+  idêntica à do PR aprovado. CI push/main41924476763 concluída: validate,
+  release-gates, isolated-restore e promotable-image aprovados no SHA exato.
+- Conferência ao vivo em22:20:49UTC: produção5da46964, health HTTP200/ok.
+  Fontes: GitHub PR492/Actions, origin/main e API health com nonce/no-cache.
+  Diff produção→candidato restrito à entrega CAIXA e suas evidências/documentação.
+- Checkout limpo do candidato preparado na VPS com dependências offline, sem
+  build ou suíte pesada no servidor. Artefato13369391942, ZIP SHA256
+  bb89f55f7dbc4f20622d4acb0338872db61889bb57ae9d8947e43b12893b3993:
+  checksum/revision, manifesto/configuração e14camadas conferidos. Config ID CI
+  8566c955fa68864cf99e88b543de58429ae8574e88b3dabec9102ca1c0dfda27;
+  image ID local OCI9a1fc730aaa96db6caf8aee3d8b75a78e2c23167c57f453b95068850b83a36db.
+  Dois perfis image:prove aprovados, mesma imagem, nenhum segredo impresso.
+- Backup privado0700/env e ledger0600 conferido por cmp em
+  /etc/descomplica-crm/backups/caixa-fa068c43-20261104T2355Z; imagem anterior
+  preservada. Coordenador release:production concluiu com lock/CAS e consulta
+  ao vivo: deployment e349e769-a543-44ee-b60e-71196de356da,
+  23:55:41.487UTC /20:55:41.487America/Sao_Paulo, SHA fa068c43, sem pendência.
+- Health público nonce/no-cache em23:55:55UTC: HTTP200/ok, versão fa068c43.
+  Acesso anônimo CAIXA307→login. Smoke autenticado com dados fictícios confirmou
+  cálculo automático, subsídio reduzido1091,41 preservado, nascimento1965→226
+  meses e1992→420, redução manual360, parcela/juros junto ao resumo.
+  Ranking obrigatório e entrada mínima150; consulta ao estoque vivo concluída,
+  perfil4000 sem unidades e perfil6000/recursos10000 com opções aprovadas.
+  Detalhe mostrou aprovação,84mensais e memória de anuais; modal bancário420
+  parcelas centralizado com Imprimir. Nenhuma proposta ou impressão enviada.
+- Desktop1280:19controles em duas linhas, alturas30–32px; mobile390 sem
+  overflow horizontal. Ações removidas ausentes e Limpar apagou resultado.
+  Prova visual local: caixa-unidades-publicado-fa068c43.png no diretório de
+  visualizações deste chat. Janela concorrente liberada após smoke por mensagem
+  autorizada. Registro final somente documental, sem novo deploy de runtime.
+- Evidência local reaproveitada:88testes financeiros/unidades;508032cenários
+  físicos (idades18–80,1–3pessoas,15–70m²,24pontos de renda,fator social),
+  juros/limiares adicionais e13testes do cliente. CI e comparação visual final
+  aprovadas. Limites: equivalência da calculadora rápida não é proposta de
+  crédito; perfil detalhado mantém regras próprias. PDF MFOM ao vivo indisponível
+  por redirect; cópia oficial034/hash documentada. Não alegar teste de infinitos
+  valores reais nem aprovação bancária. Reavaliar com alteração de fonte/regra.
+
 ## 2026-11-04 — CAIXA: revisão visual, cálculo e unidades por ranking
 
 - Retomada às18:47UTC: main5da46964, CI41882885306 ainda em execução;
