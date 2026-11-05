@@ -122,6 +122,8 @@ const rankingParticipantSchema = z
     brokerKey: key,
     brokerName: label,
     managerName: label,
+    rosterManagerName: label.nullable().optional(),
+    regionalManagerName: label.nullable().optional(),
     roulette: count,
     rouletteSaturday: count,
     rouletteSunday: count,
@@ -130,7 +132,11 @@ const rankingParticipantSchema = z
     approvedFolder: count,
     sale: count,
   })
-  .strict();
+  .strict()
+  .refine((participant) => !participant.regionalManagerName || !!participant.rosterManagerName, {
+    message: "regional manager requires the official roster manager",
+    path: ["regionalManagerName"],
+  });
 
 const rankingSchema = z
   .object({

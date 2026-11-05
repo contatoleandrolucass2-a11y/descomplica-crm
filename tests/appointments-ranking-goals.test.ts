@@ -37,6 +37,31 @@ function input() {
 }
 
 describe("appointment ranking calendar goals", () => {
+  it("uses explicit broker regions even when one sales manager spans regions", () => {
+    const explicit = roster.map((broker, index) => ({
+      ...broker,
+      regionalManager: index === 2 ? "Regional A" : "Regional B",
+    }));
+    const result = analyzeAppointments(input(), { brokerRoster: explicit });
+    expect(result.regionalManagers?.map(({ key, goal }) => [key, goal])).toEqual([
+      ["Regional A", 23],
+      ["Regional B", 46],
+    ]);
+    const filtered = analyzeAppointments(input(), {
+      brokerRoster: explicit,
+      filters: { regionalManager: "Regional B" },
+    });
+    expect(filtered.todayGoal).toBe(4);
+  });
+
+  it("does not infer an explicitly unknown regional link from manager activity", () => {
+    const result = analyzeAppointments(input(), {
+      brokerRoster: roster.map((broker) => ({ ...broker, regionalManager: null })),
+    });
+    expect(result.regionalManagers?.every(({ goal }) => goal === null)).toBe(true);
+    expect(result.managers[0]?.goal).toBe(46);
+  });
+
   it("uses each registered cohort, not the highest actual rank or productive broker count", () => {
     const result = analyzeAppointments(input(), { brokerRoster: [...roster, roster[0]!] });
     // November2026:19 useful weekdays plus4 Thursday bonuses, per broker.

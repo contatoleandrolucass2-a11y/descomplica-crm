@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-11-05 — Agendamentos: vínculo oficial das equipes
+
+- Continuação do aceite do PR502: o cadastro Corretores possui gerente oficial;
+  Regional Comercial significa SP CAPITAL, não o nome do regional. Conciliação
+  usa o próprio corretor em Agendamentos e seu gerente oficial, rejeitando
+  homônimos, ausência e conflitos. Nenhum relatório salvo foi alterado.
+- Campos aditivos separados preservam manager_name e contagens legadas. Apenas
+  Agendamentos lê gerente oficial/regional; null explícito não usa inferência
+  histórica por gerente. O painel diário respeita o mesmo vínculo opt-in.
+- Migration20261105175738 mantém ACL/RLS, trava e transação. Requests enriquecidos
+  vinculam requestId ao hash do JSONB integral; replay alterado rejeita, replay
+  idêntico não regrava. Requests legados preservam seu contrato anterior.
+- Testes locais:43 casos de leitura/metas/equipe e26 de calendário/modelo
+  compartilhado aprovados; produtor7/7 e ingestão48/1skip. pgTAP obrigatório na
+  CI isolada; Docker local não disponível. Sem alteração remota nesta etapa.
+- Ordem obrigatória: CI, autorização específica da migration, banco compatível,
+  aplicação e atualização controlada do coletor, carga reconciliada e prints.
+  Rollback conserva colunas e versão compatível; não apagar dados ou locks.
+
 ## 2026-11-05 — Agendamentos: apresentação, metas e visitas
 
 - Escopo comportamental exclusivo de /app/etapas/agendamentos. Shell e modal

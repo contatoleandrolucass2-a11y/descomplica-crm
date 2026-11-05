@@ -4,7 +4,7 @@ select plan(9);
 
 select is(
   (select pg_catalog.md5(prosrc) from pg_catalog.pg_proc
-    where oid = 'public.ingest_crm_salesforce_snapshot(jsonb)'::regprocedure),
+    where oid = 'private.ingest_crm_salesforce_snapshot_roster_base(jsonb)'::regprocedure),
   '48bcdeb5d43781cc7499b0a20e42d2fd',
   'the existing ingestion implementation remains unchanged'
 );

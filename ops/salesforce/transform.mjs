@@ -290,6 +290,48 @@ function countBrokerActivity(records, brokerName, range, predicate = () => true)
   ).length;
 }
 
+// The broker report owns the sales-manager relationship. Appointment history
+// supplies the regional person; Regional Comercial is never a person identifier.
+function rosterHierarchy(broker, reports, referenceDate) {
+  const rosterManagerName = text(broker.managerName) || null;
+  if (!rosterManagerName) return { rosterManagerName, regionalManagerName: null };
+  const observations = (reports.appointments ?? []).flatMap((row) => {
+    const stamp = parseDate(row.date ?? row.createdAt);
+    if (
+      !stamp ||
+      dateKey(stamp) > referenceDate ||
+      fold(row.managerName) !== fold(rosterManagerName)
+    )
+      return [];
+    return [
+      {
+        broker: fold(row.brokerName),
+        stamp: stamp.getTime(),
+        regional: text(row.regionalManager) || null,
+      },
+    ];
+  });
+  const own = observations.filter((row) => row.broker === fold(broker.name));
+  if (!own.length) return { rosterManagerName, regionalManagerName: null };
+  const matchingContacts = new Set(
+    (reports.brokers ?? [])
+      .filter(
+        (row) =>
+          fold(row.name) === fold(broker.name) &&
+          fold(row.managerName) === fold(rosterManagerName) &&
+          ACTIVE_BROKER_STATUSES.has(fold(row.status)),
+      )
+      .map((row) => text(row.contactId)),
+  );
+  if (own.length && matchingContacts.size > 1) {
+    return { rosterManagerName, regionalManagerName: null };
+  }
+  const latest = Math.max(...own.map((row) => row.stamp));
+  const candidates = own.filter((row) => row.stamp === latest);
+  const regions = new Set(candidates.map((row) => row.regional));
+  return { rosterManagerName, regionalManagerName: regions.size === 1 ? [...regions][0] : null };
+}
+
 function buildRanking(reports, referenceDate, generatedAt) {
   const activeBrokers = (reports.brokers ?? []).filter(
     (broker) =>
@@ -301,6 +343,7 @@ function buildRanking(reports, referenceDate, generatedAt) {
   const participants = [];
 
   for (const broker of activeBrokers) {
+    const hierarchy = rosterHierarchy(broker, reports, referenceDate);
     for (const periodKey of PERIOD_KEYS) {
       const range = rankingRange(periodKey, referenceDate);
       participants.push({
@@ -308,6 +351,7 @@ function buildRanking(reports, referenceDate, generatedAt) {
         brokerKey: hashKey("sf-contact", broker.contactId),
         brokerName: text(broker.name),
         managerName: managers.get(fold(broker.name))?.manager ?? "Sem gerente informado",
+        ...hierarchy,
         roulette: 0,
         rouletteSaturday: 0,
         rouletteSunday: 0,

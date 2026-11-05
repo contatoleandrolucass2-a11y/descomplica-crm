@@ -60,6 +60,20 @@ const analysis = (override: Partial<DashboardAnalysisSlice> = {}): DashboardAnal
 const options = { date: "2026-10-05", month: "2026-10", brokerRoster: roster };
 
 describe("daily appointment roster partition", () => {
+  it("retains official broker regions in the daily team, including inactive members", () => {
+    const result = analyzeDailyAppointmentTeam(analysis(), {
+      ...options,
+      brokerRoster: roster.map((broker, index) => ({
+        ...broker,
+        regionalManager: index === 1 ? "Regional distinto" : null,
+      })),
+    });
+    expect(result.withoutAppointments?.find(({ key }) => key === "bia")?.regionalManager).toBe(
+      "Regional distinto",
+    );
+    expect(result.withAppointments?.find(({ key }) => key === "ana")?.regionalManager).toBeNull();
+  });
+
   it("counts distinct official identities for the selected day and preserves full names", () => {
     const result = analyzeDailyAppointmentTeam(analysis(), options);
     expect(result.unavailableReason).toBeNull();

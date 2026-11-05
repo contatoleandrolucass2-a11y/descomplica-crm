@@ -112,3 +112,67 @@ segundo browser cobriu navegação em três temas/seis larguras. Ambos passaram;
 29testes unitários/SSR passaram. CI completa do novo SHA continua necessária.
 As capturas gerais dessa CI são do estado indisponível, não provam os cards
 com dados; estes têm cobertura sintética dedicada e exigem prova real no site.
+
+## Publicação visual e conciliação oficial da hierarquia — 05/11/2026
+
+PR502 integrado16:27:34Z em28b4ac35. CI42054435745 (head72e96aa8) e
+CI42064655539 (push/main28b4ac35) aprovaram os quatro gates, sem trocar baselines.
+Imagem CI13434836159: ZIP68583777c0b577aacdd33e5ab108127aa38f3c0c8e5a3124d70605f88bd840fc;
+arquivo411b3de4e4b03d96fd7b2e5d3ad6afc15b636b22ef90dafb164e16e2f6c04a12;
+configCI5b7aba4b1e6b4dc7fcd00b343b3ab45aca8a687f520a58959afc9f5c175fd22f;
+manifest/locald154cf3fcd262845e179108e9fd0ae1c14c8cf71c15bfa20687a93452dc98144.
+Cadeia OCI e14camadas conferidas, sem rebuild/retag; image:prove aprovou os
+mesmos dois perfis isolados. Deploy protegido8228d2a6-5ceb-4f13-9263-72f0f1a3644f
+às17:19:14.807Z (14:19BRT), anterior57305658/e407ecd9; sem pendência.
+Health17:42:06Z confirmou200/ok/28b4ac35; anônimo redireciona307/login.
+
+Chrome e integrado autenticados:32IDs, dimensões e ordem iguais, preservados
+após reload e navegação sem gravação. Integrado percorreu20seções com espera
+pelo artigo esperado; primeiro clique mostra só o funil. Celular simulado390x844
+↔844x390 manteve o mesmo perfil depois de atualizar. Resumo KPI, calendário,
+editor e equipe centralizados; editor fechado sem salvar. Tabela geral17linhas;
+sem visita confirmada16linhas (inclusive datas futuras), dez colunas, sem overflow
+horizontal; todas as linhas montadas. Semana atual:150para30corretores,
+17realizados vermelhos; quinta-feira60, realizado0 abaixo. Fontes/prints locais
+ignorados: test-results/appointments-apresentacao-live/receipt.json e JPEGs.
+Zoom é equivalente CSS/viewport em CI/local, não prova em celular físico nem
+controle de zoom nativo. Algumas chamadas CUA perderam a confirmação após
+aplicar eventos; estado novo foi conferido antes de prosseguir. Capturas rápidas
+antes do paint foram refeitas e não usadas como evidência.
+
+Limite encontrado no aceite: regional Daniel Vilar tem vínculo indisponível no
+roster; mínimo regional comprovado não foi promovido a meta total. Perguntado,
+o usuário indicou o relatório Agendamentos (coluna Gerente Regional) e Corretores.
+Consulta visual oficial em00OTT000009j0l32AA confirmou BASE CORRETORES/30registros,
+gerente oficial Account.Comissionado_generico_3**c.Name e Regional Comercial
+Account.Regional_Comercial**c=SP CAPITAL, que não é uma pessoa. Nenhum CPF,
+contato, banco ou linha privada do relatório foi exportado. Agendamentos já
+coleta Activity.Gerente_Regional\_\_c por label validado.
+
+Rastreio somente leitura identificou que ranking.managerName vem da última
+atividade e não preserva o gerente oficial já coletado do cadastro; a tabela
+não retém uma hierarquia oficial separada. Continuação autorizada pelo pedido:
+conciliar o corretor cadastrado ao regional de seus agendamentos e preservar
+gerente oficial em campos aditivos exclusivos de leitura por Agendamentos.
+Demais páginas e manager_name legado devem ficar iguais. Migration, API e
+coletor ainda NÃO alterados remotamente; preparar compatibilidade, pgTAP,
+backup/rollback e CI antes de pedir autorização remota específica.
+
+### Continuação — hierarquia oficial preparada (05/11/2026, 18:08 UTC)
+
+Branch codex/agendamentos-vinculo-regional sobre main28b4ac35. Conferência
+origin/main sem mudança; publicação anterior continua28b4ac35. Dados aditivos
+rosterManagerName/regionalManagerName separados do managerName legado;
+Agendamentos lê os novos vínculos sem inferir regional explicitamente null.
+Leitura antiga sem os campos mantém compatibilidade nas fixtures/consumidores.
+A fonte regional é a observação elegível do próprio corretor, conciliada ao
+cadastro oficial; nenhum fallback por gerente para corretor sem observação.
+
+Produtor7/7, ingestão48aprovados/1ignorado, leitura/metas/equipe43 e calendário/
+modelo compartilhado26 aprovados localmente. Revisão estática independente sem
+vulnerabilidade demonstrada; exige pgTAP e matriz ACL na CI. Migration gerada
+pelo CLI2.115.0, sem upgrade; mantém30s, trava, grants e rollback transacional.
+Hash integral aplica apenas a requests enriquecidos; legado requestId-only
+preservado. Banco/serviço coletor não alterados; autorização remota específica,
+CI e ativação controlada permanecem pendentes. Sync de abertura corrigido após
+normalizar LF do registro (CRLF ultrapassava limite);16documentos sincronizados.

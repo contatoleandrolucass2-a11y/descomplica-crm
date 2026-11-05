@@ -89,6 +89,108 @@ function fixture() {
   };
 }
 
+test("official roster hierarchy is additive and bounded by reference date", () => {
+  const input = fixture();
+  const legacy = buildSalesforceSnapshot(input).payload.ranking.participants;
+  input.reports.brokers[0].managerName = "Gerente Oficial";
+  input.reports.appointments.push(
+    {
+      appointmentCode: "H1",
+      createdAt: "2026-08-05",
+      brokerName: "Corretor Um",
+      managerName: "Gerente Oficial",
+      regionalManager: "Regional Anterior",
+    },
+    {
+      appointmentCode: "H2",
+      createdAt: "2026-08-06T23:30:00-03:00",
+      brokerName: "Corretor Um",
+      managerName: "Gerente Oficial",
+      regionalManager: "Regional Atual",
+    },
+    {
+      appointmentCode: "H3",
+      createdAt: "2026-08-07",
+      brokerName: "Corretor Um",
+      managerName: "Gerente Oficial",
+      regionalManager: "Regional Futuro",
+    },
+  );
+  const result = buildSalesforceSnapshot(input).payload.ranking.participants;
+  assert.ok(
+    result.every(
+      (row) =>
+        row.rosterManagerName === "Gerente Oficial" && row.regionalManagerName === "Regional Atual",
+    ),
+  );
+  // Compare against the same activity input with no official roster relationship:
+  // legacy manager/counts must not depend on the additive hierarchy.
+  delete input.reports.brokers[0].managerName;
+  const unchanged = buildSalesforceSnapshot(input).payload.ranking.participants;
+  const strip = ({ rosterManagerName, regionalManagerName, ...row }) => row;
+  assert.deepEqual(result.map(strip), unchanged.map(strip));
+  assert.ok(
+    legacy.every((row) => row.rosterManagerName === null && row.regionalManagerName === null),
+  );
+});
+
+test("regional reconciliation requires the broker's own observation, even for a single observed manager region", () => {
+  const input = fixture();
+  input.reports.brokers[0].managerName = "Gerente Um";
+  input.reports.appointments = ["Regional A", "Regional B"].map((regionalManager, index) => ({
+    appointmentCode: `H${index}`,
+    createdAt: "2026-08-06",
+    brokerName: "Corretor Um",
+    managerName: "Gerente Um",
+    regionalManager,
+  }));
+  assert.equal(
+    buildSalesforceSnapshot(input).payload.ranking.participants[0].regionalManagerName,
+    null,
+  );
+  input.reports.appointments.forEach((row) => {
+    row.brokerName = "Outro Corretor";
+  });
+  assert.equal(
+    buildSalesforceSnapshot(input).payload.ranking.participants[0].regionalManagerName,
+    null,
+  );
+  input.reports.appointments.pop();
+  assert.equal(
+    buildSalesforceSnapshot(input).payload.ranking.participants[0].regionalManagerName,
+    null,
+  );
+  input.reports.appointments[0].regionalManager = "";
+  assert.equal(
+    buildSalesforceSnapshot(input).payload.ranking.participants[0].regionalManagerName,
+    null,
+  );
+});
+
+test("latest missing regional and duplicate broker names do not invent a regional person", () => {
+  const input = fixture();
+  input.reports.brokers[0].managerName = "Gerente Um";
+  input.reports.appointments[0].regionalManager = "Regional A";
+  input.reports.appointments.push({
+    appointmentCode: "L1",
+    createdAt: "2026-08-06T23:00:00-03:00",
+    brokerName: "Corretor Um",
+    managerName: "Gerente Um",
+    regionalManager: "",
+  });
+  assert.equal(
+    buildSalesforceSnapshot(input).payload.ranking.participants[0].regionalManagerName,
+    null,
+  );
+  input.reports.appointments.pop();
+  input.reports.brokers.push({ ...input.reports.brokers[0], contactId: "003000000000003AAA" });
+  assert.ok(
+    buildSalesforceSnapshot(input).payload.ranking.participants.every(
+      (row) => row.regionalManagerName === null,
+    ),
+  );
+});
+
 test("builds complete three-view dashboard without dropping source divergences", () => {
   const result = buildSalesforceSnapshot(fixture());
   assert.equal(result.payload.dashboard.views.length, 3);

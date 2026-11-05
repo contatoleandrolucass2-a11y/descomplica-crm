@@ -95,6 +95,35 @@ beforeEach(() => {
 });
 
 describe("appointments snapshot read", () => {
+  it("uses official roster managers and retains explicit regional uncertainty", async () => {
+    participantResponses = [
+      {
+        data: roster.map((row, index) => ({
+          ...row,
+          roster_manager_name: "Gerente oficial",
+          regional_manager_name: index === 0 ? "Regional oficial" : null,
+        })),
+        count: 2,
+        error: null,
+      },
+    ];
+    const actual = await loadAppointmentsReadModel("all");
+    expect(actual.brokerRoster).toEqual([
+      {
+        key: "broker-a",
+        owner: "Responsável A",
+        manager: "Gerente oficial",
+        regionalManager: "Regional oficial",
+      },
+      {
+        key: "broker-b",
+        owner: "Responsável B",
+        manager: "Gerente oficial",
+        regionalManager: null,
+      },
+    ]);
+  });
+
   it.each([0, 11])(
     "reads %i historical months in one authorized policy request",
     async (history) => {

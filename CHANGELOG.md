@@ -1,5 +1,9 @@
 # Changelog
 
+- Corrige a coorte das metas em Agendamentos com o gerente oficial de Corretores
+  e o regional conciliado por corretor em Agendamentos. Vínculos desconhecidos
+  permanecem indisponíveis; outras páginas mantêm o gerente e contagens legados.
+
 - Preserva a leitura do aviso de dados indisponíveis em Agendamentos; a composição
   proporcional só é aplicada quando os cards estão carregados.
 

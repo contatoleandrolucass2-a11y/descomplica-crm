@@ -58,6 +58,8 @@ export interface AppointmentBrokerRosterEntry {
   key: string;
   owner: string;
   manager: string;
+  /** Explicit null is unknown; absent retains the legacy historical inference. */
+  regionalManager?: string | null;
 }
 
 export const APPOINTMENT_MONTHS = [
@@ -363,6 +365,10 @@ export function analyzeAppointments(
     stableRosterRegions.set(key, result);
     return result;
   };
+  const regionForBroker = (broker: AppointmentBrokerRosterEntry): string | null =>
+    broker.regionalManager !== undefined
+      ? broker.regionalManager?.trim() || null
+      : stableRegionForManager(broker.manager);
   const unknownRosterRegion =
     Boolean(filters.regionalManager) &&
     (brokerRoster === null ||
@@ -372,7 +378,7 @@ export function analyzeAppointments(
             appointmentIdentity(broker.manager) === appointmentIdentity(filters.manager)) &&
           (!filters.owner ||
             appointmentIdentity(broker.owner) === appointmentIdentity(filters.owner)) &&
-          stableRegionForManager(broker.manager) === null,
+          regionForBroker(broker) === null,
       ));
   const rosterUnavailableReason =
     !houseOnly || filters.company || filters.accountRanking
@@ -386,8 +392,7 @@ export function analyzeAppointments(
     hasMappableRosterFilter && brokerRoster !== null
       ? brokerRoster.filter(
           (broker) =>
-            (!filters.regionalManager ||
-              stableRegionForManager(broker.manager) === filters.regionalManager) &&
+            (!filters.regionalManager || regionForBroker(broker) === filters.regionalManager) &&
             (!filters.manager ||
               appointmentIdentity(broker.manager) === appointmentIdentity(filters.manager)) &&
             (!filters.owner ||
@@ -760,14 +765,11 @@ export function analyzeAppointments(
     const regionalRosterKnown =
       dimension !== "regionalManager" ||
       (eligibleRoster !== null &&
-        eligibleRoster.every((broker) => stableRegionForManager(broker.manager) !== null));
+        eligibleRoster.every((broker) => regionForBroker(broker) !== null));
     return ranking(totals).map((bucket) => {
       if (eligibleRoster === null) return { ...bucket, goal: null };
       const cohort = eligibleRoster.filter((broker) => {
-        const name =
-          dimension === "regionalManager"
-            ? stableRegionForManager(broker.manager)
-            : broker[dimension];
+        const name = dimension === "regionalManager" ? regionForBroker(broker) : broker[dimension];
         return name !== null && appointmentIdentity(name) === appointmentIdentity(bucket.key);
       });
       const brokerCount = new Set(cohort.map((broker) => broker.key)).size;
