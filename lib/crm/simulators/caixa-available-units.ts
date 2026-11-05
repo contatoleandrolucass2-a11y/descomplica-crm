@@ -188,6 +188,8 @@ export function assessCaixaAvailableUnit(
   firstProperty: boolean,
   options: { includeDetails?: boolean } = {},
 ): CaixaUnitAssessment {
+  if (!positive(capacity.maximumFinancingByIncome))
+    return { status: "unavailable", reason: "Simulação inicial de renda indisponível." };
   if (!CAIXA_UNIT_RANKINGS.some((t) => t.id === ranking) || ranking === "not-eligible")
     return { status: "rejected", reason: "Ranking não elegível." };
   if (!isInvestorEligibleUnit(unit))
@@ -287,8 +289,9 @@ export function assessCaixaAvailableUnit(
   });
   if (!housing.ok || housing.subsidyEligibility === "eligible-review")
     return { status: "unavailable", reason: "Enquadramento CAIXA da unidade não calculável." };
-  const financing =
-    Math.floor(Math.min(housing.financing, capacity.maximumFinancingByIncome) * 100) / 100;
+  // The original capacity validates the starting simulation, not this property's credit ceiling.
+  // Each unit has its own rate, insurance and term; housing already applies all of its limits.
+  const financing = housing.financing;
   const remaining =
     price - financing - housing.subsidy - housing.fgts - housing.publicContribution - entry;
   const annuals = caixaAutomaticAnnuals(input.income, baseDate, unit.completionDate, remaining);
@@ -331,7 +334,7 @@ export function assessCaixaAvailableUnit(
     };
   if (!linear.valid || !decreasing.valid)
     return { status: "unavailable", reason: "Calendário ou fluxo comercial incompleto." };
-  if (!linear.approved || !decreasing.approved || !linear.comparison || !decreasing.comparison)
+  if ((!linear.approved && !decreasing.approved) || !linear.comparison || !decreasing.comparison)
     return { status: "rejected", reason: "Fora dos limites do ranking." };
   let details: CaixaUnitFlowDetails | undefined;
   if (options.includeDetails && linear.approval && decreasing.approval) {

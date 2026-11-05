@@ -292,13 +292,11 @@ export function CaixaUnitProposal({
       : !quoteReady
         ? "A compra do fluxo comercial diverge da base validada pela CAIXA. Revise o desconto."
         : "";
-  const approved =
-    quoteReady &&
-    flow.linear.valid &&
-    flow.decreasing.valid &&
-    flow.linear.approved &&
-    flow.decreasing.approved;
-  if (printMode && !approved) setPrintMode(null);
+  const linearApproved = quoteReady && flow.linear.valid && flow.linear.approved;
+  const decreasingApproved = quoteReady && flow.decreasing.valid && flow.decreasing.approved;
+  const approved = linearApproved || decreasingApproved;
+  const bothApproved = linearApproved && decreasingApproved;
+  const preferredFlow = linearApproved ? "linear" : "decreasing";
   const release = calculateAssociativeReleaseStatus({
     vgv: canonical.context.valueReal,
     entryValue: selected.entry,
@@ -338,6 +336,13 @@ export function CaixaUnitProposal({
     ],
   );
   const doc = documentation.result;
+  const printAllowed =
+    printMode === "linear"
+      ? linearApproved
+      : printMode === "decreasing"
+        ? decreasingApproved
+        : printMode === "documentation" && approved && doc.ok;
+  if (printMode && !printAllowed) setPrintMode(null);
   const docSchedule = quoteReady && doc.ok ? buildDocumentationInstallmentSchedule(doc) : [];
   const rowData = [
     ["Valor real da venda", "=", canonical.context.valueReal],
@@ -363,7 +368,7 @@ export function CaixaUnitProposal({
     })),
   ];
   useEffect(() => {
-    if (!printMode) return;
+    if (!printMode || !printAllowed) return;
     const clear = () => setPrintMode(null);
     window.addEventListener("afterprint", clear, { once: true });
     const frame = requestAnimationFrame(() => window.print());
@@ -371,15 +376,15 @@ export function CaixaUnitProposal({
       cancelAnimationFrame(frame);
       window.removeEventListener("afterprint", clear);
     };
-  }, [printMode]);
+  }, [printMode, printAllowed]);
   const scheduleTable = (
     <table aria-label="84 mensais e anuais do fluxo aprovado">
       <thead>
         <tr>
           <th>Parcela</th>
           <th>Vencimento</th>
-          <th>Linear</th>
-          <th>Decrescente</th>
+          <th>{linearApproved ? "Linear" : "Linear · revisar"}</th>
+          <th>{decreasingApproved ? "Decrescente" : "Decrescente · revisar"}</th>
           <th>Evolução de obra</th>
           <th>Anual corrigida</th>
           <th>Total Linear</th>
@@ -393,12 +398,12 @@ export function CaixaUnitProposal({
             <tr key={`${row.kind}-${index}`} data-payment-kind={row.kind}>
               <th>{row.label}</th>
               <td>{date(row.paymentDate)}</td>
-              <td>{money.format(row.linearPayment)}</td>
-              <td>{money.format(row.decreasingPayment)}</td>
+              <td>{linearApproved ? money.format(row.linearPayment) : "—"}</td>
+              <td>{decreasingApproved ? money.format(row.decreasingPayment) : "—"}</td>
               <td>{row.workEvolution == null ? "—" : money.format(row.workEvolution)}</td>
               <td>{money.format(row.annualPayment ?? 0)}</td>
-              <td>{money.format(row.linearTotal)}</td>
-              <td>{money.format(row.decreasingTotal)}</td>
+              <td>{linearApproved ? money.format(row.linearTotal) : "—"}</td>
+              <td>{decreasingApproved ? money.format(row.decreasingTotal) : "—"}</td>
             </tr>
           ))}
       </tbody>
@@ -680,12 +685,12 @@ export function CaixaUnitProposal({
                     <th>Status da proposta</th>
                     <td>
                       <span className={styles.badge}>
-                        {quoteReady && flow.linear.approved ? "APROVADO" : "REVISAR"}
+                        {linearApproved ? "APROVADO" : "REVISAR"}
                       </span>
                     </td>
                     <td>
                       <span className={styles.badge}>
-                        {quoteReady && flow.decreasing.approved ? "APROVADO" : "REVISAR"}
+                        {decreasingApproved ? "APROVADO" : "REVISAR"}
                       </span>
                     </td>
                     <td>—</td>
@@ -700,13 +705,17 @@ export function CaixaUnitProposal({
                 <span>{bankReason || release.repasse.reason}</span>
               </div>
               <div className={styles.approvedBanner}>
-                <strong>{approved ? "APROVADO" : "REVISE A PROPOSTA"}</strong>
+                <strong>
+                  {bothApproved ? "APROVADO" : approved ? "1 FLUXO APROVADO" : "REVISE A PROPOSTA"}
+                </strong>
                 <span>
-                  {approved
+                  {bothApproved
                     ? "Linear e Decrescente estão dentro da regra selecionada."
-                    : bankReason ||
-                      canonical.errors?.join(" ") ||
-                      "Confira pagamentos e limites do ranking."}
+                    : approved
+                      ? `${linearApproved ? "Linear" : "Decrescente"} está dentro da regra selecionada. Revise o outro fluxo.`
+                      : bankReason ||
+                        canonical.errors?.join(" ") ||
+                        "Confira pagamentos e limites do ranking."}
                 </span>
               </div>
             </section>
@@ -751,7 +760,11 @@ export function CaixaUnitProposal({
                     {quoteReady &&
                       summary.map((row) => (
                         <tr key={row.label}>
-                          <th>{row.label}</th>
+                          <th>
+                            {row.label}
+                            {!(row.label === "Linear 100%" ? linearApproved : decreasingApproved) &&
+                              " · revisar"}
+                          </th>
                           <td>{row.count}</td>
                           <td>{money.format(row.uncorrectedInstallment)}</td>
                           <td>{money.format(row.correctedInstallment)}</td>
@@ -794,9 +807,9 @@ export function CaixaUnitProposal({
             </dl>
             <p>
               84 mensais · {CAIXA_UNIT_RANKINGS.find((r) => r.id === ranking)?.label} ·{" "}
-              {approved ? "APROVADO" : "REVISAR"}
+              {preferredFlow === "linear" ? "Linear" : "Decrescente"} APROVADO
             </p>
-            <button type="button" disabled={!approved} onClick={() => setPrintMode("linear")}>
+            <button type="button" disabled={!approved} onClick={() => setPrintMode(preferredFlow)}>
               Imprimir proposta
             </button>
           </section>
@@ -917,10 +930,14 @@ export function CaixaUnitProposal({
         >
           Doc Pessoa Física
         </button>
-        <button type="button" disabled={!approved} onClick={() => setPrintMode("linear")}>
+        <button type="button" disabled={!linearApproved} onClick={() => setPrintMode("linear")}>
           Imprimir linear
         </button>
-        <button type="button" disabled={!approved} onClick={() => setPrintMode("decreasing")}>
+        <button
+          type="button"
+          disabled={!decreasingApproved}
+          onClick={() => setPrintMode("decreasing")}
+        >
           Imprimir escalonado
         </button>
         <a href="https://boravender.app.br/login" target="_blank" rel="noopener noreferrer">
@@ -944,7 +961,7 @@ export function CaixaUnitProposal({
       </section>
       {documentsOpen && <CaixaUnitDocuments className={styles.readyProposal ?? ""} />}
       {printMode &&
-        approved &&
+        printAllowed &&
         quoteReady &&
         createPortal(
           <article className={styles.printSheet}>

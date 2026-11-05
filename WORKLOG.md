@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-11-05 — CAIXA: capacidade por unidade e aprovação por fluxo
+
+- Escopo restrito ao cálculo das unidades disponíveis e aos guards de proposta
+  e impressão que dependem dele. Nenhuma mudança de layout ou em outra página.
+- Corrige teto herdado: crédito usa taxa, seguros, prazo e limites da unidade;
+  mantém prestação aprovada do cliente, preço real e menor compra/avaliação.
+- Oferece unidades com pelo menos um fluxo aprovado pelo ranking canônico;
+  o fluxo reprovado continua identificado e bloqueado para proposta/impressão.
+- Anuais do exemplo já eram quatro de2000, limite nominal50% da renda,
+  reduzindo compromisso16,08%/19,83%. Regras compartilhadas preservadas.
+- Testes financeiros focados:39 aprovados; cinco cenários de navegador aprovados.
+  Novas regressões cobrem troca de faixa do imóvel inicial, aprovação individual,
+  cota, anuais e revogação de impressão após edição. CI/publicação
+  ainda pendentes nesta etapa. Detalhes e limites em docs/simulators/CAIXA.md.
+
 ## 2026-11-05 — Publicação do refresh e prova real sem reload
 
 - PR497 integrado em02fcbc06466dea47bb832c067233eef2e67eb546. Os quatro gates

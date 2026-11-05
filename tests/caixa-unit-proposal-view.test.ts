@@ -177,7 +177,7 @@ describe("CAIXA commercial discount must recalculate the bank purchase basis", (
       product: "mcmv",
       income: 4000,
       propertyValue: 300000,
-      ownFunds: 65000,
+      ownFunds: 55000,
       hasFgts36: true,
       singlePersonFamily: false,
       propertyType: "apartment",
@@ -214,10 +214,7 @@ describe("CAIXA commercial discount must recalculate the bank purchase basis", (
     expect(oldBank.rate).toBe(7.66);
     expect(newBank.rate).toBe(5.5);
     expect(discounted.value.price).toBe(274000);
-    expect(discounted.value.financing).toBeCloseTo(
-      Math.floor(Math.min(newBank.financing, initial.capacity) * 100) / 100,
-      2,
-    );
+    expect(discounted.value.financing).toBeCloseTo(newBank.financing, 2);
     expect(discounted.value.subsidy).toBe(newBank.subsidy);
     expect(discounted.value.subsidy).toBeGreaterThan(0);
   });

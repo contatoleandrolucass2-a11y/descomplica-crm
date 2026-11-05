@@ -1,5 +1,39 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-05 — CAIXA: abertura da revisão de anuais e base da cota
+
+- Escopo solicitado: somente cálculo das unidades disponíveis, anuais e relação
+  entre preço de compra, avaliação e capacidade de financiamento. Sem alteração
+  de layout ou de outras páginas. Valores dos prints são cenários de conferência,
+  não autorização para substituir dados reais do imóvel.
+- Git comum confirmado; branch codex/caixa-calculo-anuais-cota parte de main
+  98d476f0776891e5482a0d3da40ac1242759adb3. GitHub consultado em 05/11/2026:
+  CI42005074660 concluída com sucesso; avanço desde36b8fbe6 somente documental.
+- GET observacional público /api/health: HTTP200, status ok, versão
+  b1544dd13aacb12690fa75e60e43e9881e1627ff. Versão publicada e main distintas;
+  a versão publicada corresponde à entrega CAIXA anterior. Fontes: Git local,
+  API GitHub do repositório e https://crm.descomplicapro.com.br/api/health.
+- Próxima verificação: regra oficial da cota e reprodução das anuais canônicas.
+  Nenhuma equivalência nova com aprovação bancária foi demonstrada nesta abertura.
+
+### Diagnóstico e candidato de cálculo
+
+- Duas causas reproduzidas: teto de renda herdado do primeiro imóvel mesmo
+  após mudança de taxa; exigência indevida de aprovação dos dois fluxos.
+  Crédito agora usa a simulação da própria unidade; oferta aceita pelo menos
+  um fluxo aprovado pelo ranking canônico. Opção reprovada não gera proposta
+  ou impressão. Não altera motor Associativo, limites, layout ou outras páginas.
+- Anuais do print já eram quatro de2000, máximo permitido para renda4000,
+  e reduziam comprometimento16,08%/19,83%. Compra253790 mantém crédito203032
+  pela cota80%; não se substituem compra e avaliação reais por261770,43.
+- Fonte bancária: FAQCAIXA via índice público, consultada05/11/2026;
+  abertura direta da FAQ e MFOM034 indisponível por redirecionamento.
+  Limite e reprodução detalhados em docs/simulators/CAIXA.md.
+- Validação local:39 testes financeiros e cinco cenários browser aprovados;
+  revisão financeira independente confirmou prestação800 e cota60% preservadas.
+  Sem nova contagem do estoque vivo, promessa de crédito bancário ou teste
+  exaustivo de todas as combinações. CI/merge/deploy pendentes nesta etapa.
+
 ## 2026-11-05 — Refresh de Agendamentos publicado e comprovado nos três ambientes
 
 - PR497/main02fcbc06 com quatro gates verdes e publicação protegida06:38UTC.

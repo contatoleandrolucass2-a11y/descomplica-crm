@@ -1,5 +1,9 @@
 # Changelog
 
+- Corrige o cálculo das unidades CAIXA: capacidade de crédito própria de cada
+  imóvel e elegibilidade por fluxo Linear ou Decrescente aprovado. Preserva
+  anuais, preço real, cota e ranking; bloqueia proposta/impressão do fluxo reprovado.
+
 - Publica a correção de atualização automática de Agendamentos do PR497.
   Chrome, integrado e celular simulado recebem versões novas sem reload,
   preservando os32 cards, filtros, tamanhos e posições.

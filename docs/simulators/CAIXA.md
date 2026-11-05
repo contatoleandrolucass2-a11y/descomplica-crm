@@ -52,7 +52,9 @@ lista disponível. Aceita apenas status comercial explícito Disponível.
 
 Cada unidade é recalculada com preço comercial, avaliação, município/UF, área,
 tipo, condição, entrega e progresso próprios. Financiamento respeita cota e
-capacidade original; não transplanta subsídio, aporte público, avaliação ou
+capacidade de renda recalculada para a unidade, preservando prestação aprovada
+e demais dados do cliente. A capacidade do imóvel inicial não é teto de outro
+imóvel com taxa/seguros diferentes. Não transplanta subsídio, aporte público, avaliação ou
 seguros específicos do imóvel anterior. Dados indispensáveis ausentes ficam
 não avaliáveis, com contagem explícita, nunca aprovados por presunção.
 
@@ -60,8 +62,9 @@ A entrada é `max(150, recursos próprios)` e abate uma única vez. Mantém84
 mensais; anuais de15/12 elegíveis são preenchidas por renda/2 truncada em
 centavos, limitadas pelo saldo disponível. Datas seguem o calendário canônico
 do Associativo, inclusive exclusão do mês da entrada e vencimentos após entrega.
-Os motores e rankings existentes são importados sem alterações; ambas as
-avaliações Linear/Decrescente precisam aprovar. Isso é enquadramento comercial
+Os motores e rankings existentes são importados sem alterações; basta uma das
+avaliações Linear/Decrescente aprovar para oferecer a unidade. Cada opção mantém
+seu status, e proposta/impressão só liberam o fluxo aprovado. Isso é enquadramento comercial
 simulado, não concessão bancária. Saldo totalmente quitado não recebe um fluxo
 fictício de84 prestações: a validade continua sendo decidida pelo motor canônico.
 
@@ -83,12 +86,31 @@ a confirmar; primeiro imóvel pode ser informado também no SBPE sem bloquear
 a consulta das unidades desse produto. Impressões e documentos são locais.
 
 Desconto autorizado refaz o cálculo CAIXA da unidade usando a compra efetiva,
-mantendo a capacidade original como teto. Financiamento, subsídio e recursos
+recalculando a capacidade com a taxa e os seguros dessa compra. Financiamento, subsídio e recursos
 revalidados alimentam ledger, documentação e impressão. O preço comercial já
 resolvido não recebe bônus/folga novamente quando o estoque traz somente preço
 final. As bases bancária e comercial precisam coincidir em centavos; ausência
 de autorização, dados ou revalidação impede exibir aprovação e imprimir valores
 anteriores. Exemplo sintético de compra219000: cotas175200PRICE/197100SAC.
+
+Conferência em05/11/2026: renda4000, cotista, nascimento1987-01-22, São Paulo,
+compra253790, avaliação340000, área25,77m², dependentes, entrega2029-12-31,
+obra15%, Ouro, entrada150: crédito203032, subsídio3357,01 e quatro anuais
+nominais de2000 em15/12/2026–2029. Com as anuais, comprometimento Linear/Decrescente
+16,08%/19,83%; sem elas19,36%/23,88%. Saldo nominal39250,99 recebe correção
+inicial de0,5%, resultando39447,24. Anuais já eram aplicadas no cenário informado.
+Compra260000 admite Linear, embora Decrescente ultrapasse20% de comprometimento.
+Modificar somente o imóvel inicial275000→276000 não pode excluir a mesma unidade
+por herdar a taxa da Faixa3. As regressões cobrem esses dois erros do adaptador.
+
+A [FAQ pública CAIXA](https://www.caixa.gov.br/voce/habitacao/perguntas-frequentes-novos-financiamentos/Paginas/default.aspx)
+continua definindo o valor do imóvel pelo menor entre compra e avaliação.
+Conferida via índice público em05/11/2026; abertura direta apresentou loop de
+redirecionamento, assim como o PDF MFOM034. Não foi validada nova exceção bancária.
+Dividir209416,34 por0,8 produz261770,425 matematicamente, mas não autoriza
+substituir a compra real253790 nem a avaliação340000. Nenhum desses fatos é
+reescrito para evitar reenquadramento. A conferência não equivale à aprovação
+individual da CAIXA nem promete uma quantidade fixa de unidades do estoque.
 
 Consultas: 25, 26 e 27/10/2026, America/Sao_Paulo. Escopo exclusivo:
 `/app/simulacao/caixa`.
