@@ -38,9 +38,26 @@ export function stepPresentation(
   direction: "previous" | "next",
 ) {
   if (ids.length === 0) return null;
+  if (current === null && direction === "previous") return ids.at(-1) ?? null;
   const index = current === null ? -1 : ids.indexOf(current);
   const next = direction === "next" ? Math.min(index + 1, ids.length - 1) : index - 1;
   return next < 0 ? null : (ids[next] ?? null);
+}
+
+/** Read the overview's visual rows before the guide hides any article. */
+export function groupPresentationRows(
+  cards: readonly { id: string; top: number; left: number }[],
+): string[][] {
+  const rows: { top: number; cards: { id: string; left: number }[] }[] = [];
+  for (const card of [...cards].sort((a, b) => a.top - b.top || a.left - b.left)) {
+    let row = rows.find((candidate) => Math.abs(candidate.top - card.top) <= 2);
+    if (!row) {
+      row = { top: card.top, cards: [] };
+      rows.push(row);
+    }
+    row.cards.push({ id: card.id, left: card.left });
+  }
+  return rows.map((row) => row.cards.sort((a, b) => a.left - b.left).map((card) => card.id));
 }
 
 function presentationCards(root: HTMLElement | null) {
@@ -66,26 +83,53 @@ export function useAppointmentsPresentation({
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const overviewScroll = useRef(0);
+  const overviewRows = useRef<{ ids: string[]; height: number }[]>([]);
 
   const exit = useCallback(() => {
     setActiveCardId(null);
+    overviewRows.current = [];
     setAnnouncement("Visão geral de Agendamentos.");
     requestAnimationFrame(() => window.scrollTo({ top: overviewScroll.current, behavior: "auto" }));
   }, []);
 
   function guide(direction: "previous" | "next") {
     const cards = presentationCards(root.current);
-    const ids = cards.map((card) => card.dataset.dashboardCardId!);
+    if (activeCardId === null) {
+      overviewRows.current = groupPresentationRows(
+        cards.map((card) => {
+          const bounds = card.getBoundingClientRect();
+          return { id: card.dataset.dashboardCardId!, top: bounds.top, left: bounds.left };
+        }),
+      ).map((ids) => ({
+        ids,
+        height: Math.max(
+          ...cards
+            .filter((card) => ids.includes(card.dataset.dashboardCardId!))
+            .map((card) => card.offsetHeight),
+        ),
+      }));
+    }
+    const rows = overviewRows.current;
+    const ids = rows.map((row) => row.ids[0]!);
     const next = stepPresentation(ids, activeCardId, direction);
     if (next === null) {
       exit();
       return;
     }
     if (activeCardId === null) overviewScroll.current = window.scrollY;
-    const element = cards[ids.indexOf(next)];
-    const label = element?.querySelector("h2, h3")?.textContent?.trim() || "Gráfico";
+    const row = rows[ids.indexOf(next)];
+    if (!row) return;
+    const label = row.ids
+      .map(
+        (id) =>
+          cards
+            .find((card) => card.dataset.dashboardCardId === id)
+            ?.querySelector("h2, h3")
+            ?.textContent?.trim() || "Gráfico",
+      )
+      .join("; ");
     setAnnouncement(
-      `${label}. Gráfico ${ids.indexOf(next) + 1} de ${ids.length}. Escape volta à visão geral.`,
+      `${label}. Linha ${ids.indexOf(next) + 1} de ${ids.length}. Escape volta à visão geral.`,
     );
     setActiveCardId(next);
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -110,13 +154,15 @@ export function useAppointmentsPresentation({
     let focused = false;
     const decorate = () => {
       const cards = presentationCards(shell);
-      const active = cards.find((card) => card.dataset.dashboardCardId === activeCardId);
-      if (!active) {
+      const row = overviewRows.current.find((item) => item.ids[0] === activeCardId);
+      const active = cards.filter((card) => row?.ids.includes(card.dataset.dashboardCardId!));
+      const first = active[0];
+      if (!row || !first) {
         setActiveCardId(null);
         return;
       }
       for (const card of cards) {
-        if (card === active) {
+        if (active.includes(card)) {
           card.dataset.appointmentsPresented = "true";
           if (!card.hasAttribute("tabindex")) {
             card.tabIndex = -1;
@@ -126,10 +172,9 @@ export function useAppointmentsPresentation({
           delete card.dataset.appointmentsPresented;
         }
       }
-      const grid = active.closest<HTMLElement>("[data-dashboard-canvas-grid]");
+      const grid = first.closest<HTMLElement>("[data-dashboard-canvas-grid]");
       if (!grid) return;
-      resize.observe(active);
-      resize.observe(grid);
+      for (const card of active) resize.observe(card);
       const bounds = grid.getBoundingClientRect();
       // Includes both the fitted surface and browser/root zoom used by accessibility QA.
       const effectiveScale = grid.offsetWidth > 0 ? bounds.width / grid.offsetWidth : surfaceScale;
@@ -137,15 +182,15 @@ export function useAppointmentsPresentation({
         1,
         (window.innerHeight - Math.max(0, bounds.top) - 8) / effectiveScale,
       );
-      const availableWidth = Math.max(1, grid.clientWidth);
-      const fit = fitPresentationCard(
-        { width: active.offsetWidth, height: active.offsetHeight },
-        { width: availableWidth, height: availableHeight },
-      );
       shell.style.setProperty("--appointments-focus-height", `${availableHeight}px`);
-      shell.style.setProperty("--appointments-focused-zoom", String(fit));
+      shell.style.setProperty("--appointments-presented-columns", String(active.length));
+      shell.style.setProperty(
+        "--appointments-presented-height",
+        `${Math.min(row.height, availableHeight)}px`,
+      );
+      shell.style.setProperty("--appointments-focused-zoom", "1");
       if (!focused) {
-        active.focus({ preventScroll: true });
+        first.focus({ preventScroll: true });
         focused = true;
       }
     };
@@ -177,6 +222,8 @@ export function useAppointmentsPresentation({
       }
       shell.style.removeProperty("--appointments-focus-height");
       shell.style.removeProperty("--appointments-focused-zoom");
+      shell.style.removeProperty("--appointments-presented-columns");
+      shell.style.removeProperty("--appointments-presented-height");
     };
   }, [enabled, root, activeCardId, surfaceScale]);
 

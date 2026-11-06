@@ -3235,3 +3235,7 @@ Escopo dos21prints, estado inicial e evidências desta entrega em
 [registro específico](ATUALIZACOES-ARQUIVO-2026-11-05-a-2026-11-05-AGENDAMENTOS-APRESENTACAO.md).
 Visual publicado28b4ac35/PR502 e validado nos três ambientes.
 Conciliação da hierarquia oficial em andamento; outras páginas fora do escopo.
+
+## Agendamentos: alinhamento e linhas — 06/11/2026
+
+Registro: [escopo e evidências](ATUALIZACOES-AGENDAMENTOS-LINHAS-2026-11-06.md).

@@ -1,5 +1,7 @@
 # Changelog
 
+- Alinha Agendamentos à largura disponível e navega por linhas completas de gráficos; setas mantêm somente ícones e nomes acessíveis.
+
 - Registra publicação e validação da revisão CAIXA 318b51fa; arquiva somente a nota desta entrega para respeitar o limite de sincronização. Nenhuma alteração de runtime neste registro.
 
 - Corrige a coorte das metas em Agendamentos com o gerente oficial de Corretores

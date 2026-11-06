@@ -313,7 +313,7 @@ function AppointmentsDashboardShell({
               title="Ir para a seção anterior"
             >
               <ArrowUp aria-hidden="true" size={18} />
-              <span className={styles.dashboardLabel}>Subir seção</span>
+              {!appointments && <span className={styles.dashboardLabel}>Subir seção</span>}
             </button>
             <button
               type="button"
@@ -322,7 +322,7 @@ function AppointmentsDashboardShell({
               title="Ir para a próxima seção"
             >
               <ArrowDown aria-hidden="true" size={18} />
-              <span className={styles.dashboardLabel}>Descer seção</span>
+              {!appointments && <span className={styles.dashboardLabel}>Descer seção</span>}
             </button>
           </div>
         </aside>
