@@ -801,3 +801,16 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
 - Limite de ferramenta: fetch_commit_workflow_runs filtra eventos pull_request;
   ausência ali não prova indisponibilidade de CI da main. A consulta push/main
   foi conferida via gh com SHA completo, sem copiar logs nem dados privados.
+- CI42215691521/head5c58a0a8: validate, imagem e restore aprovados; release-gates
+  em andamento quando main avançou novamente para1d87931f/PR509. Diff desta
+  revisão contém somente68linhas no arquivo de encerramento de Agendamentos,
+  sem código, configuração ou referência alterados. Incorporação necessária
+  porque a proteção de main tem strict=true e exige validate, release-gates e
+  isolated-restore atualizados. Política adicional de publicação preserva os
+  quatro jobs, incluindo imagem. Auto-merge não habilitado no repositório;
+  nenhuma configuração alterada nem bypass/admin/force usado.
+- Novas alterações de registro na main durante uma CI longa podem exigir
+  atualização da branch e repetição obrigatória. A prevenção é coordenar ordem
+  de integração/publicação entre entregas, sem cancelar outra entrega ou
+  eliminar gates. Envio de recados a outros chats exige autorização humana
+  específica pela ferramenta; solicitada, sem presumir aprovação por tempo.

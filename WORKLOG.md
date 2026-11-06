@@ -47,6 +47,9 @@
 - CI42174376394/c35f501b aprovada nos quatro gates. Main919be9b2/PR506 também
   aprovada na CI42174495249; conciliação limitada ao índice de conhecimento,
   preservando códigos e referências. Publicação exige main final validada.
+- Main1d87931f acrescentou somente fechamento documental de Agendamentos;
+  integrado preservando código e testes. Proteção strict da main exige branch
+  atualizada e novos checks; nenhuma regra, timeout ou baseline foi reduzido.
 
 - Publicação CAIXA concluída: PR503/main318b51fa, CI42088655220 com quatro gates verdes, coordenador/CAS em05/11/2026 19:58:29 UTC. Health e smoke de cálculo, prazo automático, filtros, seleção e anuais aprovados. Evidências e limites em docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-05-CAIXA-FRONTEIRAS.md.
 

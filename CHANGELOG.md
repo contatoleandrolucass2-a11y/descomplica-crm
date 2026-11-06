@@ -17,6 +17,9 @@
   aplicada após testes; interface final aprovada no PR, com publicação aguardando
   validação da main combinada.
 
+- Concilia os registros da entrega com o fechamento documental de Agendamentos,
+  preservando o código já aprovado e as proteções de integração/publicação.
+
 - Ajusta a proporção do indicador compacto de Equipe Produtiva para comportar
   percentuais decimais e100% dentro do anel, preservando as cinco linhas na tela.
 
