@@ -814,3 +814,61 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
   de integração/publicação entre entregas, sem cancelar outra entrega ou
   eliminar gates. Envio de recados a outros chats exige autorização humana
   específica pela ferramenta; solicitada, sem presumir aprovação por tempo.
+- Usuário autorizou explicitamente a coordenação com os chats CAIXA e
+  Agendamentos. Enviados recados somente a Simulador Caixa e Ajustar cards e
+  sidebar, identificados por metadados e Git comum confirmado, sem ler histórico.
+  Respostas compactas da nova rodada: CAIXA relata919be9b2 publicado09:04:51-03,
+  deployment1e892386-8df5-4d14-95bc-8c1bcbb5d91b, sem deploy ativo e PR510 apenas
+  documental mantido em branch; Agendamentos confirma507funcional/509registro,
+  sem integração ou deploy pendente. Ambos confirmaram janela estável para
+  Equipe Produtiva. Conferir produção diretamente antes de publicar e avisar
+  conclusão para liberar o registro documental; não cancelar entregas nem
+  substituir CI/CAS pelo relato dos outros chats. Este registro permanece local
+  durante os checks para não invalidar o candidato33a9e72f por nova escrita Git.
+
+### Publicação concluída — 06/11/2026
+
+- PR508 integrado em9ee2c0cf7fe11df21efeb58cc19c615d71058948. Head33a9e72f:
+  CI42219937362 com quatro gates aprovados. Main exata: CI42230895044,
+  push/main, validate/release-gates/isolated-restore/promotable-image aprovados.
+  Nenhum gate ignorado, proteção alterada ou referência alheia promovida.
+- Artefato13508752327, promotable-image-9ee2c0cf7fe11df21efeb58cc19c615d71058948;
+  ZIP SHA256100d5664c41c62d729b615321ad47a7cfd735d0c47af698d5c675baa31ef3238.
+  Extração com paths e symlinks validados. image.tar.gz SHA256
+  89376a0b6b4c6f5192f2a1f6ff3bc5ec53a6500e32e2e593b0bf95bef5a62d3f.
+  CI configID sha256:d80d6a2f76e59e83fd1fc4f0ff70144b0ba516b4f51c0e88bc0337b217049f2b;
+  store local usa manifesto sha256:d10e4269aadd5d364a23d85c6e2fbf9d1c67098ef3c4a2d961aebd4b999e7abb.
+  Conferidos30blobs/14layers, RootFS/diffIDs, revisão OCI e linux/amd64; formatos
+  legacy/OCI equivalentes. Prova privada persistida em
+  /srv/descomplica-crm-release-artifacts/9ee2c0cf7fe11df21efeb58cc19c615d71058948/image-identity-proof.json.
+  Imagem carregada sem retag; nenhum build ou suíte pesada na VPS.
+- Node24.19/pnpm11.20 e checkout candidato limpo. Preparação conferiu publicação
+  anterior919be9b2, imagem9c5d8263cd2c76f31639510a01c79e278dc16970d6da714ecd059c94e3f6777e,
+  deployment1e892386-8df5-4d14-95bc-8c1bcbb5d91b de12:04:51.057UTC. Backup de
+  metadados da migration e caminho de reversão preservados; dados não alterados.
+- Promoção exclusiva por pnpm release:production: fontes main/CI/health no mesmo
+  minuto UTC e idade<=60s, travas compartilhadas e CAS da versão esperada. Retorno
+  deployed, deployment30a25353-987d-4367-81ec-f0601f1bcff9, imagem locald10e4269,
+  deployedAt2026-11-06T15:57:44.674Z (12:57:44.674 America/Sao_Paulo).
+  pendingDeploymentId=null. Sem recuperação, segundo deploy ou troca de flags.
+- Pós-publicação: health200/ok/version9ee2c0cf; Equipe Produtiva e Agendamentos
+  anônimos307para/login. CSS da imagem ativa contém vidro, shell externo,
+  tabelas nominais, resumo e compactação. Script de observação retornou passed.
+  Ledger relido confirma mesmo ID/SHA/imagem e ausência de pendência.
+- Banco pós-publicação: bodymd5v229c94c01db28f7d6d6dd031dae0202b3; ownerpostgres,
+  STABLE, SECURITYDEFINER/searchpathvazio, EXECUTEauthenticatedtrue/anonfalse/
+  servicefalse; sem sessão retorna null. V1 definitionmd591ebffe4f16ddfac558889416fd54fb8;
+  comparação integral de owner/ACL/proconfig/securitydefiner com backup=true.
+  Carga15:33:31UTC/12:33:31local reconciliada, quatro etapas disponíveis,
+  30corretores/5gerentes/0gerentes oficiais ausentes/7regionais ausentes.
+- Limites: não foi criada sessão autenticada de produção nem exportado dado
+  nominal; resumo preenchido, filtros, nomes compactos, ordenação e encaixe são
+  comprovados por navegador/SSR com fixtures; matriz autenticada usa fonte nominal
+  indisponível. Produção confere metadados reais, autorização anônima, versão e
+  estilos servidos. Sete vínculos continuam sem nome regional na fonte consultada;
+  reavaliar quando relatório/cadastro reconciliado fornecer vínculo por corretor.
+  Não inferir Regional pelo gerente nem apresentar ausência como valor confirmado.
+- Janela de coordenação liberada aos dois chats autorizados, com SHA/CI/ID da
+  publicação. CAIXA e Agendamentos preservados. Este encerramento é documental:
+  publicar registro no Git e sincronizar Obsidian, sem reiniciar a aplicação nem
+  repetir suites funcionais aprovadas por causa deste texto.
