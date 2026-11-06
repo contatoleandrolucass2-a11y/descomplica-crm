@@ -4,10 +4,11 @@
 
 Resumo de sete colunas, uma linha por gerente de vendas e percentuais por base
 filtrada, conforme esclarecimento do usuário. Cards e popups compactos; nova
-leitura versionada da hierarquia oficial preparada. Fonte atual:30corretores,
+leitura versionada da hierarquia oficial aplicada após autorização. Fonte consultada:30corretores,
 5gerentes e7vínculos regionais ausentes; nenhum nome inferido para preenchê-los.
 Evidências e limites no [registro da demanda](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
-Migration, CI e publicação desta revisão ainda pendentes.
+CI42162934633 aprovada; migration remota20261106052910 conferida. Integração
+com main/PR507 e nova validação/publicação da aplicação ainda pendentes.
 
 ## 2026-11-05 — CAIXA: fronteiras e interface publicadas
 
@@ -3244,3 +3245,7 @@ Escopo dos21prints, estado inicial e evidências desta entrega em
 [registro específico](ATUALIZACOES-ARQUIVO-2026-11-05-a-2026-11-05-AGENDAMENTOS-APRESENTACAO.md).
 Visual publicado28b4ac35/PR502 e validado nos três ambientes.
 Conciliação da hierarquia oficial em andamento; outras páginas fora do escopo.
+
+## Agendamentos: alinhamento e linhas — 06/11/2026
+
+Registro: [escopo e evidências](ATUALIZACOES-ARQUIVO-2026-11-06-a-2026-11-06-AGENDAMENTOS-LINHAS.md).

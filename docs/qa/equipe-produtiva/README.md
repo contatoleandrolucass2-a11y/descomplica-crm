@@ -43,8 +43,9 @@ Fixtures incluem bases desiguais, dois regionais no mesmo gerente, vínculos
 pendentes, filtros e crescimento dinâmico da quantidade de gerentes.
 
 Os resultados locais ficam em `test-results/productive-team-layout/current`;
-pgTAP, build e gates de release são exigidos na CI do candidato. Migration nova
-não foi aplicada remotamente nesta preparação.
+pgTAP, build e gates de release são exigidos na CI do candidato. CI42162934633
+aprovou quatro gates; a migration foi autorizada e aplicada via MCP em06/11,
+registro remoto20261106052910, preservando função anterior, dados e permissões.
 
 ### Tabelas nominais dos quatro indicadores — 03/11/2026
 
@@ -56,9 +57,9 @@ vigente filtrado; o grupo produtivo usa exatamente o conjunto do indicador.
 Sem cadastro reconciliável, o detalhe nominal fica indisponível; não se cria
 lista vazia nem se classifica um corretor por ausência de dados.
 
-O read model atual não contém Regional no cadastro nominal. O detalhe utiliza
+Na revisão de03/11, o read model não continha Regional no cadastro nominal. O detalhe utilizava
 o vínculo autorizado de Agendamentos quando conhecido e estável no período;
-ausência, conflito ou mudança gera Não informado. Nenhuma consulta remota,
+ausência, conflito ou mudança gerava Não informado. Naquela revisão, nenhuma consulta remota,
 concessão ou alteração de RPC foi acrescentada. Testes de análise cobrem
 partição, filtros, nomes homônimos/duplicados, ordenação, zero e indisponibilidade.
 

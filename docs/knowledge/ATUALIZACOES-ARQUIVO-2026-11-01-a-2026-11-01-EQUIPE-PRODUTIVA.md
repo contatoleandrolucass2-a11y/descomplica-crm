@@ -715,3 +715,43 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
   Correção restrita ao inventário dessa função, sem mudar concessões reais.
   Log também registrou rate limit Docker; a falha pgTAP foi independente e
   reproduzível pela comparação estática da lista. Nenhuma aplicação remota.
+
+### Aprovação e integração — 06/11/2026
+
+- Usuário autorizou especificamente a nova migration20261106035242 após os
+  testes. PR508/head524abbc8, CI42162934633: quatro gates aprovados; restore
+  2492asserts e matriz completa (release-gates47m5s). Leitura v2 e ACL testadas.
+  QA confirmou fixture global sem análise nominal: resumo preenchido/regionais
+  oficiais e nulos são comprovados pelos focados sintéticos, não pela matriz
+  global indisponível. Nenhum teste duplicado ou baseline alterado.
+- Refresh externo05:28UTC: main avançou para6ae947fe/PR507 (alinhamento e
+  navegação de Agendamentos). Diff compartilhado confrontado: condicionais de
+  rótulo e CSS estão limitados a Agendamentos; Equipe Produtiva preservada.
+  Nenhuma autoridade ou regra de deploy mudou. Não editar páginas dessa revisão.
+  Health público200/ok ainda0307bd47; versão integrada e publicada distintas.
+  CI da nova main não foi localizada pelo conector nesta consulta; publicação
+  exige quatro gates da main final, sem usar os da PR como autorização de deploy.
+  CLI recuperou a consulta: main6ae947fe possui CI42164749623 em execução;
+  nenhuma execução dessa outra entrega foi cancelada.
+- Backup aplicável: metadados da função v1 e fingerprint do histórico, sem
+  registros pessoais, persistidos root:root0600 na VPS em
+  /etc/descomplica-crm/migration-backups/equipe-20261106-v2-before.json,
+  SHA256e19da9c4dac4423d305cedbb3c5c71b98ab373318bd857da629dfbacd058f317.
+  Hash local/remoto e sincronização de disco conferidos. Envelope operacional
+  preserva SQL aprovado40ce2127fdf0899aab3b9300375ec97f62bad66f5332648e4fdb54d18192d53c,
+  com travas, CAS e pós-validação; nenhuma concessão ou linha existente alterada.
+- Aplicada somente a migration autorizada via Supabase MCP em05:29UTC,
+  registro20261106052910/productive_team_official_hierarchy. Envelope operacional
+  SHA2565276509e2db7221cff4e9bb2991cc86b48350e7d7f5441faa41cfbfaece43df1,
+  SQL original byte-idêntico ao aprovado. Bodymd5 v2 local/remoto
+  29c94c01db28f7d6d6dd031dae0202b3; v1 permanece91ebffe4f16ddfac558889416fd54fb8.
+  Ownerpostgres, STABLE, SECURITYDEFINER/searchpathvazio, authenticatedexecute,
+  anon/service/PUBLIC negados, sem sessão retorna null. Histórico89→90;
+  as89linhas anteriores mantêm MD5d87c1453fc7c17d27b29b5a03efd1679. Não houve
+  alteração de dados, coleta ou função antiga. Rollback da aplicação conserva
+  a função aditiva, podendo continuar na v1 sem remover dados.
+- Merge do PR508 encontrou conflitos somente em WORKLOG/CHANGELOG. Preservados
+  ambos os registros, com Agendamentos antes da seção Equipe Produtiva para
+  reduzir colisão com novos registros no topo. Código de PR507 integrado intacto.
+  Nova CI do candidato combinado obrigatória; não reutilizar a aprovação da PR
+  antiga como prova desse SHA. Aplicação publicada segue0307bd47 nesta etapa.
