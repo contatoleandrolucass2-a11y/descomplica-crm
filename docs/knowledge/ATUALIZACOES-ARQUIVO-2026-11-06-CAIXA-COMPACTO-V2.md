@@ -20,3 +20,7 @@
 ## 2026-11-05 — CAIXA: compactação visual v2
 
 Abertura: Git comum confirmado; main7084fda6, produção0307bd47 HTTP200/ok, consultados em05/11 via GitHub/Git/health. Escopo: somente apresentação e posicionamento de campos CAIXA conforme25prints; cálculos preservados. Implementação e validação pendentes.
+
+## Pendência documental isolada
+
+PR510: CI42216070698 aprovou validate; os três jobs de runtime foram skipped pela faixa documental. GitHub recusou merge (405: 3 of 3 required status checks are expected). A aplicação919be9b2 já está publicada/validada e não depende deste merge. Não houve bypass, alteração de pipeline/proteção nem reinício adicional. Registro enviado ao Git e Obsidian sincronizado; integrar a PR após a compatibilidade dos checks documentais ser resolvida em demanda própria. Fonte: resposta da API de merge PR510 em06/11/2026.
