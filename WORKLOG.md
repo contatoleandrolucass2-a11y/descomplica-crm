@@ -8,6 +8,14 @@
 
 - CAIXA: revisão visual dos25prints. Campos36px com títulos/orientações externos, rankingopcional/primeiroimóvel no formulário, cores do resumo, pulsação/hover com movimento reduzido, estoque/proposta/documentação compactos. Cálculos preservados; testes e publicação em andamento.
 
+## 2026-11-06 — Agendamentos: largura útil e navegação por linhas
+
+- Preserva o slot visual durante arraste/cancelamento; teste real de ponteiro aprovado com três cards heterogêneos.
+
+- Cards preenchem as lacunas laterais mantendo a ordem e as dimensões salvas.
+- Setas sem texto mostram juntos os gráficos de cada linha, com largura e altura uniformes no guia; Escape restaura a visão geral.
+- Escopo opt-in somente Agendamentos; sem mudança de dados, metas, permissões ou migrations.
+
 - Publicação CAIXA concluída: PR503/main318b51fa, CI42088655220 com quatro gates verdes, coordenador/CAS em05/11/2026 19:58:29 UTC. Health e smoke de cálculo, prazo automático, filtros, seleção e anuais aprovados. Evidências e limites em docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-05-CAIXA-FRONTEIRAS.md.
 
 ## 2026-11-05 — Agendamentos: vínculo oficial das equipes
