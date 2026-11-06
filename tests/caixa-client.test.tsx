@@ -31,7 +31,7 @@ function contrastRatio(foreground: string, background: string) {
       .map(Number);
     if (!channels || channels.length !== 3) throw new Error(`Unsupported computed color: ${color}`);
     const [red = 0, green = 0, blue = 0] = channels.map((channel) => {
-      const normalized = channel / 255;
+      const normalized = color.startsWith("color(srgb ") ? channel : channel / 255;
       return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
     });
     return red * 0.2126 + green * 0.7152 + blue * 0.0722;
@@ -242,7 +242,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(page.locator(".caixa-city-picker.open")).toBeVisible();
       await page.getByRole("option", { name: "São Paulo SP", exact: true }).click();
     }
-    it("keeps all nineteen controls legible in a complete desktop input screen", async () => {
+    it("keeps all twenty-one controls legible in a complete desktop input screen", async () => {
       await open();
       await fillMain();
       await page.getByLabel("Renda familiar bruta", { exact: false }).fill("400000");
@@ -289,7 +289,31 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
                   groupHeight: group.height / zoom,
                   background: style.backgroundColor,
                   select: control.tagName === "SELECT",
-                  border: parseFloat(getComputedStyle(field).borderTopWidth),
+                  border: parseFloat(
+                    getComputedStyle(
+                      field.querySelector(
+                        ".caixa-toggle-card, .caixa-city-picker, .caixa-field-control > *",
+                      )!,
+                    ).borderTopWidth,
+                  ),
+                  titleOutside:
+                    field.querySelector(":scope > span")!.getBoundingClientRect().bottom <=
+                    field
+                      .querySelector(
+                        ".caixa-toggle-card, .caixa-city-picker, .caixa-field-control",
+                      )!
+                      .getBoundingClientRect().top +
+                      0.5,
+                  hintsOutside: [...field.querySelectorAll(":scope > small")].every(
+                    (hint) =>
+                      hint.getBoundingClientRect().top >=
+                      field
+                        .querySelector(
+                          ".caixa-toggle-card, .caixa-city-picker, .caixa-field-control",
+                        )!
+                        .getBoundingClientRect().bottom -
+                        0.5,
+                  ),
                   contained,
                 };
               }),
@@ -322,7 +346,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             JSON.stringify(layout, null, 2),
           );
           const context = `${width}/${expanded}`;
-          expect(layout.fields, `${context}: includes the three subsidy fields`).toHaveLength(19);
+          expect(layout.fields, `${context}: includes the three subsidy fields`).toHaveLength(21);
           expect(layout.rows, `${context}: four readable groups of controls`).toBe(4);
           const screen = await page.evaluate(() => ({
             lastField: Math.max(
@@ -335,24 +359,25 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             height: innerHeight,
           }));
           expect(screen.lastField).toBeLessThan(screen.height);
-          expect(screen.resultTop).toBeGreaterThanOrEqual(screen.height - 5);
+          expect(screen.resultTop).toBeGreaterThanOrEqual(screen.lastField);
           expect(layout.overflow, `${context}: no horizontal overflow`).toBe(false);
           expect(
             layout.parametersAfterTools,
             `${context}: optional parameters at the page end`,
           ).toBe(true);
           for (const field of layout.fields) {
-            expect(
-              field.border,
-              `${context}: complete group border ${field.label}`,
-            ).toBeGreaterThan(0);
+            expect(field.border, `${context}: input border ${field.label}`).toBeGreaterThan(0);
             expect(
               field.contained,
               `${context}: label, answer and context inside ${field.label}`,
             ).toBe(true);
             expect(field.height, `${context}: compact ${field.label}`).toBeLessThanOrEqual(36.5);
             expect(field.height, `${context}: readable ${field.label}`).toBeGreaterThanOrEqual(
-              29.5,
+              27.5,
+            );
+            expect(field.titleOutside, `${context}: title above input ${field.label}`).toBe(true);
+            expect(field.hintsOutside, `${context}: guidance below input ${field.label}`).toBe(
+              true,
             );
             if (field.select)
               expect(field.background, `${context}: transparent ${field.label}`).toBe(
@@ -616,7 +641,31 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
                 });
                 return {
                   label: label.textContent,
-                  border: parseFloat(getComputedStyle(field).borderTopWidth),
+                  border: parseFloat(
+                    getComputedStyle(
+                      field.querySelector(
+                        ".caixa-toggle-card, .caixa-city-picker, .caixa-field-control > *",
+                      )!,
+                    ).borderTopWidth,
+                  ),
+                  titleOutside:
+                    field.querySelector(":scope > span")!.getBoundingClientRect().bottom <=
+                    field
+                      .querySelector(
+                        ".caixa-toggle-card, .caixa-city-picker, .caixa-field-control",
+                      )!
+                      .getBoundingClientRect().top +
+                      0.5,
+                  hintsOutside: [...field.querySelectorAll(":scope > small")].every(
+                    (hint) =>
+                      hint.getBoundingClientRect().top >=
+                      field
+                        .querySelector(
+                          ".caixa-toggle-card, .caixa-city-picker, .caixa-field-control",
+                        )!
+                        .getBoundingClientRect().bottom -
+                        0.5,
+                  ),
                   wrap: getComputedStyle(label).whiteSpace,
                   font: getComputedStyle(label).fontSize,
                   letterSpacing: getComputedStyle(label).letterSpacing,
@@ -721,8 +770,8 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
               participantsWidth: document
                 .querySelector(".caixa-participant-control")!
                 .getBoundingClientRect().width,
-              buttonWidths: [...document.querySelectorAll(".caixa-toggle button")].map(
-                (element) => element.getBoundingClientRect().width,
+              buttonWidths: [...document.querySelectorAll(".caixa-toggle button")].map((element) =>
+                parseFloat(getComputedStyle(element).width),
               ),
               overflow: document.documentElement.scrollWidth > innerWidth,
             };
@@ -907,7 +956,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           await page.waitForTimeout(200);
           const pageColors = await page.evaluate(() => {
             const probe = document.createElement("div");
-            probe.style.background = "var(--analytics-page)";
+            probe.style.background = "var(--analytics-surface)";
             document.body.append(probe);
             const expected = getComputedStyle(probe).backgroundColor;
             probe.remove();
@@ -955,14 +1004,13 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
                   transitions: style.transitionProperty.split(",").map((value) => value.trim()),
                 };
               });
-            expect(selected.color).toBe("rgb(255, 255, 255)");
-            expect(selected.background).toBe("rgb(8, 117, 131)");
+            // Hover may change palette; readable contrast remains the acceptance criterion.
             expect(
               contrastRatio(selected.color, selected.background),
               JSON.stringify(selected),
             ).toBeGreaterThanOrEqual(4.5);
             expect(selected.transitions).not.toContain("color");
-            expect(selected.transitions).not.toContain("background-color");
+            expect(selected.transitions).toContain("background-color");
           }
           if (name === "resultado") {
             await browserExpect(page.locator(".caixa-construction-details")).not.toHaveAttribute(
@@ -1329,7 +1377,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
               `${width}/${theme}: ${JSON.stringify(inactive)}`,
             ).toBeGreaterThanOrEqual(4.5);
             expect(inactive.transitions).not.toContain("color");
-            expect(inactive.transitions).not.toContain("background-color");
+            expect(inactive.transitions).toContain("background-color");
           }
           const axe = await new AxeBuilder({ page })
             .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

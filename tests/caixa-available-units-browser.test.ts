@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { mkdir, readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { chromium, expect as browserExpect, type Browser, type Page } from "@playwright/test";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import AxeBuilder from "@axe-core/playwright";
@@ -585,7 +585,17 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       const ledger = page.getByRole("region", { name: "Composição da proposta", exact: true });
       await browserExpect(ledger).toContainText("209.572,08");
       await browserExpect(ledger).toContainText("253.790,00");
-      await browserExpect(ledger).toContainText("261.965,10");
+      await browserExpect(ledger).not.toContainText("261.965,10");
+      await page.evaluate(() => {
+        window.print = () => {};
+      });
+      await page.getByRole("button", { name: "Imprimir linear", exact: true }).click();
+      const commercialPrint = page
+        .locator("body > article")
+        .filter({ hasText: "Proposta Associativo" });
+      await browserExpect(commercialPrint).toContainText("261.965,10");
+      await browserExpect(commercialPrint).toContainText("Cenário comercial");
+      await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
       await browserExpect(ledger.getByText(/Cenário comercial/)).not.toBeVisible();
       await browserExpect(ledger.getByRole("row", { name: /^Financiamento/ })).not.toContainText(
         "Cenário comercial",
@@ -595,6 +605,39 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           page.getByRole("spinbutton", { name: `Valor da anual ${index}`, exact: true }),
         ).toHaveValue("2000");
       expect(errors).toEqual([]);
+    });
+    it("fits the complete proposal with four annuals in one desktop viewport", async () => {
+      await open({ width: 1920, asOf: "2026-11-05", mcmvPrice: 253790, mcmvAppraisal: 340000 });
+      await page.getByLabel("Ranking do cliente", { exact: true }).selectOption("gold");
+      await page.getByLabel("Primeiro imóvel?", { exact: true }).selectOption("yes");
+      await browserExpect(page.getByRole("status")).toContainText("1 unidade dentro do ranking");
+      await page
+        .getByRole("button", { name: "Exibir fluxo de Apartamento teste", exact: true })
+        .click();
+      for (let index = 1; index <= 4; index++)
+        await browserExpect(
+          page.getByRole("spinbutton", { name: `Valor da anual ${index}`, exact: true }),
+        ).toHaveValue("2000");
+      const panel = page.getByRole("region", { name: "Fluxo editável", exact: true });
+      const dimensions = await panel.evaluate((element) => ({
+        height: element.getBoundingClientRect().height,
+        viewport: innerHeight,
+        maxRow: Math.max(
+          ...[...element.querySelectorAll("tr")].map((row) => row.getBoundingClientRect().height),
+        ),
+      }));
+      const directory = resolve("private-data/caixa-qa");
+      await mkdir(directory, { recursive: true });
+      await writeFile(
+        resolve(directory, "caixa-proposal-1920-four-annuals.json"),
+        JSON.stringify(dimensions, null, 2),
+      );
+      await panel.screenshot({
+        path: resolve(directory, "caixa-proposal-1920-four-annuals.png"),
+        animations: "disabled",
+      });
+      expect(dimensions.height).toBeLessThanOrEqual(dimensions.viewport - 100);
+      expect(dimensions.maxRow).toBeLessThanOrEqual(40);
     });
     it("keeps a fully covered commercial balance available without imaginary monthly or annual payments", async () => {
       const { errors } = await open({
