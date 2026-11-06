@@ -1,5 +1,7 @@
 # Changelog
 
+- Compacta somente a interface CAIXA: controles com legendas externas, rankingopcional e primeiroimóvel no início, FGTS/recursos separados, animações acessíveis e proposta no padrão Associativo.
+
 - Mantém o alinhamento dos gráficos de Agendamentos durante o arraste, incluindo o espaço temporário do card.
 
 - Alinha Agendamentos à largura disponível e navega por linhas completas de gráficos; setas mantêm somente ícones e nomes acessíveis.
