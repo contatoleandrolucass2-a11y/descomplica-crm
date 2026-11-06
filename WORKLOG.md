@@ -1,5 +1,7 @@
 # Worklog
 
+- CAIXA compacto v2: 30 testes distintos de navegador aprovados em rodadas focadas (14 formulário,16 estoque/proposta), sem duplicar contagens. Tipos, lint e formatação aprovados. Proposta com quatro anuais:593,5px em1920x900, sem rolagem interna; limite800px. Capturas sintéticas privadas conferidas. Gates CI/publicação ainda pendentes.
+
 - CAIXA: revisão visual dos25prints. Campos36px com títulos/orientações externos, rankingopcional/primeiroimóvel no formulário, cores do resumo, pulsação/hover com movimento reduzido, estoque/proposta/documentação compactos. Cálculos preservados; testes e publicação em andamento.
 
 - Publicação CAIXA concluída: PR503/main318b51fa, CI42088655220 com quatro gates verdes, coordenador/CAS em05/11/2026 19:58:29 UTC. Health e smoke de cálculo, prazo automático, filtros, seleção e anuais aprovados. Evidências e limites em docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-05-CAIXA-FRONTEIRAS.md.
