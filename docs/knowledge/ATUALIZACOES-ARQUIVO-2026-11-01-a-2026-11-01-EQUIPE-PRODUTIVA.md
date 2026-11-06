@@ -661,3 +661,51 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
   conflitante ou instável no período continua Não informado. Não houve nova
   coleta, concessão, endpoint ou remoção de masking. Registro final somente
   documental; sincronizar Obsidian e não reiniciar o runtime para este registro.
+
+## Regional oficial e resumo compacto — abertura em 06/11/2026
+
+- Pedido: preencher Regional com o vínculo dos relatórios nas duas tabelas,
+  usar primeiro nome/sobrenome nos pop-ups e reduzir linhas/cards. Acrescentar
+  tabela de oito colunas abaixo dos cards e remover as duas notas indicadas.
+- Git comum confirmado, checkout limpo em 628f4402 antes do fetch; nova branch
+  codex/equipe-produtiva-resumo-regional baseada na main 7084fda6c437c5ae85cd1f2b58d630a895888208.
+  CI documental 42108445799 aprovada. Health público HTTP 200/status ok em
+  0307bd47c3d73f068ef07ae035eb1adcdccb1c1d, que inclui PR #504 de vínculo
+  oficial de Agendamentos. Código integrado e runtime são versões distintas.
+- Fontes: Git/GitHub, https://crm.descomplicapro.com.br/api/health e busca
+  pertinente no Obsidian. Conferir os contratos atuais antes de reutilizar
+  notas de 03/11. Nenhuma coleta ou migration remota executada nesta abertura.
+
+### Preparação e validação focada — 06/11/2026
+
+- Esclarecimento do usuário substitui as oito colunas iniciais: retirar
+  Responsável da conta e agrupar por gerente de vendas, com quantidade dinâmica
+  de linhas e percentuais por base filtrada. Implementadas sete colunas;
+  total ponderado usa o mesmo percentual global dos cards.
+- RPC v2 aditiva expõe roster_manager_name/regional_manager_name já existentes,
+  mantendo v1, guard, projeção autorizada e ACL. Arquivo preparado:
+  20261106035242_productive_team_official_hierarchy.sql; sem alteração de dados,
+  coleta, concessões ou aplicação remota. Aprovação antiga das duas migrations
+  originais não autoriza esta nova função. Docker local indisponível:39asserts
+  pgTAP desta suíte dependem da CI isolada. Inventário106migrations/2492asserts.
+- MCP SELECT agregado, projeto verificado por hostname hnncxuerlcsaahdxoswb:
+  snapshotref06/11, generated04:03:53.025Z, updated04:07:15.226870Z;
+  30corretores,5gerentes,2regionais conhecidos e7regionaisnull. Os sete não têm
+  agendamentos próprios na análise (inclusive identidade normalizada), nem
+  visitas;3 têm pastas e4 têm vendas. Pastas possui coluna regional no contrato,
+  mas a projeção retém apenas identificador da oportunidade, não o nome regional.
+  Fonte ao vivo não consultada; isso não prova ausência nos relatórios originais.
+- Um gerente possui dois regionais confirmados. O resumo mantém ambos em
+  nomes separados/abreviados, identifica quantidade sem vínculo e não duplica
+  gerente nem denominador. Null por corretor não usa inferência histórica.
+  Corrigir a projeção compartilhada/coletor exige diagnóstico e validação
+  próprios; nenhuma ampliação incidental para outras páginas foi realizada.
+- Focados aprovados:26análise,15loader,6SSR e34inventário/homologação.
+  Chromium47,90s:48layouts/72popups,180corretores,30gerentes com scroll interno,
+  filtros,7colunas, total ponderado, dois regionais e pendências. Capturas
+  sintéticas em test-results/productive-team-layout/current; nenhuma identidade
+  real exportada. ESLint/Prettier/diff/sintaxe focados aprovados.
+- Cards144px, popup compacto opt-in com primeiro nome/último sobrenome e title
+  integral; comportamento compartilhado de Agendamentos preservado. Removidas
+  somente as duas notas pedidas. CI completa, aprovação da migration nova,
+  merge e publicação desta revisão continuam pendentes nesta etapa.

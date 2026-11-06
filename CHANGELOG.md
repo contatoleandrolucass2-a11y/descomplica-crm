@@ -1,5 +1,11 @@
 # Changelog
 
+- Compacta Equipe Produtiva e inclui resumo por gerente de vendas, com base e
+  percentuais filtrados e total ponderado. Popups abreviam nomes e usam linhas
+  menores. Leitura versionada aditiva utiliza hierarquia oficial; resumo mantém
+  múltiplos regionais confirmados e identifica vínculos pendentes. Remove as
+  duas notas abaixo dos cards conforme solicitado. Ativação remota pendente.
+
 - Registra publicação e validação da revisão CAIXA 318b51fa; arquiva somente a nota desta entrega para respeitar o limite de sincronização. Nenhuma alteração de runtime neste registro.
 
 - Corrige a coorte das metas em Agendamentos com o gerente oficial de Corretores

@@ -63,6 +63,176 @@ const slice = (overrides: Partial<DashboardAnalysisSlice> = {}): DashboardAnalys
 });
 
 describe("productive team analysis", () => {
+  it("uses the official regional in both groups despite inconsistent historical observations", () => {
+    const input = slice({
+      appointments: [
+        appointment(),
+        { ...appointment("Ana", "2026-11-03"), regionalManager: "Regional Histórico" },
+      ],
+      facts: [fact(4)],
+    });
+    const result = analyzeProductiveTeam(input, {
+      brokerRoster: [
+        { ...roster[0]!, regionalManager: "Regional Oficial" },
+        { ...roster[1]!, regionalManager: "Regional Oficial" },
+      ],
+    });
+    expect(result.cards[3]?.productiveMembers?.[0]?.regionalManager).toBe("Regional Oficial");
+    expect(result.cards[3]?.unproductiveMembers?.[0]?.regionalManager).toBe("Regional Oficial");
+    expect(result.summaryRows?.map((row) => row.regionalManagers)).toEqual([
+      ["Regional Oficial"],
+      ["Regional Oficial"],
+    ]);
+    const unknown = analyzeProductiveTeam(input, {
+      brokerRoster: roster.map((member) => ({ ...member, regionalManager: null })),
+    });
+    expect(
+      unknown.summaryRows?.every(
+        (row) => row.regionalManagers.length === 0 && row.regionalUnknownBrokerCount === 1,
+      ),
+    ).toBe(true);
+  });
+
+  it("derives summary counts from the same unique membership as the cards", () => {
+    const result = analyzeProductiveTeam(slice(), { brokerRoster: [...roster, roster[0]!] });
+    expect(result.summaryRows?.reduce((sum, row) => sum + row.brokerCount, 0)).toBe(
+      result.brokerCount,
+    );
+    for (const card of result.cards) {
+      expect(result.summaryRows?.reduce((sum, row) => sum + (row[card.stage] ?? 0), 0)).toBe(
+        card.productiveBrokers,
+      );
+    }
+    const filtered = analyzeProductiveTeam(slice(), {
+      brokerRoster: roster,
+      filters: { owner: "Ana", createdDate: "2026-11-02" },
+    });
+    expect(filtered.summaryRows).toHaveLength(1);
+    expect(filtered.summaryRows?.[0]).toMatchObject({
+      manager: "Gerente A",
+      brokerCount: 1,
+      appointments: 1,
+      visits: 1,
+      folders: 1,
+      sales: 0,
+    });
+  });
+
+  it("distinguishes an unknown base, an empty base and unavailable stages", () => {
+    expect(analyzeProductiveTeam(slice()).summaryRows).toBeNull();
+    expect(
+      analyzeProductiveTeam(slice({ brokerCount: 1 }), { brokerRoster: roster }).summaryRows,
+    ).toBeNull();
+    expect(
+      analyzeProductiveTeam(slice(), { brokerRoster: roster, filters: { company: "Empresa A" } })
+        .summaryRows,
+    ).toBeNull();
+    expect(
+      analyzeProductiveTeam(slice({ brokerCount: 0, facts: [], appointments: [] }), {
+        brokerRoster: [],
+      }).summaryRows,
+    ).toEqual([]);
+    const unavailable = analyzeProductiveTeam(slice(), {
+      brokerRoster: roster,
+      availableStages: ["appointments"],
+    });
+    expect(unavailable.summaryRows).toHaveLength(2);
+    expect(
+      unavailable.summaryRows?.every(
+        (row) => row.visits === null && row.folders === null && row.sales === null,
+      ),
+    ).toBe(true);
+  });
+
+  it("sorts full identities by regional, manager and owner without merging similar names", () => {
+    const result = analyzeProductiveTeam(slice({ appointments: [], facts: [] }), {
+      brokerRoster: [
+        {
+          key: "one",
+          owner: "Ana Maria Silva",
+          manager: "Gerente B",
+          regionalManager: "Regional B",
+        },
+        {
+          key: "two",
+          owner: "Ana Paula Silva",
+          manager: "Gerente A",
+          regionalManager: "Regional A",
+        },
+      ],
+    });
+    expect(result.summaryRows?.map((row) => row.manager)).toEqual(["Gerente A", "Gerente B"]);
+  });
+
+  it("groups dynamically by full manager identity, with weighted unique broker counts", () => {
+    const brokerRoster = [
+      { ...roster[0]!, manager: "Gerente Ana Maria Silva", regionalManager: "Regional A" },
+      { ...roster[1]!, manager: "Gerente Ana Maria Silva", regionalManager: "Regional A" },
+      ...["Gerente Ana Paula Silva", "Gerente C", "Gerente D", "Gerente E"].map(
+        (manager, index) => ({
+          key: `extra${index}`,
+          owner: `Pessoa ${index}`,
+          manager,
+          regionalManager: "Regional B",
+        }),
+      ),
+    ];
+    const result = analyzeProductiveTeam(slice({ brokerCount: 6 }), {
+      brokerRoster: [...brokerRoster, brokerRoster[0]!],
+    });
+    expect(result.summaryRows).toHaveLength(5);
+    const group = result.summaryRows?.find((row) => row.manager === "Gerente Ana Maria Silva");
+    expect(group).toMatchObject({
+      brokerCount: 2,
+      appointments: 1,
+      visits: 2,
+      folders: 1,
+      sales: 0,
+    });
+    for (const card of result.cards)
+      expect(result.summaryRows?.reduce((sum, row) => sum + (row[card.stage] ?? 0), 0)).toBe(
+        card.productiveBrokers,
+      );
+    const ownerFiltered = analyzeProductiveTeam(slice({ brokerCount: 6 }), {
+      brokerRoster,
+      filters: { owner: "Ana" },
+    });
+    expect(ownerFiltered.summaryRows).toHaveLength(1);
+    expect(ownerFiltered.summaryRows?.[0]?.brokerCount).toBe(1);
+    const managerFiltered = analyzeProductiveTeam(slice({ brokerCount: 6 }), {
+      brokerRoster,
+      filters: { manager: "Gerente Ana Maria Silva" },
+    });
+    expect(managerFiltered.summaryRows).toHaveLength(1);
+    expect(managerFiltered.summaryRows?.[0]?.brokerCount).toBe(2);
+  });
+
+  it("keeps all known official regions and separately counts unknown links within one manager", () => {
+    const result = analyzeProductiveTeam(slice({ brokerCount: 4 }), {
+      brokerRoster: [
+        { ...roster[0]!, manager: "Gerente Único", regionalManager: "Regional B" },
+        { ...roster[1]!, manager: "Gerente Único", regionalManager: "Regional A" },
+        { key: "extra1", owner: "Pessoa C", manager: "Gerente Único", regionalManager: null },
+        {
+          key: "extra2",
+          owner: "Pessoa D",
+          manager: "Gerente Único",
+          regionalManager: "Regional A",
+        },
+      ],
+    });
+    expect(result.summaryRows).toHaveLength(1);
+    expect(result.summaryRows?.[0]).toMatchObject({
+      manager: "Gerente Único",
+      regionalManagers: ["Regional A", "Regional B"],
+      regionalUnknownBrokerCount: 1,
+      brokerCount: 4,
+      appointments: 1,
+      visits: 2,
+      folders: 1,
+      sales: 0,
+    });
+  });
   it.each(["appointments", "visits", "folders", "sales"] as const)(
     "intersects %s activity with the current filtered roster after a manager change",
     (stage) => {

@@ -1,5 +1,14 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-06 — Equipe Produtiva: resumo por gerente em preparação
+
+Resumo de sete colunas, uma linha por gerente de vendas e percentuais por base
+filtrada, conforme esclarecimento do usuário. Cards e popups compactos; nova
+leitura versionada da hierarquia oficial preparada. Fonte atual:30corretores,
+5gerentes e7vínculos regionais ausentes; nenhum nome inferido para preenchê-los.
+Evidências e limites no [registro da demanda](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
+Migration, CI e publicação desta revisão ainda pendentes.
+
 ## 2026-11-05 — CAIXA: fronteiras e interface publicadas
 
 PR503/main318b51fa publicado às19:58:29 UTC, quatro gates aprovados, health200/ok

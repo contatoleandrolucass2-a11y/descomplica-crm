@@ -20,6 +20,7 @@ import {
 import shared from "../../etapas/_components/AppointmentsDashboard.module.css";
 import styles from "./ProductiveTeamDashboard.module.css";
 import { ProductiveTeamDetails } from "./ProductiveTeamDetails";
+import { ProductiveTeamSummary } from "./ProductiveTeamSummary";
 
 const labels = {
   appointments: ["Agendamentos", "agendamentos"],
@@ -195,7 +196,8 @@ export function ProductiveTeamDashboard({
                 content: (
                   <ProductiveTeamDetails
                     appointmentLabels={stage === "appointments"}
-                    shortNames={stage === "appointments"}
+                    shortNames
+                    compact
                     productiveMembers={card?.productiveMembers ?? null}
                     unproductiveMembers={card?.unproductiveMembers ?? null}
                     unavailableDetail={
@@ -215,15 +217,7 @@ export function ProductiveTeamDashboard({
           );
         })}
       </section>
-      <p className={styles.note}>
-        Cada corretor é contado uma única vez por etapa no período selecionado. A base é o cadastro
-        vigente de corretores.
-      </p>
-      {result?.coverage === "partial" && (
-        <p role="status" className={styles.note}>
-          Cobertura parcial: os indicadores consideram somente as datas disponíveis nos relatórios.
-        </p>
-      )}
+      <ProductiveTeamSummary rows={result?.summaryRows ?? null} cards={result?.cards ?? []} />
       {!analysis && (
         <p role="status" className={styles.note}>
           Aguardando coleta confirmada dos relatórios comerciais. Nenhum valor demonstrativo é

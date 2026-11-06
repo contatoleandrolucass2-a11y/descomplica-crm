@@ -6,7 +6,9 @@
 }
 
 .cards > article {
-  min-height: clamp(12rem, calc(100dvh - 20rem), 20rem);
+  min-height: 0;
+  height: 9rem;
+  padding: 0.45rem;
   background:
     linear-gradient(135deg, rgb(255 255 255 / 9%), transparent 55%),
     color-mix(in srgb, var(--analytics-surface) 78%, transparent);
@@ -16,10 +18,128 @@
 
 .cards > article > h2 {
   margin: 0 0 0.25rem;
+  font-size: 0.9rem;
+  line-height: 1.2;
 }
 
 .cards > article > p {
-  margin: 0.35rem 0 0;
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.25;
+}
+
+.cards > article > [role="img"] {
+  width: 3rem;
+  margin: 0;
+}
+.cards > article > [role="img"] strong {
+  font-size: 1.3rem;
+}
+
+.compactDetails .detailTables {
+  gap: 0.85rem;
+}
+.compactDetails .detailTable {
+  font-size: 0.8rem;
+  line-height: 1.25;
+}
+.compactDetails .detailTable caption {
+  padding: 0.4rem;
+  font-size: 0.95rem;
+}
+.compactDetails .detailTable th,
+.compactDetails .detailTable td {
+  padding: 0.24rem 0.4rem;
+}
+
+.summaryViewport {
+  min-width: 0;
+  max-height: 25rem;
+  overflow: auto;
+  margin-top: 0.4rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.6rem;
+  background: var(--analytics-surface);
+  overscroll-behavior: contain;
+}
+.summaryViewport:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.summaryTable {
+  width: 100%;
+  min-width: 48rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  color: var(--analytics-ink);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+.summaryTable caption {
+  padding: 0.35rem 0.5rem;
+  color: var(--analytics-ink);
+  font-weight: 700;
+  text-align: left;
+}
+.summaryTable .countColumn {
+  width: 5rem;
+}
+.summaryTable th,
+.summaryTable td {
+  padding: 0.22rem 0.4rem;
+  border-bottom: 1px solid var(--analytics-line);
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+  text-align: left;
+}
+.summaryTable td:nth-child(n + 3),
+.summaryTable th:nth-child(n + 3) {
+  text-align: center;
+}
+.summaryTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--analytics-surface-muted);
+  font-weight: 700;
+}
+.summaryTable tfoot th,
+.summaryTable tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: var(--analytics-surface-muted);
+  font-weight: 700;
+}
+.summaryTable tfoot td {
+  text-align: center;
+}
+
+@media (min-width: 901px) {
+  .compact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    height: calc(100dvh - var(--dashboard-header-height, 58px) - 16px);
+    min-height: 0;
+  }
+  .compact > header,
+  .compact > section {
+    flex-shrink: 0;
+  }
+  .compact > header {
+    margin-bottom: 0;
+  }
+  .compact .cards {
+    margin-top: 0;
+  }
+  .compact .summaryViewport {
+    flex: 1 1 auto;
+    min-height: 5rem;
+    margin-top: 0;
+  }
 }
 .note {
   margin: 0.4rem 0 0;
@@ -113,7 +233,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .cards > article {
-    min-height: 12rem;
+    min-height: 9rem;
+    height: auto;
   }
 }
 @media (max-width: 540px) {

@@ -48,6 +48,18 @@ export interface ProductiveTeamMember {
   owner: string;
 }
 
+export interface ProductiveTeamSummaryRow {
+  key: string;
+  regionalManagers: string[];
+  regionalUnknownBrokerCount: number;
+  manager: string;
+  brokerCount: number;
+  appointments: number | null;
+  visits: number | null;
+  folders: number | null;
+  sales: number | null;
+}
+
 const memberCollator = new Intl.Collator("pt-BR", { sensitivity: "base", numeric: true });
 const compareMembers = (left: ProductiveTeamMember, right: ProductiveTeamMember) =>
   (left.regionalManager === null
@@ -170,7 +182,7 @@ export function analyzeProductiveTeam(
   const registeredMembers = () => {
     if (members !== undefined) return members;
     const filteredRoster = appointments.filteredBrokerRoster;
-    if (filteredRoster === null) return (members = null);
+    if (filteredRoster === null || brokerCount === null) return (members = null);
     const rosterByKey = new Map(filteredRoster.map((broker) => [broker.key, broker]));
     if (rosterByKey.size !== brokerCount) return (members = null);
     const explicitPeriod = filters.periodStart !== undefined || filters.periodEnd !== undefined;
@@ -294,8 +306,70 @@ export function analyzeProductiveTeam(
       unproductiveMembers: registered?.filter((member) => !productive.has(member.key)) ?? null,
     };
   });
+  const productiveKeys = new Map(
+    cards.map((card) => [
+      card.stage,
+      card.productiveMembers === null
+        ? null
+        : new Set(card.productiveMembers.map((member) => member.key)),
+    ]),
+  );
+  const stageValue = (stage: ProductiveTeamStage, key: string): number | null => {
+    const keys = productiveKeys.get(stage);
+    return keys === null || keys === undefined ? null : keys.has(key) ? 1 : 0;
+  };
+  // Group by the full canonical manager identity, never its abbreviated label.
+  // Each stage reuses the same broker membership as its card and pop-up.
+  const registered = registeredMembers();
+  const groups = new Map<string, ProductiveTeamSummaryRow>();
+  for (const member of registered ?? []) {
+    const key = identity(member.manager);
+    const existing = groups.get(key);
+    if (existing) {
+      existing.brokerCount += 1;
+      const regional = member.regionalManager;
+      if (regional === null) existing.regionalUnknownBrokerCount += 1;
+      else if (!existing.regionalManagers.some((name) => identity(name) === identity(regional)))
+        existing.regionalManagers.push(regional);
+      for (const stage of PRODUCTIVE_TEAM_STAGES) {
+        const value = stageValue(stage, member.key);
+        existing[stage] =
+          existing[stage] === null || value === null ? null : existing[stage] + value;
+      }
+    } else {
+      groups.set(key, {
+        key,
+        manager: member.manager,
+        regionalManagers: member.regionalManager === null ? [] : [member.regionalManager],
+        regionalUnknownBrokerCount: member.regionalManager === null ? 1 : 0,
+        brokerCount: 1,
+        appointments: stageValue("appointments", member.key),
+        visits: stageValue("visits", member.key),
+        folders: stageValue("folders", member.key),
+        sales: stageValue("sales", member.key),
+      });
+    }
+  }
+  for (const group of groups.values()) group.regionalManagers.sort(memberCollator.compare);
+  const summaryRows: ProductiveTeamSummaryRow[] | null =
+    registered === null
+      ? null
+      : [...groups.values()].sort(
+          (left, right) =>
+            (left.regionalManagers.length === 0
+              ? right.regionalManagers.length === 0
+                ? 0
+                : 1
+              : right.regionalManagers.length === 0
+                ? -1
+                : memberCollator.compare(
+                    left.regionalManagers.join(" / "),
+                    right.regionalManagers.join(" / "),
+                  )) || memberCollator.compare(left.manager, right.manager),
+        );
   return {
     cards,
+    summaryRows,
     brokerCount,
     coverage: appointments.coverage,
     filterOptions: appointments.filterOptions,

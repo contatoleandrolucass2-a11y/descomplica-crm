@@ -1,5 +1,5 @@
 begin;
-select plan(23);
+select plan(39);
 
 create function pg_temp.productive_slice() returns jsonb language sql as $$
   select '{"version":4,"viewKey":"all","coverageStart":"2026-10-01",
@@ -44,6 +44,10 @@ select ok(has_function_privilege('authenticated','public.read_crm_productive_tea
   and not has_function_privilege('anon','public.read_crm_productive_team(text)','execute')
   and not has_function_privilege('service_role','public.read_crm_productive_team(text)','execute'),
   'only authenticated may execute the guarded read');
+select ok(has_function_privilege('authenticated','public.read_crm_productive_team_v2(text)','execute')
+  and not has_function_privilege('anon','public.read_crm_productive_team_v2(text)','execute')
+  and not has_function_privilege('service_role','public.read_crm_productive_team_v2(text)','execute'),
+  'only authenticated may execute the guarded v2 read');
 select ok(not has_function_privilege(role_name,
   'private.project_crm_productive_team_analysis(jsonb,text[])','execute'),
   role_name || ' cannot bypass the public authorization boundary')
@@ -67,6 +71,7 @@ from public.crm_ranking_snapshots where snapshot_key='global';
 
 set local role authenticated;
 select is(public.read_crm_productive_team('all'),null::jsonb,'missing identity has no data');
+select is(public.read_crm_productive_team_v2('all'),null::jsonb,'v2 missing identity has no data');
 reset role;
 insert into auth.users(id,email)
 values ('ed110000-0000-4000-8000-000000000001','productive@example.test');
@@ -79,22 +84,66 @@ select is(jsonb_array_length(public.read_crm_productive_team('all')->'availableS
 select is(jsonb_array_length(public.read_crm_productive_team('all')->'brokerRoster'),1,
   'matching official roster is returned atomically');
 select is(public.read_crm_productive_team('not-a-view'),null::jsonb,'unknown view is denied');
+select is(public.read_crm_productive_team_v2('not-a-view'),null::jsonb,'v2 unknown view is denied');
 reset role;
+
+update public.crm_ranking_participants set roster_manager_name='Official manager',
+  regional_manager_name='Official regional';
+set local role authenticated;
+select is(public.read_crm_productive_team_v2('all')#>>'{brokerRoster,0,manager}',
+  'Official manager','v2 uses the official manager rather than historical activity');
+select is(public.read_crm_productive_team_v2('all')#>>'{brokerRoster,0,regionalManager}',
+  'Official regional','v2 returns the matching official regional');
+select is(public.read_crm_productive_team('all')#>>'{brokerRoster,0,manager}',
+  'Synthetic manager','v1 keeps its original legacy contract');
+select ok(not ((public.read_crm_productive_team('all')#>'{brokerRoster,0}') ? 'regionalManager'),
+  'v1 strict clients receive no new roster property');
+reset role;
+update public.crm_ranking_participants set regional_manager_name=null;
+set local role authenticated;
+select is(public.read_crm_productive_team_v2('all')#>'{brokerRoster,0,regionalManager}',
+  'null'::jsonb,'explicit missing official regional never borrows activity history');
+reset role;
+update public.crm_ranking_participants set roster_manager_name=null;
+set local role authenticated;
+select is(public.read_crm_productive_team_v2('all')->'brokerRoster',
+  'null'::jsonb,'unknown official manager makes the roster unavailable');
+reset role;
+update public.crm_ranking_participants set roster_manager_name='Official manager',
+  regional_manager_name='Official regional';
+select set_config('request.jwt.claim.sub','',true);
+insert into public.user_permission_overrides(user_id,permission_key,effect,reason)
+values ('ed110000-0000-4000-8000-000000000001','crm.stage.appointments.view','deny','Synthetic unrelated stage denial'),
+  ('ed110000-0000-4000-8000-000000000001','crm.ranking.view','deny','Synthetic unrelated ranking denial');
+select set_config('request.jwt.claim.sub','ed110000-0000-4000-8000-000000000001',true);
+set local role authenticated;
+select is(jsonb_array_length(public.read_crm_productive_team_v2('all')->'brokerRoster'),1,
+  'productive-team permission is independent of appointments and ranking access');
+reset role;
+select set_config('request.jwt.claim.sub','',true);
+delete from public.user_permission_overrides where user_id='ed110000-0000-4000-8000-000000000001';
+select set_config('request.jwt.claim.sub','ed110000-0000-4000-8000-000000000001',true);
 
 update public.crm_ranking_snapshots set generated_at='2026-11-01T17:00:00Z' where snapshot_key='global';
 set local role authenticated;
 select is(public.read_crm_productive_team('all')->'brokerRoster','null'::jsonb,
   'mismatched roster generation is unavailable');
+select is(public.read_crm_productive_team_v2('all')->'brokerRoster','null'::jsonb,
+  'v2 mismatched roster generation is unavailable');
 reset role;
 update public.crm_dashboard_analysis set payload=jsonb_set(payload,'{facts}','[]'::jsonb);
 set local role authenticated;
 select is(jsonb_array_length(public.read_crm_productive_team('all')->'availableStages'),4,
   'a source with no facts is still an available real zero');
+select is(jsonb_array_length(public.read_crm_productive_team_v2('all')->'availableStages'),4,
+  'v2 preserves confirmed empty sources');
 reset role;
 delete from public.crm_dashboard_metrics where stage_key='folders';
 set local role authenticated;
 select ok(not (public.read_crm_productive_team('all')->'availableStages' ? 'folders'),
   'missing metric source stays unavailable');
+select ok(not (public.read_crm_productive_team_v2('all')->'availableStages' ? 'folders'),
+  'v2 missing metric source stays unavailable');
 reset role;
 -- Fixture writes run as postgres without a JWT. RESET ROLE alone leaves
 -- auth.uid() populated and correctly triggers the immutable-Master boundary.
@@ -104,6 +153,7 @@ values ('ed110000-0000-4000-8000-000000000001','crm.dashboard.all.view','deny','
 select set_config('request.jwt.claim.sub','ed110000-0000-4000-8000-000000000001',true);
 set local role authenticated;
 select is(public.read_crm_productive_team('all'),null::jsonb,'explicit view denial wins');
+select is(public.read_crm_productive_team_v2('all'),null::jsonb,'v2 explicit view denial wins');
 reset role;
 select set_config('request.jwt.claim.sub','',true);
 delete from public.user_permission_overrides where user_id='ed110000-0000-4000-8000-000000000001';
@@ -112,6 +162,7 @@ values ('ed110000-0000-4000-8000-000000000001','crm.productive_team.view','deny'
 select set_config('request.jwt.claim.sub','ed110000-0000-4000-8000-000000000001',true);
 set local role authenticated;
 select is(public.read_crm_productive_team('all'),null::jsonb,'explicit page denial wins');
+select is(public.read_crm_productive_team_v2('all'),null::jsonb,'v2 explicit page denial wins');
 reset role;
 select set_config('request.jwt.claim.sub','',true);
 delete from public.user_permission_overrides where user_id='ed110000-0000-4000-8000-000000000001';
@@ -119,6 +170,7 @@ update public.app_pages set is_active=false where key='crm.productive_team';
 select set_config('request.jwt.claim.sub','ed110000-0000-4000-8000-000000000001',true);
 set local role authenticated;
 select is(public.read_crm_productive_team('all'),null::jsonb,'inactive page cannot be read via RPC');
+select is(public.read_crm_productive_team_v2('all'),null::jsonb,'v2 inactive page cannot be read via RPC');
 reset role;
 select * from finish();
 rollback;

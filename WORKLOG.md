@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-11-06 — Equipe Produtiva: resumo por gerente
+
+- Resumo de sete colunas, sem Responsável da conta: uma linha dinâmica por
+  gerente de vendas, quantidade de corretores e percentuais por etapa sobre a
+  base filtrada de cada gerente. Total ponderado corresponde aos quatro cards.
+- Cards menores, tabela compacta com rolagem interna e remoção das duas notas
+  solicitadas. Popups usam nome e último sobrenome e linhas compactas; demais
+  consumidores do componente compartilhado preservam seu comportamento.
+- Leitura v2 aditiva usa gerente/regional oficiais do cadastro reconciliado,
+  mantendo RPC v1 e ACL existentes. Migration 20261106035242 preparada;
+  aplicação remota exige aprovação específica e CI isolada.
+- Consulta agregada de 06/11:30 corretores,5 gerentes,7 regionais ausentes.
+  Um gerente possui dois regionais confirmados; resumo mantém ambos e sinaliza
+  pendências. Os sete não possuem agendamentos próprios na fonte reconciliada.
+  Pastas contém campo regional no contrato, mas o nome não é projetado no
+  read model; não foi executada coleta nem inferência por gerente.
+
 - Publicação CAIXA concluída: PR503/main318b51fa, CI42088655220 com quatro gates verdes, coordenador/CAS em05/11/2026 19:58:29 UTC. Health e smoke de cálculo, prazo automático, filtros, seleção e anuais aprovados. Evidências e limites em docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-05-CAIXA-FRONTEIRAS.md.
 
 ## 2026-11-05 — Agendamentos: vínculo oficial das equipes

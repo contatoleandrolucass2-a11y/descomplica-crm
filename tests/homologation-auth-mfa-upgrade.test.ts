@@ -66,6 +66,7 @@ describe("homologation Auth/MFA migration gate", () => {
     const manifest = await loadManifest();
     expect(manifest.nonDeployableRepositoryVersions).toContain("20261104201024");
     expect(manifest.nonDeployableRepositoryVersions).toContain("20261105175738");
+    expect(manifest.nonDeployableRepositoryVersions).toContain("20261106035242");
     const candidates = await loadCandidateFiles(repositoryRoot, manifest);
     try {
       expect(candidates.map(({ version }) => version)).toEqual([
