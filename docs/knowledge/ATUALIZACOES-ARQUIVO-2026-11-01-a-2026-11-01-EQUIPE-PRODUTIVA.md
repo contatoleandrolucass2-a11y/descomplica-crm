@@ -709,3 +709,9 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
   integral; comportamento compartilhado de Agendamentos preservado. Removidas
   somente as duas notas pedidas. CI completa, aprovação da migration nova,
   merge e publicação desta revisão continuam pendentes nesta etapa.
+- PR508/head5bf82246, CI42161270488: validate e promotable-image aprovados.
+  Restore isolado executou50arquivos/2492asserts e apontou uma falha no test15
+  de grants_matrix: a nova RPC faltava na lista exata das funções autenticadas.
+  Correção restrita ao inventário dessa função, sem mudar concessões reais.
+  Log também registrou rate limit Docker; a falha pgTAP foi independente e
+  reproduzível pela comparação estática da lista. Nenhuma aplicação remota.

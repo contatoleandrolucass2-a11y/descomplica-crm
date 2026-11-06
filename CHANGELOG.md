@@ -1,5 +1,8 @@
 # Changelog
 
+- Inclui a nova leitura v2 de Equipe Produtiva no inventário pgTAP de funções
+  autenticadas, preservando a matriz exata e as concessões existentes.
+
 - Compacta Equipe Produtiva e inclui resumo por gerente de vendas, com base e
   percentuais filtrados e total ponderado. Popups abreviam nomes e usam linhas
   menores. Leitura versionada aditiva utiliza hierarquia oficial; resumo mantém

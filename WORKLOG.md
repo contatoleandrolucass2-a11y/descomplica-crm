@@ -16,6 +16,9 @@
   pendências. Os sete não possuem agendamentos próprios na fonte reconciliada.
   Pastas contém campo regional no contrato, mas o nome não é projetado no
   read model; não foi executada coleta nem inferência por gerente.
+- PR508/CI42161270488: validação e imagem aprovadas; restore identificou a nova
+  RPC ausente na lista esperada de funções autenticadas. Correção limitada ao
+  inventário pgTAP, sem mudar grants ou enfraquecer a matriz de permissões.
 
 - Publicação CAIXA concluída: PR503/main318b51fa, CI42088655220 com quatro gates verdes, coordenador/CAS em05/11/2026 19:58:29 UTC. Health e smoke de cálculo, prazo automático, filtros, seleção e anuais aprovados. Evidências e limites em docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-05-CAIXA-FRONTEIRAS.md.
 
