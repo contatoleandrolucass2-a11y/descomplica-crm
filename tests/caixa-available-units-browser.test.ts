@@ -586,12 +586,16 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(ledger).toContainText("209.572,08");
       await browserExpect(ledger).toContainText("253.790,00");
       await browserExpect(ledger).not.toContainText("261.965,10");
+      await page.evaluate(() => {
+        window.print = () => {};
+      });
       await page.getByRole("button", { name: "Imprimir linear", exact: true }).click();
       const commercialPrint = page
         .locator("body > article")
         .filter({ hasText: "Proposta Associativo" });
       await browserExpect(commercialPrint).toContainText("261.965,10");
       await browserExpect(commercialPrint).toContainText("Cenário comercial");
+      await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
       await browserExpect(ledger.getByText(/Cenário comercial/)).not.toBeVisible();
       await browserExpect(ledger.getByRole("row", { name: /^Financiamento/ })).not.toContainText(
         "Cenário comercial",
