@@ -2,6 +2,8 @@
 
 ## 2026-11-06 — Agendamentos: largura útil e navegação por linhas
 
+- Preserva o slot visual durante arraste/cancelamento; teste real de ponteiro aprovado com três cards heterogêneos.
+
 - Cards preenchem as lacunas laterais mantendo a ordem e as dimensões salvas.
 - Setas sem texto mostram juntos os gráficos de cada linha, com largura e altura uniformes no guia; Escape restaura a visão geral.
 - Escopo opt-in somente Agendamentos; sem mudança de dados, metas, permissões ou migrations.

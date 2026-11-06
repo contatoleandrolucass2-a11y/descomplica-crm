@@ -1450,7 +1450,7 @@
 }
 
 .appointmentsShell[data-dashboard-shell][data-appointments-composition="true"]
-  :global([data-dashboard-card-id][data-appointments-aligned]) {
+  :global([data-appointments-aligned]) {
   height: var(--appointments-presented-height, var(--appointments-row-height)) !important;
 }
 

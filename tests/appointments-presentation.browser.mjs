@@ -374,6 +374,52 @@ test(
       );
       assert.equal(resized.width, Math.round((initialCardBox.width + 20) / scale));
       assert.equal(resized.height, Math.round(194 + 15 / scale));
+      // Drag uses a placeholder: it must retain the equalized slot without pushing siblings away.
+      await page.goto("http://appointments-presentation.local.invalid/app/etapas/agendamentos");
+      const handle = page.getByRole("button", { name: "Mover Ranking por gerente", exact: true });
+      await handle.scrollIntoViewIfNeeded();
+      const beforeDrag = await page
+        .locator('[data-dashboard-card-id^="ranking"]')
+        .evaluateAll((es) =>
+          es.map((e) => {
+            const r = e.getBoundingClientRect();
+            return { top: r.top, width: r.width, height: r.height };
+          }),
+        );
+      const grip = await handle.boundingBox();
+      await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+      await page.mouse.down();
+      await expect(page.locator('[data-dashboard-canvas-grid] > [aria-hidden="true"]')).toHaveCount(
+        1,
+      );
+      await expect
+        .poll(async () =>
+          page
+            .locator('[data-dashboard-canvas-grid] > [aria-hidden="true"]')
+            .evaluate((e) => e.hasAttribute("data-appointments-aligned")),
+        )
+        .toBe(true);
+      const during = await page
+        .locator(
+          '[data-dashboard-card-id^="ranking"], [data-dashboard-canvas-grid] > [aria-hidden="true"]',
+        )
+        .evaluateAll((es) =>
+          es.map((e) => {
+            const r = e.getBoundingClientRect();
+            return { top: r.top, width: r.width, height: r.height };
+          }),
+        );
+      assert.equal(during.length, 3);
+      for (const box of during) {
+        assert.ok(
+          Math.abs(box.top - beforeDrag[0].top) < 2 &&
+            Math.abs(box.width - beforeDrag[0].width) < 2 &&
+            Math.abs(box.height - beforeDrag[0].height) < 2,
+          "drag retains all three aligned slots",
+        );
+      }
+      await page.keyboard.press("Escape");
+      await page.mouse.up();
       assert.deepEqual(errors, []);
     } finally {
       await browser.close();

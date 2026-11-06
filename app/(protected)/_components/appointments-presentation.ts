@@ -91,6 +91,7 @@ export function useAppointmentsPresentation({
     let frame = 0;
     let signature = "";
     let width = shell.clientWidth;
+    const alignedGeometry = new Map<HTMLElement, { width: string; height: string }[]>();
     const cards = () => [
       ...shell.querySelectorAll<HTMLElement>("[data-appointments-canvas] [data-dashboard-card-id]"),
     ];
@@ -111,9 +112,28 @@ export function useAppointmentsPresentation({
       card.style.removeProperty("--appointments-row-height");
     };
     const align = () => {
+      const placeholders = shell.querySelectorAll<HTMLElement>(
+        '[data-appointments-canvas] [data-dashboard-canvas-grid] > [aria-hidden="true"]',
+      );
+      // Drag replaces one article. Keep that slot and its siblings stable until commit/cancel.
+      if (placeholders.length) {
+        for (const placeholder of placeholders) {
+          const grid = placeholder.parentElement;
+          if (!grid) continue;
+          const index = [...grid.children].indexOf(placeholder);
+          const geometry = alignedGeometry.get(grid)?.[index];
+          if (!geometry) continue;
+          placeholder.style.setProperty("--appointments-row-width", geometry.width);
+          placeholder.style.setProperty("--appointments-row-height", geometry.height);
+          placeholder.dataset.appointmentsAligned = "true";
+        }
+        signature = baseSignature();
+        return;
+      }
       const elements = cards();
       // Measure the saved composition, never our own equalized dimensions.
       elements.forEach(clear);
+      alignedGeometry.clear();
       const measurements = elements.map((card) => {
         const bounds = card.getBoundingClientRect();
         const explicitHeight = /^\d+(?:\.\d+)?px$/.test(card.style.height)
@@ -138,6 +158,10 @@ export function useAppointmentsPresentation({
           card.style.setProperty("--appointments-row-width", rowWidth);
           card.style.setProperty("--appointments-row-height", rowHeight);
           card.dataset.appointmentsAligned = "true";
+          const index = [...grid.children].indexOf(card);
+          const slots = alignedGeometry.get(grid) ?? [];
+          slots[index] = { width: rowWidth, height: rowHeight };
+          alignedGeometry.set(grid, slots);
         }
       }
       signature = baseSignature();

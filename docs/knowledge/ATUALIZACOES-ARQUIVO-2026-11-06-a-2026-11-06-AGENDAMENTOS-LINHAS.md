@@ -48,3 +48,11 @@ O teste de navegador cobre três gráficos originalmente390x500,410x650 e380x550
 verifica alinhamento e igualdade nas cinco geometrias e preservação dos valores
 salvos. Os27testes focados de canvas/apresentação passaram. CI42157333051 do
 primeiro candidato foi cancelada por estar superada; nova CI exigida.
+
+O segundo achado da revisão foi o placeholder do arraste: sua substituição
+removia temporariamente um artigo da contagem. O alinhador agora conserva as
+medidas de cada slot durante o gesto e só recalcula após concluir/cancelar.
+Novo teste real de ponteiro mantém os três slots alinhados com tamanhos
+originais heterogêneos; Escape cancela sem gravação. Nenhuma alteração no motor
+compartilhado do canvas foi necessária. A assinatura também é atualizada nesse
+ramo para ignorar suas próprias variáveis e evitar reagendamento contínuo.
