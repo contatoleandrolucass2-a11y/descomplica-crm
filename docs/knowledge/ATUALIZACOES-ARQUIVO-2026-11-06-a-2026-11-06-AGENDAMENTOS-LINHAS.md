@@ -56,3 +56,56 @@ Novo teste real de ponteiro mantém os três slots alinhados com tamanhos
 originais heterogêneos; Escape cancela sem gravação. Nenhuma alteração no motor
 compartilhado do canvas foi necessária. A assinatura também é atualizada nesse
 ramo para ignorar suas próprias variáveis e evitar reagendamento contínuo.
+
+## Integração e imagem candidata
+
+PR507 aprovado nos quatro gates em CI42158302299, head875edf82. Integrado em
+06/11/2026 às04:49:19UTC no main6ae947fe83242bfd78c27a75f0fb975ae7e038f4.
+Árvore a0af716fbc2fb5fbff513ebc25bda5716ba12734 idêntica à do PR aprovado.
+CI do main42164749623 em andamento: validate, isolated-restore e promotable-image
+aprovados; release-gates ainda executando. Nenhum gate dispensado. Nenhuma
+publicação desta alteração realizada até esta observação. Checkout imutável
+remoto preparado sem trocar aplicação, dados ou coletor. Diff completo desde
+produção0307bd47 inclui somente estes ajustes visuais/testes e registros
+documentais já integrados de CAIXA505; pacotes/lockfile não mudaram.
+
+## Publicação e aceite — 06/11/2026
+
+CI42164749623 do main6ae947fe concluiu os quatro gates com sucesso, incluindo
+matriz completa de temas, responsividade, zoom e teclado, sem atualizar
+baselines. Artefato13478678101: ZIPd43f4be0b55b50fe5ed354ae834faef691abe05a27509028cab6b9266420819b;
+archive5fe06b85f8acdf408d7ad643a5735b3e5cd6847f1cb94a99f2ebe0d7eff7b1fc;
+configCIfb6e87557b6734e27fa341a45bce7f947e3d78ca0a86074c9bf8e6a87956eaa7;
+manifest/local7f1a9cbee17f4dfe71064e389b442e4b53c33dbf50c9cdb48791efc7a7c4089c.
+Verificados14layers e cadeia OCI, sem rebuild/retag; image:prove confirmou dois
+perfis sobre a mesma imagem. Promoção exclusiva pelo coordenador, CAS e locks,
+deployment17006ab5-7b85-45c0-9d9c-c4a4d9b0ed27 às05:52:45.103UTC (02:52BRT),
+anterior0307bd47/d29a5a61. Ledger sem pendência. Health público às05:57:48UTC
+confirmou200/ok/6ae947fe; acesso anônimo à página retorna307/login.
+
+No site autenticado integrado,32cards receberam alinhamento. As seis colunas
+iniciais ficaram com larguras iguais; sobra à direita menor que0,001px.
+Primeira seta exibiu funil; depois evoluções existentes e linha inteira com
+Previstos/Realizados, Semanal e Score. Três artigos apresentaram largura371,47px
+e altura462,78px, com topo igual. Demais grupos conferidos: três rankings,
+três conversões, três faixas de recência, dois empreendimentos e os gráficos/
+tabelas individuais; todos iguais dentro de cada linha e contidos na tela.
+Seta anterior conferida; retorno à visão geral confirmado pelo teclado.
+
+Celular simulado390x844 manteve os três gráficos juntos. Em844x390 ficaram
+com largura259,76px, altura272,47px e fundo382px, dentro da tela390px. Viewport
+restaurado a1280x720. Após reload,32IDs/ordem/larguras/alturas/colunas salvos
+continuam iguais ao baseline anterior à publicação. Nenhum perfil foi gravado;
+aba temporária encerrada e abas do usuário preservadas. Não repetir logout.
+
+Evidências locais ignoradas emtest-results/appointments-rows-live: receipt.json,
+visao-geral.jpg, linha-completa.jpg, celular-visao-geral.jpg,
+celular-linha-vertical.jpg, celular-linha-horizontal.jpg e apos-atualizar.jpg.
+São capturas reais do integrado. Chrome e arraste por controle nativo Windows
+não foram repetidos nesta entrega: esse caminho havia sido bloqueado por
+identificação insuficiente da URL. Ponteiro real/resize/arraste foram validados
+no Chromium isolado; celular foi simulado, não aparelho físico. Esses limites
+não são convertidos em aprovações não executadas. Coletor, schema, permissões,
+metas e dados preservados. Esta nota final é apenas documental; não requer
+reinício nem nova imagem. Integração do registro deve respeitar a janela de
+main em uso pela entrega CAIXA506, sem invalidar sua CI nem cancelar trabalho.
