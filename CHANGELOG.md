@@ -14,8 +14,8 @@
   menores. Leitura versionada aditiva utiliza hierarquia oficial; resumo mantém
   múltiplos regionais confirmados e identifica vínculos pendentes. Remove as
   duas notas abaixo dos cards conforme solicitado. Migration autorizada e
-  aplicada após testes; interface final aprovada no PR, com publicação aguardando
-  validação da main combinada.
+  aplicada após testes; interface publicada em9ee2c0cf após quatro gates da main
+  e conferência de saúde, acessos e integridade da leitura.
 
 - Concilia os registros da entrega com o fechamento documental de Agendamentos,
   preservando o código já aprovado e as proteções de integração/publicação.

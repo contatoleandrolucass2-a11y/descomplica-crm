@@ -456,11 +456,12 @@ Registro integral preservado no [arquivo CAIXA](ATUALIZACOES-ARQUIVO-2026-11-05-
 
 - 06/11/2026: Equipe Produtiva com resumo de sete colunas, uma linha por gerente
   e percentuais por base filtrada. Popups compactos, nome/sobrenome e hierarquia
-  oficial; cards160px com indicadores legíveis. CI42174376394/c35f501b aprovada
-  nos quatro gates. Migration autorizada20261106035242 aplicada como registro
+  oficial; cards160px com indicadores legíveis. Publicada main9ee2c0cf/PR508
+  às12:57:44(-03), CI42230895044 com quatro gates e pós-publicação aprovados.
+  Migration autorizada20261106035242 aplicada como registro
   remoto20261106052910 e conferida. Fonte reconciliada:30corretores/5gerentes,
-  7regionais ausentes, sem inferência. Integração com main919be9b2/PR506 preserva
-  códigos já validados; publicação depende dos gates da main combinada exata.
+  7regionais ausentes, sem inferência. Integração preserva CAIXA e Agendamentos;
+  coordenador sem pendência, reversão preparada e função anterior preservada.
   Evidências e limites no [registro da demanda](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
 
 - Agendamentos: [recência e rolagem integral](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-ROLAGEM.md).

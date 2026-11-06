@@ -50,6 +50,11 @@
 - Main1d87931f acrescentou somente fechamento documental de Agendamentos;
   integrado preservando código e testes. Proteção strict da main exige branch
   atualizada e novos checks; nenhuma regra, timeout ou baseline foi reduzido.
+- Publicado PR508/main9ee2c0cf em06/11 às12:57:44(-03), após CI42230895044
+  aprovar quatro gates. Coordenador/CAS, imagem imutável e reversão preservados;
+  deployment30a25353-987d-4367-81ec-f0601f1bcff9, sem pendência. Health200/ok,
+  acessos anônimos negados, CSS servido e leitura conferidos. Fonte atualizada:
+  30corretores/5gerentes/7regionais ausentes. Janela liberada aos chats coordenados.
 
 - Publicação CAIXA concluída: PR503/main318b51fa, CI42088655220 com quatro gates verdes, coordenador/CAS em05/11/2026 19:58:29 UTC. Health e smoke de cálculo, prazo automático, filtros, seleção e anuais aprovados. Evidências e limites em docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-05-CAIXA-FRONTEIRAS.md.
 
