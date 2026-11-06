@@ -1,5 +1,7 @@
 # Worklog
 
+- CI42154606118/fca7f52e: validate, imagem e restauração aprovadas; release parou em11diferenças visuais exclusivamente CAIXA. Dez capturas revisadas e aceitas;1280px retida por quebra real de opcional no ranking. CSScorrigido; referência1280aguarda nova capturaCI. Demais66comparações e testes funcionais aprovados; sem mudança de limiares.
+
 - CAIXA compacto v2: 30 testes distintos de navegador aprovados em rodadas focadas (14 formulário,16 estoque/proposta), sem duplicar contagens. Tipos, lint e formatação aprovados. Proposta com quatro anuais:593,5px em1920x900, sem rolagem interna; limite800px. Capturas sintéticas privadas conferidas. Gates CI/publicação ainda pendentes.
 
 - CAIXA: revisão visual dos25prints. Campos36px com títulos/orientações externos, rankingopcional/primeiroimóvel no formulário, cores do resumo, pulsação/hover com movimento reduzido, estoque/proposta/documentação compactos. Cálculos preservados; testes e publicação em andamento.

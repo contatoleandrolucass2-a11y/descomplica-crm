@@ -5395,3 +5395,15 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
   > select {
   border-color: #b28a27;
 }
+@media (min-width: 1100px) and (max-width: 1350px) {
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-ranking-field > span {
+    font-size: 11px;
+    gap: 4px;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-ranking-field > span small {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+}
