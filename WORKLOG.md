@@ -1,5 +1,7 @@
 # Worklog
 
+- CI42159626752/d7cc69e8: testes funcionais aprovados,76comparações visuais aprovadas; única diferença CAIXA1280px corrigida, revisada e referência aceita. Nenhuma referência de outra página alterada.
+
 - CI42154606118/fca7f52e: validate, imagem e restauração aprovadas; release parou em11diferenças visuais exclusivamente CAIXA. Dez capturas revisadas e aceitas;1280px retida por quebra real de opcional no ranking. CSScorrigido; referência1280aguarda nova capturaCI. Demais66comparações e testes funcionais aprovados; sem mudança de limiares.
 
 - CAIXA compacto v2: 30 testes distintos de navegador aprovados em rodadas focadas (14 formulário,16 estoque/proposta), sem duplicar contagens. Tipos, lint e formatação aprovados. Proposta com quatro anuais:593,5px em1920x900, sem rolagem interna; limite800px. Capturas sintéticas privadas conferidas. Gates CI/publicação ainda pendentes.

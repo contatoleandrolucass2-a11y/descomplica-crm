@@ -49518,37 +49518,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1222400,
+        "totalPixels": 921600,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1280x720.webp",
           "tracked": true,
-          "bytes": 41236,
-          "sha256": "b6a7a85af2d82494bb73d98add820a4141cf4028ccdb5ca5d7d1e17e54dad7e2"
+          "bytes": 42660,
+          "sha256": "5b4e64eefb05d092071fddcdffae493bb1fbac4066d249f2033448528a657bc7"
         }
       },
       "path": "target-authenticated/simulacao-caixa-1280x720.webp",
-      "bytes": 41236,
-      "sha256": "b6a7a85af2d82494bb73d98add820a4141cf4028ccdb5ca5d7d1e17e54dad7e2",
+      "bytes": 42660,
+      "sha256": "5b4e64eefb05d092071fddcdffae493bb1fbac4066d249f2033448528a657bc7",
       "width": 1280,
-      "height": 955,
+      "height": 720,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1280,
-          "height": 720
+          "height": 955
         },
         "actual": {
           "width": 1280,
-          "height": 955
+          "height": 720
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1280x720.webp",
           "tracked": true,
-          "bytes": 37934,
-          "sha256": "cb369aaaccd3d9ed98db00555702cfe2649a87589e6abf8041d2f3047f1a1cef"
+          "bytes": 41236,
+          "sha256": "b6a7a85af2d82494bb73d98add820a4141cf4028ccdb5ca5d7d1e17e54dad7e2"
         }
       }
     },
@@ -55589,8 +55589,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1280x720.webp",
         "tracked": true,
-        "bytes": 41236,
-        "sha256": "b6a7a85af2d82494bb73d98add820a4141cf4028ccdb5ca5d7d1e17e54dad7e2"
+        "bytes": 42660,
+        "sha256": "5b4e64eefb05d092071fddcdffae493bb1fbac4066d249f2033448528a657bc7"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1440x900.webp",
@@ -56991,7 +56991,30 @@
       "manualReview": "Coordinator1440light; delegated1440themes,1024,768,390,375,320 and390dark inspected via view_image. Labels above, hints below, controls compact, no clipping in accepted images. Loaded proposal separately measured593.5px with4annuals at1920x900.",
       "limits": "1280not accepted. Final CI mandatory; no thresholds or masks changed. Source failure retained.",
       "previousBaselineResultSha256": "e6b21924cd820069c093d8f8a829042455f1fedd1a9df7c5da17ca30b09006f2"
+    },
+    {
+      "reviewedAt": "2026-11-06",
+      "scope": "CAIXA1280px only; corrected ranking optional label now contained and aligned.",
+      "sourceRun": 42159626752,
+      "sourceArtifact": 13477359497,
+      "sourceZipSha256": "5bfc71ce70cfb077bc11a22bfa1f0e6ac557ae6b35cb67b6a1a22574e056d54b",
+      "sourceCaptureCommit": "93815c98c1e0a0a1c8c2fbe02a020f37f8567553",
+      "sourceHead": "d7cc69e81bca9ffb21bb563cb20b13d6da44a84e",
+      "sourceCapturedAt": "2026-11-06T04:38:36.170Z",
+      "sourceWorktreeDirtyAtCapture": true,
+      "sourceWorktreeFingerprint": "9ea6aa5895dc9fd7df14d25650ed4c67ef5f1e0bc81da03a55edb8de5d9b5c23",
+      "candidateOverallPassed": false,
+      "candidateFailure": "Only1280intentionaldimensionschange; other76comparisons and functional checks passed.",
+      "reviewedPaths": [
+        "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1280x720.webp"
+      ],
+      "updatedImages": 1,
+      "preservedImages": 241,
+      "method": "Verified artifact bytes; screenshot and manifest rows only.",
+      "manualReview": "Coordinator inspected1280CIcapture: full ranking/optional label above aligned select, no clipping or overlap. Independent local test passed with sidebar expanded and collapsed.",
+      "limits": "FinalCI mandatory; no threshold/mask/otherpagechange.",
+      "previousBaselineResultSha256": "4c37c3c80b7aa699a04822c9b4a705c43d43caab26856ff99c37812f0bab2993"
     }
   ],
-  "baselineRevision": 7
+  "baselineRevision": 8
 }
