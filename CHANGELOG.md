@@ -1,5 +1,7 @@
 # Changelog
 
+- Registra publicação validada da interface CAIXA919be9b2 e evidências de teste/smoke. Somente documentação neste complemento, sem novo reinício.
+
 - Compacta somente a interface CAIXA: controles com legendas externas, rankingopcional e primeiroimóvel no início, FGTS/recursos separados, animações acessíveis e proposta no padrão Associativo.
 
 - Mantém o alinhamento dos gráficos de Agendamentos durante o arraste, incluindo o espaço temporário do card.

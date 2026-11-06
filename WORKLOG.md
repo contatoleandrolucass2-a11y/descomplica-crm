@@ -1,5 +1,7 @@
 # Worklog
 
+- CAIXAcompacto v2 publicado/validado: PR506/main919be9b2, CI42174495249 quatro gates verdes, deployment1e892386 às06/11/2026 09:04(-03). Health e smoke de controles/cálculo/estoque/anuais aprovados; evidências emdocs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-06-CAIXA-COMPACTO-V2.md.
+
 - CI42159626752/d7cc69e8: testes funcionais aprovados,76comparações visuais aprovadas; única diferença CAIXA1280px corrigida, revisada e referência aceita. Nenhuma referência de outra página alterada.
 
 - CI42154606118/fca7f52e: validate, imagem e restauração aprovadas; release parou em11diferenças visuais exclusivamente CAIXA. Dez capturas revisadas e aceitas;1280px retida por quebra real de opcional no ranking. CSScorrigido; referência1280aguarda nova capturaCI. Demais66comparações e testes funcionais aprovados; sem mudança de limiares.
