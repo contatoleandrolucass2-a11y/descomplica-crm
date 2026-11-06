@@ -1430,13 +1430,28 @@
   flex-shrink: 0;
 }
 
+.appointmentsShell .dashboardGuide button {
+  justify-content: center;
+  width: 36px;
+  align-self: center;
+}
+
 .appointmentsShell[data-dashboard-shell][data-appointments-composition="true"]
   :global(
     [data-free-resize="true"]
       [data-dashboard-canvas-grid]
       > :is([data-dashboard-card-id], [aria-hidden="true"])
   ) {
-  width: var(--dashboard-card-width, auto) !important;
+  width: var(
+    --appointments-presented-width,
+    var(--appointments-row-width, var(--dashboard-card-width, auto))
+  ) !important;
+  flex-grow: 1;
+}
+
+.appointmentsShell[data-dashboard-shell][data-appointments-composition="true"]
+  :global([data-appointments-aligned]) {
+  height: var(--appointments-presented-height, var(--appointments-row-height)) !important;
 }
 
 .appointmentsPresentationBar {
@@ -1487,10 +1502,11 @@
 
 .appointmentsShell[data-appointments-composition="true"][data-presentation-active="true"]
   :global([data-dashboard-canvas-grid]) {
+  --appointments-presented-width: 100%;
   display: grid;
   height: var(--appointments-focus-height);
   min-height: var(--appointments-focus-height);
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(var(--appointments-presented-columns, 1), minmax(0, 1fr));
   align-content: center;
   justify-items: center;
 }
@@ -1501,10 +1517,12 @@
 }
 
 .appointmentsShell[data-presentation-active="true"] :global([data-appointments-presented]) {
-  grid-column: 1 !important;
+  grid-column: auto !important;
+  width: 100% !important;
+  height: var(--appointments-presented-height) !important;
   justify-self: center;
   align-self: center;
-  zoom: var(--appointments-focused-zoom, 1);
+  zoom: 1;
 }
 
 .appointmentsShell[data-presentation-active="true"] :global([data-appointments-presented] > header),
