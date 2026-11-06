@@ -20,6 +20,37 @@ dados permitida.
 
 ## Validação reproduzível
 
+### Resumo por gerente e hierarquia oficial — 06/11/2026
+
+O resumo contém sete colunas: Gerente Regional, Gerente de Vendas, Qnt de
+corretores e as quatro etapas. Cada gerente de vendas tem uma linha dinâmica;
+o filtro de Responsável continua disponível, mas não vira coluna. Cada etapa
+divide corretores produtivos pela base filtrada do gerente. O total usa o
+percentual global do card, preservando a ponderação entre bases diferentes.
+
+`read_crm_productive_team_v2(text)` acrescenta a hierarquia oficial já existente
+no cadastro. A v1 permanece compatível; fallback somente quando a v2 não existe.
+Regional oficial explicitamente nulo não recebe inferência histórica. Um gerente
+com vários regionais apresenta todos os nomes confirmados separadamente, com
+vínculos ausentes contabilizados. A fonte atual contém sete vínculos ausentes;
+os testes não transformam essa ausência em nome inventado.
+
+Os popups mostram primeiro nome e último sobrenome, mantendo nome integral no
+atributo title. A compactação é opt-in exclusivo desta página. Cards de160px e
+tabela com rolagem interna mantêm o desktop na mesma tela; celular preserva
+rolagem acessível e não corta registros. As duas notas pedidas foram removidas.
+Fixtures incluem bases desiguais, dois regionais no mesmo gerente, vínculos
+pendentes, filtros e crescimento dinâmico da quantidade de gerentes.
+
+Os percentuais43,3% e100% cabem no interior do anel de64px com fonte1,05rem.
+Fixture de30corretores/cincogerentes confere rótulos íntegros e cinco linhas
+mais total visíveis no desktop1280/1920, sem rolagem vertical da página.
+
+Os resultados locais ficam em `test-results/productive-team-layout/current`;
+pgTAP, build e gates de release são exigidos na CI do candidato. CI42162934633
+aprovou quatro gates; a migration foi autorizada e aplicada via MCP em06/11,
+registro remoto20261106052910, preservando função anterior, dados e permissões.
+
 ### Tabelas nominais dos quatro indicadores — 03/11/2026
 
 Cada pop-up tem duas tabelas, com captions Equipe Produtiva e Equipe não
@@ -30,9 +61,9 @@ vigente filtrado; o grupo produtivo usa exatamente o conjunto do indicador.
 Sem cadastro reconciliável, o detalhe nominal fica indisponível; não se cria
 lista vazia nem se classifica um corretor por ausência de dados.
 
-O read model atual não contém Regional no cadastro nominal. O detalhe utiliza
+Na revisão de03/11, o read model não continha Regional no cadastro nominal. O detalhe utilizava
 o vínculo autorizado de Agendamentos quando conhecido e estável no período;
-ausência, conflito ou mudança gera Não informado. Nenhuma consulta remota,
+ausência, conflito ou mudança gerava Não informado. Naquela revisão, nenhuma consulta remota,
 concessão ou alteração de RPC foi acrescentada. Testes de análise cobrem
 partição, filtros, nomes homônimos/duplicados, ordenação, zero e indisponibilidade.
 

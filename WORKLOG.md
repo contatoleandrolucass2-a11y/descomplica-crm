@@ -16,6 +16,41 @@
 - Setas sem texto mostram juntos os gráficos de cada linha, com largura e altura uniformes no guia; Escape restaura a visão geral.
 - Escopo opt-in somente Agendamentos; sem mudança de dados, metas, permissões ou migrations.
 
+## 2026-11-06 — Equipe Produtiva: resumo por gerente
+
+- Resumo de sete colunas, sem Responsável da conta: uma linha dinâmica por
+  gerente de vendas, quantidade de corretores e percentuais por etapa sobre a
+  base filtrada de cada gerente. Total ponderado corresponde aos quatro cards.
+- Cards menores, tabela compacta com rolagem interna e remoção das duas notas
+  solicitadas. Popups usam nome e último sobrenome e linhas compactas; demais
+  consumidores do componente compartilhado preservam seu comportamento.
+- Leitura v2 aditiva usa gerente/regional oficiais do cadastro reconciliado,
+  mantendo RPC v1 e ACL existentes. Migration 20261106035242 autorizada pelo
+  usuário após testes e aplicada via MCP, registro remoto20261106052910.
+- Consulta agregada de 06/11:30 corretores,5 gerentes,7 regionais ausentes.
+  Um gerente possui dois regionais confirmados; resumo mantém ambos e sinaliza
+  pendências. Os sete não possuem agendamentos próprios na fonte reconciliada.
+  Pastas contém campo regional no contrato, mas o nome não é projetado no
+  read model; não foi executada coleta nem inferência por gerente.
+- PR508/CI42161270488: validação e imagem aprovadas; restore identificou a nova
+  RPC ausente na lista esperada de funções autenticadas. Correção limitada ao
+  inventário pgTAP, sem mudar grants ou enfraquecer a matriz de permissões.
+- CI42162934633 aprovada nos quatro gates. Integração preserva PR507 e resolve
+  apenas registros concorrentes; nova validação obrigatória no candidato unido.
+- Revisão com valores reais de formato identificou43,3% e100% maiores que o
+  anel compacto. Corrige somente Equipe Produtiva: cards160px, anel64px e fonte
+  proporcional. Medição nos três temas confirma conteúdo íntegro, cinco gerentes
+  e total visíveis no desktop, sem rolagem vertical da página.
+- Regressão permanente aprovada:48layouts/72popups/9cenários decimais em60,42s.
+  Primeira tentativa interrompida por timeout de carregamento após34layouts;
+  repetição sequencial passou sem mudar timeout ou asserções. Causa não confirmada.
+- CI42174376394/c35f501b aprovada nos quatro gates. Main919be9b2/PR506 também
+  aprovada na CI42174495249; conciliação limitada ao índice de conhecimento,
+  preservando códigos e referências. Publicação exige main final validada.
+- Main1d87931f acrescentou somente fechamento documental de Agendamentos;
+  integrado preservando código e testes. Proteção strict da main exige branch
+  atualizada e novos checks; nenhuma regra, timeout ou baseline foi reduzido.
+
 - Publicação CAIXA concluída: PR503/main318b51fa, CI42088655220 com quatro gates verdes, coordenador/CAS em05/11/2026 19:58:29 UTC. Health e smoke de cálculo, prazo automático, filtros, seleção e anuais aprovados. Evidências e limites em docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-05-CAIXA-FRONTEIRAS.md.
 
 ## 2026-11-05 — Agendamentos: vínculo oficial das equipes

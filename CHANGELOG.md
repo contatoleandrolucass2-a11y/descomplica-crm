@@ -6,6 +6,23 @@
 
 - Alinha Agendamentos à largura disponível e navega por linhas completas de gráficos; setas mantêm somente ícones e nomes acessíveis.
 
+- Inclui a nova leitura v2 de Equipe Produtiva no inventário pgTAP de funções
+  autenticadas, preservando a matriz exata e as concessões existentes.
+
+- Compacta Equipe Produtiva e inclui resumo por gerente de vendas, com base e
+  percentuais filtrados e total ponderado. Popups abreviam nomes e usam linhas
+  menores. Leitura versionada aditiva utiliza hierarquia oficial; resumo mantém
+  múltiplos regionais confirmados e identifica vínculos pendentes. Remove as
+  duas notas abaixo dos cards conforme solicitado. Migration autorizada e
+  aplicada após testes; interface final aprovada no PR, com publicação aguardando
+  validação da main combinada.
+
+- Concilia os registros da entrega com o fechamento documental de Agendamentos,
+  preservando o código já aprovado e as proteções de integração/publicação.
+
+- Ajusta a proporção do indicador compacto de Equipe Produtiva para comportar
+  percentuais decimais e100% dentro do anel, preservando as cinco linhas na tela.
+
 - Registra publicação e validação da revisão CAIXA 318b51fa; arquiva somente a nota desta entrega para respeitar o limite de sincronização. Nenhuma alteração de runtime neste registro.
 
 - Corrige a coorte das metas em Agendamentos com o gerente oficial de Corretores

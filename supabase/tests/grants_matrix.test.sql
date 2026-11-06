@@ -448,6 +448,7 @@ select is(
     'read_crm_appointments_goals_range',
     'read_crm_dashboard_analysis',
     'read_crm_productive_team',
+    'read_crm_productive_team_v2',
     'remove_user_permission_override',
     'replace_crm_point_settings',
     'revoke_current_user_sessions_after_password_recovery',

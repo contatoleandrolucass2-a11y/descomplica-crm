@@ -661,3 +661,156 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
   conflitante ou instável no período continua Não informado. Não houve nova
   coleta, concessão, endpoint ou remoção de masking. Registro final somente
   documental; sincronizar Obsidian e não reiniciar o runtime para este registro.
+
+## Regional oficial e resumo compacto — abertura em 06/11/2026
+
+- Pedido: preencher Regional com o vínculo dos relatórios nas duas tabelas,
+  usar primeiro nome/sobrenome nos pop-ups e reduzir linhas/cards. Acrescentar
+  tabela de oito colunas abaixo dos cards e remover as duas notas indicadas.
+- Git comum confirmado, checkout limpo em 628f4402 antes do fetch; nova branch
+  codex/equipe-produtiva-resumo-regional baseada na main 7084fda6c437c5ae85cd1f2b58d630a895888208.
+  CI documental 42108445799 aprovada. Health público HTTP 200/status ok em
+  0307bd47c3d73f068ef07ae035eb1adcdccb1c1d, que inclui PR #504 de vínculo
+  oficial de Agendamentos. Código integrado e runtime são versões distintas.
+- Fontes: Git/GitHub, https://crm.descomplicapro.com.br/api/health e busca
+  pertinente no Obsidian. Conferir os contratos atuais antes de reutilizar
+  notas de 03/11. Nenhuma coleta ou migration remota executada nesta abertura.
+
+### Preparação e validação focada — 06/11/2026
+
+- Esclarecimento do usuário substitui as oito colunas iniciais: retirar
+  Responsável da conta e agrupar por gerente de vendas, com quantidade dinâmica
+  de linhas e percentuais por base filtrada. Implementadas sete colunas;
+  total ponderado usa o mesmo percentual global dos cards.
+- RPC v2 aditiva expõe roster_manager_name/regional_manager_name já existentes,
+  mantendo v1, guard, projeção autorizada e ACL. Arquivo preparado:
+  20261106035242_productive_team_official_hierarchy.sql; sem alteração de dados,
+  coleta, concessões ou aplicação remota. Aprovação antiga das duas migrations
+  originais não autoriza esta nova função. Docker local indisponível:39asserts
+  pgTAP desta suíte dependem da CI isolada. Inventário106migrations/2492asserts.
+- MCP SELECT agregado, projeto verificado por hostname hnncxuerlcsaahdxoswb:
+  snapshotref06/11, generated04:03:53.025Z, updated04:07:15.226870Z;
+  30corretores,5gerentes,2regionais conhecidos e7regionaisnull. Os sete não têm
+  agendamentos próprios na análise (inclusive identidade normalizada), nem
+  visitas;3 têm pastas e4 têm vendas. Pastas possui coluna regional no contrato,
+  mas a projeção retém apenas identificador da oportunidade, não o nome regional.
+  Fonte ao vivo não consultada; isso não prova ausência nos relatórios originais.
+- Um gerente possui dois regionais confirmados. O resumo mantém ambos em
+  nomes separados/abreviados, identifica quantidade sem vínculo e não duplica
+  gerente nem denominador. Null por corretor não usa inferência histórica.
+  Corrigir a projeção compartilhada/coletor exige diagnóstico e validação
+  próprios; nenhuma ampliação incidental para outras páginas foi realizada.
+- Focados aprovados:26análise,15loader,6SSR e34inventário/homologação.
+  Chromium47,90s:48layouts/72popups,180corretores,30gerentes com scroll interno,
+  filtros,7colunas, total ponderado, dois regionais e pendências. Capturas
+  sintéticas em test-results/productive-team-layout/current; nenhuma identidade
+  real exportada. ESLint/Prettier/diff/sintaxe focados aprovados.
+- Cards144px, popup compacto opt-in com primeiro nome/último sobrenome e title
+  integral; comportamento compartilhado de Agendamentos preservado. Removidas
+  somente as duas notas pedidas. CI completa, aprovação da migration nova,
+  merge e publicação desta revisão continuam pendentes nesta etapa.
+- PR508/head5bf82246, CI42161270488: validate e promotable-image aprovados.
+  Restore isolado executou50arquivos/2492asserts e apontou uma falha no test15
+  de grants_matrix: a nova RPC faltava na lista exata das funções autenticadas.
+  Correção restrita ao inventário dessa função, sem mudar concessões reais.
+  Log também registrou rate limit Docker; a falha pgTAP foi independente e
+  reproduzível pela comparação estática da lista. Nenhuma aplicação remota.
+
+### Aprovação e integração — 06/11/2026
+
+- Usuário autorizou especificamente a nova migration20261106035242 após os
+  testes. PR508/head524abbc8, CI42162934633: quatro gates aprovados; restore
+  2492asserts e matriz completa (release-gates47m5s). Leitura v2 e ACL testadas.
+  QA confirmou fixture global sem análise nominal: resumo preenchido/regionais
+  oficiais e nulos são comprovados pelos focados sintéticos, não pela matriz
+  global indisponível. Nenhum teste duplicado ou baseline alterado.
+- Refresh externo05:28UTC: main avançou para6ae947fe/PR507 (alinhamento e
+  navegação de Agendamentos). Diff compartilhado confrontado: condicionais de
+  rótulo e CSS estão limitados a Agendamentos; Equipe Produtiva preservada.
+  Nenhuma autoridade ou regra de deploy mudou. Não editar páginas dessa revisão.
+  Health público200/ok ainda0307bd47; versão integrada e publicada distintas.
+  CI da nova main não foi localizada pelo conector nesta consulta; publicação
+  exige quatro gates da main final, sem usar os da PR como autorização de deploy.
+  CLI recuperou a consulta: main6ae947fe possui CI42164749623 em execução;
+  nenhuma execução dessa outra entrega foi cancelada.
+- Backup aplicável: metadados da função v1 e fingerprint do histórico, sem
+  registros pessoais, persistidos root:root0600 na VPS em
+  /etc/descomplica-crm/migration-backups/equipe-20261106-v2-before.json,
+  SHA256e19da9c4dac4423d305cedbb3c5c71b98ab373318bd857da629dfbacd058f317.
+  Hash local/remoto e sincronização de disco conferidos. Envelope operacional
+  preserva SQL aprovado40ce2127fdf0899aab3b9300375ec97f62bad66f5332648e4fdb54d18192d53c,
+  com travas, CAS e pós-validação; nenhuma concessão ou linha existente alterada.
+- Aplicada somente a migration autorizada via Supabase MCP em05:29UTC,
+  registro20261106052910/productive_team_official_hierarchy. Envelope operacional
+  SHA2565276509e2db7221cff4e9bb2991cc86b48350e7d7f5441faa41cfbfaece43df1,
+  SQL original byte-idêntico ao aprovado. Bodymd5 v2 local/remoto
+  29c94c01db28f7d6d6dd031dae0202b3; v1 permanece91ebffe4f16ddfac558889416fd54fb8.
+  Ownerpostgres, STABLE, SECURITYDEFINER/searchpathvazio, authenticatedexecute,
+  anon/service/PUBLIC negados, sem sessão retorna null. Histórico89→90;
+  as89linhas anteriores mantêm MD5d87c1453fc7c17d27b29b5a03efd1679. Não houve
+  alteração de dados, coleta ou função antiga. Rollback da aplicação conserva
+  a função aditiva, podendo continuar na v1 sem remover dados.
+- Merge do PR508 encontrou conflitos somente em WORKLOG/CHANGELOG. Preservados
+  ambos os registros, com Agendamentos antes da seção Equipe Produtiva para
+  reduzir colisão com novos registros no topo. Código de PR507 integrado intacto.
+  Nova CI do candidato combinado obrigatória; não reutilizar a aprovação da PR
+  antiga como prova desse SHA. Aplicação publicada segue0307bd47 nesta etapa.
+
+### Legibilidade do indicador compacto — 06/11/2026
+
+- Medição adicional justificada pelo valor43,3% do print: a fixture principal
+  com50% não cobria texto decimal. No anel48px/fonte1,3rem,43,3% mede58,98px e
+  100% mede53,20px, excedendo o próprio anel. Reproduzido960/1280 em três temas.
+  Evidência sintética test-results/productive-team-donut-measure.
+- Correção restrita ao CSS de Equipe Produtiva: card160px/anel64px/fonte1,05rem
+  e margens compactas.43,3% mede47,61px e100%42,95px, abaixo do interior49,92px.
+  Título/anel/descrição íntegros; cinco gerentes+total visíveis1280x720/1920x1080;
+  960x600 admite rolagem interna da tabela. Documento sem scroll vertical nas
+  nove combinações. Evidência test-results/productive-team-donut-option-b.
+- Aplicar regressão permanente e executar navegador focado uma vez após CSS
+  final; nova CI obrigatória porque o CSS mudou. RPC/migration já autorizada e
+  aplicada permanecem iguais; nenhum outro banco ou página foi alterado.
+- Regressão permanente adicionada ao navegador e checkProductiveTeam. Fonte
+  final aprovada em60,42s:48layouts/72popups/9cenários de rótulos decimais,
+  50resumos e listas/filtros. Primeira tentativa interrompida no setContent/load
+  após34layouts/24popups, sem asserção visual falhar; causa não confirmada.
+  Repetição sequencial autorizada passou, com processo novo, sem ampliar
+  timeout ou alterar asserções. ESLint/Prettier/sintaxe/diff focados aprovados.
+  Evidência final test-results/productive-team-layout/current/evidence.json e
+  decimal-gauge-dark-1280.png. SSR/dados não repetidos: nenhum contrato JS mudou.
+
+### Retomada e conciliação documental — 06/11/2026
+
+- Consulta09:03 America/Sao_Paulo (12:03UTC): Git comum e branch confirmados,
+  checkout limpo emc35f501b; CI42174376394 concluída com validate, imagem,
+  restore e release-gates aprovados. Fonte final legível validada integralmente.
+- Main avançou para919be9b20d27ec7f9b3367c73aef6e38f0e7cd05/PR506(CAIXA),
+  CI42174495249 com os quatro gates aprovados. Apenas módulo CAIXA e seus
+  testes/referências, sem autoridade, shell, biblioteca ou permissão alterados;
+  CSS global novo está limitado a .goal-page-shell.caixa-page-shell. Não editar
+  essa entrega nem seus baselines. Runtime observado200/ok ainda6ae947fe/PR507.
+- Migration permanece ativa: bodymd5v229c94c01db28f7d6d6dd031dae0202b3 e
+  definitionmd5v191ebffe4f16ddfac558889416fd54fb8 iguais aos aprovados. Carga
+  11:33UTC/08:33local reconciliada,30corretores/5gerentes/7regionaisnull.
+- Conflito novo somente no índice: ambos inseriram registro no topo. Preservar
+  a entrada CAIXA e mover apenas o resumo desta demanda para junto das entradas
+  anteriores de Equipe Produtiva, reduzindo colisões futuras. Arquivo de cada
+  módulo deve ficar idêntico ao respectivo código já aprovado; somente registros
+  são conciliados. Proteções de PR mantidas, sem force/admin, e quatro gates da
+  main final são obrigatórios antes do coordenador publicar a aplicação.
+- Limite de ferramenta: fetch_commit_workflow_runs filtra eventos pull_request;
+  ausência ali não prova indisponibilidade de CI da main. A consulta push/main
+  foi conferida via gh com SHA completo, sem copiar logs nem dados privados.
+- CI42215691521/head5c58a0a8: validate, imagem e restore aprovados; release-gates
+  em andamento quando main avançou novamente para1d87931f/PR509. Diff desta
+  revisão contém somente68linhas no arquivo de encerramento de Agendamentos,
+  sem código, configuração ou referência alterados. Incorporação necessária
+  porque a proteção de main tem strict=true e exige validate, release-gates e
+  isolated-restore atualizados. Política adicional de publicação preserva os
+  quatro jobs, incluindo imagem. Auto-merge não habilitado no repositório;
+  nenhuma configuração alterada nem bypass/admin/force usado.
+- Novas alterações de registro na main durante uma CI longa podem exigir
+  atualização da branch e repetição obrigatória. A prevenção é coordenar ordem
+  de integração/publicação entre entregas, sem cancelar outra entrega ou
+  eliminar gates. Envio de recados a outros chats exige autorização humana
+  específica pela ferramenta; solicitada, sem presumir aprovação por tempo.

@@ -27,6 +27,7 @@ const envelopeSchema = z
               .regex(/^[a-z0-9]+([._-][a-z0-9]+)*$/),
             owner: z.string().trim().min(1).max(200),
             manager: z.string().trim().min(1).max(200),
+            regionalManager: z.string().trim().min(1).max(200).nullable().optional(),
           })
           .strict(),
       )
@@ -44,6 +45,13 @@ export interface ProductiveTeamReadModel {
   availableStages: ProductiveTeamStage[];
 }
 
+const missingRpc = (error: { code: string; message?: string }, name: string) =>
+  error.code === "PGRST202" ||
+  (error.code === "42883" &&
+    typeof error.message === "string" &&
+    error.message.includes(`${name}(`) &&
+    /does not exist/i.test(error.message));
+
 /** A single stable RPC reads one consistent snapshot and its matching roster. */
 export async function loadProductiveTeamReadModel(
   view: DashboardViewKey,
@@ -54,10 +62,12 @@ export async function loadProductiveTeamReadModel(
     availableStages: [],
   };
   const supabase = await createClient();
-  const response = await supabase.rpc("read_crm_productive_team", { p_view_key: view });
+  let response = await supabase.rpc("read_crm_productive_team_v2", { p_view_key: view });
+  if (response.error && missingRpc(response.error, "read_crm_productive_team_v2"))
+    response = await supabase.rpc("read_crm_productive_team", { p_view_key: view });
   if (response.error) {
     // Code can precede additive catalog/RPC activation without inventing results.
-    if (["PGRST202", "42883"].includes(response.error.code)) return empty;
+    if (missingRpc(response.error, "read_crm_productive_team")) return empty;
     throw new Error("Não foi possível carregar a equipe produtiva.");
   }
   if (response.data === null) return empty;
@@ -71,5 +81,11 @@ export async function loadProductiveTeamReadModel(
     result.analysis.facts.some((fact) => !result.availableStages.includes(stages[fact[0] - 1]!))
   )
     throw new Error("A análise não corresponde à equipe produtiva autorizada.");
-  return result;
+  return {
+    ...result,
+    brokerRoster:
+      result.brokerRoster?.map(({ regionalManager, ...member }) =>
+        regionalManager === undefined ? member : { ...member, regionalManager },
+      ) ?? null,
+  };
 }

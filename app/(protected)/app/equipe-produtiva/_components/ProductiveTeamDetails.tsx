@@ -8,17 +8,19 @@ export function ProductiveTeamDetails({
   unavailableDetail,
   appointmentLabels = false,
   shortNames = false,
+  compact = false,
 }: {
   productiveMembers: ProductiveTeamMember[] | null;
   unproductiveMembers: ProductiveTeamMember[] | null;
   unavailableDetail: string;
   appointmentLabels?: boolean;
   shortNames?: boolean;
+  compact?: boolean;
 }) {
   const name = (value: string | null) =>
     shortNames ? appointmentTeamShortName(value) : value || "Não informado";
   return (
-    <div className={styles.details}>
+    <div className={[styles.details, compact && styles.compactDetails].filter(Boolean).join(" ")}>
       {(productiveMembers === null || unproductiveMembers === null) && (
         <p role="status" className={styles.detailsUnavailable}>
           {unavailableDetail}
@@ -56,9 +58,21 @@ export function ProductiveTeamDetails({
               ) : (
                 members.map((member) => (
                   <tr key={member.key}>
-                    <td>{name(member.regionalManager)}</td>
-                    <td>{name(member.manager)}</td>
-                    <td>{name(member.owner)}</td>
+                    <td
+                      title={
+                        compact && shortNames
+                          ? (member.regionalManager ?? "Não informado")
+                          : undefined
+                      }
+                    >
+                      {name(member.regionalManager)}
+                    </td>
+                    <td title={compact && shortNames ? member.manager : undefined}>
+                      {name(member.manager)}
+                    </td>
+                    <td title={compact && shortNames ? member.owner : undefined}>
+                      {name(member.owner)}
+                    </td>
                   </tr>
                 ))
               )}

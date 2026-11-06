@@ -33,13 +33,16 @@ beforeEach(() => {
 describe("productive team authorized read", () => {
   it("reads one atomic RPC without stage goals or direct table access", async () => {
     expect(await loadProductiveTeamReadModel("all")).toEqual(fixture());
-    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("read_crm_productive_team", {
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("read_crm_productive_team_v2", {
       p_view_key: "all",
     });
   });
 
   it.each(["PGRST202", "42883"])("keeps unactivated RPC unavailable (%s)", async (code) => {
-    mocks.rpc.mockResolvedValue({ data: null, error: { code } });
+    mocks.rpc.mockImplementation(async (name: string) => ({
+      data: null,
+      error: { code, message: `function public.${name}(text) does not exist` },
+    }));
     expect(await loadProductiveTeamReadModel("all")).toEqual({
       analysis: null,
       brokerRoster: null,
@@ -50,11 +53,41 @@ describe("productive team authorized read", () => {
   it("does not hide database permission failures as an empty team", async () => {
     mocks.rpc.mockResolvedValue({ data: null, error: { code: "42501" } });
     await expect(loadProductiveTeamReadModel("all")).rejects.toThrow("Não foi possível");
+    expect(mocks.rpc).toHaveBeenCalledTimes(1);
   });
+
+  it("falls back to the compatible v1 only when v2 is absent", async () => {
+    mocks.rpc.mockResolvedValueOnce({ data: null, error: { code: "PGRST202" } });
+    expect(await loadProductiveTeamReadModel("all")).toEqual(fixture());
+    expect(mocks.rpc).toHaveBeenNthCalledWith(2, "read_crm_productive_team", { p_view_key: "all" });
+  });
+
+  it("does not mask an undefined internal helper as an absent RPC", async () => {
+    mocks.rpc.mockResolvedValue({
+      data: null,
+      error: {
+        code: "42883",
+        message: "function private.internal_helper(text) does not exist",
+      },
+    });
+    await expect(loadProductiveTeamReadModel("all")).rejects.toThrow("Não foi possível");
+    expect(mocks.rpc).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["Regional Oficial", null])(
+    "preserves the official regional value (%s)",
+    async (regionalManager) => {
+      const payload = fixture();
+      const brokerRoster = payload.brokerRoster.map((member) => ({ ...member, regionalManager }));
+      mocks.rpc.mockResolvedValue({ data: { ...payload, brokerRoster }, error: null });
+      expect((await loadProductiveTeamReadModel("all")).brokerRoster).toEqual(brokerRoster);
+    },
+  );
 
   it("keeps denied or absent data unavailable", async () => {
     mocks.rpc.mockResolvedValue({ data: null, error: null });
     expect((await loadProductiveTeamReadModel("all")).analysis).toBeNull();
+    expect(mocks.rpc).toHaveBeenCalledTimes(1);
   });
 
   it("accepts a real empty source and an unavailable roster independently", async () => {

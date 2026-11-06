@@ -5705,6 +5705,7 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
     screens: [],
     desktopFitChecks: [],
     detailsChecks: [],
+    summaryChecks: [],
     keyboard: false,
     zoom: false,
     zoomMethod: "CSS viewport equivalents with deviceScaleFactor on a 1440×900 physical canvas",
@@ -5800,6 +5801,198 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
           );
         if (width === 1440 && geometry.scrollHeight > geometry.height + 1)
           throw new Error(`Equipe Produtiva has desktop vertical overflow at ${theme}/${width}`);
+        const gaugeFit = await cards.locator('article > [role="img"]').evaluateAll((elements) =>
+          elements.map((gauge) => ({
+            outer: gauge.getBoundingClientRect().width,
+            text: gauge.querySelector("strong").getBoundingClientRect().width,
+          })),
+        );
+        if (gaugeFit.some((gauge) => gauge.text > gauge.outer * 0.78))
+          throw new Error(
+            `Equipe Produtiva percentage exceeds the donut interior at ${theme}/${width}`,
+          );
+        evidence.stage = `summary:${theme}:${width}`;
+        const summary = page.getByRole("table", {
+          name: "Resumo da Equipe Produtiva",
+          exact: true,
+        });
+        await expect(summary.getByRole("columnheader")).toHaveText([
+          "Gerente Regional",
+          "Gerente de Vendas",
+          "Qnt de corretores",
+          "Equipe produtiva “Agendamentos”",
+          "Equipe produtiva “Visitas”",
+          "Equipe produtiva “Pastas”",
+          "Equipe produtiva “Vendas”",
+        ]);
+        await expect(summary.locator('thead th[scope="col"]')).toHaveCount(7);
+        await expect(
+          page.getByText(
+            "Cada corretor é contado uma única vez por etapa no período selecionado.",
+            { exact: false },
+          ),
+        ).toHaveCount(0);
+        await expect(
+          page.getByText(
+            "Cobertura parcial: os indicadores consideram somente as datas disponíveis nos relatórios.",
+            { exact: true },
+          ),
+        ).toHaveCount(0);
+        const summaryRows = await summary.locator("tbody tr").evaluateAll((elements) =>
+          elements
+            .filter((row) => row.children.length === 7)
+            .map((row) =>
+              Array.from(row.children, (cell) => ({
+                text: cell.textContent?.trim() ?? "",
+                full: cell.getAttribute("title")?.trim() || cell.textContent?.trim() || "",
+                regionals: Array.from(cell.querySelectorAll("span[title]"), (name) => ({
+                  full: name.getAttribute("title"),
+                  text: name.textContent.trim().replace(/^\/\s*/u, ""),
+                })),
+              })),
+            ),
+        );
+        const footerCells = await summary
+          .locator("tfoot tr")
+          .last()
+          .locator("th,td")
+          .allTextContents();
+        const summaryTotals = footerCells.slice(-5).map((value) => value.trim());
+        const nominalUnavailable = /indisponível|aguardando|n[aã]o conciliado/iu.test(
+          await summary.locator("tbody").innerText(),
+        );
+        if (
+          nominalUnavailable &&
+          (summaryRows.length || summaryTotals.some((value) => /^\d/u.test(value)))
+        )
+          throw new Error(
+            `Equipe Produtiva summary invented counts without a roster at ${theme}/${width}`,
+          );
+        const summaryCollator = new Intl.Collator("pt-BR", { sensitivity: "base", numeric: true });
+        const compareSummary = (left, right) =>
+          (left[0].regionals.length === 0
+            ? right[0].regionals.length === 0
+              ? 0
+              : 1
+            : right[0].regionals.length === 0
+              ? -1
+              : summaryCollator.compare(
+                  left[0].regionals.map((name) => name.full).join(" / "),
+                  right[0].regionals.map((name) => name.full).join(" / "),
+                )) || summaryCollator.compare(left[1].full, right[1].full);
+        for (const row of summaryRows) {
+          const names = row[0].regionals;
+          if (!names.length && row[0].text !== "Vínculo pendente")
+            throw new Error(`Equipe Produtiva hides pending regional links at ${theme}/${width}`);
+          if (new Set(names.map((name) => name.full)).size !== names.length)
+            throw new Error(`Equipe Produtiva duplicates regional names at ${theme}/${width}`);
+          for (const [index, name] of names.entries()) {
+            const parts = name.full.trim().split(/\s+/u);
+            const short = parts.length > 1 ? parts[0] + " " + parts.at(-1) : parts[0];
+            if (
+              name.text !== short ||
+              (index > 0 && summaryCollator.compare(names[index - 1].full, name.full) > 0)
+            )
+              throw new Error(
+                `Equipe Produtiva regional names are not independently abbreviated and ordered at ${theme}/${width}`,
+              );
+          }
+        }
+        if (
+          summaryRows.some(
+            (row, index) => index > 0 && compareSummary(summaryRows[index - 1], row) > 0,
+          )
+        )
+          throw new Error(`Equipe Produtiva summary is not alphabetical at ${theme}/${width}`);
+        if (summaryRows.length) {
+          const quantity = (value) => Number(value.replaceAll(".", ""));
+          const bases = summaryRows.map((row) => quantity(row[2].text));
+          const totalBase = bases.reduce((sum, value) => sum + value, 0);
+          const formatPercent = (value) =>
+            new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(value) + "%";
+          const stageCounts = Array.from({ length: 4 }, (_, stage) => {
+            if (summaryRows.some((row) => row[stage + 3].text === "—")) return null;
+            return summaryRows.reduce((sum, row, index) => {
+              const match = row[stage + 3].full.match(/([\d.]+) de ([\d.]+) corretores/u);
+              if (
+                !match ||
+                quantity(match[2]) !== bases[index] ||
+                row[stage + 3].text !== formatPercent((quantity(match[1]) / bases[index]) * 100)
+              )
+                throw new Error(
+                  `Equipe Produtiva manager percentage disagrees with its base at ${theme}/${width}`,
+                );
+              return sum + quantity(match[1]);
+            }, 0);
+          });
+          const expectedTotals = [
+            String(totalBase),
+            ...stageCounts.map((count) =>
+              count === null ? "—" : formatPercent(totalBase === 0 ? 0 : (count / totalBase) * 100),
+            ),
+          ];
+          if (
+            summaryTotals.length !== 5 ||
+            expectedTotals.some(
+              (value, index) =>
+                value !==
+                (index === 0 ? summaryTotals[index].replaceAll(".", "") : summaryTotals[index]),
+            )
+          )
+            throw new Error(
+              `Equipe Produtiva weighted totals disagree with manager bases at ${theme}/${width}`,
+            );
+          const cardCounts = await cards.locator("article").evaluateAll((elements) =>
+            elements.map((element) => {
+              const match = element.innerText.match(/([\d.]+) de ([\d.]+) corretores/u);
+              return match
+                ? [Number(match[1].replaceAll(".", "")), Number(match[2].replaceAll(".", ""))]
+                : null;
+            }),
+          );
+          for (const [index, count] of cardCounts.entries())
+            if (count && (totalBase !== count[1] || stageCounts[index] !== count[0]))
+              throw new Error(
+                `Equipe Produtiva summary disagrees with indicator at ${theme}/${width}/${index}`,
+              );
+        }
+        const summaryGeometry = await summary.evaluate((element) => {
+          let container = element.parentElement;
+          while (container && !/(auto|scroll)/.test(getComputedStyle(container).overflowY))
+            container = container.parentElement;
+          const box = container?.getBoundingClientRect();
+          return {
+            top: box?.top ?? null,
+            bottom: box?.bottom ?? null,
+            height: innerHeight,
+            scrollHeight: container?.scrollHeight ?? null,
+            clientHeight: container?.clientHeight ?? null,
+            role: container?.getAttribute("role") ?? null,
+            tabIndex: container?.tabIndex ?? null,
+            label: container?.getAttribute("aria-label") ?? null,
+          };
+        });
+        if (
+          width === 1440 &&
+          (summaryGeometry.top === null ||
+            summaryGeometry.bottom === null ||
+            summaryGeometry.top < 0 ||
+            summaryGeometry.bottom > summaryGeometry.height + 1 ||
+            summaryGeometry.role !== "region" ||
+            summaryGeometry.tabIndex < 0 ||
+            !summaryGeometry.label)
+        )
+          throw new Error(
+            `Equipe Produtiva summary must be a bounded keyboard scroll region at ${theme}/${width}`,
+          );
+        evidence.summaryChecks.push({
+          width,
+          theme,
+          rows: summaryRows.length,
+          totals: summaryTotals,
+          nominalUnavailable,
+          geometry: summaryGeometry,
+        });
         evidence.stage = `accessibility:${theme}:${width}`;
         const accessibility = await inspectAccessibility(
           page,
@@ -5825,7 +6018,7 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
           unavailableCards: unavailableCards.length,
           screenshot,
         });
-        await expect(page.locator("table")).toHaveCount(0);
+        await expect(page.locator("table")).toHaveCount(1);
         for (const [index, activity] of ["Agendamentos", "Visitas", "Pastas", "Vendas"].entries()) {
           evidence.stage = `details:${theme}:${width}:${activity}`;
           const card = cards.locator("article").nth(index);
@@ -5861,6 +6054,36 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
               "Responsável",
             ]);
             await expect(table.locator('thead th[scope="col"]')).toHaveCount(3);
+            const compactCells = await table.locator("tbody tr").evaluateAll((elements) =>
+              elements
+                .filter((row) => row.children.length === 3)
+                .flatMap((row) =>
+                  Array.from(row.children, (cell) => ({
+                    text: cell.textContent?.trim() ?? "",
+                    full: cell.getAttribute("title")?.trim() || cell.textContent?.trim() || "",
+                  })),
+                ),
+            );
+            for (const cell of compactCells) {
+              const parts = cell.full.split(/\s+/u);
+              const expected = /não informad|sem responsável|sem gerente/iu.test(cell.full)
+                ? cell.full
+                : parts.length > 1
+                  ? `${parts[0]} ${parts.at(-1)}`
+                  : cell.full;
+              if (cell.text !== expected)
+                throw new Error(
+                  `Equipe Produtiva popup name is not compact at ${theme}/${width}/${activity}`,
+                );
+            }
+            const rowPadding = await table
+              .locator("tbody td")
+              .first()
+              .evaluate((cell) => Number.parseFloat(getComputedStyle(cell).paddingTop));
+            if (rowPadding > 4)
+              throw new Error(
+                `Equipe Produtiva popup rows are not compact at ${theme}/${width}/${activity}`,
+              );
             const body = table.locator("tbody");
             if (sourceUnavailable) {
               await expect(body).toHaveText("Detalhamento nominal indisponível.");
@@ -5874,7 +6097,11 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
                 elements
                   .filter((element) => element.children.length === 3)
                   .map((element) =>
-                    Array.from(element.children, (cell) => cell.textContent?.trim() ?? ""),
+                    Array.from(
+                      element.children,
+                      (cell) =>
+                        cell.getAttribute("title")?.trim() || cell.textContent?.trim() || "",
+                    ),
                   ),
               );
             const collator = new Intl.Collator("pt-BR", { sensitivity: "base", numeric: true });
@@ -5959,7 +6186,7 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
           await page.keyboard.press("Escape");
           await expect(dialog).not.toBeVisible();
           await expect(trigger).toBeFocused();
-          await expect(page.locator("table")).toHaveCount(0);
+          await expect(page.locator("table")).toHaveCount(1);
         }
       }
     }
