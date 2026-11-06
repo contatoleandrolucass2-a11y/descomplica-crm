@@ -36,11 +36,15 @@ vínculos ausentes contabilizados. A fonte atual contém sete vínculos ausentes
 os testes não transformam essa ausência em nome inventado.
 
 Os popups mostram primeiro nome e último sobrenome, mantendo nome integral no
-atributo title. A compactação é opt-in exclusivo desta página. Cards de144px e
+atributo title. A compactação é opt-in exclusivo desta página. Cards de160px e
 tabela com rolagem interna mantêm o desktop na mesma tela; celular preserva
 rolagem acessível e não corta registros. As duas notas pedidas foram removidas.
 Fixtures incluem bases desiguais, dois regionais no mesmo gerente, vínculos
 pendentes, filtros e crescimento dinâmico da quantidade de gerentes.
+
+Os percentuais43,3% e100% cabem no interior do anel de64px com fonte1,05rem.
+Fixture de30corretores/cincogerentes confere rótulos íntegros e cinco linhas
+mais total visíveis no desktop1280/1920, sem rolagem vertical da página.
 
 Os resultados locais ficam em `test-results/productive-team-layout/current`;
 pgTAP, build e gates de release são exigidos na CI do candidato. CI42162934633

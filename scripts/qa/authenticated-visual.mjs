@@ -5801,6 +5801,16 @@ async function checkProductiveTeam(page, origin, httpCredentials) {
           );
         if (width === 1440 && geometry.scrollHeight > geometry.height + 1)
           throw new Error(`Equipe Produtiva has desktop vertical overflow at ${theme}/${width}`);
+        const gaugeFit = await cards.locator('article > [role="img"]').evaluateAll((elements) =>
+          elements.map((gauge) => ({
+            outer: gauge.getBoundingClientRect().width,
+            text: gauge.querySelector("strong").getBoundingClientRect().width,
+          })),
+        );
+        if (gaugeFit.some((gauge) => gauge.text > gauge.outer * 0.78))
+          throw new Error(
+            `Equipe Produtiva percentage exceeds the donut interior at ${theme}/${width}`,
+          );
         evidence.stage = `summary:${theme}:${width}`;
         const summary = page.getByRole("table", {
           name: "Resumo da Equipe Produtiva",

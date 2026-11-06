@@ -14,6 +14,9 @@
   duas notas abaixo dos cards conforme solicitado. Migration autorizada e
   aplicada após testes; aplicação aguarda validação do candidato integrado.
 
+- Ajusta a proporção do indicador compacto de Equipe Produtiva para comportar
+  percentuais decimais e100% dentro do anel, preservando as cinco linhas na tela.
+
 - Registra publicação e validação da revisão CAIXA 318b51fa; arquiva somente a nota desta entrega para respeitar o limite de sincronização. Nenhuma alteração de runtime neste registro.
 
 - Corrige a coorte das metas em Agendamentos com o gerente oficial de Corretores

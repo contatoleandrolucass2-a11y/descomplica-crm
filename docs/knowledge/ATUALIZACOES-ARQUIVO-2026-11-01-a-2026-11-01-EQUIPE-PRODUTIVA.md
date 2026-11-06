@@ -755,3 +755,26 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
   reduzir colisão com novos registros no topo. Código de PR507 integrado intacto.
   Nova CI do candidato combinado obrigatória; não reutilizar a aprovação da PR
   antiga como prova desse SHA. Aplicação publicada segue0307bd47 nesta etapa.
+
+### Legibilidade do indicador compacto — 06/11/2026
+
+- Medição adicional justificada pelo valor43,3% do print: a fixture principal
+  com50% não cobria texto decimal. No anel48px/fonte1,3rem,43,3% mede58,98px e
+  100% mede53,20px, excedendo o próprio anel. Reproduzido960/1280 em três temas.
+  Evidência sintética test-results/productive-team-donut-measure.
+- Correção restrita ao CSS de Equipe Produtiva: card160px/anel64px/fonte1,05rem
+  e margens compactas.43,3% mede47,61px e100%42,95px, abaixo do interior49,92px.
+  Título/anel/descrição íntegros; cinco gerentes+total visíveis1280x720/1920x1080;
+  960x600 admite rolagem interna da tabela. Documento sem scroll vertical nas
+  nove combinações. Evidência test-results/productive-team-donut-option-b.
+- Aplicar regressão permanente e executar navegador focado uma vez após CSS
+  final; nova CI obrigatória porque o CSS mudou. RPC/migration já autorizada e
+  aplicada permanecem iguais; nenhum outro banco ou página foi alterado.
+- Regressão permanente adicionada ao navegador e checkProductiveTeam. Fonte
+  final aprovada em60,42s:48layouts/72popups/9cenários de rótulos decimais,
+  50resumos e listas/filtros. Primeira tentativa interrompida no setContent/load
+  após34layouts/24popups, sem asserção visual falhar; causa não confirmada.
+  Repetição sequencial autorizada passou, com processo novo, sem ampliar
+  timeout ou alterar asserções. ESLint/Prettier/sintaxe/diff focados aprovados.
+  Evidência final test-results/productive-team-layout/current/evidence.json e
+  decimal-gauge-dark-1280.png. SSR/dados não repetidos: nenhum contrato JS mudou.

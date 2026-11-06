@@ -75,7 +75,9 @@ test(
           const groupedAnalysis={...analysis,brokerCount:30,brokerManagerCount:30,dimensions:{...analysis.dimensions,managers:groupedRoster.map(row=>row.manager),owners:groupedRoster.map(row=>row.owner)},facts:groupedRoster.map((row,index)=>[2,'2026-10-10',index,index,0,1,-1,1,0,0,-1]),appointments:[]};
           const regionalRoster=[{...roster[0],regionalManager:'Ana Maria Almeida'},{...roster[1],regionalManager:'Bruno Carlos Barbosa'},{key:'c',owner:'Corretor sintético C',manager:'Gerente sintético',regionalManager:null},{key:'d',owner:'Corretor sintético D',manager:'Gerente Zebra',regionalManager:null}];
           const regionalAnalysis={...analysis,brokerCount:4,brokerManagerCount:2,dimensions:{...analysis.dimensions,managers:['Gerente sintético','Gerente Zebra'],owners:regionalRoster.map(row=>row.owner)}};
-          window.mountTeam=(missing=false,large=false)=>createRoot(document.getElementById('root')).render(<ProtectedShellFrame shellClassName={shell.shell} contentClassName={shell.mainContent} chrome={<><header data-protected-topbar style={{height:58,boxSizing:'border-box'}}>Descomplica — teste sintético</header><AuthorizedBreadcrumbs pages={pages}/></>} wrapContent={c=><DashboardShell pages={pages}>{c}</DashboardShell>}><main className={analytics.canvasMain}><AnalyticsCanvas kind='stage'><ProductiveTeamDashboard analysis={missing?null:large==='regional'?regionalAnalysis:large==='groups'?groupedAnalysis:large?largeAnalysis:analysis} brokerRoster={missing?null:large==='regional'?regionalRoster:large==='groups'?groupedRoster:large?largeRoster:roster} availableStages={missing?[]:['appointments','visits','folders','sales']} generatedAt='2026-10-31T12:00:00Z' calendarDate='2026-10-31'/></AnalyticsCanvas></main></ProtectedShellFrame>);`;
+          const decimalRoster=Array.from({length:30},(_,index)=>({key:'decimal-'+index,owner:'Corretor '+String(index).padStart(2,'0'),manager:'Gerente '+Math.floor(index/6),regionalManager:'Regional Oficial'}));
+          const decimalAnalysis={...analysis,brokerCount:30,brokerManagerCount:5,dimensions:{...analysis.dimensions,managers:Array.from({length:5},(_,index)=>'Gerente '+index),owners:decimalRoster.map(row=>row.owner)},facts:decimalRoster.flatMap((row,index)=>[[4,'2026-10-10',Math.floor(index/6),index,0,1,-1,1,0,0,-1],...(index<13?[[2,'2026-10-10',Math.floor(index/6),index,0,1,-1,1,0,0,-1]]:[])]),appointments:decimalRoster.slice(0,13).map(row=>({...analysis.appointments[0],owner:row.owner,salesManager:row.manager}))};
+          window.mountTeam=(missing=false,large=false)=>createRoot(document.getElementById('root')).render(<ProtectedShellFrame shellClassName={shell.shell} contentClassName={shell.mainContent} chrome={<><header data-protected-topbar style={{height:58,boxSizing:'border-box'}}>Descomplica — teste sintético</header><AuthorizedBreadcrumbs pages={pages}/></>} wrapContent={c=><DashboardShell pages={pages}>{c}</DashboardShell>}><main className={analytics.canvasMain}><AnalyticsCanvas kind='stage'><ProductiveTeamDashboard analysis={missing?null:large==='decimal'?decimalAnalysis:large==='regional'?regionalAnalysis:large==='groups'?groupedAnalysis:large?largeAnalysis:analysis} brokerRoster={missing?null:large==='decimal'?decimalRoster:large==='regional'?regionalRoster:large==='groups'?groupedRoster:large?largeRoster:roster} availableStages={missing?[]:['appointments','visits','folders','sales']} generatedAt='2026-10-31T12:00:00Z' calendarDate='2026-10-31'/></AnalyticsCanvas></main></ProtectedShellFrame>);`;
           },
         },
       ],
@@ -119,6 +121,7 @@ test(
       summaryChecks: [],
       largeLists: [],
       filteredDetails: false,
+      decimalGaugeChecks: [],
       passed: false,
     };
     const browser = await chromium.launch({ headless: true });
@@ -274,6 +277,7 @@ test(
         await page.setViewportSize({ width, height });
         for (const theme of ["light", "balanced", "dark"]) {
           for (const missing of [false, true]) {
+            evidence.stage = `layout:${width}:${height}:${theme}:${missing}`;
             await mount(theme, missing);
             const cards = page.getByRole("region", { name: "Corretores produtivos por etapa" });
             await expect(cards.locator("article")).toHaveCount(4);
@@ -613,6 +617,93 @@ test(
         partialLink: true,
         pendingLink: true,
       });
+      for (const [width, height] of [
+        [960, 600],
+        [1280, 720],
+        [1920, 1080],
+      ])
+        for (const theme of ["light", "balanced", "dark"]) {
+          evidence.stage = `decimal-gauge:${theme}:${width}`;
+          await page.setViewportSize({ width, height });
+          await mount(theme, false, "decimal");
+          const decimalSummary = await assertSummary(false, 5);
+          const cards = page
+            .getByRole("region", { name: "Corretores produtivos por etapa" })
+            .locator("article");
+          await expect(cards.locator(':scope > [role="img"] strong')).toHaveText([
+            "43,3%",
+            "43,3%",
+            "0%",
+            "100%",
+          ]);
+          const gauges = await cards.evaluateAll((elements) =>
+            elements.map((card) => {
+              const box = card.getBoundingClientRect(),
+                gauge = card.querySelector(':scope > [role="img"]'),
+                strong = gauge.querySelector("strong");
+              const outer = gauge.getBoundingClientRect(),
+                text = strong.getBoundingClientRect();
+              return {
+                cardHeight: box.height,
+                donutWidth: outer.width,
+                text: strong.textContent,
+                textWidth: text.width,
+                contentInside: Array.from(
+                  card.querySelectorAll(':scope > h2, :scope > [role="img"], :scope > p'),
+                ).every((child) => {
+                  const rect = child.getBoundingClientRect();
+                  return (
+                    rect.top >= box.top - 1 &&
+                    rect.bottom <= box.bottom + 1 &&
+                    rect.left >= box.left - 1 &&
+                    rect.right <= box.right + 1
+                  );
+                }),
+              };
+            }),
+          );
+          for (const gauge of gauges) {
+            assert.ok(
+              gauge.textWidth <= gauge.donutWidth * 0.78,
+              `${gauge.text} exceeds the donut interior: ${gauge.textWidth}px > ${gauge.donutWidth * 0.78}px`,
+            );
+            assert.ok(
+              gauge.contentInside,
+              "Card title, donut and description must fit inside the compact card",
+            );
+            assert.ok(gauge.cardHeight <= 180);
+          }
+          const tableGeometry = await decimalSummary.evaluate((table) => {
+            const footer = table.querySelector("tfoot").getBoundingClientRect(),
+              region = table.parentElement.getBoundingClientRect();
+            return {
+              rows: table.querySelectorAll("tbody tr").length,
+              allRowsVisible: Array.from(table.querySelectorAll("tbody tr")).every((row) => {
+                const rect = row.getBoundingClientRect();
+                return (
+                  rect.top >= region.top && rect.bottom <= footer.top && rect.bottom <= innerHeight
+                );
+              }),
+              footerVisible: footer.top >= region.top && footer.bottom <= innerHeight,
+              documentHeight: document.documentElement.scrollHeight,
+              documentWidth: document.documentElement.scrollWidth,
+            };
+          });
+          assert.equal(tableGeometry.documentHeight, height);
+          assert.equal(tableGeometry.documentWidth, width);
+          if (width >= 1280) {
+            assert.ok(tableGeometry.allRowsVisible);
+            assert.ok(tableGeometry.footerVisible);
+          } else {
+            await decimalSummary.locator("tbody tr").last().scrollIntoViewIfNeeded();
+            await expect(decimalSummary.locator("tbody tr").last()).toBeInViewport();
+            assert.equal(await page.evaluate(() => document.documentElement.scrollHeight), height);
+          }
+          await page.screenshot({
+            path: path.join(evidenceRoot, `decimal-gauge-${theme}-${width}.png`),
+          });
+          evidence.decimalGaugeChecks.push({ width, height, theme, gauges, tableGeometry });
+        }
       evidence.passed = true;
     } finally {
       await browser.close();

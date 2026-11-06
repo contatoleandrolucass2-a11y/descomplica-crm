@@ -29,6 +29,13 @@
   inventário pgTAP, sem mudar grants ou enfraquecer a matriz de permissões.
 - CI42162934633 aprovada nos quatro gates. Integração preserva PR507 e resolve
   apenas registros concorrentes; nova validação obrigatória no candidato unido.
+- Revisão com valores reais de formato identificou43,3% e100% maiores que o
+  anel compacto. Corrige somente Equipe Produtiva: cards160px, anel64px e fonte
+  proporcional. Medição nos três temas confirma conteúdo íntegro, cinco gerentes
+  e total visíveis no desktop, sem rolagem vertical da página.
+- Regressão permanente aprovada:48layouts/72popups/9cenários decimais em60,42s.
+  Primeira tentativa interrompida por timeout de carregamento após34layouts;
+  repetição sequencial passou sem mudar timeout ou asserções. Causa não confirmada.
 
 - Publicação CAIXA concluída: PR503/main318b51fa, CI42088655220 com quatro gates verdes, coordenador/CAS em05/11/2026 19:58:29 UTC. Health e smoke de cálculo, prazo automático, filtros, seleção e anuais aprovados. Evidências e limites em docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-05-CAIXA-FRONTEIRAS.md.
 
