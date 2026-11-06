@@ -5152,3 +5152,229 @@ body:has(.caixa-page-shell) nav[aria-label="Breadcrumb"] {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* Compact controls: labels and guidance stay outside the input border. */
+.goal-page-shell.caixa-page-shell {
+  --caixa-layout-page: var(--analytics-surface);
+  background: var(--analytics-surface) !important;
+}
+.goal-page-shell.caixa-page-shell .caixa-workspace-content {
+  background: var(--analytics-surface);
+}
+.goal-page-shell.caixa-page-shell .caixa-workspace-content .caixa-full-form {
+  gap: 16px;
+  padding-block: 8px 18px;
+  min-height: 0;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  gap: 5px;
+  grid-template-rows: minmax(18px, auto) 36px auto;
+  box-shadow: none;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field:focus-within {
+  box-shadow: none;
+}
+.goal-page-shell.caixa-page-shell
+  .caixa-full-form
+  .caixa-field
+  > :is(
+    input,
+    select,
+    .caixa-money-input,
+    .caixa-participant-control,
+    .caixa-city-picker,
+    .caixa-toggle
+  ) {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--caixa-layout-line);
+  border-radius: 7px;
+  background: transparent;
+  height: 36px;
+  padding-inline: 9px;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-money-input input,
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-participant-control input,
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-city-picker input {
+  border: 0;
+  background: transparent;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  max-width: 140px;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle button {
+  flex: 1;
+  width: auto;
+  height: 28px;
+  min-height: 28px !important;
+  border-radius: 4px;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-ranking-field > select {
+  border-color: #b28a27;
+  animation: caixa-gold-pulse 2.6s ease-in-out infinite;
+}
+.goal-page-shell.caixa-page-shell button {
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+.goal-page-shell.caixa-page-shell button:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--caixa-layout-accent) 22%, var(--caixa-layout-panel));
+  transform: scale(1.025);
+}
+.goal-page-shell.caixa-page-shell .caixa-units-cta {
+  animation: caixa-action-pulse 2.6s ease-in-out infinite;
+}
+@keyframes caixa-gold-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 #cba64a20;
+  }
+  50% {
+    box-shadow: 0 0 0 3px #cba64a45;
+  }
+}
+@keyframes caixa-action-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--caixa-layout-accent) 30%, transparent);
+  }
+}
+@media (max-width: 760px) {
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field {
+    grid-template-rows: minmax(28px, auto) 44px auto;
+  }
+  .goal-page-shell.caixa-page-shell
+    .caixa-full-form
+    .caixa-field
+    > :is(
+      input,
+      select,
+      .caixa-money-input,
+      .caixa-participant-control,
+      .caixa-city-picker,
+      .caixa-toggle
+    ) {
+    height: 44px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle {
+    height: 48px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle button {
+    min-height: 44px !important;
+    height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .goal-page-shell.caixa-page-shell .caixa-ranking-field > select,
+  .goal-page-shell.caixa-page-shell .caixa-units-cta {
+    animation: none;
+  }
+  .goal-page-shell.caixa-page-shell button:not(:disabled):hover {
+    transform: none;
+  }
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field-control {
+  min-width: 0;
+  height: 36px;
+}
+.goal-page-shell.caixa-page-shell
+  .caixa-full-form
+  .caixa-field-control
+  > :is(input, select, .caixa-money-input, .caixa-participant-control) {
+  width: 100%;
+  height: 36px;
+  min-height: 36px !important;
+  border: 1px solid var(--caixa-layout-line);
+  border-radius: 7px;
+  padding-inline: 9px;
+  background: transparent;
+}
+.goal-page-shell.caixa-page-shell
+  .caixa-full-form
+  .caixa-field-control
+  :is(.caixa-money-input, .caixa-participant-control)
+  input {
+  border: 0;
+  background: transparent;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle-card {
+  height: 36px;
+  padding: 3px;
+  border: 1px solid var(--caixa-layout-line);
+  border-radius: 7px;
+  width: 140px;
+  max-width: 100%;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle-card .caixa-toggle {
+  height: 28px;
+  border: 0;
+  padding: 0;
+  width: 100%;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-ranking-field select {
+  border-color: #b28a27;
+  animation: caixa-gold-pulse 2.6s ease-in-out infinite;
+}
+.goal-page-shell.caixa-page-shell .caixa-full-form .caixa-primary-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(90px, 0.55fr);
+}
+@media (max-width: 1099px) {
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-primary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-primary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-field-control,
+  .goal-page-shell.caixa-page-shell
+    .caixa-full-form
+    .caixa-field-control
+    > :is(input, select, .caixa-money-input, .caixa-participant-control) {
+    height: 44px;
+    min-height: 44px !important;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle-card {
+    height: 48px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-toggle-card .caixa-toggle {
+    height: 44px;
+  }
+}
+@media (max-width: 360px) {
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-primary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-ranking-field select {
+    animation: none;
+  }
+}
+@media (min-width: 1100px) {
+  .goal-page-shell.caixa-page-shell .caixa-full-form .caixa-primary-grid {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr)) minmax(100px, 0.72fr) minmax(120px, 0.86fr)
+      minmax(60px, 0.42fr);
+  }
+}
+@media (min-width: 1100px) and (min-height: 650px) {
+  .goal-page-shell.caixa-page-shell .caixa-workspace-content .caixa-full-form {
+    min-height: calc((100svh - 55px) / var(--caixa-content-scale, 1));
+  }
+}
+.goal-page-shell.caixa-page-shell .caixa-workspace-content .caixa-full-form {
+  min-height: 0;
+}

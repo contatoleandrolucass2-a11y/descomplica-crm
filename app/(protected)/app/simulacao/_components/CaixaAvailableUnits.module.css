@@ -1156,3 +1156,209 @@
     animation: none;
   }
 }
+
+/* CAIXA mirrors the compact Associativo flow without changing its calculations. */
+.stock thead th:first-child {
+  min-width: 52px;
+  white-space: nowrap;
+}
+.stock thead th {
+  padding: 5px 8px;
+}
+
+.workspace :is(button, a) {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+.workspace button:hover:not(:disabled),
+.resourceActions a:hover {
+  background-color: color-mix(in srgb, var(--unit-accent) 18%, var(--unit-panel));
+  border-color: var(--unit-accent);
+  transform: scale(1.025);
+}
+.moneyEditor {
+  justify-content: flex-end;
+}
+.workspace .moneyEditor input {
+  background: transparent;
+  border-color: transparent;
+  border-radius: 3px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+}
+.workspace .moneyEditor input:hover,
+.workspace .moneyEditor input:focus-visible {
+  border-color: var(--unit-accent);
+}
+.loading {
+  position: relative;
+  padding: 10px 0 14px;
+  overflow: hidden;
+}
+.loading::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--unit-accent), transparent);
+  animation: loadingSweep 1.5s ease-in-out infinite;
+}
+@keyframes loadingSweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@media (min-width: 1024px) {
+  .proposal .sectionHeading {
+    min-height: 48px;
+    gap: 10px;
+    padding: 5px 16px;
+  }
+  .proposal .sectionHeading .step {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    border-radius: 10px;
+  }
+  .proposal .sectionHeading h3 {
+    margin-top: 2px;
+    font-size: 15px;
+  }
+  .proposal .sectionHeading strong {
+    font-size: 11px;
+  }
+  .proposal .flowGrid {
+    gap: 24px;
+    padding: 12px 24px;
+  }
+  .workspace .flowPanel :is(th, td) {
+    height: 26px;
+    padding: 3px 8px;
+    font-size: 12px;
+    line-height: 1.25;
+  }
+  .workspace .flowPanel thead th {
+    font-size: 10px;
+  }
+  .workspace .flowPanel :is(button, input) {
+    min-height: 26px;
+    padding: 3px 8px;
+    font-size: 12px;
+  }
+  .workspace .flowPanel .moneyEditor input {
+    height: 25px;
+    min-height: 25px;
+    padding: 1px 5px;
+    max-width: 145px;
+  }
+  .proposal .paymentActions {
+    gap: 6px;
+    padding: 5px 6px;
+  }
+  .proposal .paymentActions button {
+    min-height: 28px;
+  }
+  .proposal .approvalColumn {
+    gap: 8px;
+  }
+  .proposal .approval > header {
+    padding: 5px 8px;
+  }
+  .proposal .approval header p {
+    margin-top: 2px;
+    font-size: 12px;
+  }
+  .proposal .ranking {
+    min-width: 140px;
+    padding: 5px 10px;
+  }
+  .proposal .release {
+    margin: 8px;
+    padding: 9px 12px;
+    gap: 10px;
+  }
+  .proposal .approvedBanner {
+    margin: 8px;
+    padding: 8px 10px;
+  }
+  .proposal .release strong,
+  .proposal .approvedBanner strong {
+    font-size: 13px;
+  }
+  .proposal .paymentSummary > header {
+    padding: 4px 7px;
+  }
+  .proposal .paymentSummary header small {
+    font-size: 10px;
+  }
+  .proposal .paymentSummary thead th {
+    white-space: nowrap;
+    font-size: 9px;
+  }
+  .proposal .badge {
+    padding: 1px 7px;
+    font-size: 11px;
+  }
+  .proposal .documentation {
+    padding: 0 14px 14px;
+    border-radius: 14px;
+  }
+  .proposal .documentation > .sectionHeading {
+    padding: 8px 0;
+  }
+  .proposal .documentationGrid {
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .proposal .documentationPlan,
+  .proposal .documentationBreakdown {
+    min-height: 0;
+    padding: 16px;
+    border-radius: 12px;
+  }
+  .proposal .documentationPlan p {
+    margin: 12px 0;
+    font-size: 23px;
+  }
+  .proposal .documentationPlan > div {
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+  .proposal .documentationBreakdown h4 {
+    margin-bottom: 12px;
+  }
+  .proposal .documentationBreakdown dl > div {
+    padding: 6px 2px;
+  }
+  .proposal .headingActions button {
+    min-height: 32px;
+    padding: 5px 12px;
+  }
+  .proposal .resourceActions {
+    gap: 12px;
+  }
+  .proposal .resourceActions :is(button, a) {
+    min-height: 56px;
+    padding: 8px 10px;
+    font-size: 14px;
+    border-radius: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace :is(button, a) {
+    transition: none;
+  }
+  .workspace button:hover:not(:disabled),
+  .resourceActions a:hover {
+    transform: none;
+  }
+  .loading::after {
+    animation: none;
+  }
+}

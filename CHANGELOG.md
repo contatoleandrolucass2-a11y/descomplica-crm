@@ -1,5 +1,7 @@
 # Changelog
 
+- Compacta somente a interface CAIXA: controles com legendas externas, rankingopcional e primeiroimóvel no início, FGTS/recursos separados, animações acessíveis e proposta no padrão Associativo.
+
 - Registra publicação e validação da revisão CAIXA 318b51fa; arquiva somente a nota desta entrega para respeitar o limite de sincronização. Nenhuma alteração de runtime neste registro.
 
 - Corrige a coorte das metas em Agendamentos com o gerente oficial de Corretores

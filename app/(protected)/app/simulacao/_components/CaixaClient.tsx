@@ -16,6 +16,8 @@ import {
   Wrench,
 } from "lucide-react";
 import {
+  Children,
+  isValidElement,
   useEffect,
   useId,
   useMemo,
@@ -25,6 +27,7 @@ import {
   type ReactNode,
 } from "react";
 import { CaixaInstallments } from "./CaixaInstallments";
+import { CAIXA_UNIT_RANKINGS } from "@/lib/crm/simulators/caixa-available-units";
 import { CaixaAvailableUnits } from "./CaixaAvailableUnits";
 import { calculateCaixaPublicReference } from "@/lib/crm/simulators/caixa-public-reference";
 import {
@@ -254,10 +257,14 @@ function Field({
   children: ReactNode;
   className?: string;
 }) {
+  const items = Children.toArray(children);
+  const hints = items.filter((item) => isValidElement(item) && item.type === "small");
+  const controls = items.filter((item) => !isValidElement(item) || item.type !== "small");
   return (
     <label className={`caixa-field ${className}`}>
       <span>{typeof label === "string" ? label.replace(/ \*$/, "\u00a0*") : label}</span>
-      {children}
+      <div className="caixa-field-control">{controls}</div>
+      {hints}
     </label>
   );
 }
@@ -508,6 +515,8 @@ export function CaixaClient({
   } as CSSProperties;
   const [form, setForm] = useState(initialForm);
   const [unitsOpen, setUnitsOpen] = useState(false);
+  const [unitRanking, setUnitRanking] = useState("");
+  const [firstProperty, setFirstProperty] = useState("");
   const unitsTrigger = useRef<HTMLButtonElement>(null);
   const [participants, setParticipants] = useState(1);
   const lastProfileSyncSignature = useRef("");
@@ -598,6 +607,8 @@ export function CaixaClient({
   }
   function clear() {
     setUnitsOpen(false);
+    setUnitRanking("");
+    setFirstProperty("");
     setForm(initialForm);
     setParticipants(1);
     setProfiles([createApplicant(0)]);
@@ -854,6 +865,38 @@ export function CaixaClient({
                           value={form.ownFunds}
                           onChange={(value) => update("ownFunds", value)}
                         />
+                      </Field>
+                      <Field className="caixa-first-property-field" label="Primeiro imóvel?">
+                        <select
+                          aria-label="Primeiro imóvel?"
+                          value={firstProperty}
+                          onChange={(event) => setFirstProperty(event.target.value)}
+                        >
+                          <option value="">Selecione…</option>
+                          <option value="yes">Sim</option>
+                          <option value="no">Não</option>
+                        </select>
+                      </Field>
+                      <Field
+                        className="caixa-ranking-field"
+                        label={
+                          <>
+                            Ranking do cliente <small>opcional</small>
+                          </>
+                        }
+                      >
+                        <select
+                          aria-label="Ranking do cliente"
+                          value={unitRanking}
+                          onChange={(event) => setUnitRanking(event.target.value)}
+                        >
+                          <option value="">Selecione…</option>
+                          {CAIXA_UNIT_RANKINGS.map((ranking) => (
+                            <option key={ranking.id} value={ranking.id}>
+                              {ranking.label}
+                            </option>
+                          ))}
+                        </select>
                       </Field>
                       <Field
                         className="caixa-qualification-item caixa-participants-field"
@@ -1134,8 +1177,8 @@ export function CaixaClient({
                         <h2>Resumo financeiro</h2>
                         <button
                           ref={unitsTrigger}
+                          className="caixa-result-print caixa-units-cta"
                           type="button"
-                          className="caixa-result-print"
                           aria-expanded={unitsOpen}
                           aria-controls={unitsOpen ? "caixa-available-units" : undefined}
                           onClick={() => setUnitsOpen((previous) => !previous)}
@@ -1192,10 +1235,6 @@ export function CaixaClient({
                           <dl>
                             {[
                               ["Valor do imóvel", money.format(result.propertyValue)],
-                              ["Base da cota", money.format(result.quotaBaseValue)],
-                              ...(result.municipalLimit !== undefined
-                                ? [["Limite municipal", money.format(result.municipalLimit)]]
-                                : []),
                               ["Financiamento", money.format(result.financing)],
                               [
                                 "Subsídio",
@@ -1208,7 +1247,8 @@ export function CaixaClient({
                               ...(result.publicContribution > 0
                                 ? [["Aporte MCMV Cidades", money.format(result.publicContribution)]]
                                 : []),
-                              ["FGTS + recursos", money.format(result.totalResources)],
+                              ["FGTS", money.format(result.fgts)],
+                              ["Recursos", money.format(result.totalResources - result.fgts)],
                               ["Complemento de entrada", money.format(result.entryNeeded)],
                             ].map(([label, value]) => (
                               <div
@@ -1402,6 +1442,8 @@ export function CaixaClient({
               )}
               {result?.ok && (
                 <CaixaAvailableUnits
+                  ranking={unitRanking}
+                  firstProperty={firstProperty}
                   input={housingInput(form, baseDate, participants)}
                   result={result}
                   open={unitsOpen}
