@@ -1,14 +1,8 @@
 # Aprendizados e atualizacoes
 
-## 2026-11-06 — Equipe Produtiva: resumo por gerente em preparação
+## 2026-11-05 — CAIXA: compactação visual v2
 
-Resumo de sete colunas, uma linha por gerente de vendas e percentuais por base
-filtrada, conforme esclarecimento do usuário. Cards e popups compactos; nova
-leitura versionada da hierarquia oficial aplicada após autorização. Fonte consultada:30corretores,
-5gerentes e7vínculos regionais ausentes; nenhum nome inferido para preenchê-los.
-Evidências e limites no [registro da demanda](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
-CI42162934633 aprovada; migration remota20261106052910 conferida. Integração
-com main/PR507 e nova validação/publicação da aplicação ainda pendentes.
+Abertura: Git comum confirmado; main7084fda6, produção0307bd47 HTTP200/ok, consultados em05/11 via GitHub/Git/health. Escopo: somente apresentação e posicionamento de campos CAIXA conforme25prints; cálculos preservados. Implementação e validação pendentes.
 
 ## 2026-11-05 — CAIXA: fronteiras e interface publicadas
 
@@ -459,6 +453,15 @@ Registro integral preservado no [arquivo CAIXA](ATUALIZACOES-ARQUIVO-2026-11-05-
 - 03/11/2026: Equipe Produtiva compacta publicada em f3c4f126, CI 41585221159
   com quatro gates aprovados e health 200/ok. Vidro e menu externo confirmados;
   evidências e limites no [registro da página](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
+
+- 06/11/2026: Equipe Produtiva com resumo de sete colunas, uma linha por gerente
+  e percentuais por base filtrada. Popups compactos, nome/sobrenome e hierarquia
+  oficial; cards160px com indicadores legíveis. CI42174376394/c35f501b aprovada
+  nos quatro gates. Migration autorizada20261106035242 aplicada como registro
+  remoto20261106052910 e conferida. Fonte reconciliada:30corretores/5gerentes,
+  7regionais ausentes, sem inferência. Integração com main919be9b2/PR506 preserva
+  códigos já validados; publicação depende dos gates da main combinada exata.
+  Evidências e limites no [registro da demanda](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
 
 - Agendamentos: [recência e rolagem integral](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-ROLAGEM.md).
 

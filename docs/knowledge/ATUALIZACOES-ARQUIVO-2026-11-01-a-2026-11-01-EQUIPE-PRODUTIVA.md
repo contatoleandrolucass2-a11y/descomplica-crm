@@ -778,3 +778,26 @@ ferramentas desta conversa; nenhuma fonte de instruções mudou desde main38bec.
   timeout ou alterar asserções. ESLint/Prettier/sintaxe/diff focados aprovados.
   Evidência final test-results/productive-team-layout/current/evidence.json e
   decimal-gauge-dark-1280.png. SSR/dados não repetidos: nenhum contrato JS mudou.
+
+### Retomada e conciliação documental — 06/11/2026
+
+- Consulta09:03 America/Sao_Paulo (12:03UTC): Git comum e branch confirmados,
+  checkout limpo emc35f501b; CI42174376394 concluída com validate, imagem,
+  restore e release-gates aprovados. Fonte final legível validada integralmente.
+- Main avançou para919be9b20d27ec7f9b3367c73aef6e38f0e7cd05/PR506(CAIXA),
+  CI42174495249 com os quatro gates aprovados. Apenas módulo CAIXA e seus
+  testes/referências, sem autoridade, shell, biblioteca ou permissão alterados;
+  CSS global novo está limitado a .goal-page-shell.caixa-page-shell. Não editar
+  essa entrega nem seus baselines. Runtime observado200/ok ainda6ae947fe/PR507.
+- Migration permanece ativa: bodymd5v229c94c01db28f7d6d6dd031dae0202b3 e
+  definitionmd5v191ebffe4f16ddfac558889416fd54fb8 iguais aos aprovados. Carga
+  11:33UTC/08:33local reconciliada,30corretores/5gerentes/7regionaisnull.
+- Conflito novo somente no índice: ambos inseriram registro no topo. Preservar
+  a entrada CAIXA e mover apenas o resumo desta demanda para junto das entradas
+  anteriores de Equipe Produtiva, reduzindo colisões futuras. Arquivo de cada
+  módulo deve ficar idêntico ao respectivo código já aprovado; somente registros
+  são conciliados. Proteções de PR mantidas, sem force/admin, e quatro gates da
+  main final são obrigatórios antes do coordenador publicar a aplicação.
+- Limite de ferramenta: fetch_commit_workflow_runs filtra eventos pull_request;
+  ausência ali não prova indisponibilidade de CI da main. A consulta push/main
+  foi conferida via gh com SHA completo, sem copiar logs nem dados privados.

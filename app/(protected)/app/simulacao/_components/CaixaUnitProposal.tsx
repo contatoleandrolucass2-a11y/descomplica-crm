@@ -126,6 +126,7 @@ function Amount({
       <span aria-hidden="true">R$</span>
       <input
         aria-label={label}
+        dir="ltr"
         type="number"
         inputMode="decimal"
         min="0"
@@ -411,7 +412,12 @@ export function CaixaUnitProposal({
     </table>
   );
   return (
-    <section className={styles.proposal} aria-label={`Fluxo de ${unit.product}`} ref={proposal}>
+    <section
+      className={styles.proposal}
+      aria-label={`Fluxo de ${unit.product}`}
+      ref={proposal}
+      data-caixa-proposal="compact"
+    >
       <article className={styles.propertySummary} aria-label="Descrição do imóvel">
         <header>
           <div>
@@ -727,17 +733,6 @@ export function CaixaUnitProposal({
                     </tr>
                   </tbody>
                 </table>
-                {quoteReady && funding.commercialFunding && (
-                  <details className={styles.commercialAudit}>
-                    <summary>Auditoria do financiamento</summary>
-                    <p>
-                      Cenário comercial · base {money.format(funding.commercialFunding.baseValue)} ·
-                      cota {percent.format(funding.commercialFunding.financingQuota)} · juros{" "}
-                      {percent.format(funding.commercialFunding.rate / 100)} a.a. · sujeito à
-                      aprovação bancária.
-                    </p>
-                  </details>
-                )}
               </section>
               <div className={styles.approvalColumn}>
                 <section className={styles.approval} aria-label="Parâmetros de aprovação">

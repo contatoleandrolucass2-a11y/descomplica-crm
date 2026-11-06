@@ -5,7 +5,6 @@ import { loadInvestorInventory } from "@/lib/archive-investor/load-inventory";
 import {
   CAIXA_UNIT_RANKINGS,
   assessCaixaAvailableUnit,
-  caixaUnitEntry,
   type CaixaUnit,
   type CaixaAvailableUnit,
 } from "@/lib/crm/simulators/caixa-available-units";
@@ -45,14 +44,20 @@ export function CaixaAvailableUnits({
   result,
   open,
   onClose,
+  ranking: profileRanking,
+  firstProperty: profileFirstProperty,
 }: {
+  ranking?: string;
+  firstProperty?: string;
   open: boolean;
   onClose: () => void;
   input: HousingInput;
   result: Extract<HousingResult, { ok: true }>;
 }) {
-  const [ranking, setRanking] = useState("");
-  const [firstProperty, setFirstProperty] = useState("");
+  const [localRanking, setRanking] = useState("");
+  const [localFirstProperty, setFirstProperty] = useState("");
+  const ranking = profileRanking ?? localRanking;
+  const firstProperty = profileFirstProperty ?? localFirstProperty;
   const [attempt, setAttempt] = useState(0);
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
   const [filters, setFilters] = useState(initialFilters);
@@ -269,45 +274,42 @@ export function CaixaAvailableUnits({
         </button>
       </header>
       <div className={styles.body}>
-        <div className={styles.profile}>
-          <label>
-            Ranking do cliente
-            <select
-              aria-label="Ranking do cliente"
-              value={ranking}
-              onChange={(event) => {
-                setRanking(event.target.value);
-                setSelectedId("");
-              }}
-            >
-              <option value="">Selecione…</option>
-              {CAIXA_UNIT_RANKINGS.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          {
+        {profileRanking === undefined && (
+          <div className={styles.profile}>
             <label>
-              Primeiro imóvel?
+              Ranking do cliente
               <select
-                aria-label="Primeiro imóvel?"
-                value={firstProperty}
-                onChange={(event) => setFirstProperty(event.target.value)}
+                aria-label="Ranking do cliente"
+                value={ranking}
+                onChange={(event) => {
+                  setRanking(event.target.value);
+                  setSelectedId("");
+                }}
               >
                 <option value="">Selecione…</option>
-                <option value="yes">Sim</option>
-                <option value="no">Não</option>
+                {CAIXA_UNIT_RANKINGS.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.label}
+                  </option>
+                ))}
               </select>
             </label>
-          }
-          <p>
-            Renda <strong>{money.format(input.income)}</strong> · Entrada{" "}
-            <strong>{money.format(caixaUnitEntry(input.ownFunds))}</strong> · 84 mensais e anuais
-            válidas automáticas.
-          </p>
-        </div>
+            {
+              <label>
+                Primeiro imóvel?
+                <select
+                  aria-label="Primeiro imóvel?"
+                  value={firstProperty}
+                  onChange={(event) => setFirstProperty(event.target.value)}
+                >
+                  <option value="">Selecione…</option>
+                  <option value="yes">Sim</option>
+                  <option value="no">Não</option>
+                </select>
+              </label>
+            }
+          </div>
+        )}
         {!input.officialQuickEstimate ? (
           <p role="status">
             A comparação de unidades precisa de seguros específicos de cada imóvel ou da estimativa
@@ -326,7 +328,7 @@ export function CaixaAvailableUnits({
             Confirme o enquadramento do cliente na CAIXA antes de buscar unidades MCMV.
           </p>
         ) : !current || current.phase === "loading" ? (
-          <p role="status">
+          <p className={styles.loading} role="status">
             Conferindo unidades
             {current?.total ? `: ${current.checked} de ${current.total}` : " no estoque atualizado"}
             …

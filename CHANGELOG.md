@@ -1,5 +1,7 @@
 # Changelog
 
+- Compacta somente a interface CAIXA: controles com legendas externas, rankingopcional e primeiroimóvel no início, FGTS/recursos separados, animações acessíveis e proposta no padrão Associativo.
+
 - Mantém o alinhamento dos gráficos de Agendamentos durante o arraste, incluindo o espaço temporário do card.
 
 - Alinha Agendamentos à largura disponível e navega por linhas completas de gráficos; setas mantêm somente ícones e nomes acessíveis.
@@ -12,7 +14,8 @@
   menores. Leitura versionada aditiva utiliza hierarquia oficial; resumo mantém
   múltiplos regionais confirmados e identifica vínculos pendentes. Remove as
   duas notas abaixo dos cards conforme solicitado. Migration autorizada e
-  aplicada após testes; aplicação aguarda validação do candidato integrado.
+  aplicada após testes; interface final aprovada no PR, com publicação aguardando
+  validação da main combinada.
 
 - Ajusta a proporção do indicador compacto de Equipe Produtiva para comportar
   percentuais decimais e100% dentro do anel, preservando as cinco linhas na tela.
