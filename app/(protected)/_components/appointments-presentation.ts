@@ -85,6 +85,93 @@ export function useAppointmentsPresentation({
   const overviewScroll = useRef(0);
   const overviewRows = useRef<{ ids: string[]; height: number }[]>([]);
 
+  useLayoutEffect(() => {
+    const shell = root.current;
+    if (!enabled || !shell || activeCardId !== null) return;
+    let frame = 0;
+    let signature = "";
+    let width = shell.clientWidth;
+    const cards = () => [
+      ...shell.querySelectorAll<HTMLElement>("[data-appointments-canvas] [data-dashboard-card-id]"),
+    ];
+    const baseSignature = () =>
+      JSON.stringify(
+        cards().map((card) => [
+          card.dataset.dashboardCardId,
+          card.style.width,
+          card.style.height,
+          card.style.gridColumn,
+          card.style.order,
+          card.style.getPropertyValue("--dashboard-card-width"),
+        ]),
+      );
+    const clear = (card: HTMLElement) => {
+      delete card.dataset.appointmentsAligned;
+      card.style.removeProperty("--appointments-row-width");
+      card.style.removeProperty("--appointments-row-height");
+    };
+    const align = () => {
+      const elements = cards();
+      // Measure the saved composition, never our own equalized dimensions.
+      elements.forEach(clear);
+      const measurements = elements.map((card) => {
+        const bounds = card.getBoundingClientRect();
+        const explicitHeight = /^\d+(?:\.\d+)?px$/.test(card.style.height)
+          ? Number.parseFloat(card.style.height)
+          : 0;
+        return {
+          id: card.dataset.dashboardCardId!,
+          top: bounds.top,
+          left: bounds.left,
+          card,
+          height: explicitHeight > 0 ? explicitHeight : card.offsetHeight,
+        };
+      });
+      for (const ids of groupPresentationRows(measurements)) {
+        const row = measurements.filter((item) => ids.includes(item.id));
+        const grid = row[0]?.card.closest<HTMLElement>("[data-dashboard-canvas-grid]");
+        if (!grid) continue;
+        const gap = Number.parseFloat(getComputedStyle(grid).columnGap) || 0;
+        const rowWidth = `calc((100% - ${gap * (row.length - 1)}px) / ${row.length})`;
+        const rowHeight = `${Math.max(...row.map((item) => item.height))}px`;
+        for (const { card } of row) {
+          card.style.setProperty("--appointments-row-width", rowWidth);
+          card.style.setProperty("--appointments-row-height", rowHeight);
+          card.dataset.appointmentsAligned = "true";
+        }
+      }
+      signature = baseSignature();
+    };
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(align);
+    };
+    const changes = new MutationObserver(() => {
+      // React and pointer tilt also write styles; only saved geometry/order matters.
+      if (baseSignature() !== signature) schedule();
+    });
+    changes.observe(shell, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "data-dashboard-card-id"],
+    });
+    const resize = new ResizeObserver(() => {
+      if (shell.clientWidth !== width) {
+        width = shell.clientWidth;
+        schedule();
+      }
+    });
+    resize.observe(shell);
+    align();
+    return () => {
+      cancelAnimationFrame(frame);
+      changes.disconnect();
+      resize.disconnect();
+      cards().forEach(clear);
+    };
+  }, [enabled, root, activeCardId, surfaceScale]);
+
   const exit = useCallback(() => {
     setActiveCardId(null);
     overviewRows.current = [];

@@ -3238,4 +3238,4 @@ Conciliação da hierarquia oficial em andamento; outras páginas fora do escopo
 
 ## Agendamentos: alinhamento e linhas — 06/11/2026
 
-Registro: [escopo e evidências](ATUALIZACOES-AGENDAMENTOS-LINHAS-2026-11-06.md).
+Registro: [escopo e evidências](ATUALIZACOES-ARQUIVO-2026-11-06-a-2026-11-06-AGENDAMENTOS-LINHAS.md).

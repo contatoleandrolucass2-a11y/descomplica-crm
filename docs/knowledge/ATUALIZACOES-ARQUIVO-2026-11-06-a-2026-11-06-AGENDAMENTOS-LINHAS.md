@@ -36,3 +36,15 @@ usam fixture sintética e não representam dados reais nem publicação.
 Primeiro teste de resize detectou que a largura renderizada agora inclui a
 distribuição da sobra; a asserção passou a medir a largura inicial real e
 continua verificando o delta correto na escala lógica, sem ignorar a falha.
+
+## Correção após revisão independente
+
+A primeira versão preenchia a sobra mas conservava diferenças entre tamanhos
+salvos. A revisão identificou esse caso antes da publicação. A visão geral
+agora equaliza visualmente cada linha com variáveis CSS locais, calculadas
+sobre a geometria original; não muda largura/altura inline ou perfil. Observar
+somente mudanças de tamanho/ordem evita reagir às próprias variáveis ou ao tilt.
+O teste de navegador cobre três gráficos originalmente390x500,410x650 e380x550,
+verifica alinhamento e igualdade nas cinco geometrias e preservação dos valores
+salvos. Os27testes focados de canvas/apresentação passaram. CI42157333051 do
+primeiro candidato foi cancelada por estar superada; nova CI exigida.

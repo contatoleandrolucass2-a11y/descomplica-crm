@@ -49,7 +49,7 @@ test(
           import '@/app/globals.css';
           const metric=['appointments.goal','team.productive','brokers.total','managers.total','visits.total','sales.total','conversion.opportunity-appointment','conversion.appointment-visit','conversion.appointment-sale','appointments.rate','appointments.yesterday','appointments.today'];
           const cards=metric.map((metric,i)=>({id:'kpi'+i,title:'Indicador'+i,metric,type:'kpi',period:'month',groupBy:'entity',entityIds:null,layout:{order:i,columnSpan:2,...(i<6?{width:194}:{}),height:194}}));
-          cards.push(...[{id:'funnel',metric:'appointments.funnel-comparison',title:'Funil comparativo',width:1205,height:500},{id:'ranking',metric:'ranking.owner',title:'Ranking por responsável',width:396,height:500},{id:'ranking-manager',metric:'ranking.manager',title:'Ranking por gerente',width:396,height:500},{id:'ranking-regional',metric:'ranking.regional',title:'Ranking regional',width:396,height:500},{id:'details',metric:'appointments.details',title:'Detalhamento',width:1205,height:484}].map((c,i)=>({...c,type:'bars',period:'month',groupBy:'entity',entityIds:null,layout:{order:i+12,columnSpan:12,width:c.width,height:c.height}})));
+          cards.push(...[{id:'funnel',metric:'appointments.funnel-comparison',title:'Funil comparativo',width:1205,height:500},{id:'ranking',metric:'ranking.owner',title:'Ranking por responsável',width:390,height:500},{id:'ranking-manager',metric:'ranking.manager',title:'Ranking por gerente',width:410,height:650},{id:'ranking-regional',metric:'ranking.regional',title:'Ranking regional',width:380,height:550},{id:'details',metric:'appointments.details',title:'Detalhamento',width:1205,height:484}].map((c,i)=>({...c,type:'bars',period:'month',groupBy:'entity',entityIds:null,layout:{order:i+12,columnSpan:12,width:c.width,height:c.height}})));
           window.__cards=JSON.stringify(cards); window.__commits=[];
           const pages=PAGE_REGISTRY.filter(page=>page.pageKey==='crm.dashboard'||page.parentKey==='crm.dashboard').map(page=>({...page,key:page.pageKey}));
           function Fixture(){const[modal,setModal]=useState(false);const[layoutCards,setLayoutCards]=useState(cards);return <><header data-protected-topbar style={{height:48,position:'sticky',top:0,zIndex:20,background:'#102d48',color:'white'}}>Cabeçalho</header><DashboardShell pages={pages}><div data-protected-main-content><main>{window.location.search.includes("unavailable")?<section><h1>Agendamentos</h1><p data-unavailable>Dados indisponíveis. Tente novamente.</p></section>:<div data-appointments-dashboard><h1>Agendamentos</h1><section data-appointments-canvas><DashboardCanvas cards={layoutCards} layoutPolicy={APPOINTMENTS_CARD_LAYOUT_POLICY} gap={8} compactControls cornerResizeHandle onCommit={(next)=>{window.__commits.push(next);setLayoutCards(next)}} renderCard={card=><div><h2>{card.title}</h2>{card.id==='funnel'?<><input aria-label='Estado do funil' defaultValue='preservado'/><button onClick={()=>setModal(true)}>Abrir resumo</button><button onClick={()=>setLayoutCards(current=>current.map(item=>item.id==='funnel'?{...item,layout:{...item.layout,width:900,height:750}}:item))}>Alterar dimensões do funil</button></>:null}</div>}/></section><footer>Rodapé</footer></div>}</main></div></DashboardShell>{modal?<DashboardModal portalToBody title='Resumo centralizado' onClose={()=>setModal(false)}><p>Conteúdo sintético</p></DashboardModal>:null}</>}
@@ -132,6 +132,23 @@ test(
           return Math.abs(right - lastFirstRow);
         });
         assert.ok(fill < 2, "overview cards fill the right edge without an unused strip");
+        const alignedOverview = await page
+          .locator('[data-dashboard-card-id^="ranking"]')
+          .evaluateAll((es) =>
+            es.map((e) => {
+              const r = e.getBoundingClientRect();
+              return { width: r.width, height: r.height, top: r.top };
+            }),
+          );
+        assert.equal(alignedOverview.length, 3);
+        for (const r of alignedOverview) {
+          assert.ok(
+            Math.abs(r.width - alignedOverview[0].width) < 2 &&
+              Math.abs(r.height - alignedOverview[0].height) < 2 &&
+              Math.abs(r.top - alignedOverview[0].top) < 2,
+            "heterogeneous saved chart sizes align in the overview",
+          );
+        }
         await expect(page.getByText("Subir seção", { exact: true })).toHaveCount(0);
         await expect(page.getByText("Descer seção", { exact: true })).toHaveCount(0);
         await page.getByLabel("Estado do funil").fill("estado local mantido");

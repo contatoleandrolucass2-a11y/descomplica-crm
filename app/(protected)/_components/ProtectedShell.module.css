@@ -1442,8 +1442,16 @@
       [data-dashboard-canvas-grid]
       > :is([data-dashboard-card-id], [aria-hidden="true"])
   ) {
-  width: var(--appointments-presented-width, var(--dashboard-card-width, auto)) !important;
+  width: var(
+    --appointments-presented-width,
+    var(--appointments-row-width, var(--dashboard-card-width, auto))
+  ) !important;
   flex-grow: 1;
+}
+
+.appointmentsShell[data-dashboard-shell][data-appointments-composition="true"]
+  :global([data-dashboard-card-id][data-appointments-aligned]) {
+  height: var(--appointments-presented-height, var(--appointments-row-height)) !important;
 }
 
 .appointmentsPresentationBar {
