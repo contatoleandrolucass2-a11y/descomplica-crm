@@ -109,3 +109,18 @@ não são convertidos em aprovações não executadas. Coletor, schema, permiss�
 metas e dados preservados. Esta nota final é apenas documental; não requer
 reinício nem nova imagem. Integração do registro deve respeitar a janela de
 main em uso pela entrega CAIXA506, sem invalidar sua CI nem cancelar trabalho.
+
+## Encerramento do registro documental — 06/11/2026
+
+Janela liberada após a promoção concorrente. Consulta pública de12:06:41UTC
+confirmou200/ok/919be9b20d27ec7f9b3367c73aef6e38f0e7cd05. GitHub confirmou
+main919be9b2 e PR509 aberto/mergeável; CI documental42171644165 aprovou validate
+no e9b8e0dc, com os três jobs pesados corretamente ignorados. O diff entre
+6ae947fe e main919 não alterou os três arquivos de apresentação de Agendamentos
+nem AGENTS ou os runbooks de eficiência/publicação. As evidências de interface
+permanecem válidas para esses arquivos idênticos; não repetir testes funcionais.
+
+Retomada limitada a atualizar a base, validar e integrar o registro próprio.
+Nenhuma nova publicação de aplicação, banco ou coletor é necessária. A nota
+final resolve a pendência documental anunciada; consultar o estado do PR509
+para o SHA real de integração, sem abrir outro ciclo de registro sobre si mesma.
