@@ -1,0 +1,22 @@
+# CAIXA: compactação visual v2 publicada
+
+## Resultado em06/11/2026
+
+- Escopo: somente apresentação CAIXA solicitada em25prints. Títulos e orientações externos, controles36pxdesktop/44pxtoque, escolhas compactas, cores do resumo, ranking opcional no formulário com borda dourada/pulso, primeiro imóvel no início, FGTS e Recursos separados. Botão de unidades pulsante; hover com cor/escala; movimento reduzido respeitado. Carregamento animado; anuais transparentes e alinhadas à direita. Proposta, documentação e ações compactadas conforme Associativo. Fórmulas/cotas/ranking preservados; identificação comercial continua na impressão.
+- Código PR506 integrado no main `919be9b20d27ec7f9b3367c73aef6e38f0e7cd05`. Main6ae947fe/PR507 incorporado sem alterações; conflitos somente emWORKLOG/CHANGELOG, preservados ambos os registros. Diff próprio restrito àCAIXA, testes,11referênciasCAIXA e documentação.
+- Validação: tipos/lint/formatação aprovados;30testes distintos de navegador aprovados por rodadas (14formulário/16estoque-proposta); referências15aprovadas/1não selecionada. Proposta com4anuais mede593,5px em1920x900 (máximo800), maior linha35,5px. Não extrapolar encaixe integral para todas as alturas de tela.
+- CI42154606118 revelou11diferençasCAIXA e uma quebra real do texto opcional em1280px; corrigida, dez referências aceitas e1280retida. CI42159626752:76comparações passaram, única diferença1280corrigida foi revisada/aceita. Catálogo atualizado com hashes/proveniência, sem limiar/máscara nova e sem referências de outras páginas.
+- CI42163972556 do próprio candidato passou4gates. Após avanço externo do main, CIcombinada42169068756 também passou4. MainexatoCI42174495249: validate,release-gates,isolated-restore,promotable-image aprovados. Fontes: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/506 e https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/42174495249.
+- Artefato13482184402: ZIPsha256 `f2aa328e55b783359ef15cba0d5294d090a6572b99001d708970c773a5c4da11`; checksum interno/revision aprovados. ConfigCI `sha256:208948b03531e69783be658c29fae2b37381aadcfca06a858f7a1967ffc307fe`; manifesto/IDcarregado `sha256:9c5d8263cd2c76f31639510a01c79e278dc16970d6da714ecd059c94e3f6777e`. Equivalência das14camadas/linuxamd64 comprovada; image:prove validoudois perfis com a mesma imagem. Sem rebuild naVPS.
+- Backup privado root0600 em diretório0700; coordenador único com locks/CAS/consultas ao vivo promoveu de6ae947fe/deployment17006ab5 para919be9b2/deployment `1e892386-8df5-4d14-95bc-8c1bcbb5d91b`, em **06/11/2026 12:04:51.057UTC /09:04:51.057 America/Sao_Paulo**. Pendingnull. Sem alteração manual do ambiente, banco ou coletor.
+- Health observacional https://crm.descomplicapro.com.br/api/health em12:06:23UTC: HTTP200/statusok/version919be9b20d27ec7f9b3367c73aef6e38f0e7cd05.
+- Smoke autenticado: SãoPaulo/SP, renda4000, imóvel275000, nascimento22/01/1987,PRICE420,FGTSsim,apartamento32m2,dependentesSim. Financiamento209416,34/subsídio2099/entrada63484,66 preservados. Primeiroimóvel/Ranking no formulário; ranking borderRGB178,138,39/animationcaixa-gold-pulse; CTAanimationcaixa-action-pulse. FGTS eRecursos em linhas distintas, semBasecota/Limitemunicipal na composição.
+- Estoque abriu inline com348opções instantâneas paraOuro/primeiroimóvelsim. Clique no texto selecionou unidade; quatro anuais2000 e84mensais visíveis, aprovação dos fluxos no caso observado; sem auditoria financeira expandida na proposta. Captura privada da proposta salva emprivate-data/caixa-publicada-919be9b2/proposta.jpg. Nenhuma proposta real enviada, impressão física ou cliente gravado. Contagem varia conforme estoque.
+- Limites: mudança visual; seguros continuam de referência, regra comercial customizada permanece distinta da regra oficial. Testes sintéticos e smoke não garantem igualdade universal com produtos/apólices CAIXA.
+- Encerramento documental, sem reinício adicional. Obsidian será sincronizado no commit final; estados pendentes da abertura abaixo foram superados pelas evidências deste registro.
+
+## Abertura preservada
+
+## 2026-11-05 — CAIXA: compactação visual v2
+
+Abertura: Git comum confirmado; main7084fda6, produção0307bd47 HTTP200/ok, consultados em05/11 via GitHub/Git/health. Escopo: somente apresentação e posicionamento de campos CAIXA conforme25prints; cálculos preservados. Implementação e validação pendentes.

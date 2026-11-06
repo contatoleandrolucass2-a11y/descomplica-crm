@@ -1,8 +1,9 @@
 # Aprendizados e atualizacoes
 
-## 2026-11-05 — CAIXA: compactação visual v2
+## 2026-11-06 — CAIXA compacta v2 publicada
 
-Abertura: Git comum confirmado; main7084fda6, produção0307bd47 HTTP200/ok, consultados em05/11 via GitHub/Git/health. Escopo: somente apresentação e posicionamento de campos CAIXA conforme25prints; cálculos preservados. Implementação e validação pendentes.
+PR506/main919be9b2 publicado e validado às09:04(-03). Quatro gates aprovados,
+health e smoke confirmados. [Evidências e limites](ATUALIZACOES-ARQUIVO-2026-11-06-CAIXA-COMPACTO-V2.md).
 
 ## 2026-11-05 — CAIXA: fronteiras e interface publicadas
 
