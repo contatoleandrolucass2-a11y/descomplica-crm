@@ -3,10 +3,11 @@
 ## 2026-11-07 — Equipe Produtiva: outras fontes e resumo visível
 
 - Consulta observacional confirmou o resumo publicado, com cinco gerentes;
-  janela1280x585 escondia parcialmente a última linha pela rolagem interna.
-  Media query específica compacta cards para128px e indicadores48px nessa
-  faixa, mantendo160/64px no desktop alto, vidro, filtros e efeitos.
-- Fontes atuais:30corretores/5gerentes/5regionais pendentes. Execuções de leitura
+  a janela 1280x585 escondia parcialmente a última linha pela rolagem interna.
+  Media query específica compacta cards para 128px e indicadores de 48px nessa
+  faixa, mantendo 160/64px no desktop alto, vidro, filtros e efeitos.
+- Diagnóstico inicial: 30 corretores, cinco gerentes e cinco regionais pendentes.
+  Execuções de leitura
   delimitadas por corretor nos quatro relatórios confirmaram evidência própria
   para dois pendentes; três não possuem registros próprios nessas fontes.
   Não foram salvos relatórios, exportações nominais ou dados comerciais.
@@ -14,12 +15,22 @@
   corretores sem observação própria de Agendamentos, exigindo gerente oficial,
   data válida e identidade não ambígua. Sem inferência por gerente, migration,
   mudança de RPC, ACL, métricas ou política comercial.
-- Browser local final aprovado:48layouts,72popups,50verificações do resumo e12
-  indicadores; cinco linhas e total visíveis em1280x585 nos três temas. Novos
-  testes backend3/3 aprovados; primeira fixture de Visitas corrigida após falha
-  por ausência da Unidade de Negócio obrigatória. Gates completos aguardam CI.
-- Publicação do app e atualização controlada do coletor são etapas distintas;
-  coletor atual permanece0307bd47. Ativação não foi executada nesta preparação.
+- Browser local final aprovado: 48 layouts, 72 popups, 50 verificações do resumo
+  e 12 indicadores; cinco linhas e total visíveis em 1280x585 nos três temas.
+  Foco regional 7/7 e transform 10/10 aprovados. Fixture inicial de Visitas
+  corrigida por falta da Unidade de Negócio; revisão encontrou e corrigiu o
+  placeholder "-" tratado como pessoa. CI do PR 42345815784 e main 42350072525
+  aprovadas nos quatro gates, sem reduzir cobertura.
+- Aplicação publicada em cc5479b7, deployment 5d1ca8b4-569f-4950-bb3e-acfe86f7fed4
+  de 07/11/2026 às 08:11:22.051 UTC (05:11:22.051 em São Paulo). Health,
+  acesso anônimo negado, estilos e DOM autenticado aprovados: sete colunas,
+  cinco gerentes, total 30 e nenhuma rolagem do documento em altura de 585px.
+- Usuário autorizou especificamente atualizar o coletor após os gates. Troca
+  controlada de 0307bd47 para cc5479b7 preservou quatro drop-ins, memória,
+  agenda, credenciais, n8n e demais serviços. Duas cargas naturais conciliadas
+  com 27 vínculos conhecidos e três pendentes; cada uma conferiu as 120 linhas
+  entre candidato e banco, com snapshots consistentes e recibo succeeded.
+  Não houve nova migration, importação manual ou inferência por gerente.
 
 ## 2026-11-07 — Agendamentos: quinze ajustes e atualização
 
