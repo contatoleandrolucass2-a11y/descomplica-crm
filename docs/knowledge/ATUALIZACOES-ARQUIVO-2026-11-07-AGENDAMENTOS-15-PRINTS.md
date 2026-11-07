@@ -97,3 +97,13 @@ rede externa. HTTP503/409/409 são falhas sintéticas injetadas no próprio QA.
 Resultados ignorados peloGit: test-results/appointments-daily-team-focus/result-after.json
 e test-results/appointments-first-save/prints-20261107/result.json.
 Quatro outros QA legados tiveram apenas validação sintática; CI ainda pendente.
+
+PR512/head05e05f41: CI42340849456 aprovou formatação/lint/tipos;5168testes
+passaram, dois falharam em stages-page.test.tsx porque as chamadas esperadas
+não incluíam a nova prop intervalMs120000. As duas asserções foram atualizadas
+para exigir o intervalo solicitado, sem relaxar comparação ou alterar runtime.
+Os demais jobs foram ignorados por dependência; não contam como aprovados.
+Controle de navegador e node_repl indisponíveis nesta sessão com erro
+sanitizado failed to write kernel assets / caminho não encontrado. Sem contorno
+de login/configuração; validação autenticada real pós-publicação fica limitada
+por essa ferramenta. Chromium sintético e gates isolados permanecem distintos.

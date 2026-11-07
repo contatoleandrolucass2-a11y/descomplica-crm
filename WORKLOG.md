@@ -2,6 +2,10 @@
 
 ## 2026-11-07 — Agendamentos: quinze ajustes e atualização
 
+- CI42340849456: formatação/lint/tipos aprovados;5168testes passaram e duas
+  asserções do transporte da página exigiram incluir intervalMs120000. Teste
+  atualizado para comprovar o novo contrato, sem mudar runtime ou outros gates.
+
 - Inclinação até45° por eixo nos indicadores do canvas; nomes exibem as duas
   primeiras palavras, com identidade completa preservada nos títulos/chaves.
 - Calendário compacto; conversões realizadas abaixo da esperada usam a mesma

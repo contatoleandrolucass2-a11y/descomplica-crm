@@ -1,5 +1,8 @@
 # Changelog
 
+- Confere explicitamente o intervalo120s de Agendamentos nos testes da rota,
+  inclusive com snapshot indisponível.
+
 - Refina Agendamentos conforme15prints: indicadores até45°, calendário e popup
   compactos, conversões abaixo da esperada em vermelho, primeiras duas palavras
   dos nomes, meta do dia atual e cinco layouts de linhas. Remove os controles
