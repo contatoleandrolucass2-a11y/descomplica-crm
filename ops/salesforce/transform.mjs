@@ -290,13 +290,16 @@ function countBrokerActivity(records, brokerName, range, predicate = () => true)
   ).length;
 }
 
-// The broker report owns the sales-manager relationship. Appointment history
-// supplies the regional person; Regional Comercial is never a person identifier.
+// The broker report owns the sales-manager relationship. A regional person
+// must come from the same broker and official manager, never Regional Comercial
+// or another broker managed by the same person. Preserve appointment authority;
+// other report observations fill only brokers with no own appointment evidence.
 function rosterHierarchy(broker, reports, referenceDate) {
   const rosterManagerName = text(broker.managerName) || null;
   if (!rosterManagerName) return { rosterManagerName, regionalManagerName: null };
-  const observations = (reports.appointments ?? []).flatMap((row) => {
+  const observation = (row) => {
     const stamp = parseDate(row.date ?? row.createdAt);
+    const regional = text(row.regionalManager);
     if (
       !stamp ||
       dateKey(stamp) > referenceDate ||
@@ -307,11 +310,21 @@ function rosterHierarchy(broker, reports, referenceDate) {
       {
         broker: fold(row.brokerName),
         stamp: stamp.getTime(),
-        regional: text(row.regionalManager) || null,
+        regional: regional === "-" ? null : regional || null,
       },
     ];
-  });
-  const own = observations.filter((row) => row.broker === fold(broker.name));
+  };
+  const ownAppointments = (reports.appointments ?? [])
+    .flatMap(observation)
+    .filter((row) => row.broker === fold(broker.name));
+  const own = ownAppointments.length
+    ? ownAppointments
+    : ["opportunities", "visits", "folders", "sales"].flatMap((key) =>
+        (reports[key] ?? [])
+          .filter((row) => Object.hasOwn(row, "regionalManager"))
+          .flatMap(observation)
+          .filter((row) => row.broker === fold(broker.name)),
+      );
   if (!own.length) return { rosterManagerName, regionalManagerName: null };
   const matchingContacts = new Set(
     (reports.brokers ?? [])

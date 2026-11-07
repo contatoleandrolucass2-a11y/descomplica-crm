@@ -458,6 +458,10 @@ Registro integral preservado no [arquivo CAIXA](ATUALIZACOES-ARQUIVO-2026-11-05-
   com quatro gates aprovados e health 200/ok. Vidro e menu externo confirmados;
   evidências e limites no [registro da página](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
 
+- 07/11/2026: investigação dos regionais pendentes e ajuste do resumo de Equipe
+  Produtiva para janela baixa; preparação e fontes no
+  [registro desta retomada](ATUALIZACOES-ARQUIVO-2026-11-07-a-2026-11-07-EQUIPE-REGIONAIS.md).
+
 - 06/11/2026: Equipe Produtiva com resumo de sete colunas, uma linha por gerente
   e percentuais por base filtrada. Popups compactos, nome/sobrenome e hierarquia
   oficial; cards160px com indicadores legíveis. Publicada main9ee2c0cf/PR508

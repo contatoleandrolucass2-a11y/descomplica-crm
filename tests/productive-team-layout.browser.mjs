@@ -75,7 +75,7 @@ test(
           const groupedAnalysis={...analysis,brokerCount:30,brokerManagerCount:30,dimensions:{...analysis.dimensions,managers:groupedRoster.map(row=>row.manager),owners:groupedRoster.map(row=>row.owner)},facts:groupedRoster.map((row,index)=>[2,'2026-10-10',index,index,0,1,-1,1,0,0,-1]),appointments:[]};
           const regionalRoster=[{...roster[0],regionalManager:'Ana Maria Almeida'},{...roster[1],regionalManager:'Bruno Carlos Barbosa'},{key:'c',owner:'Corretor sintético C',manager:'Gerente sintético',regionalManager:null},{key:'d',owner:'Corretor sintético D',manager:'Gerente Zebra',regionalManager:null}];
           const regionalAnalysis={...analysis,brokerCount:4,brokerManagerCount:2,dimensions:{...analysis.dimensions,managers:['Gerente sintético','Gerente Zebra'],owners:regionalRoster.map(row=>row.owner)}};
-          const decimalRoster=Array.from({length:30},(_,index)=>({key:'decimal-'+index,owner:'Corretor '+String(index).padStart(2,'0'),manager:'Gerente '+Math.floor(index/6),regionalManager:'Regional Oficial'}));
+          const decimalRoster=Array.from({length:30},(_,index)=>({key:'decimal-'+index,owner:'Corretor '+String(index).padStart(2,'0'),manager:'Gerente '+Math.floor(index/6),regionalManager:index<6&&index%2?'Regional Sintético Interior':'Regional Sintético Metropolitana'}));
           const decimalAnalysis={...analysis,brokerCount:30,brokerManagerCount:5,dimensions:{...analysis.dimensions,managers:Array.from({length:5},(_,index)=>'Gerente '+index),owners:decimalRoster.map(row=>row.owner)},facts:decimalRoster.flatMap((row,index)=>[[4,'2026-10-10',Math.floor(index/6),index,0,1,-1,1,0,0,-1],...(index<13?[[2,'2026-10-10',Math.floor(index/6),index,0,1,-1,1,0,0,-1]]:[])]),appointments:decimalRoster.slice(0,13).map(row=>({...analysis.appointments[0],owner:row.owner,salesManager:row.manager}))};
           window.mountTeam=(missing=false,large=false)=>createRoot(document.getElementById('root')).render(<ProtectedShellFrame shellClassName={shell.shell} contentClassName={shell.mainContent} chrome={<><header data-protected-topbar style={{height:58,boxSizing:'border-box'}}>Descomplica — teste sintético</header><AuthorizedBreadcrumbs pages={pages}/></>} wrapContent={c=><DashboardShell pages={pages}>{c}</DashboardShell>}><main className={analytics.canvasMain}><AnalyticsCanvas kind='stage'><ProductiveTeamDashboard analysis={missing?null:large==='decimal'?decimalAnalysis:large==='regional'?regionalAnalysis:large==='groups'?groupedAnalysis:large?largeAnalysis:analysis} brokerRoster={missing?null:large==='decimal'?decimalRoster:large==='regional'?regionalRoster:large==='groups'?groupedRoster:large?largeRoster:roster} availableStages={missing?[]:['appointments','visits','folders','sales']} generatedAt='2026-10-31T12:00:00Z' calendarDate='2026-10-31'/></AnalyticsCanvas></main></ProtectedShellFrame>);`;
           },
@@ -619,6 +619,7 @@ test(
       });
       for (const [width, height] of [
         [960, 600],
+        [1280, 585],
         [1280, 720],
         [1920, 1080],
       ])
@@ -672,6 +673,13 @@ test(
               "Card title, donut and description must fit inside the compact card",
             );
             assert.ok(gauge.cardHeight <= 180);
+            if (height <= 650) {
+              assert.ok(gauge.cardHeight <= 128);
+              assert.ok(gauge.donutWidth <= 48);
+            } else {
+              assert.equal(gauge.cardHeight, 160);
+              assert.equal(gauge.donutWidth, 64);
+            }
           }
           const tableGeometry = await decimalSummary.evaluate((table) => {
             const footer = table.querySelector("tfoot").getBoundingClientRect(),
@@ -700,7 +708,10 @@ test(
             assert.equal(await page.evaluate(() => document.documentElement.scrollHeight), height);
           }
           await page.screenshot({
-            path: path.join(evidenceRoot, `decimal-gauge-${theme}-${width}.png`),
+            path: path.join(
+              evidenceRoot,
+              `decimal-gauge-${theme}-${width}${height === 585 ? "-585" : ""}.png`,
+            ),
           });
           evidence.decimalGaugeChecks.push({ width, height, theme, gauges, tableGeometry });
         }
