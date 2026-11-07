@@ -7,7 +7,8 @@
   próprias de Oportunidades, Visitas, Pastas e Vendas, conciliadas com o gerente
   oficial. Preserva vínculos confirmados, conflitos, métricas e contratos.
   Compacta cards e resumo em janelas desktop de até650px de altura para exibir
-  cinco gerentes e total. Sem nova migration.
+  cinco gerentes e total. Publicado em cc5479b7 após quatro gates aprovados;
+  coletor atualizado com autorização específica e sem nova migration.
 
 - Valida no navegador a apresentação compacta dos nomes de Agendamentos,
   preservando a identificação completa e o carregamento de todos os registros.
