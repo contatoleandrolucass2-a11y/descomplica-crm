@@ -142,6 +142,12 @@ function optionalDate(row, name) {
   return typeof value === "string" && value.trim() === "-" ? "" : value;
 }
 
+function regionalPerson(row, name) {
+  const value = field(row, name);
+  // Salesforce displays a missing formula value as a dash, not a person's name.
+  return typeof value === "string" && value.trim() === "-" ? "" : value;
+}
+
 function recordId(row, name) {
   return row[name]?.recordId ?? "";
 }
@@ -154,6 +160,7 @@ function project(key, rows, analysisEnabled = false) {
       createdAt: raw(row, "Opportunity.CreatedDate"),
       brokerName: field(row, "Opportunity.Contato_Corretor_Proprietario1__c.Name"),
       managerName: field(row, "Opportunity.Gerente_de_vendas__c"),
+      ...(analysisEnabled ? { regionalManager: regionalPerson(row, "hierarchyRegional") } : {}),
       realEstateName: field(row, "Opportunity.Imobiliaria__c.Name"),
       businessUnit: field(row, "Opportunity.Unidade_De_Neg_cio__c"),
       development: field(row, "Opportunity.Empreendimento__c.Name"),
@@ -170,13 +177,16 @@ function project(key, rows, analysisEnabled = false) {
                   scheduledAt: optionalDate(row, "appointmentTime"),
                   attendedAt: optionalDate(row, "appointmentAttendance"),
                   visitPerformed: raw(row, "appointmentVisitPerformed"),
-                  regionalManager: field(row, "appointmentRegional"),
+                  regionalManager: regionalPerson(row, "appointmentRegional"),
                   accountName: field(row, "appointmentAccountName"),
                   accountRanking: field(row, "appointmentAccountRanking"),
                 }
               : {}),
           }
         : { attendedAt: raw(row, "Activity.Data_de_comparecimento__c") }),
+      ...(key === "visits" && analysisEnabled
+        ? { regionalManager: regionalPerson(row, "hierarchyRegional") }
+        : {}),
       brokerName: field(row, "Activity.Corretor__c.Name"),
       managerName: field(row, "Activity.Gerente_de_Vendas__c"),
       realEstateName:
@@ -214,6 +224,7 @@ function project(key, rows, analysisEnabled = false) {
         row,
         "Avaliacao_credito__c.Nome_Imobili_ria__c.Comissionado_generico_3__c.Name",
       ),
+      ...(analysisEnabled ? { regionalManager: regionalPerson(row, "hierarchyRegional") } : {}),
       realEstateName: field(row, "Avaliacao_credito__c.Imobiliaria__c"),
       businessUnit: field(row, "Avaliacao_credito__c.Empreendimento__c.UnidadeDeNegocio__c"),
       development: field(row, "Avaliacao_credito__c.Empreendimento__c.Name"),
@@ -227,6 +238,7 @@ function project(key, rows, analysisEnabled = false) {
       saleDate: raw(row, "Opportunity.DataVenda__c"),
       brokerName: field(row, "Opportunity.Contato_Corretor_Proprietario1__c.Name"),
       managerName: field(row, "Opportunity.Imobiliaria__c.Comissionado_generico_3__c.Name"),
+      ...(analysisEnabled ? { regionalManager: regionalPerson(row, "hierarchyRegional") } : {}),
       realEstateName: field(row, "Opportunity.Imobiliaria__c.Name"),
       businessUnit: field(row, "Opportunity.Unidade_De_Neg_cio__c"),
       development: field(row, "Opportunity.Empreendimento__c.Name"),
@@ -249,7 +261,7 @@ function project(key, rows, analysisEnabled = false) {
 
 export async function collectReport(sessionId, definition, startDate, endDate, options = {}) {
   const analysisEnabled = options.analysisEnabled === true;
-  const requiredDefinition =
+  let requiredDefinition =
     analysisEnabled && ["appointments", "visits"].includes(definition.key)
       ? {
           ...definition,
@@ -291,6 +303,24 @@ export async function collectReport(sessionId, definition, startDate, endDate, o
             : {}),
         }
       : definition;
+  const hierarchyRegional = {
+    opportunities: { label: "Gerente regional", column: "Opportunity.Gerente_regional__c" },
+    visits: { label: "Gerente Regional", column: "Activity.Gerente_Regional__c" },
+    folders: {
+      label: "Avaliação de crédito : Oportunidade : Gerente regional",
+      column: "Avaliacao_credito__c.Oportunidade__c.Gerente_regional__c",
+    },
+    sales: { label: "Gerente regional", column: "Opportunity.Gerente_regional__c" },
+  }[definition.key];
+  if (analysisEnabled && hierarchyRegional) {
+    requiredDefinition = {
+      ...requiredDefinition,
+      requiredLabelColumns: {
+        ...requiredDefinition.requiredLabelColumns,
+        hierarchyRegional,
+      },
+    };
+  }
   const rows = await collectReportRows(sessionId, requiredDefinition, startDate, endDate, options);
   return validateProjectedRows(definition.key, project(definition.key, rows, analysisEnabled));
 }

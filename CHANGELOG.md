@@ -1,5 +1,11 @@
 # Changelog
 
+- Enriquece vínculos regionais pendentes de Equipe Produtiva com observações
+  próprias de Oportunidades, Visitas, Pastas e Vendas, conciliadas com o gerente
+  oficial. Preserva vínculos confirmados, conflitos, métricas e contratos.
+  Compacta cards e resumo em janelas desktop de até650px de altura para exibir
+  cinco gerentes e total. Sem nova migration.
+
 - Valida no navegador a apresentação compacta dos nomes de Agendamentos,
   preservando a identificação completa e o carregamento de todos os registros.
 

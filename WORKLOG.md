@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-11-07 — Equipe Produtiva: outras fontes e resumo visível
+
+- Consulta observacional confirmou o resumo publicado, com cinco gerentes;
+  janela1280x585 escondia parcialmente a última linha pela rolagem interna.
+  Media query específica compacta cards para128px e indicadores48px nessa
+  faixa, mantendo160/64px no desktop alto, vidro, filtros e efeitos.
+- Fontes atuais:30corretores/5gerentes/5regionais pendentes. Execuções de leitura
+  delimitadas por corretor nos quatro relatórios confirmaram evidência própria
+  para dois pendentes; três não possuem registros próprios nessas fontes.
+  Não foram salvos relatórios, exportações nominais ou dados comerciais.
+- Produtor passa a validar/projetar os campos de Regional e completar apenas
+  corretores sem observação própria de Agendamentos, exigindo gerente oficial,
+  data válida e identidade não ambígua. Sem inferência por gerente, migration,
+  mudança de RPC, ACL, métricas ou política comercial.
+- Browser local final aprovado:48layouts,72popups,50verificações do resumo e12
+  indicadores; cinco linhas e total visíveis em1280x585 nos três temas. Novos
+  testes backend3/3 aprovados; primeira fixture de Visitas corrigida após falha
+  por ausência da Unidade de Negócio obrigatória. Gates completos aguardam CI.
+- Publicação do app e atualização controlada do coletor são etapas distintas;
+  coletor atual permanece0307bd47. Ativação não foi executada nesta preparação.
+
 ## 2026-11-07 — Agendamentos: quinze ajustes e atualização
 
 - CI42341206694: validação completa e imagem aprovadas. Gate do detalhamento
