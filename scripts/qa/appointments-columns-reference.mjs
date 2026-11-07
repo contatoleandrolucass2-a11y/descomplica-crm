@@ -175,8 +175,8 @@ try {
   assert.equal(await page.locator("[data-appointments-column-label]").count(), 30);
   await page.getByRole("button", { name: "Atualizar totais", exact: true }).click();
   assert.match(await page.locator("[data-appointments-plot]").textContent(), /Máximo 99/u);
-  await page.getByLabel("Altura máxima das torres (px)", { exact: true }).fill("80");
-  await page.getByLabel("Altura máxima das torres (px)", { exact: true }).press("Enter");
+  // Only the synthetic fixture is seeded; the removed height editor stays absent.
+  await page.evaluate(() => localStorage.setItem("cap", "80"));
   await page.reload();
   await page.waitForFunction(
     () =>
@@ -187,11 +187,12 @@ try {
       ) < 1,
   );
   assert.equal(
-    await page.getByLabel("Altura máxima das torres (px)", { exact: true }).inputValue(),
+    await page.locator("[data-appointments-plot]").getAttribute("data-pixel-height"),
     "80",
   );
-  await page.locator("[data-appointments-plot]").hover();
-  await page.getByRole("button", { name: "Usar altura automática das torres" }).click();
+  assert.equal(await page.getByLabel("Altura máxima das torres (px)", { exact: true }).count(), 0);
+  await page.evaluate(() => localStorage.removeItem("cap"));
+  await page.reload();
   await page.getByRole("button", { name: "Zeros", exact: true }).click();
   assert.equal((await facts()).max, 0);
   await page.getByRole("button", { name: "Sem coorte", exact: true }).click();
