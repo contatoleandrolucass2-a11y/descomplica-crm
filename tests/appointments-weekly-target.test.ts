@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { analyzeAppointments } from "@/lib/crm/stages/appointments";
+import {
+  analyzeAppointments,
+  plannedAppointmentsForDate,
+  saoPauloDate,
+} from "@/lib/crm/stages/appointments";
 import { appointmentModel } from "./fixtures/appointments-summary";
 
 function monthlyInput(count = 17) {
@@ -28,6 +32,58 @@ const roster = [
 ];
 
 describe("weekly appointment calendar target", () => {
+  it.each(["2026-11-07", "2026-11-08", "2026-11-02", "2026-06-04", "2027-01-25"])(
+    "keeps %s at zero even without a known broker count",
+    (date) => {
+      expect(plannedAppointmentsForDate(date, null)).toBe(0);
+    },
+  );
+
+  it("keeps a working day's target unavailable when the broker count is unknown", () => {
+    expect(plannedAppointmentsForDate("2026-11-09", null)).toBeNull();
+  });
+  it("matches the requested 30-broker week, including Thursday and weekend targets", () => {
+    const result = analyzeAppointments({
+      ...monthlyInput(0),
+      brokerCount: 30,
+      referenceDate: "2026-11-15",
+    });
+    expect(
+      result.daily.filter(({ key }) => key >= "2026-11-09").map(({ key, goal }) => [key, goal]),
+    ).toEqual([
+      ["2026-11-09", 30],
+      ["2026-11-10", 30],
+      ["2026-11-11", 30],
+      ["2026-11-12", 60],
+      ["2026-11-13", 30],
+      ["2026-11-14", 0],
+      ["2026-11-15", 0],
+    ]);
+    expect(result.weekly.find(({ key }) => key === "3")?.goal).toBe(180);
+    expect(result.weeklyTarget).toBe(180);
+  });
+
+  it("removes both Thursday units for São Paulo's Corpus Christi holiday", () => {
+    const result = analyzeAppointments({
+      ...monthlyInput(0),
+      brokerCount: 30,
+      coverageStart: "2026-06-01",
+      referenceDate: "2026-06-07",
+    });
+    expect(result.daily.find(({ key }) => key === "2026-06-04")?.goal).toBe(0);
+    expect(result.weekly.find(({ key }) => key === "1")?.goal).toBe(120);
+    expect(result.weeklyTarget).toBe(120);
+  });
+
+  it.each([
+    ["2026-11-12T02:59:59.999Z", 30],
+    ["2026-11-12T03:00:00.000Z", 60],
+    ["2026-11-14T02:59:59.999Z", 30],
+    ["2026-11-14T03:00:00.000Z", 0],
+  ] as const)("changes the daily target at São Paulo midnight for %s", (timestamp, goal) => {
+    expect(plannedAppointmentsForDate(saoPauloDate(timestamp), 30)).toBe(goal);
+  });
+
   it("uses the full intersecting week's valid days instead of the largest actual sum", () => {
     // Nov 2 is a national holiday: Tue1 + Wed1 + Thu2 + Fri1 =5 per broker.
     for (const count of [0, 17, 300]) {

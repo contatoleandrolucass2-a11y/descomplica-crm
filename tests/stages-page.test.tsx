@@ -87,6 +87,7 @@ describe("stage source states and initial authorized profile", () => {
     );
     expect(mocks.autoRefresh).toHaveBeenCalledExactlyOnceWith({
       statusEndpoint: "/api/appointments/status",
+      intervalMs: 120_000,
       generatedAt: "2026-11-05T03:35:00.123456+00:00",
       updatedAt: "2026-11-05T03:38:57.123457+00:00",
       referenceDay: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/u),
@@ -102,6 +103,7 @@ describe("stage source states and initial authorized profile", () => {
     );
     expect(mocks.autoRefresh).toHaveBeenCalledExactlyOnceWith({
       statusEndpoint: "/api/appointments/status",
+      intervalMs: 120_000,
       generatedAt: null,
       updatedAt: null,
       referenceDay: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/u),

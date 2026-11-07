@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { buildAppointmentComparison } from "@/app/(protected)/app/etapas/_components/appointments-comparison";
 import type {
@@ -6,6 +6,7 @@ import type {
   DashboardAnalysisSlice,
 } from "@/lib/crm/dashboard/analysis-contract";
 import type { AppointmentFilters } from "@/lib/crm/stages/appointments";
+import * as appointmentAnalysis from "@/lib/crm/stages/appointments";
 
 const fact = (
   date: string,
@@ -34,7 +35,147 @@ function slice(overrides: Partial<DashboardAnalysisSlice> = {}): DashboardAnalys
   };
 }
 
+// The former implementation independently ran the full analysis for each
+// comparison month. Keep that authoritative path as a differential oracle.
+function monthlyOracle(
+  input: DashboardAnalysisSlice,
+  referenceMonth: string,
+  filters: AppointmentFilters,
+  days: number[],
+) {
+  const dimensions = { ...filters };
+  delete dimensions.createdDate;
+  delete dimensions.createdDates;
+  delete dimensions.week;
+  delete dimensions.periodStart;
+  delete dimensions.periodEnd;
+  const months = new Map<string, (number | null)[]>();
+  const values = (month: string) => {
+    if (months.has(month)) return months.get(month)!;
+    const daily = new Map(
+      appointmentAnalysis
+        .analyzeAppointments(input, { month, filters: dimensions })
+        .daily.map(({ key, total }) => [key, total]),
+    );
+    const end = new Date(`${month}-01T12:00:00Z`);
+    end.setUTCMonth(end.getUTCMonth() + 1, 0);
+    const lastDate = end.toISOString().slice(0, 10);
+    const result = days.map((day) => {
+      const date = `${month}-${String(day).padStart(2, "0")}`;
+      return date > lastDate || date < input.coverageStart || date > input.referenceDate
+        ? null
+        : (daily.get(date) ?? 0);
+    });
+    months.set(month, result);
+    return result;
+  };
+  const previous = new Date(`${referenceMonth}-01T12:00:00Z`);
+  previous.setUTCMonth(previous.getUTCMonth() - 1);
+  const annual = Array.from({ length: 12 }, (_, index) =>
+    values(`${referenceMonth.slice(0, 4)}-${String(index + 1).padStart(2, "0")}`),
+  );
+  const start = new Date(`${referenceMonth}-01T12:00:00Z`);
+  start.setUTCMonth(Math.floor(start.getUTCMonth() / 3) * 3 - 3);
+  const quarter = Array.from({ length: 3 }, (_, index) => {
+    const date = new Date(start);
+    date.setUTCMonth(date.getUTCMonth() + index);
+    return date.toISOString().slice(0, 7);
+  });
+  const roundedMean = (numbers: number[]) =>
+    numbers.length
+      ? Math.ceil(numbers.reduce((sum, value) => sum + value, 0) / numbers.length)
+      : null;
+  return [
+    values(referenceMonth),
+    values(previous.toISOString().slice(0, 7)),
+    days.map((_, index) =>
+      roundedMean(annual.map((month) => month[index]!).filter((value) => value !== null)),
+    ),
+    days.map((day, index) => {
+      const covered = quarter
+        .filter((month) => {
+          const date = new Date(`${month}-01T12:00:00Z`);
+          date.setUTCMonth(date.getUTCMonth() + 1, 0);
+          return day <= date.getUTCDate();
+        })
+        .map((month) => values(month)[index]!);
+      return covered.some((value) => value === null) ? null : roundedMean(covered as number[]);
+    }),
+  ];
+}
+
 describe("appointment month comparison", () => {
+  it.each([2, 3, 4] as const)(
+    "matches independent monthly analysis for v%s dimensions, hierarchy and temporal selections",
+    (version) => {
+      const dates = Array.from({ length: 12 }, (_, index) =>
+        new Date(Date.UTC(2025, 11 + index, 5, 15)).toISOString().slice(0, 10),
+      );
+      const input = slice({
+        version,
+        coverageStart: "2025-12-01",
+        referenceDate: "2026-11-19",
+        facts: dates.flatMap((date) => [fact(date, 2), fact(date, 3, 1, 1, 0, 1)]),
+        ...(version >= 3
+          ? {
+              appointments: dates.flatMap((date) =>
+                ["A", "B"].map((team) => ({
+                  createdAt: `${date}T15:00:00Z`,
+                  scheduledAt: null,
+                  attendedAt: null,
+                  visitPerformed: false,
+                  salesManager: `Gerente ${team}`,
+                  regionalManager:
+                    team === "A" && date >= "2026-07-01" ? "Regional Nova" : `Regional ${team}`,
+                  owner: `Corretor ${team}`,
+                  accountName: "Conta sintética",
+                  accountRanking: team === "A" ? "Ouro" : "Prata",
+                  ...(version === 4
+                    ? {
+                        channel: team === "A" ? (1 as const) : (0 as const),
+                        company: `Empresa ${team}`,
+                        registeredBroker: true,
+                      }
+                    : {}),
+                })),
+              ),
+            }
+          : {}),
+      });
+      for (const filters of [
+        {},
+        { channel: 1 },
+        { channel: 0 },
+        { company: "Empresa A" },
+        { owner: "Corretor A" },
+        { manager: "Gerente A" },
+        { regionalManager: "Regional A" },
+        { regionalManager: "Regional Nova" },
+        { accountRanking: "Ouro" },
+        { channel: 1, company: "Empresa A", manager: "Gerente A", owner: "Corretor A" },
+        { createdDates: ["2026-10-05", "2026-10-31"], manager: "Gerente A" },
+        { week: 2, periodStart: "2026-10-05", periodEnd: "2026-10-20", channel: 0 },
+      ] satisfies AppointmentFilters[]) {
+        const month = "2026-10";
+        const result = buildAppointmentComparison(input, { month, filters });
+        expect(
+          result.series.map(({ values }) => values),
+          JSON.stringify({ version, filters }),
+        ).toEqual(monthlyOracle(input, month, filters, result.days));
+      }
+    },
+  );
+
+  it("runs the complete dashboard aggregation only once for the covered comparison period", () => {
+    const analysis = vi.spyOn(appointmentAnalysis, "analyzeAppointments");
+    try {
+      buildAppointmentComparison(slice({ referenceDate: "2026-11-19" }), { month: "2026-10" });
+      expect(analysis).toHaveBeenCalledTimes(1);
+    } finally {
+      analysis.mockRestore();
+    }
+  });
+
   it("rounds each covered daily annual average upward to an integer and preserves zero", () => {
     const result = buildAppointmentComparison(
       slice({

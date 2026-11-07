@@ -192,7 +192,9 @@ try {
   assert.equal(evidence.requests[0].all, true);
   await expect(page.getByRole("button", { name: "Próxima página", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Página anterior", exact: true })).toHaveCount(0);
-  await expect(table).toContainText("Conta sintética 00271");
+  await expect(table.locator('td[data-label="Conta"][title="Conta sintética 00271"]')).toHaveText(
+    "Conta sintética",
+  );
   const viewport = table.locator("..");
   await viewport.focus();
   await page.keyboard.press("End");

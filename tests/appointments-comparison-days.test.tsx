@@ -1,6 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { AppointmentsComparison } from "@/app/(protected)/app/etapas/_components/AppointmentsComparison";
+import {
+  appointmentComparisonPath,
+  AppointmentsComparison,
+} from "@/app/(protected)/app/etapas/_components/AppointmentsComparison";
 import { buildAppointmentComparison } from "@/app/(protected)/app/etapas/_components/appointments-comparison";
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
 
@@ -74,7 +77,9 @@ describe("comparison calendar day axis", () => {
     expect(html).toContain('aria-label="Mês de referência · outubro de 2026, dia 3: 22"');
     expect(result.series[2].values[2]).toBe(4);
     expect(html).toContain('aria-label="Média de 2026, dia 3: 4"');
-    expect(html).toContain('<th scope="row">3</th><td>22</td><td>11</td><td>4</td><td>4</td>');
+    expect(html).not.toContain("Ver valores e cobertura");
+    expect(html).not.toContain("<table");
+    expect(html.match(/<option /g)).toHaveLength(5);
     expect(html).toContain('data-comparison-series="quarter-average"');
     expect(html).toContain('title="Sáb" aria-label="3: Sáb"');
     expect(html).toContain('title="Qui" aria-label="1: Qui"');
@@ -82,4 +87,29 @@ describe("comparison calendar day axis", () => {
     // Points identify the series/date accessibly without a verbose native popup.
     expect(html).not.toContain("<title>Mês de referência");
   });
+
+  it("keeps unavailable dates disconnected in straight, smooth and step layouts", () => {
+    const x = (index: number) => index * 10;
+    const y = (value: number) => 100 - value;
+    const values = [2, 4, null, 8, 6];
+    expect(appointmentComparisonPath(values, "straight", x, y)).toBe("M0,98 L10,96 M30,92 L40,94");
+    expect(appointmentComparisonPath(values, "steps", x, y)).toBe("M0,98 H10 V96 M30,92 H40 V94");
+    expect(appointmentComparisonPath(values, "smooth", x, y)).toBe(
+      "M0,98 C5,98 5,96 10,96 M30,92 C35,92 35,94 40,94",
+    );
+  });
+
+  it.each(["straight", "smooth", "steps", "points", "area"] as const)(
+    "renders all four comparison series immediately in the %s layout",
+    (layout) => {
+      const result = buildAppointmentComparison(slice, { month: "2026-10" });
+      const html = renderToStaticMarkup(
+        <AppointmentsComparison getComparison={() => result} initialLayout={layout} />,
+      );
+      expect(html.match(/data-comparison-series=/g)).toHaveLength(4);
+      expect(html).toContain(`data-line-layout="${layout}"`);
+      expect(html.includes('fill-opacity="0.12"')).toBe(layout === "area");
+      expect(html).not.toContain("<table");
+    },
+  );
 });

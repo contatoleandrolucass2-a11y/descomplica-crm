@@ -360,7 +360,12 @@ try {
   await page.setViewportSize({ width: 1440, height: 900 });
   await chooseMonth("Outubro");
 
-  await daily().getByLabel("Tipo do gráfico diário", { exact: true }).selectOption("line");
+  await daily()
+    .getByRole("button", { name: "Editar Evolução de agendamentos por dia", exact: true })
+    .press("Enter");
+  const modelEditor = page.getByRole("dialog", { name: "Editar card", exact: true });
+  await modelEditor.getByLabel("Modelo", { exact: true }).selectOption("line");
+  await modelEditor.getByRole("button", { name: "Salvar", exact: true }).click();
   await saved();
   await expect(daily().locator("[data-comparison-series]")).toHaveCount(4);
   await expect
@@ -369,7 +374,10 @@ try {
   record("single-type-selection-saved-as-existing-profile-type");
   await page.reload();
   await saved();
-  await expect(daily().getByLabel("Tipo do gráfico diário", { exact: true })).toHaveValue("line");
+  await expect(daily().getByLabel("Layout do gráfico de linhas", { exact: true })).toHaveValue(
+    "points",
+  );
+  await expect(daily().getByLabel("Tipo do gráfico diário", { exact: true })).toHaveCount(0);
   await expect
     .poll(async () =>
       (await daily().locator('[data-comparison-series="selected"]').getAttribute("d")).trim(),
@@ -553,15 +561,25 @@ try {
     "Salvo automaticamente",
   );
   const leapDaily = leapPage.locator('[data-dashboard-card-id="appointments-daily"]');
-  await leapDaily.getByLabel("Tipo do gráfico diário", { exact: true }).selectOption("line");
+  await leapDaily
+    .getByRole("button", { name: "Editar Evolução de agendamentos por dia", exact: true })
+    .press("Enter");
+  const leapEditor = leapPage.getByRole("dialog", { name: "Editar card", exact: true });
+  await leapEditor.getByLabel("Modelo", { exact: true }).selectOption("line");
+  await leapEditor.getByRole("button", { name: "Salvar", exact: true }).click();
   await expect(leapDaily.locator("[data-comparison-series]")).toHaveCount(4);
-  await leapDaily.getByText("Ver valores e cobertura", { exact: true }).click();
-  const rows = leapDaily.locator("tbody tr");
-  await expect(rows.nth(28).locator("td").nth(1)).toHaveText("7");
-  await expect(rows.nth(28).locator("td").nth(2)).toHaveText("6");
-  await expect(rows.nth(29).locator("td").nth(1)).toHaveText("Sem cobertura");
-  await expect(rows.nth(30).locator("td").nth(1)).toHaveText("Sem cobertura");
-  await expect(rows.nth(30).locator("td").nth(2)).toHaveText("9");
+  await expect(leapDaily.getByText("Ver valores e cobertura", { exact: true })).toHaveCount(0);
+  const leapSeries = (key) => leapDaily.locator(`[data-comparison-series="${key}"]`).locator("..");
+  await expect(leapSeries("previous").locator('circle[aria-label$="dia 29: 7"]')).toHaveCount(1);
+  await expect(leapSeries("year-average").locator('circle[aria-label$="dia 29: 6"]')).toHaveCount(
+    1,
+  );
+  await expect(
+    leapSeries("previous").locator('circle[aria-label*="dia 30:"], circle[aria-label*="dia 31:"]'),
+  ).toHaveCount(0);
+  await expect(leapSeries("year-average").locator('circle[aria-label$="dia 31: 9"]')).toHaveCount(
+    1,
+  );
   assert.equal(
     await leapDaily
       .locator('[data-comparison-series="previous"]')

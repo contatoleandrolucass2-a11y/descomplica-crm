@@ -1,5 +1,9 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-07 — Agendamentos: quinze prints, metas e desempenho
+
+[Escopo, fontes e evidências desta demanda](ATUALIZACOES-ARQUIVO-2026-11-07-AGENDAMENTOS-15-PRINTS.md).
+
 ## 2026-11-05 — CAIXA: compactação visual v2
 
 Abertura: Git comum confirmado; main7084fda6, produção0307bd47 HTTP200/ok, consultados em05/11 via GitHub/Git/health. Escopo: somente apresentação e posicionamento de campos CAIXA conforme25prints; cálculos preservados. Implementação e validação pendentes.

@@ -246,6 +246,15 @@ try {
   const count = () => page.evaluate(() => globalThis.__qaComparisonTrace?.builds.length ?? 0);
   const saved = () =>
     expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
+  const setModel = async (model) => {
+    await card()
+      .getByRole("button", { name: "Editar Evolução de agendamentos por dia", exact: true })
+      .press("Enter");
+    const editor = page.getByRole("dialog", { name: "Editar card", exact: true });
+    await editor.getByLabel("Modelo", { exact: true }).selectOption(model);
+    await editor.getByRole("button", { name: "Salvar", exact: true }).click();
+    await expect(editor).toHaveCount(0);
+  };
   let month = "2026-10",
     filters = { channel: 1 };
   async function checkResult(name, expectedBuilds) {
@@ -306,15 +315,15 @@ try {
   await saved();
   assert.equal(await count(), 0);
   evidence.checks.push({ name: "bars-remain-lazy", builds: 0 });
-  await card().getByLabel("Tipo do gráfico diário", { exact: true }).selectOption("line");
+  await setModel("line");
   await saved();
   await checkResult("first-line-build", 1);
   await dragLine({ width: 1440, height: 900 });
   await checkResult("actual-pointer-drag-floating-and-remount", 1);
-  await card().getByLabel("Tipo do gráfico diário", { exact: true }).selectOption("bars");
+  await setModel("bars");
   await expect(card().locator("[data-appointments-comparison]")).toHaveCount(0);
   assert.equal(await count(), 1);
-  await card().getByLabel("Tipo do gráfico diário", { exact: true }).selectOption("line");
+  await setModel("line");
   await checkResult("line-toggle-remount", 1);
   await card()
     .getByRole("button", { name: "Copiar Evolução de agendamentos por dia", exact: true })

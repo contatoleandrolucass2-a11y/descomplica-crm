@@ -140,31 +140,6 @@
   background: #a91932;
   color: #fff;
 }
-.details {
-  font-size: 0.75rem;
-  text-align: left;
-}
-.details summary {
-  cursor: pointer;
-}
-.details > div {
-  overflow: auto;
-  max-height: 240px;
-}
-.details table {
-  width: 100%;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
-}
-.details th,
-.details td {
-  padding: 0.35rem;
-  text-align: right;
-  border-bottom: 1px solid var(--analytics-line);
-}
-.details th:first-child {
-  text-align: left;
-}
 .salesValue {
   display: block;
   margin-top: 0.15rem;

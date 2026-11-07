@@ -11,6 +11,8 @@ const charts = [
 export async function runAppointmentsFirstSave({ page, origin, evidence, artifactSubdir }) {
   page.on("dialog", (dialog) => dialog.accept());
   evidence.firstSave = [];
+  evidence.savedCapMethod =
+    "Presentation seeded only in the localhost fixture; removed height controls remain absent.";
   const requests = [];
   let holdNextResponse = false;
   let releaseResponse;
@@ -228,11 +230,37 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
   );
   await mkdir(proofDirectory, { recursive: true });
   async function savePixelCap(chart, value, target = page) {
+    // The height control was removed. Seed only the isolated HTTP fixture to
+    // verify that existing saved caps survive edits, reloads and reflow.
+    assert.ok(["127.0.0.1", "localhost"].includes(new URL(origin).hostname));
     const article = target.locator(`[data-dashboard-card-id="${chart.id}"]`);
-    const input = article.getByLabel("Altura máxima das torres (px)", { exact: true });
-    await expect(input).not.toHaveAttribute("max", /.+/u);
-    await input.fill(value);
-    await input.press("Enter");
+    await expect(article.getByLabel("Altura máxima das torres (px)", { exact: true })).toHaveCount(
+      0,
+    );
+    const status = await target.evaluate(
+      async ({ id, cap }) => {
+        const { profiles } = await (await fetch("/api/dashboard-profiles")).json();
+        const profile = profiles.find((entry) => entry.cards.some((card) => card.id === id));
+        const cards = profile.cards.map((card) => {
+          if (card.id !== id) return card;
+          const presentation = { ...card.presentation };
+          delete presentation.barScale;
+          if (cap === "") delete presentation.barMaxHeight;
+          else presentation.barMaxHeight = Number(cap);
+          return { ...card, presentation };
+        });
+        return (
+          await fetch(`/api/dashboard-profiles/${profile.id}`, {
+            method: "PATCH",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ version: profile.version, cards }),
+          })
+        ).status;
+      },
+      { id: chart.id, cap: value },
+    );
+    assert.equal(status, 200, "Synthetic presentation seed is acknowledged");
+    await target.reload();
     await expect(target.locator("[data-dashboard-save-status]")).toContainText(
       "Salvo automaticamente",
     );
@@ -268,7 +296,7 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
   const legacyEditor = await open(barChart);
   await expect(
     card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
-  ).toHaveValue("");
+  ).toHaveCount(0);
   await legacyEditor.getByLabel("Título", { exact: true }).fill(`${barChart.title} QA`);
   await legacyEditor.getByRole("button", { name: "Salvar", exact: true }).click();
   await expect(legacyEditor).toHaveCount(0);
@@ -324,9 +352,21 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
       card(noGoalChart).getByRole("img", { name: /^Maior quantidade no recorte:/u }),
     ).toHaveCount(1);
     checkGeometry(exactBars, cap);
+    const exactScale = await card(noGoalChart)
+      .locator("[data-appointments-plot]")
+      .evaluate((host) => {
+        const track = host.querySelector("[data-appointments-track]");
+        const value = track.querySelector("[data-appointments-value]");
+        return {
+          rendered: Number(host.dataset.appointmentsRenderedMax),
+          available: track.clientHeight - Math.max(20, value.getBoundingClientRect().height + 6),
+        };
+      });
     assert.ok(
-      Math.abs(Math.max(...exactBars.map(({ height }) => height)) - cap) < 1,
-      "Tallest goal-free bar reaches the requested pixels",
+      Math.abs(
+        Math.max(...exactBars.map(({ height }) => height)) - Math.min(cap, exactScale.available),
+      ) < 1,
+      `Tallest bar reaches the saved cap within available plot space: ${JSON.stringify({ cap, exactScale, exactBars })}`,
     );
     assert.deepEqual(await read(noGoalChart), noGoalDimensions);
     await card(noGoalChart).screenshot({
@@ -340,21 +380,10 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
     });
   }
 
-  // Native constraints reject zero/fractional pixel heights without sending a write.
-  const invalidInput = card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true });
-  for (const value of ["0", "24.5"]) {
-    const beforeInvalidSave = requests.length;
-    await invalidInput.fill(value);
-    assert.equal(await invalidInput.evaluate((input) => input.checkValidity()), false);
-    await invalidInput.press("Enter");
-    assert.equal(
-      requests.length,
-      beforeInvalidSave,
-      "Invalid pixel height must not write a profile",
-    );
-  }
-  await invalidInput.press("Escape");
-  evidence.firstSave.push({ scenario: "pixel-cap-rejects-nonpositive-and-fractional-values" });
+  await expect(
+    card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
+  ).toHaveCount(0);
+  evidence.firstSave.push({ scenario: "removed-pixel-height-control-stays-absent" });
   for (const cap of [1, 24, 240, 10000]) {
     const beforeSave = requests.length;
     await savePixelCap(barChart, String(cap));
@@ -366,7 +395,7 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
     assert.equal(
       requests.at(-1).cards.find((entry) => entry.id === barChart.id).presentation.barScale,
       undefined,
-      "Explicit pixel edit replaces legacy percentage",
+      "Seeded pixel presentation replaces legacy percentage",
     );
     await page.reload();
     await expect(page.locator("[data-dashboard-save-status]")).toContainText(
@@ -381,9 +410,10 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
         Math.abs(Math.max(...bars.map(({ height }) => height)) - 1) < 0.1,
         "The 1px cap actually limits the largest tower below its default size",
       );
-    await expect(
-      card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
-    ).toHaveValue(String(cap));
+    await expect(card(barChart).locator("[data-appointments-plot]")).toHaveAttribute(
+      "data-pixel-height",
+      String(cap),
+    );
     evidence.firstSave.push({
       scenario: "pixel-cap-one-save-refresh",
       cap,
@@ -391,28 +421,27 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
       bars,
     });
   }
-  // The removed upper slider cannot return; the inline field confirms once and persists unchanged layout.
+  // Removed editing controls stay absent; stored caps preserve the layout.
   await savePixelCap(barChart, "120");
   const referenceBefore = requests.length;
   await expect(card(barChart).getByRole("slider")).toHaveCount(0);
   await expect(card(barChart).locator("[data-dashboard-bar-top-line]")).toHaveCount(0);
-  const inlineHeight = card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true });
-  await inlineHeight.fill("100");
-  await inlineHeight.press("Enter");
+  await savePixelCap(barChart, "100");
   await expect.poll(() => requests.length).toBe(referenceBefore + 1);
   await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
   const inlineCap = requests.at(-1).cards.find((entry) => entry.id === barChart.id)
     .presentation.barMaxHeight;
   assert.equal(inlineCap, 100);
   await page.reload();
-  await expect(
-    card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
-  ).toHaveValue("100");
+  await expect(card(barChart).locator("[data-appointments-plot]")).toHaveAttribute(
+    "data-pixel-height",
+    "100",
+  );
   assert.deepEqual(await read(barChart), dimensionsBeforeCap);
   assert.deepEqual(await order(), orderBeforeCap);
   const references = await checkReferences(card(barChart));
   evidence.firstSave.push({
-    scenario: "inline-height-one-patch-refresh-no-removed-slider",
+    scenario: "seeded-height-one-patch-refresh-no-removed-controls",
     inlineCap,
     references,
   });
@@ -430,9 +459,10 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
   await page.goto(`${origin}?editable`);
   await page.getByRole("button", { name: "House", exact: true }).click();
   await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
-  await expect(
-    card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
-  ).toHaveValue("240");
+  await expect(card(barChart).locator("[data-appointments-plot]")).toHaveAttribute(
+    "data-pixel-height",
+    "240",
+  );
   assert.deepEqual(await order(), orderBeforeCap);
   checkGeometry(await geometry(), 240);
   await card(barChart).screenshot({
@@ -446,7 +476,7 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
 
   const fluidChart = { id: "appointments-monthly", title: "Agendamentos por mês" };
   const fluidDimensions = await read(fluidChart);
-  // The regular pencil editor must preserve an automatic width when only the cap changes.
+  // Previously saved caps preserve an automatic width and the whole layout.
   const { profiles: fluidProfiles } = await (
     await page.request.get(`${origin}/api/dashboard-profiles`)
   ).json();
@@ -457,13 +487,13 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
   assert.equal(fluidLayout.width, undefined, "Regression starts from a genuinely fluid saved card");
   const beforeFullEditorCap = requests.length;
   await savePixelCap(fluidChart, "96");
-  assert.equal(requests.length, beforeFullEditorCap + 1, "Inline cap-only change sends one PATCH");
+  assert.equal(requests.length, beforeFullEditorCap + 1, "Fixture cap-only seed sends one PATCH");
   const savedFluidCard = requests.at(-1).cards.find((entry) => entry.id === fluidChart.id);
   assert.equal(savedFluidCard.presentation.barMaxHeight, 96);
   assert.deepEqual(
     savedFluidCard.layout,
     fluidLayout,
-    "Inline control must not materialize an untouched fluid width or alter height/order",
+    "Saved cap must not materialize an untouched fluid width or alter height/order",
   );
   for (const viewport of [
     { width: 390, height: 844 },
@@ -487,10 +517,10 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
     checkGeometry(await geometry(card(fluidChart)), 96);
   }
   await card(fluidChart).screenshot({
-    path: path.join(proofDirectory, "inline-fluid-after-refresh.png"),
+    path: path.join(proofDirectory, "saved-fluid-after-refresh.png"),
   });
   evidence.firstSave.push({
-    scenario: "inline-pixel-cap-preserves-fluid-layout-after-refresh-and-viewport",
+    scenario: "saved-pixel-cap-preserves-fluid-layout-after-refresh-and-viewport",
     cap: 96,
     fluidLayout,
     fluidDimensions,
@@ -534,9 +564,10 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
       await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
       "Mobile page fits without horizontal overflow",
     );
-    await expect(
-      card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
-    ).toHaveValue("240");
+    await expect(card(barChart).locator("[data-appointments-plot]")).toHaveAttribute(
+      "data-pixel-height",
+      "240",
+    );
     await card(barChart).screenshot({
       path: path.join(
         proofDirectory,

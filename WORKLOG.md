@@ -21,6 +21,32 @@
 - Publicação do app e atualização controlada do coletor são etapas distintas;
   coletor atual permanece0307bd47. Ativação não foi executada nesta preparação.
 
+## 2026-11-07 — Agendamentos: quinze ajustes e atualização
+
+- CI42341206694: validação completa e imagem aprovadas. Gate do detalhamento
+  aguardava nome completo visível; passa a conferir duas palavras visíveis e
+  identidade completa no title, preservando a prova das136linhas carregadas.
+
+- CI42340849456: formatação/lint/tipos aprovados;5168testes passaram e duas
+  asserções do transporte da página exigiram incluir intervalMs120000. Teste
+  atualizado para comprovar o novo contrato, sem mudar runtime ou outros gates.
+
+- Inclinação até45° por eixo nos indicadores do canvas; nomes exibem as duas
+  primeiras palavras, com identidade completa preservada nos títulos/chaves.
+- Calendário compacto; conversões realizadas abaixo da esperada usam a mesma
+  borda vermelha dos cards. Popup diário compacto fecha ao sair do ponteiro.
+- Remove controles Torres/Altura e valores/cobertura. Comparativo conserva as
+  quatro séries e oferece cinco layouts de linhas. Cabeçalho mostra meta do dia
+  atual SP, independente do intervalo histórico selecionado.
+- Regra existente preservada e testada:1 por corretor em dia útil,2 quinta,
+  zero fim de semana/feriados; semana normal com30corretores totaliza180.
+- Consulta de versão a cada120s somente nesta rota, suspensa em aba oculta,
+  sem escrita no banco/coleta. Comparativo agora agrega uma vez a cobertura.
+  Benchmark sintético pareado5000registros: mediana5395,37→671,71ms, seis
+  resultados JSON idênticos. Não representa latência total em produção.
+- Validação local/CI e publicação registradas na nota específica de conhecimento;
+  nenhuma migration, permissão, workflow ou outra página alterados.
+
 - CI42159626752/d7cc69e8: testes funcionais aprovados,76comparações visuais aprovadas; única diferença CAIXA1280px corrigida, revisada e referência aceita. Nenhuma referência de outra página alterada.
 
 - CI42154606118/fca7f52e: validate, imagem e restauração aprovadas; release parou em11diferenças visuais exclusivamente CAIXA. Dez capturas revisadas e aceitas;1280px retida por quebra real de opcional no ranking. CSScorrigido; referência1280aguarda nova capturaCI. Demais66comparações e testes funcionais aprovados; sem mudança de limiares.

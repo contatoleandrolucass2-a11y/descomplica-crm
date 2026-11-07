@@ -567,6 +567,7 @@ export default async function StagePage({
         <AnalyticsCanvas kind="stage">
           <DashboardAutoRefresh
             statusEndpoint="/api/appointments/status"
+            intervalMs={120_000}
             generatedAt={appointments.generatedAt ?? null}
             updatedAt={appointments.updatedAt ?? null}
             referenceDay={calendarDate}

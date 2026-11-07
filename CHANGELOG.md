@@ -6,6 +6,18 @@
   Compacta cards e resumo em janelas desktop de até650px de altura para exibir
   cinco gerentes e total. Sem nova migration.
 
+- Valida no navegador a apresentação compacta dos nomes de Agendamentos,
+  preservando a identificação completa e o carregamento de todos os registros.
+
+- Confere explicitamente o intervalo120s de Agendamentos nos testes da rota,
+  inclusive com snapshot indisponível.
+
+- Refina Agendamentos conforme15prints: indicadores até45°, calendário e popup
+  compactos, conversões abaixo da esperada em vermelho, primeiras duas palavras
+  dos nomes, meta do dia atual e cinco layouts de linhas. Remove os controles
+  e informações solicitados; consulta atualizações a cada dois minutos e reduz
+  o cálculo repetido do comparativo, preservando filtros e regras de metas.
+
 - Compacta somente a interface CAIXA: controles com legendas externas, rankingopcional e primeiroimóvel no início, FGTS/recursos separados, animações acessíveis e proposta no padrão Associativo.
 
 - Mantém o alinhamento dos gráficos de Agendamentos durante o arraste, incluindo o espaço temporário do card.

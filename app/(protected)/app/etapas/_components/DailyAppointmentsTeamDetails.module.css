@@ -32,7 +32,7 @@
   z-index: 100;
   box-sizing: border-box;
   display: flex;
-  width: min(64rem, calc(100vw - 1.5rem));
+  width: min(58rem, calc(100vw - 1.5rem));
   max-height: calc(100dvh - 1.5rem);
   flex-direction: column;
   border: 1px solid var(--analytics-line);
@@ -51,12 +51,12 @@
   gap: 0.6rem;
   flex-shrink: 0;
   border-bottom: 1px solid var(--analytics-line);
-  padding: 0.65rem 0.8rem;
+  padding: 0.4rem 0.65rem;
 }
 
 .title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -77,8 +77,8 @@
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
-  padding: 0.5rem 0.8rem;
-  font-size: 0.85rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
 }
 
 .controls select {
@@ -95,7 +95,7 @@
   flex: 1;
   overflow: auto;
   overscroll-behavior: contain;
-  padding: 0.6rem 0.8rem 0.8rem;
+  padding: 0.4rem 0.65rem 0.6rem;
   scrollbar-color: var(--analytics-cyan-strong) var(--analytics-surface-muted);
   scrollbar-width: thin;
 }

@@ -50,6 +50,6 @@ describe("calendar monthly appointment target", () => {
     expect(isAppointmentGoalHoliday("2026-02-17")).toBe(false);
     expect(isAppointmentGoalHoliday("2026-06-05")).toBe(false);
     expect(isAppointmentGoalHoliday("2026-02-30")).toBe(false);
-    expect(plannedAppointmentsForDate("2026-06-04", null)).toBeNull();
+    expect(plannedAppointmentsForDate("2026-06-04", null)).toBe(0);
   });
 });

@@ -41,6 +41,23 @@ afterEach(() => {
 });
 
 describe("dashboard published snapshot refresh", () => {
+  it("checks appointments every two minutes and only refreshes a changed snapshot", async () => {
+    mount({ ...version, statusEndpoint: "/api/appointments/status", intervalMs: 120_000 });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(119_999);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    fetchMock.mockImplementation(async () =>
+      Response.json({ ...version, updatedAt: "2026-10-14T13:03:00.123457+00:00" }),
+    );
+    await vi.advanceTimersByTimeAsync(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+    documentTarget.hidden = true;
+    documentTarget.dispatchEvent(new Event("visibilitychange"));
+    await vi.advanceTimersByTimeAsync(240_000);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
   it("receives new appointments snapshots through the page-scoped status without looping", async () => {
     mount({ ...version, statusEndpoint: "/api/appointments/status" });
     await vi.advanceTimersByTimeAsync(0);
