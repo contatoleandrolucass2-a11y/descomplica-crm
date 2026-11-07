@@ -107,3 +107,14 @@ Controle de navegador e node_repl indisponíveis nesta sessão com erro
 sanitizado failed to write kernel assets / caminho não encontrado. Sem contorno
 de login/configuração; validação autenticada real pós-publicação fica limitada
 por essa ferramenta. Chromium sintético e gates isolados permanecem distintos.
+
+CI42341206694/head7c6eca9c: validate e promotable-image aprovados. O browser
+do detalhamento ainda esperava Conta sintética00271 como texto visível após o
+pedido de abreviar nomes. Teste atualizado para conferir duas palavras visíveis
+e identidade completa no title; contagem136linhas e ausência de novas requisições
+em resize/drag/cópia continuam exigidas. Nenhuma alteração adicional de runtime.
+
+Browser corrigido aprovado localmente:136linhas em cada cópia, drag/resize/cópia
+sem requisições adicionais e zero errosJS. Revisão final preservou explicitamente
+o gesto legado do TiltCard fora do canvas, pois Equipe Produtiva reutiliza esse
+componente; limite45° e geometria estável aplicam-se somente ao canvas solicitado.

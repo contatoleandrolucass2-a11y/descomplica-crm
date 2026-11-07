@@ -196,18 +196,15 @@ function TiltCard({
     if (event.pointerType === "touch") return;
     if (event.target instanceof Element && event.target.closest("dialog[open]")) return;
     const target = tiltTarget(event.currentTarget);
-    const bounds = tiltBounds.current ?? target.getBoundingClientRect();
-    const horizontal = Math.max(
-      -1,
-      Math.min(1, ((event.clientX - bounds.left) / bounds.width - 0.5) * 2),
-    );
-    const vertical = Math.max(
-      -1,
-      Math.min(1, ((event.clientY - bounds.top) / bounds.height - 0.5) * 2),
-    );
-    const amplitude = target === event.currentTarget ? 22.5 : 45;
-    target.style.setProperty("--card-tilt-x", `${vertical * -amplitude}deg`);
-    target.style.setProperty("--card-tilt-y", `${horizontal * amplitude}deg`);
+    const inCanvas = target !== event.currentTarget;
+    const bounds = (inCanvas ? tiltBounds.current : null) ?? target.getBoundingClientRect();
+    const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
+    // Keep standalone consumers' original motion; only this canvas reaches 45°.
+    const rotation = (offset: number) =>
+      inCanvas ? Math.max(-45, Math.min(45, offset * 90)) : offset * 45;
+    target.style.setProperty("--card-tilt-x", `${-rotation(vertical)}deg`);
+    target.style.setProperty("--card-tilt-y", `${rotation(horizontal)}deg`);
   };
   const reset = (event: ReactPointerEvent<HTMLElement>) => {
     tiltBounds.current = null;

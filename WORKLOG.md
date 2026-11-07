@@ -2,6 +2,10 @@
 
 ## 2026-11-07 — Agendamentos: quinze ajustes e atualização
 
+- CI42341206694: validação completa e imagem aprovadas. Gate do detalhamento
+  aguardava nome completo visível; passa a conferir duas palavras visíveis e
+  identidade completa no title, preservando a prova das136linhas carregadas.
+
 - CI42340849456: formatação/lint/tipos aprovados;5168testes passaram e duas
   asserções do transporte da página exigiram incluir intervalMs120000. Teste
   atualizado para comprovar o novo contrato, sem mudar runtime ou outros gates.
