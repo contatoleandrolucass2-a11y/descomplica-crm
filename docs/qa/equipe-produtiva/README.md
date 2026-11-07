@@ -130,3 +130,12 @@ referências móveis de Usuários para a nova permissão; Administração e Pág
 continuam com referências originais. Fonte e limites em
 `docs/qa/reference-parity/README.md`.
 Uma captura da implementação não é referência externa.
+
+Na retomada de07/11/2026, o teste de layout acrescenta1280x585 e exige cinco
+gerentes e total visíveis nos três temas. Apenas desktop com altura<=650px usa
+cards128px/indicadores48px; alturas maiores preservam160/64px. Fixtures incluem
+dois regionais no mesmo gerente e nomes sintéticos, sem capturar dados reais.
+O enriquecimento regional usa observação própria de outro relatório somente
+quando não existe observação própria de Agendamentos, com gerente oficial e
+data válidos; conflitos e homônimos permanecem indisponíveis. A prova real da
+fonte e a ativação do coletor são distintas do QA sintético do frontend.

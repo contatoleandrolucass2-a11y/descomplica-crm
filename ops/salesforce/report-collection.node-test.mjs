@@ -45,6 +45,21 @@ const APPOINTMENT_OPERATION_COLUMNS = {
 const BROKER_MANAGER_COLUMN = {
   "Account.Comissionado_generico_3__c.Name": "Gerente de Vendas: Nome completo",
 };
+const REPORT_REGIONAL_COLUMNS = {
+  opportunities: { "Opportunity.Gerente_regional__c": "Gerente regional" },
+  folders: {
+    "Avaliacao_credito__c.Oportunidade__c.Gerente_regional__c":
+      "Avaliação de crédito : Oportunidade : Gerente regional",
+  },
+  sales: { "Opportunity.Gerente_regional__c": "Gerente regional" },
+};
+const regionalMetadata = (definition) =>
+  Object.fromEntries(
+    Object.entries(REPORT_REGIONAL_COLUMNS[definition.key] ?? {}).map(([column, label]) => [
+      column,
+      { label },
+    ]),
+  );
 
 function metadataFor(definition) {
   return {
@@ -93,11 +108,13 @@ function complete(definition, metadata, numbers = [1]) {
   return {
     reportExtendedMetadata: {
       detailColumnInfo: {
+        ...regionalMetadata(definition),
         ...Object.fromEntries(
-          Object.entries(APPOINTMENT_OPERATION_COLUMNS).map(([column, label]) => [
-            column,
-            { label },
-          ]),
+          Object.entries(
+            ["appointments", "visits"].includes(definition.key)
+              ? APPOINTMENT_OPERATION_COLUMNS
+              : {},
+          ).map(([column, label]) => [column, { label }]),
         ),
         ...Object.fromEntries(
           Object.entries(BROKER_MANAGER_COLUMN).map(([column, label]) => [column, { label }]),
@@ -136,11 +153,13 @@ function client({ describeFor, resultFor, startFor, metadataForResponse } = {}) 
           reportMetadata: describeFor?.(described, definition) ?? described,
           reportExtendedMetadata: {
             detailColumnInfo: {
+              ...regionalMetadata(definition),
               ...Object.fromEntries(
-                Object.entries(APPOINTMENT_OPERATION_COLUMNS).map(([column, label]) => [
-                  column,
-                  { label },
-                ]),
+                Object.entries(
+                  ["appointments", "visits"].includes(definition.key)
+                    ? APPOINTMENT_OPERATION_COLUMNS
+                    : {},
+                ).map(([column, label]) => [column, { label }]),
               ),
               ...Object.fromEntries(
                 Object.entries(BROKER_MANAGER_COLUMN).map(([column, label]) => [column, { label }]),
@@ -174,6 +193,94 @@ function client({ describeFor, resultFor, startFor, metadataForResponse } = {}) 
 function collect(key, fixture, start = REFERENCE, end = REFERENCE) {
   return collectReport("synthetic-sid", definitionFor(key), start, end, fixture.options);
 }
+
+test("projects regional people from each other report only with verified metadata and analysis enabled", async () => {
+  for (const key of ["opportunities", "visits", "folders", "sales"]) {
+    const column =
+      key === "visits"
+        ? "Activity.Gerente_Regional__c"
+        : Object.keys(REPORT_REGIONAL_COLUMNS[key])[0];
+    const describeFor = (metadata) =>
+      key === "visits"
+        ? {
+            ...metadata,
+            detailColumns: [...metadata.detailColumns, "Activity.Unidade_de_negocio__c"],
+          }
+        : metadata;
+    const fixture = client({
+      describeFor,
+      resultFor(definition, metadata) {
+        const result = complete(definition, metadata);
+        const index = metadata.detailColumns.indexOf(column);
+        if (index >= 0)
+          result.factMap["T!T"].rows[0].dataCells[index] = {
+            value: "Regional Nome Completo",
+            label: "Regional Nome Completo",
+            recordId: key === "folders" ? "006000000000001AAA" : null,
+          };
+        return result;
+      },
+    });
+    const rows = await collectReport("synthetic-sid", definitionFor(key), REFERENCE, REFERENCE, {
+      ...fixture.options,
+      analysisEnabled: true,
+    });
+    assert.equal(rows[0].regionalManager, "Regional Nome Completo", key);
+    if (key === "folders") assert.equal(rows[0].opportunityRecordId, "006000000000001AAA");
+    const legacy = await collect(key, fixture);
+    assert.equal(Object.hasOwn(legacy[0], "regionalManager"), false, key);
+
+    const invalid = client({
+      describeFor,
+      metadataForResponse(response) {
+        response.reportExtendedMetadata.detailColumnInfo[column].label = "Regional Comercial";
+        return response;
+      },
+    });
+    await assert.rejects(
+      collectReport("synthetic-sid", definitionFor(key), REFERENCE, REFERENCE, {
+        ...invalid.options,
+        analysisEnabled: true,
+      }),
+      { code: "SALESFORCE_INVALID_REPORT" },
+    );
+    assert.equal(
+      invalid.calls.some((call) => call.method === "POST"),
+      false,
+    );
+  }
+});
+
+test("a null regional cell displayed as a dash projects an unavailable person in all five reports", async () => {
+  for (const key of ["appointments", "opportunities", "visits", "folders", "sales"]) {
+    const column = ["appointments", "visits"].includes(key)
+      ? "Activity.Gerente_Regional__c"
+      : Object.keys(REPORT_REGIONAL_COLUMNS[key])[0];
+    const fixture = client({
+      describeFor(metadata) {
+        return ["appointments", "visits"].includes(key)
+          ? {
+              ...metadata,
+              detailColumns: [...metadata.detailColumns, "Activity.Unidade_de_negocio__c"],
+            }
+          : metadata;
+      },
+      resultFor(definition, metadata) {
+        const result = complete(definition, metadata);
+        result.factMap["T!T"].rows[0].dataCells[metadata.detailColumns.indexOf(column)] = {
+          value: null,
+          label: "-",
+        };
+        return result;
+      },
+    });
+    const rows = await collectReport("synthetic-sid", definitionFor(key), REFERENCE, REFERENCE, {
+      ...fixture.options,
+      analysisEnabled: true,
+    });
+    assert.equal(rows[0].regionalManager, "", key);
+  }
+});
 
 test("appointment development metadata is checked each cycle and never substitutes PDV", async () => {
   const column = "Activity.Nome_do_empreendimento__c";

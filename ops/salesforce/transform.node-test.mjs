@@ -191,6 +191,109 @@ test("latest missing regional and duplicate broker names do not invent a regiona
   );
 });
 
+test("other reports fill an unobserved broker's regional without changing commercial counts", () => {
+  for (const key of ["opportunities", "visits", "folders", "sales"]) {
+    const input = fixture();
+    input.reports.brokers[0].managerName = "Gerente Um";
+    input.reports.appointments = [];
+    input.reports[key][0].regionalManager = "Regional Confirmado";
+    const result = buildSalesforceSnapshot(input).payload;
+    assert.ok(
+      result.ranking.participants.every((row) => row.regionalManagerName === "Regional Confirmado"),
+      key,
+    );
+    delete input.reports[key][0].regionalManager;
+    const legacy = buildSalesforceSnapshot(input).payload;
+    const strip = (row) =>
+      Object.fromEntries(Object.entries(row).filter(([key]) => key !== "regionalManagerName"));
+    assert.deepEqual(
+      result.ranking.participants.map(strip),
+      legacy.ranking.participants.map(strip),
+    );
+    assert.deepEqual(result.dashboard, legacy.dashboard);
+  }
+});
+
+test("other report fallback preserves appointment decisions, missing latest data and identity boundaries", () => {
+  const input = fixture();
+  input.reports.brokers[0].managerName = "Gerente Um";
+  input.reports.folders[0].regionalManager = "Regional Outra Fonte";
+  // A missing own appointment regional is an explicit existing decision, not permission to infer.
+  assert.equal(
+    buildSalesforceSnapshot(input).payload.ranking.participants[0].regionalManagerName,
+    null,
+  );
+  input.reports.appointments[0].regionalManager = "Regional Agendamento";
+  assert.equal(
+    buildSalesforceSnapshot(input).payload.ranking.participants[0].regionalManagerName,
+    "Regional Agendamento",
+  );
+  input.reports.appointments = [];
+  input.reports.sales[0].regionalManager = "Regional Conflitante";
+  assert.equal(
+    buildSalesforceSnapshot(input).payload.ranking.participants[0].regionalManagerName,
+    null,
+  );
+  delete input.reports.sales[0].regionalManager;
+  input.reports.folders[1].regionalManager = "";
+  input.reports.folders[1].createdAt = "2026-08-06T23:00:00-03:00";
+  assert.equal(
+    buildSalesforceSnapshot(input).payload.ranking.participants[0].regionalManagerName,
+    null,
+  );
+  delete input.reports.folders[1].regionalManager;
+  for (const [field, value] of [
+    ["managerName", "Gerente Anterior"],
+    ["brokerName", "Outro Corretor"],
+    ["createdAt", "2026-08-07"],
+  ]) {
+    const original = input.reports.folders[0][field];
+    input.reports.folders[0][field] = value;
+    assert.equal(
+      buildSalesforceSnapshot(input).payload.ranking.participants[0].regionalManagerName,
+      null,
+      field,
+    );
+    input.reports.folders[0][field] = original;
+  }
+  input.reports.brokers.push({ ...input.reports.brokers[0], contactId: "003000000000003AAA" });
+  assert.ok(
+    buildSalesforceSnapshot(input).payload.ranking.participants.every(
+      (row) => row.regionalManagerName === null,
+    ),
+  );
+});
+
+test("a latest regional dash stays unavailable instead of reviving older evidence", () => {
+  for (const key of ["appointments", "opportunities", "visits", "folders", "sales"]) {
+    const input = fixture();
+    input.reports.brokers[0].managerName = "Gerente Um";
+    if (key !== "appointments") input.reports.appointments = [];
+    const dateField = key === "visits" ? "attendedAt" : key === "sales" ? "saleDate" : "createdAt";
+    const source = input.reports[key][0];
+    source.regionalManager = "Regional Antigo";
+    source[dateField] = "2026-08-05";
+    input.reports[key].push({
+      ...source,
+      ...(key === "appointments" || key === "visits"
+        ? { appointmentCode: "AG-LATEST-REGIONAL" }
+        : key === "folders"
+          ? { recordId: "a1V000000000009AAA" }
+          : key === "sales"
+            ? { opportunityRecordId: "006000000000009AAA" }
+            : { recordId: "006000000000009AAA" }),
+      [dateField]: "2026-08-06T23:00:00-03:00",
+      regionalManager: " - ",
+    });
+    assert.ok(
+      buildSalesforceSnapshot(input).payload.ranking.participants.every(
+        (row) => row.regionalManagerName === null,
+      ),
+      key,
+    );
+  }
+});
+
 test("builds complete three-view dashboard without dropping source divergences", () => {
   const result = buildSalesforceSnapshot(fixture());
   assert.equal(result.payload.dashboard.views.length, 3);
