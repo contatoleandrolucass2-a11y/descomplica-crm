@@ -458,8 +458,10 @@ Registro integral preservado no [arquivo CAIXA](ATUALIZACOES-ARQUIVO-2026-11-05-
   com quatro gates aprovados e health 200/ok. Vidro e menu externo confirmados;
   evidências e limites no [registro da página](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
 
-- 07/11/2026: investigação dos regionais pendentes e ajuste do resumo de Equipe
-  Produtiva para janela baixa; preparação e fontes no
+- 07/11/2026: Equipe Produtiva publicada em cc5479b7, com resumo compacto
+  confirmado em produção autenticada e coletor atualizado após autorização e
+  quatro gates. Duas cargas conciliadas confirmaram dois vínculos recuperados
+  e três ainda sem fonte comprovada. Evidências e limites no
   [registro desta retomada](ATUALIZACOES-ARQUIVO-2026-11-07-a-2026-11-07-EQUIPE-REGIONAIS.md).
 
 - 06/11/2026: Equipe Produtiva com resumo de sete colunas, uma linha por gerente
