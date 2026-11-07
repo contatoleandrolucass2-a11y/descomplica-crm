@@ -251,7 +251,7 @@ try {
       .getByRole("button", { name: "Editar Evolução de agendamentos por dia", exact: true })
       .press("Enter");
     const editor = page.getByRole("dialog", { name: "Editar card", exact: true });
-    await editor.getByLabel("Modelo", { exact: true }).selectOption(model);
+    await editor.getByRole("combobox", { name: /^Modelo(?:\s|$)/u }).selectOption(model);
     await editor.getByRole("button", { name: "Salvar", exact: true }).click();
     await expect(editor).toHaveCount(0);
   };

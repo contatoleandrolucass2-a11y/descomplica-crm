@@ -1,5 +1,8 @@
 # Changelog
 
+- Compacta o calendário de Agendamentos também em janelas de até600px de altura,
+  eliminando a pequena rolagem observada na proporção do print.
+
 - Valida no navegador a apresentação compacta dos nomes de Agendamentos,
   preservando a identificação completa e o carregamento de todos os registros.
 

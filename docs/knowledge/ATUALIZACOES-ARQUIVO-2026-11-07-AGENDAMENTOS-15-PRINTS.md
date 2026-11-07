@@ -118,3 +118,35 @@ Browser corrigido aprovado localmente:136linhas em cada cópia, drag/resize/cóp
 sem requisições adicionais e zero errosJS. Revisão final preservou explicitamente
 o gesto legado do TiltCard fora do canvas, pois Equipe Produtiva reutiliza esse
 componente; limite45° e geometria estável aplicam-se somente ao canvas solicitado.
+
+## Integração e aceite adicional de altura média
+
+PR512/head6f7d339a aprovado em CI42341969606 nos quatro jobs, sem alterar
+baselines. Merge7c0c8769869834de158d1e7b3ea64d499b6923e6 em07/11 às06:04:41UTC;
+árvorec6536bf51ecd23743f429d5bcdf92ecaa3350293 idêntica à do PR. CI main42345394446
+em andamento; aplicação ainda não publicada. Checkout remoto imutável preparado
+e limpo, Node24.19/pnpm11.20, ledger sem pendência na versão9ee2c0cf.
+
+Aceite adicional pela proporção do Print2: calendário1200×563 apresentou
+client537/scroll540, excesso3px nos três temas. O painel natural540 excedia a
+área permitida e media450 não ativava a compactação.1280×600 passou550/550 e
+1280×900 com zoomCSS1,5 passou598/598/largura744px nos três temas, sem errosJS.
+Breakpoint ampliado para600px, sem mudar a geometria já aprovada de duas colunas.
+Revalidar apenas563/600, agora afetados. Pendência bloqueia a publicação desta
+demanda até concluir o ajuste e seus gates, sem aceitar o excesso como baseline.
+
+CSS600 aprovado em seis casos (563/600,três temas), dialog333/333 e painel333/333,
+sem errosJS, dentro da tela. Regressão local com agosto de seis linhas passou
+nove combinações (1200×563,1280×600,844×390,três temas), conteúdo359/359.
+QA integral calendário/comparação:20checks/6capturas aprovados. O teste legado
+parou inicialmente ao buscar label exato Modelo: o label contém também os textos
+das opções. Seleção por combobox/nome acessível corrigiu a automação; modelo
+line, quatro séries, transições de mês e dia bissexto passaram. Mesma correção
+aplicada ao QA lazy que havia sido adaptado ao editor, sem mudar runtime.
+Artefato local ignorado: test-results/appointments-calendar-comparison/result.json.
+
+QA lazy complementar aprovado:13checks, contagens de comparação estáveis durante
+arraste em1440×900 e390×844, sem falhas. Resultado ignorado em
+test-results/appointments-comparison-lazy/after. Demais evidências do PR512
+permanecem válidas para os comportamentos cujo código não mudou; gates da CI
+continuam obrigatórios para o candidato complementar.
