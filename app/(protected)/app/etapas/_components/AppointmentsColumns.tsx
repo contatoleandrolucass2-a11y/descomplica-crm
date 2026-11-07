@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
 import type { AppointmentBucket } from "@/lib/crm/stages/appointments";
 import styles from "./AppointmentsDashboard.module.css";
@@ -66,6 +66,7 @@ export function AppointmentsColumns({
   reference,
   goalLabel,
   showGoalSummary = false,
+  goalSummary,
 }: {
   buckets: Bucket[];
   label: string;
@@ -78,29 +79,17 @@ export function AppointmentsColumns({
   reference?: { value: number | null; label: string; classify?: boolean; showSummary?: boolean };
   goalLabel?: string;
   showGoalSummary?: boolean;
+  /** Today's target, independent of the selected historical range. */
+  goalSummary?: number | null;
 }) {
   const control = useDashboardBarHeightControl();
   const host = useRef<HTMLDivElement>(null);
   const plot = useRef<HTMLDivElement>(null);
-  const dirty = useRef(false);
-  const draft = useRef<number | undefined>(control?.value);
-  const [override, setOverride] = useState<{ value: number | undefined } | null>(null);
-  const [text, setText] = useState(control?.value === undefined ? "" : String(control.value));
   const [frame, setFrame] = useState(emptyFrame);
   const [inheritedLimit, setInheritedLimit] = useState<number | undefined>(undefined);
-  const helpId = useId();
-  const heightInput = useRef<HTMLInputElement>(null);
   // Equal-length months still replace keyed tracks; observe their new DOM nodes.
   const firstBucketKey = buckets[0]?.key;
   const lastBucketKey = buckets.at(-1)?.key;
-
-  useEffect(() => {
-    if (dirty.current) return;
-    draft.current = control?.value;
-    heightInput.current?.setCustomValidity("");
-    setText(control?.value === undefined ? "" : String(control.value));
-    setOverride(null);
-  }, [control?.value]);
 
   useEffect(() => {
     const element = plot.current;
@@ -146,7 +135,7 @@ export function AppointmentsColumns({
     return () => observer.disconnect();
   }, [buckets.length, firstBucketKey, lastBucketKey, verticalLabels]);
 
-  const limit = override ? override.value : control ? control.value : inheritedLimit;
+  const limit = control ? control.value : inheritedLimit;
   const availableHeight = Math.max(0, frame.height - frame.headroom);
   const renderedLimit = Math.min(limit ?? availableHeight, availableHeight);
   const largest = buckets.reduce<Bucket | null>(
@@ -175,28 +164,6 @@ export function AppointmentsColumns({
   ).length;
   const minGoal = knownGoals.length ? Math.min(...knownGoals) : null;
   const maxGoal = knownGoals.length ? Math.max(...knownGoals) : null;
-  const editable = Boolean(control?.editable);
-
-  function change(value: number | undefined) {
-    draft.current = value;
-    dirty.current = true;
-    setOverride({ value });
-    setText(value === undefined ? "" : String(value));
-  }
-
-  function commit() {
-    if (!dirty.current || !control?.editable) return;
-    dirty.current = false;
-    control.onCommit(draft.current);
-  }
-
-  function commitText(input: HTMLInputElement) {
-    if (!input.checkValidity()) {
-      input.reportValidity();
-      return;
-    }
-    commit();
-  }
 
   if (!buckets.length)
     return <p className={styles.empty}>Nenhum agendamento no período coberto.</p>;
@@ -222,82 +189,22 @@ export function AppointmentsColumns({
           {(reference?.showSummary || showGoalSummary) && (
             <span className={styles.maximumSummary} data-appointments-reference-summary>
               {referenceName}{" "}
-              {reference
-                ? referenceValue === null
+              {goalSummary !== undefined
+                ? goalSummary === null
                   ? "indisponível"
-                  : number.format(referenceValue)
-                : minGoal === null
-                  ? "indisponível"
-                  : minGoal === maxGoal
-                    ? number.format(minGoal)
-                    : `${number.format(minGoal)}–${number.format(maxGoal!)}`}
+                  : number.format(goalSummary)
+                : reference
+                  ? referenceValue === null
+                    ? "indisponível"
+                    : number.format(referenceValue)
+                  : minGoal === null
+                    ? "indisponível"
+                    : minGoal === maxGoal
+                      ? number.format(minGoal)
+                      : `${number.format(minGoal)}–${number.format(maxGoal!)}`}
             </span>
           )}
         </p>
-        {editable && (
-          <div className={styles.barHeightTools}>
-            <label>
-              <span aria-hidden="true">Altura</span>
-              <input
-                ref={heightInput}
-                type="number"
-                min={1}
-                step={1}
-                inputMode="numeric"
-                aria-label="Altura máxima das torres (px)"
-                aria-describedby={helpId}
-                placeholder="Auto"
-                value={text}
-                onChange={(event) => {
-                  const next = event.target.value;
-                  setText(next);
-                  const value = Number(next);
-                  const valid = !next.trim() || (Number.isSafeInteger(value) && value > 0);
-                  event.currentTarget.setCustomValidity(
-                    valid ? "" : "Informe um número inteiro de pixels maior que zero.",
-                  );
-                  if (valid) {
-                    draft.current = next.trim() ? value : undefined;
-                    dirty.current = true;
-                    setOverride({ value: draft.current });
-                  }
-                }}
-                onBlur={(event) => commitText(event.currentTarget)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    commitText(event.currentTarget);
-                  }
-                  if (event.key === "Escape") {
-                    event.preventDefault();
-                    dirty.current = false;
-                    draft.current = control?.value;
-                    setOverride(null);
-                    setText(control?.value === undefined ? "" : String(control.value));
-                    event.currentTarget.setCustomValidity("");
-                  }
-                }}
-              />
-              <span aria-hidden="true">px</span>
-            </label>
-            <button
-              type="button"
-              aria-label="Usar altura automática das torres"
-              title="Altura automática"
-              onClick={() => {
-                heightInput.current?.setCustomValidity("");
-                change(undefined);
-                commit();
-              }}
-            >
-              ↺
-            </button>
-            <span id={helpId} className="sr-only">
-              Informe pixels ou use altura automática. O maior valor ancora a escala; o card mantém
-              suas dimensões. Vazio usa a altura disponível, com espaço para o rótulo.
-            </span>
-          </div>
-        )}
       </div>
       <div
         className={`${overrides.plotViewport} ${daily ? overrides.dailyViewport : ""}`}

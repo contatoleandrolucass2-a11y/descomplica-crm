@@ -24,6 +24,10 @@ import { ProductiveTeamDetails } from "../../equipe-produtiva/_components/Produc
 import styles from "./DailyAppointmentsTeamDetails.module.css";
 
 const displayDate = (date: string) => date.split("-").reverse().join("/");
+const visibleName = (value: string | null) =>
+  value && !/não informad|sem responsável|sem gerente/iu.test(value)
+    ? value.trim().split(/\s+/u).slice(0, 2).join(" ")
+    : value;
 const unavailableMessage = (reason: DailyAppointmentTeam["unavailableReason"]) => {
   if (reason === "outside-selected-period") return "Dia fora do período selecionado.";
   if (reason === "unavailable-period") return "Este dia não está coberto pela fonte.";
@@ -58,6 +62,7 @@ export function DailyAppointmentsTeamDetails({
   const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const dismissedDate = useRef<string | null>(null);
   const focusExplicitOpen = useRef(false);
+  const restoringFocus = useRef(false);
   const titleId = useId();
   const panelId = useId();
   const selectId = useId();
@@ -71,10 +76,20 @@ export function DailyAppointmentsTeamDetails({
   );
 
   const cancelClose = () => clearTimeout(closeTimer.current);
-  const scheduleClose = () => {
+  const scheduleClose = (fromPointer = false) => {
     cancelClose();
-    if (active?.pinned) return;
-    closeTimer.current = setTimeout(() => setActive(null), 180);
+    if (active?.pinned && !fromPointer) return;
+    closeTimer.current = setTimeout(() => {
+      setActive(null);
+      if (panel.current?.contains(document.activeElement)) {
+        restoringFocus.current = true;
+        try {
+          (anchor.current ?? openButton.current)?.focus();
+        } finally {
+          restoringFocus.current = false;
+        }
+      }
+    }, 250);
   };
   const close = (restoreFocus: boolean) => {
     cancelClose();
@@ -94,8 +109,14 @@ export function DailyAppointmentsTeamDetails({
       previous?.date === day && previous.pinned === pinned ? previous : { date: day, pinned },
     );
   };
-  const triggerFor = (target: EventTarget | null) =>
-    target instanceof Element ? target.closest<HTMLElement>("[data-appointments-team-day]") : null;
+  const triggerFor = (target: EventTarget | null, includeButton = false) =>
+    target instanceof Element
+      ? (target.closest<HTMLElement>("[data-appointments-team-day]") ??
+        (includeButton
+          ? target.closest("button")?.querySelector<HTMLElement>("[data-appointments-team-day]")
+          : null) ??
+        null)
+      : null;
   const onBlur = (event: FocusEvent<HTMLElement>) => {
     const target = event.relatedTarget;
     if (
@@ -156,16 +177,21 @@ export function DailyAppointmentsTeamDetails({
           (!(event.relatedTarget instanceof Node) || !trigger.contains(event.relatedTarget))
         ) {
           dismissedDate.current = null;
+          if (
+            !(event.relatedTarget instanceof Node) ||
+            !panel.current?.contains(event.relatedTarget)
+          )
+            scheduleClose(true);
         }
       }}
       onFocusCapture={(event) => {
-        if (active?.pinned) return;
-        const trigger = triggerFor(event.target);
+        if (active?.pinned || restoringFocus.current) return;
+        const trigger = triggerFor(event.target, true);
         if (trigger) open(trigger, trigger.dataset.appointmentsTeamDay!);
       }}
       onBlurCapture={onBlur}
       onKeyDownCapture={(event) => {
-        if (event.key !== "ArrowDown" || !date || !triggerFor(event.target)) return;
+        if (event.key !== "ArrowDown" || !date || !triggerFor(event.target, true)) return;
         event.preventDefault();
         setActive((previous) => (previous ? { ...previous, pinned: true } : previous));
         closeButton.current?.focus();
@@ -198,6 +224,9 @@ export function DailyAppointmentsTeamDetails({
               aria-labelledby={titleId}
               className={styles.panel}
               onPointerEnter={cancelClose}
+              onPointerLeave={(event) => {
+                if (event.pointerType !== "touch") scheduleClose(true);
+              }}
               onFocusCapture={cancelClose}
               onBlurCapture={onBlur}
             >
@@ -240,11 +269,26 @@ export function DailyAppointmentsTeamDetails({
                 tabIndex={0}
               >
                 <ProductiveTeamDetails
-                  productiveMembers={team.withAppointments}
-                  unproductiveMembers={team.withoutAppointments}
+                  productiveMembers={
+                    team.withAppointments?.map((member) => ({
+                      ...member,
+                      regionalManager: visibleName(member.regionalManager),
+                      manager: visibleName(member.manager) ?? member.manager,
+                      owner: visibleName(member.owner) ?? member.owner,
+                    })) ?? null
+                  }
+                  unproductiveMembers={
+                    team.withoutAppointments?.map((member) => ({
+                      ...member,
+                      regionalManager: visibleName(member.regionalManager),
+                      manager: visibleName(member.manager) ?? member.manager,
+                      owner: visibleName(member.owner) ?? member.owner,
+                    })) ?? null
+                  }
                   unavailableDetail={unavailableMessage(team.unavailableReason)}
                   appointmentLabels
                   shortNames
+                  compact
                 />
               </div>
             </div>,

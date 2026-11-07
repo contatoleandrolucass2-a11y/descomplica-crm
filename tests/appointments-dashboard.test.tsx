@@ -87,6 +87,54 @@ const conversionGoals = {
 };
 
 describe("appointment dashboard availability", () => {
+  it("uses first and second names while keeping full identities in titles", () => {
+    const markup = renderToStaticMarkup(
+      <AppointmentsDashboard
+        analysis={{
+          ...current,
+          viewKey: "without_canal_imob",
+          appointments: [
+            {
+              ...current.appointments![0]!,
+              owner: "Ana Maria Silva",
+              salesManager: "João Carlos Santos",
+              regionalManager: "Paula Regina Costa",
+              accountName: "Carlos Eduardo Souza",
+            },
+          ],
+        }}
+      />,
+    );
+    expect(markup).toContain('title="Ana Maria Silva">Ana Maria</td>');
+    expect(markup).toContain('title="João Carlos Santos">João Carlos</td>');
+    expect(markup).toContain('title="Paula Regina Costa">Paula Regina</td>');
+    expect(markup).toContain('title="Carlos Eduardo Souza">Carlos Eduardo</td>');
+  });
+
+  it("marks only realized conversion rows below the expected rate in red", () => {
+    const markup = renderToStaticMarkup(
+      <AppointmentsDashboard
+        analysis={{
+          ...current,
+          viewKey: "without_canal_imob",
+          facts: current.facts.map((fact) =>
+            fact[0] === 3 ? ([...fact.slice(0, 9), 0, ...fact.slice(10)] as typeof fact) : fact,
+          ),
+        }}
+        individualGoal={24}
+        conversionGoals={conversionGoals}
+      />,
+    );
+    const lists = [
+      ...markup.matchAll(/<ol class="[^"]*funnelConversions[^"]*">([\s\S]*?)<\/ol>/gu),
+    ];
+    expect(lists).toHaveLength(2);
+    // Actual: 9→1 (equal), 1→1 (above), 1→1 (above), 1→0 (below), 1→1 (above).
+    const actual = lists[0]![1]!;
+    expect(actual).toMatch(/data-goal-status="negative"><span>Agendamento x Pasta Aprovada/);
+    expect(actual.match(/data-goal-status="negative"/g)).toHaveLength(1);
+    expect(lists[1]![1]).not.toContain('data-goal-status="negative"');
+  });
   it("marks a regional result below a proven minimum red without promoting an incomplete target to exact", () => {
     const source = { ...current, viewKey: "without_canal_imob" as const };
     const brokerRoster = [
@@ -187,9 +235,7 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain(">Período</span>");
     expect(markup).toContain("Outubro de 2026");
     expect(markup).toContain("Selecione o período");
-    expect(markup).toContain(
-      "Use um atalho, escolha o mês inteiro ou selecione um ou vários dias.",
-    );
+    expect(markup).toContain("Use um atalho ou selecione os dias.");
     expect(markup).toContain("Hoje");
     expect(markup).toContain("Semana passada");
     expect(markup).toContain("4º Trimestre");

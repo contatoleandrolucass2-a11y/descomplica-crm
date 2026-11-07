@@ -145,9 +145,10 @@ export function appointmentMonthlyGoal(individualGoal: number | null, brokerCoun
 }
 
 export function plannedAppointmentsForDate(referenceDate: string, brokerCount: number | null) {
-  if (brokerCount === null) return null;
   if (isAppointmentGoalHoliday(referenceDate)) return 0;
   const weekday = new Date(`${referenceDate}T12:00:00Z`).getUTCDay();
+  if (weekday === 0 || weekday === 6) return 0;
+  if (brokerCount === null) return null;
   if (weekday === 4) return brokerCount * 2;
   if ([1, 2, 3, 5].includes(weekday)) return brokerCount;
   return 0;
@@ -667,7 +668,10 @@ export function analyzeAppointments(
     appointmentMonthlyGoal(goalsByMonth[targetMonth] ?? null, goalBrokerCount);
   // User-confirmed House daily policy: one per weekday, two on Thursdays.
   // Independent of the configured monthly funnel target, which may be absent.
-  const dailyGoalFor = (date: string) => plannedAppointmentsForDate(date, goalBrokerCount);
+  // Preserve sparse analytical series when the cohort is unavailable. A direct
+  // calendar target may still be known as zero on nonworking days.
+  const dailyGoalFor = (date: string) =>
+    goalBrokerCount === null ? null : plannedAppointmentsForDate(date, goalBrokerCount);
   const dailyGoals = new Map<string, number | null>();
   const weeklyGoals = new Map<string, number | null>();
   let individualPeriodGoal = 0;

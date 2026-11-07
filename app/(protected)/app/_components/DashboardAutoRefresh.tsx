@@ -19,11 +19,13 @@ export function DashboardAutoRefresh({
   updatedAt,
   referenceDay,
   statusEndpoint = "/api/dashboard/status",
+  intervalMs = POLL_INTERVAL_MS,
 }: {
   generatedAt: string | null;
   updatedAt: string | null;
   referenceDay?: string | undefined;
   statusEndpoint?: "/api/dashboard/status" | "/api/appointments/status";
+  intervalMs?: number;
 }) {
   const router = useRouter();
 
@@ -84,7 +86,7 @@ export function DashboardAutoRefresh({
         clearTimeout(timeoutTimer);
         controller = null;
         if (!disposed && !unauthorized && !document.hidden) {
-          pollTimer = setTimeout(() => void verify(), POLL_INTERVAL_MS);
+          pollTimer = setTimeout(() => void verify(), intervalMs);
         }
       }
     }
@@ -111,7 +113,7 @@ export function DashboardAutoRefresh({
       window.removeEventListener("focus", resume);
       window.removeEventListener("online", resume);
     };
-  }, [generatedAt, updatedAt, referenceDay, statusEndpoint, router]);
+  }, [generatedAt, updatedAt, referenceDay, statusEndpoint, intervalMs, router]);
 
   return null;
 }

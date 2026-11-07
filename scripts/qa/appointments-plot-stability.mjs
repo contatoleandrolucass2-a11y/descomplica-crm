@@ -118,8 +118,8 @@ try {
   page.on("pageerror", (error) => evidence.browserErrors.push(error.message));
   await page.goto(origin);
   for (const cap of [80, 1000]) {
-    await page.getByLabel("Altura máxima das torres (px)", { exact: true }).fill(String(cap));
-    await page.getByLabel("Altura máxima das torres (px)", { exact: true }).press("Enter");
+    // Seed only this isolated fixture's previously saved presentation.
+    await page.evaluate((value) => localStorage.setItem("cap", String(value)), cap);
     for (const viewport of [
       { width: 390, height: 844 },
       { width: 844, height: 390 },
@@ -173,8 +173,12 @@ try {
       evidence.cases.push({ cap, viewport, frames, failures, screenshot });
       evidence.failures.push(...failures.map((f) => `cap${cap}/${viewport.width}: ${f}`));
       assert.equal(
-        await page.getByLabel("Altura máxima das torres (px)", { exact: true }).inputValue(),
+        await page.locator("[data-appointments-plot]").getAttribute("data-pixel-height"),
         String(cap),
+      );
+      assert.equal(
+        await page.getByLabel("Altura máxima das torres (px)", { exact: true }).count(),
+        0,
       );
     }
   }

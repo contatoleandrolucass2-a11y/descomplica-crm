@@ -20,7 +20,7 @@ import type { ConfigurableDashboardCanvasProps } from "@/lib/dashboard-canvas/ui
 import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
 import { AppointmentsColumns as Columns } from "./AppointmentsColumns";
 import { DailyAppointmentsTeamDetails } from "./DailyAppointmentsTeamDetails";
-import { AppointmentsComparison, DailyChartTypeControl } from "./AppointmentsComparison";
+import { AppointmentsComparison } from "./AppointmentsComparison";
 import { buildAppointmentComparison, type AppointmentComparison } from "./appointments-comparison";
 import comparisonStyles from "./AppointmentsComparison.module.css";
 import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
@@ -50,6 +50,7 @@ import { plannedAppointmentsForMonth } from "@/lib/crm/stages/appointments-month
 import {
   analyzeAppointments,
   appointmentYears,
+  plannedAppointmentsForDate,
   saoPauloDate,
   type AppointmentBrokerRosterEntry,
   type AppointmentBucket,
@@ -74,7 +75,7 @@ const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "
 function shortName(value: string) {
   if (/não informad|sem responsável|sem gerente/i.test(value)) return value;
   const parts = value.trim().split(/\s+/);
-  return parts.length > 2 ? `${parts[0]} ${parts[parts.length - 1]}` : value;
+  return parts.slice(0, 2).join(" ");
 }
 const displayDate = (date: string) => date.split("-").reverse().join("/");
 const calendarDateFormatter = new Intl.DateTimeFormat("pt-BR", {
@@ -188,20 +189,28 @@ function TiltCard({
   const trigger = useRef<HTMLButtonElement>(null);
   const close = useRef<HTMLButtonElement>(null);
   const titleId = useId();
+  const tiltBounds = useRef<DOMRect | null>(null);
   const tiltTarget = (element: HTMLElement) =>
     element.closest<HTMLElement>("[data-dashboard-card-id]") ?? element;
   const move = (event: ReactPointerEvent<HTMLElement>) => {
     if (event.pointerType === "touch") return;
     if (event.target instanceof Element && event.target.closest("dialog[open]")) return;
     const target = tiltTarget(event.currentTarget);
-    const bounds = target.getBoundingClientRect();
-    const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
-    const amplitude = target === event.currentTarget ? 45 : 16;
+    const bounds = tiltBounds.current ?? target.getBoundingClientRect();
+    const horizontal = Math.max(
+      -1,
+      Math.min(1, ((event.clientX - bounds.left) / bounds.width - 0.5) * 2),
+    );
+    const vertical = Math.max(
+      -1,
+      Math.min(1, ((event.clientY - bounds.top) / bounds.height - 0.5) * 2),
+    );
+    const amplitude = target === event.currentTarget ? 22.5 : 45;
     target.style.setProperty("--card-tilt-x", `${vertical * -amplitude}deg`);
     target.style.setProperty("--card-tilt-y", `${horizontal * amplitude}deg`);
   };
   const reset = (event: ReactPointerEvent<HTMLElement>) => {
+    tiltBounds.current = null;
     const target = tiltTarget(event.currentTarget);
     target.style.setProperty("--card-tilt-x", "0deg");
     target.style.setProperty("--card-tilt-y", "0deg");
@@ -210,6 +219,9 @@ function TiltCard({
     <article
       className={[styles.card, styles.tiltCard, className].filter(Boolean).join(" ")}
       data-goal-status={goalStatus}
+      onPointerEnter={(event) => {
+        tiltBounds.current = tiltTarget(event.currentTarget).getBoundingClientRect();
+      }}
       onPointerMove={move}
       onPointerLeave={reset}
       onPointerCancel={reset}
@@ -437,7 +449,13 @@ function FunnelGraphic({
   );
 }
 
-function FunnelConversions({ values }: { values: FunnelValues | null }) {
+function FunnelConversions({
+  values,
+  comparison,
+}: {
+  values: FunnelValues | null;
+  comparison?: FunnelValues | null;
+}) {
   if (!values) return <Empty>Conversões indisponíveis para este recorte.</Empty>;
   const rows: Array<[string, number, number, string, string]> = [
     [
@@ -460,11 +478,33 @@ function FunnelConversions({ values }: { values: FunnelValues | null }) {
   ];
   return (
     <ol className={styles.funnelConversions}>
-      {rows.map(([label, source, target, sourceUnit, targetUnit]) => {
+      {rows.map(([label, source, target, sourceUnit, targetUnit], index) => {
         const percent = source > 0 ? (target / source) * 100 : null;
         const ratio = target > 0 ? source / target : null;
+        const referenceSource = comparison
+          ? index === 0
+            ? comparison.opportunities
+            : comparison.appointments
+          : 0;
+        const referenceTargets = comparison
+          ? [
+              comparison.appointments,
+              comparison.visits,
+              comparison.folders,
+              comparison.approvedFolders,
+              comparison.sales,
+            ]
+          : [];
+        const referencePercent =
+          referenceSource > 0 ? (referenceTargets[index]! / referenceSource) * 100 : null;
+        const status =
+          percent === null || referencePercent === null
+            ? "neutral"
+            : percent + Number.EPSILON * 100 < referencePercent
+              ? "negative"
+              : "positive";
         return (
-          <li key={label}>
+          <li key={label} data-goal-status={status}>
             <span>{label}</span>
             <strong>{percent === null ? "—" : `${decimal.format(percent)}%`}</strong>
             <small>
@@ -530,7 +570,7 @@ function FunnelComparison({
           label="Funil realizado no período"
           statuses={realizedStatuses}
         />
-        <FunnelConversions values={realized} />
+        <FunnelConversions values={realized} comparison={expected} />
       </div>
     </article>
   );
@@ -846,7 +886,7 @@ function CalendarFilter({
               </button>
             </header>
             <p id={descriptionId} className={styles.calendarDescription}>
-              Use um atalho, escolha o mês inteiro ou selecione um ou vários dias.
+              Use um atalho ou selecione os dias.
             </p>
             <div className={styles.calendarPresets} aria-label="Atalhos de período">
               {presets.map((preset) => {
@@ -1431,7 +1471,9 @@ function AppointmentTable({
                     <td data-label="Corretor" title={row.owner}>
                       {value(shortName(row.owner))}
                     </td>
-                    <td data-label="Conta">{value(row.accountName)}</td>
+                    <td data-label="Conta" title={row.accountName}>
+                      {value(shortName(row.accountName))}
+                    </td>
                     <td data-label="Ranking">{value(row.accountRanking)}</td>
                   </tr>
                 );
@@ -2047,7 +2089,7 @@ export function AppointmentsDashboard({
     },
     "appointments.daily": {
       bars: (
-        <Chart title="Evolução de agendamentos por dia" controls={<DailyChartTypeControl />}>
+        <Chart title="Evolução de agendamentos por dia">
           {monthUnavailable ? (
             <Empty>Período sem cobertura disponível.</Empty>
           ) : (
@@ -2063,6 +2105,10 @@ export function AppointmentsDashboard({
                 label="Agendamentos por dia do mês selecionado"
                 daily
                 goalLabel="Meta diária"
+                goalSummary={plannedAppointmentsForDate(
+                  currentCalendarDate,
+                  result.goalBrokerCount,
+                )}
                 showGoalSummary
                 isSelected={(bucket) =>
                   filters.createdDate === bucket.key || selectedDates.includes(bucket.key)
@@ -2074,7 +2120,7 @@ export function AppointmentsDashboard({
         </Chart>
       ),
       line: (
-        <Chart title="Comparativo diário de agendamentos" controls={<DailyChartTypeControl />}>
+        <Chart title="Comparativo diário de agendamentos">
           <AppointmentsComparison getComparison={getComparison} />
         </Chart>
       ),

@@ -91,6 +91,7 @@ export function buildAppointmentComparison(
   delete comparisonFilters.periodEnd;
 
   const cache = new Map<string, (number | null)[]>();
+  let totalsByDate: Map<string, number> | null = null;
   const valuesForMonth = (requestedMonth: string): (number | null)[] => {
     const cached = cache.get(requestedMonth);
     if (cached) return cached;
@@ -101,22 +102,29 @@ export function buildAppointmentComparison(
     }
     const end = lastDay(requestedMonth);
     const hasCoverage = `${requestedMonth}-01` <= slice.referenceDate && end >= slice.coverageStart;
-    const totals = hasCoverage
-      ? new Map(
-          analyzeAppointments(slice, {
-            month: requestedMonth,
-            year,
-            filters: comparisonFilters,
-            brokerRoster,
-            goalsByMonth,
-          }).daily.map((bucket) => [bucket.key, bucket.total]),
-        )
-      : new Map<string, number>();
+    // Reuse the authoritative dimension/hierarchy rules, but aggregate the
+    // covered period once instead of rebuilding every dashboard metric per month.
+    // Temporal selections still apply only to the reference month's axis above.
+    if (hasCoverage && totalsByDate === null) {
+      totalsByDate = new Map(
+        analyzeAppointments(slice, {
+          month,
+          year,
+          filters: {
+            ...comparisonFilters,
+            periodStart: slice.coverageStart,
+            periodEnd: slice.referenceDate,
+          },
+          brokerRoster,
+          goalsByMonth,
+        }).daily.map((bucket) => [bucket.key, bucket.total]),
+      );
+    }
     const values = allDays.map((day) => {
       const date = `${requestedMonth}-${String(day).padStart(2, "0")}`;
       return !hasCoverage || date > end || date < slice.coverageStart || date > slice.referenceDate
         ? null
-        : (totals.get(date) ?? 0);
+        : (totalsByDate?.get(date) ?? 0);
     });
     cache.set(requestedMonth, values);
     return values;

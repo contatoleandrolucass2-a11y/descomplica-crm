@@ -2,7 +2,6 @@
 
 import { useId, useMemo, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
 import type { AppointmentComparison } from "./appointments-comparison";
 import styles from "./AppointmentsComparison.module.css";
 import { appointmentWeekdayLabel } from "./appointment-day-label";
@@ -19,35 +18,78 @@ const colors = [
   "var(--analytics-positive)",
 ];
 
-export function DailyChartTypeControl() {
-  const control = useDashboardBarHeightControl();
-  const id = useId();
-  return (
-    <label className={styles.typeControl} htmlFor={id}>
-      <span>Gráfico</span>
-      <select
-        id={id}
-        aria-label="Tipo do gráfico diário"
-        value={control?.type ?? "bars"}
-        disabled={!control?.onTypeChange}
-        onChange={(event) =>
-          control?.onTypeChange?.(event.target.value === "line" ? "line" : "bars")
-        }
-      >
-        <option value="bars">Torres</option>
-        <option value="line">Linhas: mês, anterior, média anual e trimestre</option>
-      </select>
-    </label>
-  );
+export type AppointmentLineLayout = "straight" | "smooth" | "steps" | "points" | "area";
+
+const lineLayouts: readonly { value: AppointmentLineLayout; label: string }[] = [
+  { value: "straight", label: "Linhas retas" },
+  { value: "smooth", label: "Linhas suaves" },
+  { value: "steps", label: "Linhas em degraus" },
+  { value: "points", label: "Linhas com pontos" },
+  { value: "area", label: "Linhas com área" },
+];
+
+/** Null coverage breaks every layout, including the filled area. */
+export function appointmentComparisonPath(
+  values: readonly (number | null)[],
+  layout: AppointmentLineLayout,
+  x: (index: number) => number,
+  y: (value: number) => number,
+) {
+  let previous: { x: number; y: number } | null = null;
+  const segments: string[] = [];
+  for (const [index, value] of values.entries()) {
+    if (value === null) {
+      previous = null;
+      continue;
+    }
+    const point = { x: x(index), y: y(value) };
+    if (previous === null) segments.push(`M${point.x},${point.y}`);
+    else if (layout === "steps") segments.push(`H${point.x} V${point.y}`);
+    else if (layout === "smooth") {
+      const middle = (previous.x + point.x) / 2;
+      segments.push(`C${middle},${previous.y} ${middle},${point.y} ${point.x},${point.y}`);
+    } else segments.push(`L${point.x},${point.y}`);
+    previous = point;
+  }
+  return segments.join(" ");
+}
+
+function comparisonAreaPath(
+  values: readonly (number | null)[],
+  x: (index: number) => number,
+  y: (value: number) => number,
+) {
+  let start: number | null = null;
+  let end = 0;
+  let segment = "";
+  const paths: string[] = [];
+  const finish = () => {
+    if (start !== null) paths.push(`${segment} L${x(end)},${y(0)} L${x(start)},${y(0)} Z`);
+    start = null;
+    segment = "";
+  };
+  for (const [index, value] of values.entries()) {
+    if (value === null) finish();
+    else {
+      segment += `${start === null ? "M" : " L"}${x(index)},${y(value)}`;
+      start ??= index;
+      end = index;
+    }
+  }
+  finish();
+  return paths.join(" ");
 }
 
 export function AppointmentsComparison({
   getComparison,
+  initialLayout = "points",
 }: {
   getComparison: () => AppointmentComparison | null;
+  initialLayout?: AppointmentLineLayout;
 }) {
   const comparison = useMemo(() => getComparison(), [getComparison]);
   const id = useId();
+  const [layout, setLayout] = useState<AppointmentLineLayout>(initialLayout);
   const [hoveredPoint, setTooltip] = useState<{
     comparison: AppointmentComparison;
     value: number;
@@ -63,22 +105,22 @@ export function AppointmentsComparison({
   const x = (index: number) =>
     comparison.days.length === 1 ? 360 : 8 + (index / (comparison.days.length - 1)) * 704;
   const y = (value: number) => 292 - (value / ceiling) * 284;
-  const path = (values: readonly (number | null)[]) => {
-    let connected = false;
-    return values
-      .map((value, index) => {
-        if (value === null) {
-          connected = false;
-          return "";
-        }
-        const segment = `${connected ? "L" : "M"}${x(index)},${y(value)}`;
-        connected = true;
-        return segment;
-      })
-      .join(" ");
-  };
   return (
-    <div className={styles.comparison} data-appointments-comparison>
+    <div className={styles.comparison} data-appointments-comparison data-line-layout={layout}>
+      <label className={styles.typeControl}>
+        <span>Gráfico</span>
+        <select
+          aria-label="Layout do gráfico de linhas"
+          value={layout}
+          onChange={(event) => setLayout(event.target.value as AppointmentLineLayout)}
+        >
+          {lineLayouts.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
       <ul className={styles.legend} aria-label="Séries comparadas">
         {comparison.series.map((series, index) => (
           <li key={series.key}>
@@ -115,12 +157,20 @@ export function AppointmentsComparison({
                 >
                   <title id={id}>
                     Comparação por dia do mês. Meses sem cobertura e dias inexistentes não recebem
-                    zero. Valores disponíveis na tabela abaixo.
+                    zero. Cada ponto informa a série, o dia e o valor.
                   </title>
                   {comparison.series.map((series, index) => (
                     <g key={series.key}>
+                      {layout === "area" && (
+                        <path
+                          d={comparisonAreaPath(series.values, x, y)}
+                          fill={colors[index]}
+                          fillOpacity="0.12"
+                          aria-hidden="true"
+                        />
+                      )}
                       <path
-                        d={path(series.values)}
+                        d={appointmentComparisonPath(series.values, layout, x, y)}
                         fill="none"
                         stroke={colors[index]}
                         strokeWidth="2.5"
@@ -142,7 +192,7 @@ export function AppointmentsComparison({
                             key={day}
                             cx={x(day)}
                             cy={y(value)}
-                            r="3.5"
+                            r={layout === "points" ? 4 : 2.25}
                             fill={colors[index]}
                             className={styles.point}
                             tabIndex={0}
@@ -202,38 +252,6 @@ export function AppointmentsComparison({
           </div>
         </>
       )}
-      <details className={styles.details}>
-        <summary>Ver valores e cobertura</summary>
-        <div>
-          <table>
-            <caption>Agendamentos por dia dos meses comparados</caption>
-            <thead>
-              <tr>
-                <th scope="col">Dia</th>
-                {comparison.series.map((series) => (
-                  <th scope="col" key={series.key}>
-                    {series.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {comparison.days.map((day, index) => (
-                <tr key={day}>
-                  <th scope="row">{day}</th>
-                  {comparison.series.map((series) => (
-                    <td key={series.key}>
-                      {series.values[index] === null
-                        ? "Sem cobertura"
-                        : number.format(series.values[index]!)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </details>
     </div>
   );
 }

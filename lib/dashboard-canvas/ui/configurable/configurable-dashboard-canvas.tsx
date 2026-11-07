@@ -1741,7 +1741,7 @@ function CardEditor({
       title={mode === "add" ? "Adicionar card" : "Editar card"}
       description={
         appointmentsBarHeight
-          ? "Configure a métrica, o conteúdo e as dimensões. A altura das torres é ajustada diretamente no gráfico."
+          ? "Configure a métrica, o conteúdo e as dimensões."
           : "A combinação de métrica, modelo, período, agrupamento e entidades não pode duplicar outro card."
       }
       onClose={onClose}

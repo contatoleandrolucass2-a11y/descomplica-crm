@@ -13,6 +13,7 @@ describe("appointments reference and calendar labels", () => {
         daily
         goalLabel="Meta diária"
         showGoalSummary
+        goalSummary={34}
         label="Dias úteis"
         buckets={[
           { key: "2026-11-02", label: "02", total: 0, goal: 0 },
@@ -21,7 +22,8 @@ describe("appointments reference and calendar labels", () => {
         ]}
       />,
     );
-    expect(html).toContain("Meta diária 0–68");
+    expect(html).toContain("Meta diária 34");
+    expect(html).toContain('data-appointments-reference-summary="true">Meta diária 34</span>');
     expect(html).toContain("05/11/2026: 0 agendamentos; meta 68; abaixo da referência");
     expect(html).toMatch(/data-appointments-value-status="negative"[^>]*>0<\/span>/u);
     expect(html).toContain('data-appointments-team-day="2026-11-05"');
