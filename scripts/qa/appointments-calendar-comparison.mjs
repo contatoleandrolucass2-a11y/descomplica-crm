@@ -284,6 +284,67 @@ try {
     ariaCurrent: "2026-11-01",
     disabledBecauseOutsideDataCoverage: true,
   });
+  const initialTheme = await page.evaluate(() => document.documentElement.dataset.theme ?? null);
+  for (const theme of ["light", "balanced", "dark"])
+    for (const viewport of [
+      { width: 1200, height: 563 },
+      { width: 1280, height: 600 },
+      { width: 844, height: 390 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.evaluate((value) => {
+        document.documentElement.dataset.theme = value;
+      }, theme);
+      await page
+        .getByRole("button", { name: /de 2026/u })
+        .first()
+        .click();
+      const calendar = page.getByRole("dialog", { name: "Selecione o período" });
+      // August exercises the maximum six calendar rows, including leading blanks.
+      await calendar
+        .getByLabel("Mês do calendário", { exact: true })
+        .selectOption({ label: "Agosto" });
+      const geometry = await calendar.evaluate((element) => {
+        const bounds = element.getBoundingClientRect();
+        const panel = element.firstElementChild;
+        const lastDay = [...element.querySelectorAll('[role="gridcell"]')].at(-1);
+        return {
+          clientHeight: element.clientHeight,
+          scrollHeight: element.scrollHeight,
+          clientWidth: element.clientWidth,
+          scrollWidth: element.scrollWidth,
+          panelHeight: panel.clientHeight,
+          panelScroll: panel.scrollHeight,
+          top: bounds.top,
+          bottom: bounds.bottom,
+          lastDayBottom: lastDay.getBoundingClientRect().bottom,
+        };
+      });
+      assert.ok(
+        geometry.scrollHeight <= geometry.clientHeight,
+        `Calendar scrolls: ${JSON.stringify({ theme, viewport, geometry })}`,
+      );
+      assert.ok(geometry.scrollWidth <= geometry.clientWidth, "Calendar has horizontal overflow");
+      assert.ok(geometry.panelScroll <= geometry.panelHeight, "Calendar panel clips information");
+      assert.ok(
+        geometry.top >= 0 && geometry.bottom <= viewport.height + 1,
+        "Calendar escapes the viewport",
+      );
+      assert.ok(
+        geometry.lastDayBottom <= geometry.bottom,
+        "Last calendar row is outside the panel",
+      );
+      record("six-row-calendar-fits-medium-and-short-heights", { theme, viewport, geometry });
+      await calendar
+        .getByLabel("Mês do calendário", { exact: true })
+        .selectOption({ label: "Novembro" });
+      await page.getByRole("button", { name: "Fechar calendário", exact: true }).click();
+    }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.evaluate((value) => {
+    if (value === null) delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = value;
+  }, initialTheme);
   await expect(page.locator('[data-dashboard-card-id="appointments-today"]')).toContainText(
     "Indisponível",
   );
@@ -364,7 +425,8 @@ try {
     .getByRole("button", { name: "Editar Evolução de agendamentos por dia", exact: true })
     .press("Enter");
   const modelEditor = page.getByRole("dialog", { name: "Editar card", exact: true });
-  await modelEditor.getByLabel("Modelo", { exact: true }).selectOption("line");
+  await expect(modelEditor).toBeVisible();
+  await modelEditor.getByRole("combobox", { name: /^Modelo(?:\s|$)/u }).selectOption("line");
   await modelEditor.getByRole("button", { name: "Salvar", exact: true }).click();
   await saved();
   await expect(daily().locator("[data-comparison-series]")).toHaveCount(4);
@@ -565,7 +627,7 @@ try {
     .getByRole("button", { name: "Editar Evolução de agendamentos por dia", exact: true })
     .press("Enter");
   const leapEditor = leapPage.getByRole("dialog", { name: "Editar card", exact: true });
-  await leapEditor.getByLabel("Modelo", { exact: true }).selectOption("line");
+  await leapEditor.getByRole("combobox", { name: /^Modelo(?:\s|$)/u }).selectOption("line");
   await leapEditor.getByRole("button", { name: "Salvar", exact: true }).click();
   await expect(leapDaily.locator("[data-comparison-series]")).toHaveCount(4);
   await expect(leapDaily.getByText("Ver valores e cobertura", { exact: true })).toHaveCount(0);

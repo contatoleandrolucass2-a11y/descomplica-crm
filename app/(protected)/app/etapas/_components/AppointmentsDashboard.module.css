@@ -411,7 +411,7 @@
   cursor: pointer;
 }
 
-@media (max-height: 450px) and (min-width: 600px) {
+@media (max-height: 600px) and (min-width: 600px) {
   .calendarDialog {
     width: min(47rem, calc(100vw - 1.5rem));
   }

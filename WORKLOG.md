@@ -34,6 +34,15 @@
 
 ## 2026-11-07 — Agendamentos: quinze ajustes e atualização
 
+- Aceite adicional do Print2:1200×563 revelou3px de rolagem no calendário.
+  Breakpoint compacto ampliado de450 para600px de altura; mesma geometria em
+  duas colunas, restrita a Agendamentos. Revalidar563/600antes de publicar.
+
+- Calendário563/600 aprovado nos três temas; nove casos de seis linhas em
+  563/600/390 passaram. QA completo de calendário/comparação20checks/6capturas
+  aprovado. Seletores legados Modelo usam agora papel/nome acessível, pois o
+  texto do label inclui as opções do select.
+
 - CI42341206694: validação completa e imagem aprovadas. Gate do detalhamento
   aguardava nome completo visível; passa a conferir duas palavras visíveis e
   identidade completa no title, preservando a prova das136linhas carregadas.

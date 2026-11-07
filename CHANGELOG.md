@@ -1,5 +1,8 @@
 # Changelog
 
+- Compacta o calendário de Agendamentos também em janelas de até600px de altura,
+  eliminando a pequena rolagem observada na proporção do print.
+
 - Enriquece vínculos regionais pendentes de Equipe Produtiva com observações
   próprias de Oportunidades, Visitas, Pastas e Vendas, conciliadas com o gerente
   oficial. Preserva vínculos confirmados, conflitos, métricas e contratos.
